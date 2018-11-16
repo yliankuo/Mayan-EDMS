@@ -1,5 +1,9 @@
 3.2 (2018-XX-XX)
 ================
+- Documents: Add a server side template for invalid documents.
+  The new template can be accessed via the templates API.
+  Improve the way invalid documents are detected in the JavaScript
+  code.
 - Pagination: Fix page AJAX reload when clicking on pagination active page
   link.
 - Pagination: Add pure pagination subclass that supports custom page

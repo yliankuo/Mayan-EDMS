@@ -14,7 +14,7 @@ from common import (
     MayanAppConfig, MissingItem, menu_facet, menu_main, menu_object,
     menu_secondary, menu_setup, menu_sidebar, menu_multi_item, menu_tools
 )
-from common.classes import ModelField
+from common.classes import ModelField, Template
 from common.dashboards import dashboard_main
 from common.signals import post_initial_setup
 from common.widgets import TwoStateWidget
@@ -221,6 +221,11 @@ class DocumentsApp(MayanAppConfig):
         )
         ModelPermission.register_inheritance(
             model=DocumentVersion, related='document',
+        )
+
+        Template(
+            name='invalid_document',
+            template_name='documents/invalid_document.html'
         )
 
         # Document and document page thumbnail widget

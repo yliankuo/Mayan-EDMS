@@ -6,10 +6,11 @@ class MayanImage {
         this.load();
     }
 
-    static intialize () {
-        var app = this;
+    static intialize (options) {
+        this.options = options || {};
+        this.options.templateInvalidDocument = this.options.templateInvalidDocument || '<span>Error loading document image</span>';
 
-        this.fancybox = $().fancybox({
+        $().fancybox({
             animationDuration : 300,
             buttons : [
                 'fullScreen',
@@ -58,30 +59,32 @@ class MayanImage {
     }
 
     static timerFunction () {
-        $.fn.matchHeight._maintainScroll = true;
         $.fn.matchHeight._update();
     }
 
     load () {
-        var self = this;
         var container = this.element.parent().parent().parent();
+        var dataURL = this.element.attr('data-url');
 
-        this.element.attr('src', this.element.attr('data-url'));
-        this.element.on('error', function() {
-            // Check the .complete property to see if it is a real error
-            // or it was a cached image
-            if (this.complete === false) {
-                // It is a cached image, set the src attribute to trigger
-                // it's display.
-                this.src = this.src;
-            } else {
-                container.html(MayanImage.templateInvalidDocument);
-            }
-        });
-
-        $.fn.matchHeight._maintainScroll = true;
+        if (dataURL === '') {
+            container.html(MayanImage.options.templateInvalidDocument);
+        } else {
+            this.element.attr('src', dataURL);
+            this.element.on('error', function() {
+                // Check the .complete property to see if it is a real error
+                // or it was a cached image
+                if (this.complete === false) {
+                    // It is a cached image, set the src attribute to trigger
+                    // it's display.
+                    this.src = this.src;
+                } else {
+                    container.html(MayanImage.options.templateInvalidDocument);
+                }
+            });
+        }
     };
 }
 
-MayanImage.templateInvalidDocument = $('#template-invalid-document').html();
 MayanImage.timer = setTimeout(null);
+
+$.fn.matchHeight._maintainScroll = true;
