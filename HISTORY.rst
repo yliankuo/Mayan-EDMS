@@ -2,6 +2,8 @@
 ================
 - Pagination: Fix page AJAX reload when clicking on pagination active page
   link.
+- Pagination: Add pure pagination subclass that supports custom page
+  querystring keys
 
 3.1.9 (2018-11-01)
 ==================
