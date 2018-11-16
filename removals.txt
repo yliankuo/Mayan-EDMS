@@ -4,6 +4,7 @@ django-celery
 django-compressor
 django-filetransfers
 django-rest-swagger
+django-suit
 pathlib
 pytesseract
 pdfminer

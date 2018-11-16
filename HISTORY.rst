@@ -8,6 +8,8 @@
   link.
 - Pagination: Add pure pagination subclass that supports custom page
   querystring keys
+- Dependencies: Update Python dependencies version. Remove django suit
+  as a dependency.
 
 3.1.9 (2018-11-01)
 ==================
