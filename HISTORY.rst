@@ -10,6 +10,7 @@
   querystring keys
 - Dependencies: Update Python dependencies version. Remove django suit
   as a dependency.
+- Appearance: Remove unused form_empty_label flag.
 
 3.1.9 (2018-11-01)
 ==================
