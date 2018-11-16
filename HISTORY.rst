@@ -1,171 +1,176 @@
+3.2 (2018-XX-XX)
+================
+- Pagination: Fix page AJAX reload when clicking on pagination active page
+  link.
+
 3.1.9 (2018-11-01)
 ==================
-* Convert the furl instance to text to allow serializing it into
+- Convert the furl instance to text to allow serializing it into
   JSON to be passed as arguments to the background task.
 
 3.1.8 (2018-10-31)
 ==================
-* Reorganize documentation into topics and chapters.
-* Add Workflows and API chapters.
-* Add new material from the Wiki to the documentation.
-* Add data migrations to the sources app migraton 0019 to ensure all labels
+- Reorganize documentation into topics and chapters.
+- Add Workflows and API chapters.
+- Add new material from the Wiki to the documentation.
+- Add data migrations to the sources app migraton 0019 to ensure all labels
   are unique before performing the schema migations.
-* Add improvements to the metadata URL encoding and decoding to support
+- Add improvements to the metadata URL encoding and decoding to support
   ampersand characters as part of the metadata value. GitLab issue
   #529. Thanks to Mark Maglana @relaxdiego for the report.
-* Add custom validator for multiple emails in a single text field.
+- Add custom validator for multiple emails in a single text field.
   Change the widget of the email fields in the mailer app to avoid
   browser side email validation. Closes GitLab issue #530.
   Thanks to Mark Maglana @relaxdiego for the report.
-* Add configuration option to change the project/installation URL.
+- Add configuration option to change the project/installation URL.
   This is used in the password reset emails and in the default
   document mailing templates.
-* Increase the size of the workflow preview image.
-* Center the workflow preview image.
-* Move the noop OCR backend to the right place.
-* Add new management command to display the current configuration
+- Increase the size of the workflow preview image.
+- Center the workflow preview image.
+- Move the noop OCR backend to the right place.
+- Add new management command to display the current configuration
   settings.
-* Default the YAML flow format to False which never uses inline.
-* Add support for reindexing documents when their base properties like
+- Default the YAML flow format to False which never uses inline.
+- Add support for reindexing documents when their base properties like
   the label and description are edited.
 
 3.1.7 (2018-10-14)
 ==================
-* Fix an issue with some browsers not firing the .load event on cached
+- Fix an issue with some browsers not firing the .load event on cached
   images. Ref: http://api.jquery.com/load-event/
-* Remove duplicate YAML loading of environment variables.
-* Don't load development apps if they are already loaded.
-* Make sure all key used as input for the cache key hash are
+- Remove duplicate YAML loading of environment variables.
+- Don't load development apps if they are already loaded.
+- Make sure all key used as input for the cache key hash are
   bytes and not unicode. GitLab issue #520. Thanks to TheOneValen
   @TheOneValen for the report.
-* Ignore document stub from the index mirror. GitLab issue
+- Ignore document stub from the index mirror. GitLab issue
   #520. Thanks to TheOneValen @TheOneValen for the report.
-* Fix for the Docker image INSTALL_FLAG path. Thanks to
+- Fix for the Docker image INSTALL_FLAG path. Thanks to
   Mark Maglana @relaxdiego for the report and to Hamish Farroq @farroq_HAM
   for the patch. GitLab issue #525.
-* Fix the typo in the Docker variable for worker concurrency. Thanks to
+- Fix the typo in the Docker variable for worker concurrency. Thanks to
   Mark Maglana @relaxdiego for the report and to Hamish Farroq @farroq_HAM
   for the patch. GitLab issue #527.
-* Add a noop OCR backend that disables OCR and the check for the
+- Add a noop OCR backend that disables OCR and the check for the
   Tesseract OCR binaries. Set the OCR_BACKEND setting or MAYAN_OCR_BACKEND
   environment variable to ocr.backends.pyocr.PyOCR to use this.
-* All tests pass on Python 3.
-* documentation: Add Docker installation method using a dedicated
+- All tests pass on Python 3.
+- documentation: Add Docker installation method using a dedicated
   Docker network.
-* documentation: Add scaling up chapter.
-* documentation: Add S3 storage configuration section.
+- documentation: Add scaling up chapter.
+- documentation: Add S3 storage configuration section.
 
 3.1.6 (2018-10-09)
 ==================
-* Improve index mirroring value clean up code to remove the spaces at the
+- Improve index mirroring value clean up code to remove the spaces at the
   starts and at the end of directories. Closes again GitLab issue #520
   Thanks to TheOneValen @ for the report.
-* Improve index mirroring cache class to use the hash of the keys
+- Improve index mirroring cache class to use the hash of the keys
   instead of the literal keys. Avoid warning about invalid key
   characters. Closes GitLab issue #518. Thanks to TheOneValen @ for the
   report.
-* Only render the Template API view for authenticated users.
+- Only render the Template API view for authenticated users.
   Thanks rgarcia for the report.
-* Add icon to the cabinet "Add new level" link.
-* Display the cabinet "Add new level" link in the top level view too.
+- Add icon to the cabinet "Add new level" link.
+- Display the cabinet "Add new level" link in the top level view too.
 
 3.1.5 (2018-10-08)
 ==================
-* Consolidate some document indexing test code into a new mixin.
-* Split the code of the mountindex command to be able to add tests.
-* Fix the way the children of IndexInstanceNode are accessed. Fixes GitLab
+- Consolidate some document indexing test code into a new mixin.
+- Split the code of the mountindex command to be able to add tests.
+- Fix the way the children of IndexInstanceNode are accessed. Fixes GitLab
   issue #518. Thanks to TheOneValen @TheOneValen for the report.
-* Remove newlines from the index name levels before using them as FUSE
+- Remove newlines from the index name levels before using them as FUSE
   directories.
-* Fixed duplicated FUSE directory removal.
-* Add link and view to show the parsed content of each document page.
-* Add a modelform for adding and editing transformation and perform YAML
+- Fixed duplicated FUSE directory removal.
+- Add link and view to show the parsed content of each document page.
+- Add a modelform for adding and editing transformation and perform YAML
   validation of arguments.
-* Add stricted error checking to the crop transformation.
-* Update compressed files class module to work with Python 3.
-* Update document parsing app tests to work with Python 3.
-* Handle office files in explicit binary mode for Python 3.
-* Return a proper list of SearchModel instances (Python 3).
-* Specify FUSE literals in explicit octal notation (Python 3).
-* URL quote the encoded names of the staging files using Django's compat
+- Add stricted error checking to the crop transformation.
+- Update compressed files class module to work with Python 3.
+- Update document parsing app tests to work with Python 3.
+- Handle office files in explicit binary mode for Python 3.
+- Return a proper list of SearchModel instances (Python 3).
+- Specify FUSE literals in explicit octal notation (Python 3).
+- URL quote the encoded names of the staging files using Django's compat
   module. (Python 3)
-* Open staging file in explicit binary mode. (Python 3)
-* Add separate Python 2 and Python 3 versions of the MetadataType model
+- Open staging file in explicit binary mode. (Python 3)
+- Add separate Python 2 and Python 3 versions of the MetadataType model
   .comma_splitter() static method.
-* Update the metadata app tests to work on Python 3.
-* Make sure metadata lookup choices are a list to be able to add the
+- Update the metadata app tests to work on Python 3.
+- Make sure metadata lookup choices are a list to be able to add the
   optional marker (Python 3).
-* Make sure the image in the document preview view is centered when it is
+- Make sure the image in the document preview view is centered when it is
   smaller than the viewport.
-* Restore use of the .store_body variable accidentally remove in
+- Restore use of the .store_body variable accidentally remove in
   63a77d0235ffef3cd49924ba280879313c622682. Closes GitLab issue #519.
   Thanks to TheOneValen @TheOneValen for the report.
-* Add shared cache class and add mounted index cache invalidation when
+- Add shared cache class and add mounted index cache invalidation when
   document and index instance nodes are updated or deleted.
-* Fix document metadata app view error when adding multiple optional
+- Fix document metadata app view error when adding multiple optional
   metadata types. Closes GitLab issue #521. Thanks to the TheOneValen
   @TheOneValen for the report.
 
 3.1.4 (2018-10-04)
 ==================
-* Fix the link to the documenation. Closes GitLab issue #516.
+- Fix the link to the documenation. Closes GitLab issue #516.
   Thanks to Matthias Urlichs @smurfix for the report.
-* Update related links. Add links to the new Wiki and Forum.
-* Add Redis config entries in the Docker images to disable
+- Update related links. Add links to the new Wiki and Forum.
+- Add Redis config entries in the Docker images to disable
   saving the database and to only provision 1 database.
-* Remove use of hard coded font icon for document page
+- Remove use of hard coded font icon for document page
   rendering busy indicator.
-* Disable the fancybox caption link if the document is
+- Disable the fancybox caption link if the document is
   in the trash.
-* Load the DropZone CSS from package and remove the
+- Load the DropZone CSS from package and remove the
   hard code CSS from appearance/base.css.
-* Add support for indexing on OCR content changes.
-* Add support for reindexing document on content parsing
+- Add support for indexing on OCR content changes.
+- Add support for reindexing document on content parsing
   changes.
-* Strip HTML entities from the browser's window title.
+- Strip HTML entities from the browser's window title.
   Closes GitLab issue #517. Thanks to Daniel Carrico @daniel1113
   for the report.
-* Improve search app. Refactored to resolve search queries
+- Improve search app. Refactored to resolve search queries
   by terms first then by field.
-* Add explanation to the launch workflows tool.
+- Add explanation to the launch workflows tool.
 
 3.1.3 (2018-09-27)
 ==================
-* Make sure template API renders in non US languages.
-* Fix user groups view.
-* Add no results help text to the document type -> metadata type
+- Make sure template API renders in non US languages.
+- Fix user groups view.
+- Add no results help text to the document type -> metadata type
   association view.
-* Expose the Django INSTALLED_APPS setting.
-* Add support for changing the concurrency of the Celery workers in the
+- Expose the Django INSTALLED_APPS setting.
+- Add support for changing the concurrency of the Celery workers in the
   Docker image. Add environment variables MAYAN_WORKER_FAST_CONCURRENCY,
   MAYAN_WORKER_MEDIUM_CONCURRENCY and MAYAN_WORKER_SLOW_CONCURRENCY.
-* Add latest translation updates.
-* Fixes a few text typos.
-* Documentation updates in the deployment and docker chapters.
+- Add latest translation updates.
+- Fixes a few text typos.
+- Documentation updates in the deployment and docker chapters.
 
 3.1.2 (2018-09-21)
 ==================
-* Database access in data migrations defaults to the 'default' database.
+- Database access in data migrations defaults to the 'default' database.
   Force it to the user selected database instead.
-* Don't use a hardcoded database alias for the destination of the database
+- Don't use a hardcoded database alias for the destination of the database
   conversion.
-* Improve natural key support in the UserOptions model.
-* Update from Django 1.11.11 to 1.11.15.
-* Add support to the convertdb command to operate on specified apps too.
-* Add test mixin to test the db conversion (dumping and loading) of a specific app.
-* Add an user test mixin to group user testing.
-* Add test the user managament app for database conversion.
-* Add support for natural keys to the DocumentPageImageCache model.
-* Add database conversion test to the common app.
-* Fix label display for resolved smart links when not using a dynamic label.
-* Only show smart link resolution errors to the user with the smart link edit
+- Improve natural key support in the UserOptions model.
+- Update from Django 1.11.11 to 1.11.15.
+- Add support to the convertdb command to operate on specified apps too.
+- Add test mixin to test the db conversion (dumping and loading) of a specific app.
+- Add an user test mixin to group user testing.
+- Add test the user managament app for database conversion.
+- Add support for natural keys to the DocumentPageImageCache model.
+- Add database conversion test to the common app.
+- Fix label display for resolved smart links when not using a dynamic label.
+- Only show smart link resolution errors to the user with the smart link edit
   permission.
-* Intercept document list view exception and display them as an error message.
+- Intercept document list view exception and display them as an error message.
 
 3.1.1 (2018-09-18)
 ==================
-* CSS tweak to make sure the AJAX spinner stays in place.
-* Fix 90, 180 and 270 degrees rotation transformations.
+- CSS tweak to make sure the AJAX spinner stays in place.
+- Fix 90, 180 and 270 degrees rotation transformations.
 
 3.1 (2018-09-17)
 ================
