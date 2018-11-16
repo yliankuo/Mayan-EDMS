@@ -11,6 +11,7 @@
 - Dependencies: Update Python dependencies version. Remove django suit
   as a dependency.
 - Appearance: Remove unused form_empty_label flag.
+- Appearance: Allow subclassing the text area widget.
 
 3.1.9 (2018-11-01)
 ==================
