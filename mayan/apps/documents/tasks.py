@@ -6,6 +6,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import OperationalError
 
+from converter.transformations import BaseTransformation
 from mayan.celery import app
 
 from .literals import (
