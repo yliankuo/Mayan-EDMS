@@ -14,6 +14,8 @@
 - Appearance: Allow subclassing the text area widget.
 - Documents: Add transformation support to document image API with serialized
   transformations. 
+- Documents: Add icons to the document page image and document page reset
+  views.
 
 3.1.9 (2018-11-01)
 ==================

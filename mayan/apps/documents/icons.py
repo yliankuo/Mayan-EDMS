@@ -52,13 +52,18 @@ icon_document_page_rotate_left = Icon(
 icon_document_page_rotate_right = Icon(
     driver_name='fontawesome', symbol='redo'
 )
+icon_document_page_view = Icon(
+    driver_name='fontawesome', symbol='image'
+)
+icon_document_page_view_reset = Icon(
+    driver_name='fontawesome', symbol='sync'
+)
 icon_document_page_zoom_in = Icon(
     driver_name='fontawesome', symbol='search-plus'
 )
 icon_document_page_zoom_out = Icon(
     driver_name='fontawesome', symbol='search-minus'
 )
-
 icon_document_pages = Icon(driver_name='fontawesome', symbol='copy')
 icon_document_preview = Icon(driver_name='fontawesome', symbol='eye')
 icon_document_properties = Icon(driver_name='fontawesome', symbol='info')
