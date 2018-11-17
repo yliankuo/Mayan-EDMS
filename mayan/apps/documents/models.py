@@ -865,10 +865,12 @@ class DocumentPage(models.Model):
         if document page images.
         """
         transformations_hash = BaseTransformation.combine(
-            self.get_combined_transformation_list(*args, **kwargs)
+            transformations=self.get_combined_transformation_list(
+                *args, **kwargs
+            )
         )
 
-        kwargs.pop('transformations', None)
+        transformations = kwargs.pop('transformations', None)
 
         final_url = furl()
         final_url.args = kwargs
@@ -878,6 +880,13 @@ class DocumentPage(models.Model):
             )
         )
         final_url.args['_hash'] = transformations_hash
+        count = 1
+        for transformation in transformations or []:
+            name, kwargs = transformation.serialize().split(';')
+
+            final_url.args['transformation_{}_name'.format(count)] = name
+            final_url.args['transformation_{}_kwargs'.format(count)] = kwargs
+            count = count +1
 
         return final_url.tostr()
 

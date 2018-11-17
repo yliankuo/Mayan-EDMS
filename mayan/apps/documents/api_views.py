@@ -2,8 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from furl import furl
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.encoding import force_bytes
 from django.views.decorators.cache import cache_control, patch_cache_control
 
 from django_downloadview import DownloadMixin, VirtualFile
@@ -184,6 +187,33 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
 
     @cache_control(private=True)
     def retrieve(self, request, *args, **kwargs):
+        transformation_dict = {
+            'kwargs': {},
+            'name': {}
+        }
+        transformation_list = []
+
+        querystring = furl()
+        querystring.args.update(self.request.GET)
+        querystring.args.update(self.request.POST)
+
+        for key, value in querystring.args.items():
+            if key.startswith('transformation_'):
+                literal, index, element = key.split('_')
+                transformation_dict[element][index] = value
+
+        for order, identifier in transformation_dict['name'].items():
+            if order in transformation_dict['kwargs'].keys():
+                kwargs = {}
+                for kwargs_entry in transformation_dict['kwargs'][order].split(','):
+                    key, value = kwargs_entry.split(':')
+                    kwargs[key] = float(value)
+
+                transformation_list.append({
+                    'name': identifier,
+                    'kwargs': kwargs
+                })
+
         width = request.GET.get('width')
         height = request.GET.get('height')
         zoom = request.GET.get('zoom')
@@ -199,7 +229,8 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
         task = task_generate_document_page_image.apply_async(
             kwargs=dict(
                 document_page_id=self.get_object().pk, width=width,
-                height=height, zoom=zoom, rotation=rotation
+                height=height, zoom=zoom, rotation=rotation,
+                transformation_list=transformation_list
             )
         )
 

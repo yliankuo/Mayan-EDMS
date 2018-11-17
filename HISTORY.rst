@@ -12,6 +12,8 @@
   as a dependency.
 - Appearance: Remove unused form_empty_label flag.
 - Appearance: Allow subclassing the text area widget.
+- Documents: Add transformation support to document image API with serialized
+  transformations. 
 
 3.1.9 (2018-11-01)
 ==================
