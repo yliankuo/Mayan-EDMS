@@ -76,14 +76,27 @@ def task_delete_stubs():
 
 
 @app.task()
-def task_generate_document_page_image(document_page_id, *args, **kwargs):
+def task_generate_document_page_image(document_page_id, transformation_list=None, *args, **kwargs):
+    """
+    Arguments:
+        * transformation_list: List of dictionaties with keys: name and kwargs
+        * args, kwargs: "width, height, zoom, rotation
+    """
     DocumentPage = apps.get_model(
         app_label='documents', model_name='DocumentPage'
     )
 
     document_page = DocumentPage.objects.get(pk=document_page_id)
 
-    return document_page.generate_image(*args, **kwargs)
+    transformations = []
+    for transformation in transformation_list or []:
+        transformations.append(
+            BaseTransformation.get(
+                name=transformation['name']
+            )(**transformation.get('kwargs', {}))
+        )
+
+    return document_page.generate_image(transformations=transformations, *args, **kwargs)
 
 
 @app.task(ignore_result=True)
