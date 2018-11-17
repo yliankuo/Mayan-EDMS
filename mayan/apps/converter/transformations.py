@@ -75,6 +75,15 @@ class BaseTransformation(object):
         self.image = image
         self.aspect = 1.0 * image.size[0] / image.size[1]
 
+    def serialize(self):
+        kwargs = []
+        for key, value in sorted(self.kwargs.items()):
+            kwargs.append(
+                '{}:{}'.format(key, value)
+            )
+
+        return '{};{}'.format(self.name, ','.join(kwargs))
+
 
 class TransformationCrop(BaseTransformation):
     arguments = ('left', 'top', 'right', 'bottom',)
