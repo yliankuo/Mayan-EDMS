@@ -62,8 +62,6 @@ ALLOWED_HOSTS = yaml_loads(
 INSTALLED_APPS = (
     # Placed at the top so it can override any template
     'appearance',
-    # 3rd party
-    'suit',
     # Django
     'django.contrib.admin',
     'django.contrib.admindocs',
