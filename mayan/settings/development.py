@@ -19,6 +19,8 @@ if 'django_extensions' not in INSTALLED_APPS:
         'django_extensions',
     )
 
+ROOT_URLCONF = 'mayan.urls.development'
+
 TEMPLATES[0]['OPTIONS']['loaders'] = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
