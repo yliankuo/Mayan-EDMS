@@ -2,9 +2,10 @@ from __future__ import unicode_literals
 
 import shlex
 
+from jinja2 import Template
+
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.module_loading import import_string
@@ -120,13 +121,12 @@ class MetadataType(models.Model):
 
     def get_default_value(self):
         template = Template(self.default)
-        context = Context()
-        return template.render(context=context)
+        return template.render()
 
     def get_lookup_values(self):
         template = Template(self.lookup)
-        context = Context(MetadataLookup.get_as_context())
-        return MetadataType.comma_splitter(template.render(context=context))
+        context = MetadataLookup.get_as_context()
+        return MetadataType.comma_splitter(template.render(**context))
 
     def get_required_for(self, document_type):
         """

@@ -74,13 +74,13 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
 
         level_year = self.index.node_templates.create(
             parent=self.index.template_root,
-            expression='{{ document.date_added|date:"Y" }}',
+            expression='{{ document.date_added.year }}',
             link_documents=False
         )
 
         self.index.node_templates.create(
             parent=level_year,
-            expression='{{ document.date_added|date:"m" }}',
+            expression='{{ document.date_added.month }}',
             link_documents=True
         )
         # Index the document created by default

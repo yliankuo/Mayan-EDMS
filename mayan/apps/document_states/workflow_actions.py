@@ -3,9 +3,9 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import json
 
+from jinja2 import Template
 import requests
 
-from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
 
 from .classes import WorkflowAction
@@ -55,7 +55,7 @@ class DocumentPropertiesEditAction(WorkflowAction):
         if self.document_label:
             try:
                 new_label = Template(self.document_label).render(
-                    context=Context(context)
+                    **context
                 )
             except Exception as exception:
                 raise WorkflowStateActionError(
@@ -67,7 +67,7 @@ class DocumentPropertiesEditAction(WorkflowAction):
         if self.document_description:
             try:
                 new_description = Template(self.document_description or '{}').render(
-                    context=Context(context)
+                    **context
                 )
             except Exception as exception:
                 raise WorkflowStateActionError(
@@ -137,7 +137,7 @@ class HTTPPostAction(WorkflowAction):
 
         try:
             url = Template(self.url).render(
-                context=Context(context)
+                **context
             )
         except Exception as exception:
             raise WorkflowStateActionError(
@@ -148,7 +148,7 @@ class HTTPPostAction(WorkflowAction):
 
         try:
             result = Template(self.payload or '{}').render(
-                context=Context(context)
+                **context
             )
         except Exception as exception:
             raise WorkflowStateActionError(

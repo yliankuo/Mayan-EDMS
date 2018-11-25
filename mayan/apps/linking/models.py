@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
+from jinja2 import Template
+
 from django.db import models
 from django.db.models import Q
-from django.template import Context, Template
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -53,10 +54,10 @@ class SmartLink(models.Model):
         static label, resolve the template and return the result.
         """
         if self.dynamic_label:
-            context = Context({'document': document})
+            context = {'document': document}
             try:
                 template = Template(self.dynamic_label)
-                return template.render(context=context)
+                return template.render(**context)
             except Exception as exception:
                 return _(
                     'Error generating dynamic label; %s' % force_text(
@@ -81,7 +82,7 @@ class SmartLink(models.Model):
 
         smart_link_query = Q()
 
-        context = Context({'document': document})
+        context = {'document': document}
 
         for condition in self.conditions.filter(enabled=True):
             template = Template(condition.expression)
@@ -89,7 +90,7 @@ class SmartLink(models.Model):
             condition_query = Q(**{
                 '%s__%s' % (
                     condition.foreign_document_data, condition.operator
-                ): template.render(context=context)
+                ): template.render(**context)
             })
             if condition.negated:
                 condition_query = ~condition_query

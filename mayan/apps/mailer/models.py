@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 import json
 import logging
 
+from jinja2 import Template
+
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.db import models
-from django.template import Context, Template
 from django.utils.html import strip_tags
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
@@ -139,13 +140,11 @@ class UserMailer(models.Model):
             'document': document
         }
 
-        context = Context(context_dictionary)
-
         body_template = Template(body)
-        body_html_content = body_template.render(context)
+        body_html_content = body_template.render(**context_dictionary)
 
         subject_template = Template(subject)
-        subject_text = strip_tags(subject_template.render(context))
+        subject_text = strip_tags(subject_template.render(**context_dictionary))
 
         attachments = []
         if as_attachment:

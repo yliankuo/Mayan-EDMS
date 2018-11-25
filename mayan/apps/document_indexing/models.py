@@ -2,8 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from jinja2 import Template
+
 from django.db import models, transaction
-from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -264,9 +265,9 @@ class IndexTemplateNode(MPTTModel):
                         )
 
                         try:
-                            context = Context({'document': document})
+                            context = {'document': document}
                             template = Template(self.expression)
-                            result = template.render(context=context)
+                            result = template.render(**context)
                         except Exception as exception:
                             logger.debug('Evaluating error: %s', exception)
                             error_message = _(

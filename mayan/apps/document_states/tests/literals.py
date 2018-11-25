@@ -15,6 +15,6 @@ TEST_WORKFLOW_TRANSITION_LABEL = 'test transition label'
 TEST_WORKFLOW_TRANSITION_LABEL_2 = 'test transition label 2'
 TEST_WORKFLOW_TRANSITION_LABEL_EDITED = 'test transition label edited'
 
-TEST_INDEX_TEMPLATE_METADATA_EXPRESSION = '{{{{ document.workflow.{}.get_current_state }}}}'.format(
+TEST_INDEX_TEMPLATE_METADATA_EXPRESSION = '{{{{ document.workflow.{}.get_current_state() }}}}'.format(
     TEST_WORKFLOW_INTERNAL_NAME
 )
