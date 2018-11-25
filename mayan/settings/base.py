@@ -64,7 +64,6 @@ INSTALLED_APPS = (
     'appearance',
     # Django
     'django.contrib.admin',
-    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
