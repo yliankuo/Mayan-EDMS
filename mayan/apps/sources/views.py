@@ -356,7 +356,7 @@ class UploadInteractiveView(UploadBaseView):
                             kwargs=self.request.resolver_match.kwargs
                         ), self.request.META['QUERY_STRING']
                     ),
-                    'form_class': 'dropzone',
+                    'form_css_classes': 'dropzone',
                     'form_disable_submit': True,
                     'form_id': 'html5upload',
                 }
