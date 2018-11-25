@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     'drf_yasg',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'common.middleware.error_logging.ErrorLoggingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -144,17 +144,17 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'mayan.urls'
 
-TEMPLATES = [
+TEMPLATES = (
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'OPTIONS': {
             'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
@@ -162,7 +162,7 @@ TEMPLATES = [
             ]
         },
     },
-]
+)
 
 WSGI_APPLICATION = 'mayan.wsgi.application'
 
