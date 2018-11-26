@@ -16,21 +16,14 @@ setting_graphics_backend = namespace.add_setting(
     global_name='CONVERTER_GRAPHICS_BACKEND',
 )
 setting_graphics_backend_arguments = namespace.add_setting(
-    default='''
-        {{
-            libreoffice_path: {},
-            pdftoppm_dpi: {},
-            pdftoppm_format: {},
-            pdftoppm_path: {},
-            pdfinfo_path: {},
-            pillow_format: {}
-
-        }}
-    '''.replace('\n', '').format(
-        DEFAULT_LIBREOFFICE_PATH, DEFAULT_PDFTOPPM_DPI,
-        DEFAULT_PDFTOPPM_FORMAT, DEFAULT_PDFTOPPM_PATH, DEFAULT_PDFINFO_PATH,
-        DEFAULT_PILLOW_FORMAT
-    ), help_text=_(
+    default={
+        'libreoffice_path': DEFAULT_LIBREOFFICE_PATH,
+        'pdftoppm_dpi': DEFAULT_PDFTOPPM_DPI,
+        'pdftoppm_format': DEFAULT_PDFTOPPM_FORMAT,
+        'pdftoppm_path': DEFAULT_PDFTOPPM_PATH,
+        'pdfinfo_path': DEFAULT_PDFINFO_PATH,
+        'pillow_format': DEFAULT_PILLOW_FORMAT
+    }, help_text=_(
         'Configuration options for the graphics conversion backend.'
     ), global_name='CONVERTER_GRAPHICS_BACKEND_ARGUMENTS'
 )

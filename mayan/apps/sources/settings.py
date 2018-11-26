@@ -25,9 +25,9 @@ setting_staging_file_image_cache_storage = namespace.add_setting(
 )
 setting_staging_file_image_cache_storage_arguments = namespace.add_setting(
     global_name='SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS',
-    default='{{location: {}}}'.format(
-        os.path.join(settings.MEDIA_ROOT, 'staging_file_cache')
-    ), help_text=_(
+    default={
+        'location': os.path.join(settings.MEDIA_ROOT, 'staging_file_cache')
+    }, help_text=_(
         'Arguments to pass to the SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND.'
     )
 )

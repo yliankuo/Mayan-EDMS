@@ -20,9 +20,8 @@ setting_documentimagecache_storage = namespace.add_setting(
 )
 setting_documentimagecache_storage_arguments = namespace.add_setting(
     global_name='DOCUMENTS_CACHE_STORAGE_BACKEND_ARGUMENTS',
-    default='{{location: {}}}'.format(
-        os.path.join(settings.MEDIA_ROOT, 'document_cache')
-    ), help_text=_(
+    default={'location': os.path.join(settings.MEDIA_ROOT, 'document_cache')},
+    help_text=_(
         'Arguments to pass to the DOCUMENT_CACHE_STORAGE_BACKEND.'
     )
 )
@@ -117,9 +116,9 @@ setting_storage_backend = namespace.add_setting(
 )
 setting_storage_backend_arguments = namespace.add_setting(
     global_name='DOCUMENTS_STORAGE_BACKEND_ARGUMENTS',
-    default='{{location: {}}}'.format(
-        os.path.join(settings.MEDIA_ROOT, 'document_storage')
-    ), help_text=_('Arguments to pass to the DOCUMENT_STORAGE_BACKEND.')
+    default={
+        'location': os.path.join(settings.MEDIA_ROOT, 'document_storage')
+    }, help_text=_('Arguments to pass to the DOCUMENT_STORAGE_BACKEND.')
 )
 setting_thumbnail_height = namespace.add_setting(
     global_name='DOCUMENTS_THUMBNAIL_HEIGHT', default='', help_text=_(
