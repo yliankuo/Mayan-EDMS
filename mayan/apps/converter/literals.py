@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+CHUNK_SIZE = 1024
+
 DEFAULT_ZOOM_LEVEL = 100
 DEFAULT_ROTATION = 0
 DEFAULT_PAGE_NUMBER = 1

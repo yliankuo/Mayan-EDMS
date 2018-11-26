@@ -16,11 +16,11 @@ from mimetype.api import get_mimetype
 
 from .exceptions import InvalidOfficeFormat, OfficeConversionError
 from .literals import (
-    DEFAULT_LIBREOFFICE_PATH, DEFAULT_PAGE_NUMBER, DEFAULT_PILLOW_FORMAT
+    CHUNK_SIZE, DEFAULT_LIBREOFFICE_PATH, DEFAULT_PAGE_NUMBER,
+    DEFAULT_PILLOW_FORMAT
 )
 from .settings import setting_graphics_backend_arguments
 
-CHUNK_SIZE = 1024
 logger = logging.getLogger(__name__)
 
 try:
