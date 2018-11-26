@@ -22,16 +22,6 @@ class SettingForm(forms.Form):
     def clean(self):
         quotes = ['"', "'"]
 
-        if self.setting.quoted:
-            stripped = self.cleaned_data['value'].strip()
-
-            if stripped[0] not in quotes or stripped[-1] not in quotes:
-                raise ValidationError(
-                    _(
-                        'Value must be properly quoted.'
-                    )
-                )
-
         try:
             yaml.safe_load(self.cleaned_data['value'])
         except yaml.YAMLError:

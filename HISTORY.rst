@@ -13,9 +13,59 @@
 - Appearance: Remove unused form_empty_label flag.
 - Appearance: Allow subclassing the text area widget.
 - Documents: Add transformation support to document image API with serialized
-  transformations. 
+  transformations.
 - Documents: Add icons to the document page image and document page reset
   views.
+- Remove support for quoted settings. Instead all settings must be formatted
+  according to YAML specifications. Users need to update their config files.
+  Example:
+
+    DOCUMENTS_STORAGE_BACKEND_ARGUMENTS: '{location: /home/rosarior/development/mayan-edms/mayan/media/document_storage}'
+
+  must be changed to:
+
+    DOCUMENTS_STORAGE_BACKEND_ARGUMENTS:
+      location: /home/rosarior/development/mayan-edms/mayan/media/document_storage
+
+  Example 2:
+
+    CONVERTER_GRAPHICS_BACKEND_CONFIG: '        {            libreoffice_path: /usr/bin/libreoffice,            pdftoppm_dpi:
+    300,            pdftoppm_format: jpeg,            pdftoppm_path: /usr/bin/pdftoppm,            pdfinfo_path:
+    /usr/bin/pdfinfo,            pillow_format: JPEG        }    '
+
+  must be changed to:
+
+    CONVERTER_GRAPHICS_BACKEND_CONFIG:
+      libreoffice_path: /usr/bin/libreoffice
+      pdftoppm_dpi: 300
+      pdftoppm_format: jpeg
+      pdftoppm_path: /usr/bin/pdftoppm
+      pdfinfo_path: /usr/bin/pdfinfo
+      pillow_format: JPEG
+
+  Example 3:
+
+    OCR_BACKEND_ARGUMENTS: ''
+
+  must be changed to:
+
+    OCR_BACKEND_ARGUMENTS: {}
+
+  Settings that need to be updated are:
+
+  - COMMON_SHARED_STORAGE_ARGUMENTS
+  - CONVERTER_GRAPHICS_BACKEND_CONFIG
+  - DOCUMENTS_CACHE_STORAGE_BACKEND_ARGUMENTS
+  - DOCUMENTS_STORAGE_BACKEND_ARGUMENTS
+  - OCR_BACKEND_ARGUMENTS
+  - SIGNATURES_STORAGE_BACKEND_ARGUMENTS
+  - SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS
+
+  The following error will appear in the console if a setting is not yet
+  updated to this new format::
+
+      TypeError: type object argument after ** must be a mapping, not str
+
 
 3.1.9 (2018-11-01)
 ==================

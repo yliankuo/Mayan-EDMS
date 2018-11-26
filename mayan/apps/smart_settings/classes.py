@@ -134,13 +134,12 @@ class Setting(object):
                 path=settings.CONFIGURATION_LAST_GOOD_FILEPATH
             )
 
-    def __init__(self, namespace, global_name, default, help_text=None, is_path=False, quoted=False):
+    def __init__(self, namespace, global_name, default, help_text=None, is_path=False):
         self.global_name = global_name
         self.default = default
         self.help_text = help_text
         self.loaded = False
         self.namespace = namespace
-        self.quoted = quoted
         self.environment_variable = False
         namespace._settings.append(self)
         self.__class__._registry[global_name] = self

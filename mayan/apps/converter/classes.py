@@ -7,7 +7,6 @@ import os
 
 from PIL import Image
 import sh
-import yaml
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 try:
     LIBREOFFICE = sh.Command(
-        yaml.load(setting_graphics_backend_config.value).get(
+        setting_graphics_backend_config.value.get(
             'libreoffice_path', DEFAULT_LIBREOFFICE_PATH
         )
     ).bake('--headless', '--convert-to', 'pdf:writer_pdf_Export')
@@ -180,9 +179,7 @@ class ConverterBase(object):
         fs_cleanup(converted_output)
 
     def get_page(self, output_format=None, as_base64=False):
-        output_format = output_format or yaml.load(
-            setting_graphics_backend_config.value
-        ).get(
+        output_format = output_format or setting_graphics_backend_config.value.get(
             'pillow_format', DEFAULT_PILLOW_FORMAT
         )
 

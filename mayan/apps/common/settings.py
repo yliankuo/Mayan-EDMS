@@ -67,7 +67,7 @@ setting_shared_storage_arguments = namespace.add_setting(
     global_name='COMMON_SHARED_STORAGE_ARGUMENTS',
     default='{{location: {}}}'.format(
         os.path.join(settings.MEDIA_ROOT, 'shared_files')
-    ), quoted=True
+    )
 )
 setting_temporary_directory = namespace.add_setting(
     global_name='COMMON_TEMPORARY_DIRECTORY', default=tempfile.gettempdir(),
