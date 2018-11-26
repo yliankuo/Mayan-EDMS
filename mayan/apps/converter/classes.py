@@ -18,14 +18,14 @@ from .exceptions import InvalidOfficeFormat, OfficeConversionError
 from .literals import (
     DEFAULT_LIBREOFFICE_PATH, DEFAULT_PAGE_NUMBER, DEFAULT_PILLOW_FORMAT
 )
-from .settings import setting_graphics_backend_config
+from .settings import setting_graphics_backend_arguments
 
 CHUNK_SIZE = 1024
 logger = logging.getLogger(__name__)
 
 try:
     LIBREOFFICE = sh.Command(
-        setting_graphics_backend_config.value.get(
+        setting_graphics_backend_arguments.value.get(
             'libreoffice_path', DEFAULT_LIBREOFFICE_PATH
         )
     ).bake('--headless', '--convert-to', 'pdf:writer_pdf_Export')
@@ -179,7 +179,7 @@ class ConverterBase(object):
         fs_cleanup(converted_output)
 
     def get_page(self, output_format=None, as_base64=False):
-        output_format = output_format or setting_graphics_backend_config.value.get(
+        output_format = output_format or setting_graphics_backend_arguments.value.get(
             'pillow_format', DEFAULT_PILLOW_FORMAT
         )
 

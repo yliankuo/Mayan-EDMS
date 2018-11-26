@@ -66,6 +66,7 @@
 
       TypeError: type object argument after ** must be a mapping, not str
 
+- Rename the CONVERTER_GRAPHICS_BACKEND_CONFIG to CONVERTER_GRAPHICS_BACKEND_ARGUMENTS.
 
 3.1.9 (2018-11-01)
 ==================

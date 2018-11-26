@@ -15,7 +15,7 @@ from common.utils import fs_cleanup, mkstemp
 
 from ..classes import ConverterBase
 from ..exceptions import PageCountError
-from ..settings import setting_graphics_backend_config
+from ..settings import setting_graphics_backend_arguments
 
 from ..literals import (
     DEFAULT_PDFTOPPM_DPI, DEFAULT_PDFTOPPM_FORMAT, DEFAULT_PDFTOPPM_PATH,
@@ -24,7 +24,7 @@ from ..literals import (
 
 try:
     pdftoppm = sh.Command(
-        setting_graphics_backend_config.value.get(
+        setting_graphics_backend_arguments.value.get(
             'pdftoppm_path', DEFAULT_PDFTOPPM_PATH
         )
     )
@@ -32,13 +32,13 @@ except sh.CommandNotFound:
     pdftoppm = None
 else:
     pdftoppm_format = '-{}'.format(
-        setting_graphics_backend_config.value.get(
+        setting_graphics_backend_arguments.value.get(
             'pdftoppm_format', DEFAULT_PDFTOPPM_FORMAT
         )
     )
 
     pdftoppm_dpi = format(
-        setting_graphics_backend_config.value.get(
+        setting_graphics_backend_arguments.value.get(
             'pdftoppm_dpi', DEFAULT_PDFTOPPM_DPI
         )
     )
@@ -47,7 +47,7 @@ else:
 
 try:
     pdfinfo = sh.Command(
-        setting_graphics_backend_config.value.get(
+        setting_graphics_backend_arguments.value.get(
             'pdfinfo_path', DEFAULT_PDFINFO_PATH
         )
     )

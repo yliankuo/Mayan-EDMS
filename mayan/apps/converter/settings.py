@@ -15,7 +15,7 @@ setting_graphics_backend = namespace.add_setting(
     help_text=_('Graphics conversion backend to use.'),
     global_name='CONVERTER_GRAPHICS_BACKEND',
 )
-setting_graphics_backend_config = namespace.add_setting(
+setting_graphics_backend_arguments = namespace.add_setting(
     default='''
         {{
             libreoffice_path: {},
@@ -32,5 +32,5 @@ setting_graphics_backend_config = namespace.add_setting(
         DEFAULT_PILLOW_FORMAT
     ), help_text=_(
         'Configuration options for the graphics conversion backend.'
-    ), global_name='CONVERTER_GRAPHICS_BACKEND_CONFIG'
+    ), global_name='CONVERTER_GRAPHICS_BACKEND_ARGUMENTS'
 )
