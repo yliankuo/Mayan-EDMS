@@ -5,6 +5,20 @@ import os
 
 import yaml
 
+from .literals import DJANGO_SETTINGS_LIST
+
+
+def get_environment_variables():
+    result = {}
+
+    for setting in DJANGO_SETTINGS_LIST:
+        environment_value = os.environ.get('MAYAN_{}'.format(setting))
+        if environment_value:
+            environment_value = yaml_loads(environment_value)
+            result[setting] = environment_value
+
+    return result
+
 
 def read_configuration_file(path):
     try:

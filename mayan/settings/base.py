@@ -16,15 +16,13 @@ import sys
 
 from django.utils.translation import ugettext_lazy as _
 
-import environ
-
 from .literals import (
     CONFIGURATION_FILENAME, CONFIGURATION_LAST_GOOD_FILENAME,
-    DEFAULT_SECRET_KEY, SECRET_KEY_FILENAME, SYSTEM_DIR
+    DEFAULT_SECRET_KEY, DJANGO_SETTINGS_LIST, SECRET_KEY_FILENAME, SYSTEM_DIR
 )
-from .utils import yaml_loads, read_configuration_file
-
-env = environ.Env()
+from .utils import (
+    get_environment_variables, read_configuration_file, yaml_loads
+)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
@@ -49,13 +47,10 @@ else:
         SECRET_KEY = DEFAULT_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('MAYAN_DEBUG', default=False)
 
-ALLOWED_HOSTS = yaml_loads(
-    env(
-        'MAYAN_ALLOWED_HOSTS', default="['127.0.0.1', 'localhost', '[::1]']"
-    )
-)
+DEBUG = yaml_loads(os.environ.get('MAYAN_DEBUG', 'false'))
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '[::1]']
 
 # Application definition
 
@@ -249,9 +244,13 @@ TEST_RUNNER = 'common.tests.runner.MayanTestRunner'
 
 # --------- Django -------------------
 
-HOME_VIEW = env('MAYAN_HOME_VIEW', default='common:home')
-LOGIN_URL = env('MAYAN_LOGIN_URL', default='authentication:login_view')
-LOGIN_REDIRECT_URL = env('MAYAN_LOGIN_REDIRECT_URL', default='common:root')
+HOME_VIEW = yaml_loads(os.environ.get('MAYAN_HOME_VIEW', 'common:home'))
+LOGIN_URL = yaml_loads(
+    os.environ.get('MAYAN_LOGIN_URL', 'authentication:login_view')
+)
+LOGIN_REDIRECT_URL = yaml_loads(
+    os.environ.get('MAYAN_LOGIN_REDIRECT_URL', 'common:root')
+)
 INTERNAL_IPS = ('127.0.0.1',)
 
 # ---------- Django REST framework -----------
@@ -316,35 +315,19 @@ AJAX_REDIRECT_CODE = 278
 # ----- Celery -----
 
 BROKER_URL = os.environ.get('MAYAN_BROKER_URL')
-CELERY_ALWAYS_EAGER = env.bool('MAYAN_CELERY_ALWAYS_EAGER', default=True)
+CELERY_ALWAYS_EAGER = yaml_loads(
+    os.environ.get('MAYAN_CELERY_ALWAYS_EAGER', 'true')
+)
 CELERY_RESULT_BACKEND = os.environ.get('MAYAN_CELERY_RESULT_BACKEND')
 
 # ----- Database -----
-environment_database_engine = os.environ.get('MAYAN_DATABASE_ENGINE')
 
-if environment_database_engine:
-    environment_database_conn_max_age = os.environ.get('MAYAN_DATABASE_CONN_MAX_AGE', None)
-    if environment_database_conn_max_age:
-        environment_database_conn_max_age = int(environment_database_conn_max_age)
-
-    DATABASES = {
-        'default': {
-            'ENGINE': environment_database_engine,
-            'NAME': os.environ['MAYAN_DATABASE_NAME'],
-            'USER': os.environ['MAYAN_DATABASE_USER'],
-            'PASSWORD': os.environ['MAYAN_DATABASE_PASSWORD'],
-            'HOST': os.environ.get('MAYAN_DATABASE_HOST', None),
-            'PORT': os.environ.get('MAYAN_DATABASE_PORT', None),
-            'CONN_MAX_AGE': environment_database_conn_max_age,
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(MEDIA_ROOT, 'db.sqlite3'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(MEDIA_ROOT, 'db.sqlite3'),
-        }
-    }
+}
 
 CONFIGURATION_FILEPATH = os.path.join(MEDIA_ROOT, CONFIGURATION_FILENAME)
 CONFIGURATION_LAST_GOOD_FILEPATH = os.path.join(
@@ -352,6 +335,11 @@ CONFIGURATION_LAST_GOOD_FILEPATH = os.path.join(
 )
 
 if 'revertsettings' not in sys.argv:
-    result = read_configuration_file(CONFIGURATION_FILEPATH)
-    if result:
-        globals().update(result)
+    configuration_result = read_configuration_file(CONFIGURATION_FILEPATH)
+    environment_result = get_environment_variables()
+
+    for setting in DJANGO_SETTINGS_LIST:
+        if setting in configuration_result:
+            globals().update({setting: configuration_result[setting]})
+        elif setting in environment_result:
+            globals().update({setting: environment_result[setting]})

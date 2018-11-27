@@ -66,7 +66,16 @@
 
       TypeError: type object argument after ** must be a mapping, not str
 
-- Rename the CONVERTER_GRAPHICS_BACKEND_CONFIG to CONVERTER_GRAPHICS_BACKEND_ARGUMENTS.
+- Rename the CONVERTER_GRAPHICS_BACKEND_CONFIG to
+  CONVERTER_GRAPHICS_BACKEND_ARGUMENTS.
+- Refactor the initial environment settings and configuration file loading.
+- Consolidate all database settings into a new single setting called
+  "DATABASES".
+- Remove usage of django-environ.
+- Reduce attach surface by only loading a restricted list of
+  settings during the initial configuration loading.
+
+
 
 3.1.9 (2018-11-01)
 ==================
