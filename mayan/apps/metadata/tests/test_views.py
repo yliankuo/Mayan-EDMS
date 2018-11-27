@@ -328,8 +328,7 @@ class DocumentMetadataTestCase(GenericDocumentViewTestCase):
             'metadata_type', flat=True
         )
         self.assertTrue(
-            self.metadata_type.pk in document_metadata_types and
-            metadata_type_2.pk in document_metadata_types
+            self.metadata_type.pk in document_metadata_types and metadata_type_2.pk in document_metadata_types
         )
 
 

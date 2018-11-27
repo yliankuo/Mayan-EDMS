@@ -6,7 +6,6 @@ from furl import furl
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import force_bytes
 from django.views.decorators.cache import cache_control, patch_cache_control
 
 from django_downloadview import DownloadMixin, VirtualFile

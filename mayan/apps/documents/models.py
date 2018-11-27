@@ -886,7 +886,7 @@ class DocumentPage(models.Model):
 
             final_url.args['transformation_{}_name'.format(count)] = name
             final_url.args['transformation_{}_kwargs'.format(count)] = kwargs
-            count = count +1
+            count = count + 1
 
         return final_url.tostr()
 
