@@ -81,6 +81,8 @@
 - Exposed a new Celery setting via the UI: CELERY_ALWAYS_EAGER.
 - Settings with lazy values are now more carefully checked
   and converteed before serializing them.
+- Add the 'ocr_content' attribute to documents to allow access
+  to a document's OCR content for indexing and other purposes.
 
 3.1.9 (2018-11-01)
 ==================

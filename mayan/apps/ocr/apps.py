@@ -7,6 +7,7 @@ from kombu import Exchange, Queue
 
 from django.apps import apps
 from django.db.models.signals import post_save
+from django.utils.encoding import force_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -15,7 +16,7 @@ from common import (
     MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_secondary,
     menu_tools
 )
-from common.classes import ModelField
+from common.classes import ModelAttribute, ModelField
 from common.settings import settings_db_sync_task_delay
 from documents.search import document_search, document_page_search
 from documents.signals import post_version_upload
@@ -41,7 +42,7 @@ from .permissions import (
 )
 from .queues import *  # NOQA
 from .signals import post_document_version_ocr
-from .utils import get_document_ocr_content
+from .utils import document_property_ocr_content, get_document_ocr_content
 
 logger = logging.getLogger(__name__)
 
@@ -94,11 +95,17 @@ class OCRApp(MayanAppConfig):
         DocumentVersionOCRError = self.get_model('DocumentVersionOCRError')
 
         Document.add_to_class('submit_for_ocr', document_ocr_submit)
-        DocumentVersion.add_to_class(
-            'ocr_content', get_document_ocr_content
+        Document.add_to_class(
+            'ocr_content', document_property_ocr_content
         )
         DocumentVersion.add_to_class(
             'submit_for_ocr', document_version_ocr_submit
+        )
+
+        ModelAttribute(
+            model=Document, name='ocr_content', description=_(
+                'The OCR content of the document.'
+            )
         )
 
         ModelField(

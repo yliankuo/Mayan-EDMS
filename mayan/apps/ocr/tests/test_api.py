@@ -33,7 +33,6 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_submit_document_no_access(self):
         response = self._request_document_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
         self.assertFalse(hasattr(self.document.pages.first(), 'ocr_content'))
 
     def test_submit_document_with_access(self):
@@ -42,7 +41,6 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
         )
         response = self._request_document_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
         self.assertTrue(hasattr(self.document.pages.first(), 'ocr_content'))
 
     def _request_document_version_ocr_submit_view(self):
@@ -54,7 +52,6 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_submit_document_version_no_access(self):
         response = self._request_document_version_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
         self.assertFalse(hasattr(self.document.pages.first(), 'ocr_content'))
 
     def test_submit_document_version_with_access(self):
@@ -63,7 +60,6 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
         )
         response = self._request_document_version_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
-
         self.assertTrue(hasattr(self.document.pages.first(), 'ocr_content'))
 
     def _request_document_page_content_view(self):
