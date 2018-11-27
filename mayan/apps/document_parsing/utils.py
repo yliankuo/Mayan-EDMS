@@ -14,6 +14,11 @@ def get_document_content(document):
         try:
             page_content = page.content.content
         except DocumentPageContent.DoesNotExist:
-            pass
+            yield ''
         else:
             yield conditional_escape(force_text(page_content))
+
+
+@property
+def document_property_content(self):
+    return ' '.join(get_document_content(self))

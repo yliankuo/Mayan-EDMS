@@ -15,7 +15,7 @@ from common import (
     MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_secondary,
     menu_tools
 )
-from common.classes import ModelField
+from common.classes import ModelAttribute, ModelField
 from common.settings import settings_db_sync_task_delay
 from documents.search import document_search, document_page_search
 from documents.signals import post_version_upload
@@ -40,7 +40,7 @@ from .permissions import (
     permission_parse_document
 )
 from .signals import post_document_version_parsing
-from .utils import get_document_content
+from .utils import document_property_content, get_document_content
 
 logger = logging.getLogger(__name__)
 
@@ -95,13 +95,19 @@ class DocumentParsingApp(MayanAppConfig):
 
         Document.add_to_class('submit_for_parsing', document_parsing_submit)
         Document.add_to_class(
-            'content', get_document_content
+            'content', document_property_content
         )
         DocumentVersion.add_to_class(
             'content', get_document_content
         )
         DocumentVersion.add_to_class(
             'submit_for_parsing', document_version_parsing_submit
+        )
+
+        ModelAttribute(
+            model=Document, name='content', description=_(
+                'The parsed content of the document.'
+            )
         )
 
         ModelField(
