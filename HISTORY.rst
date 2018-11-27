@@ -79,7 +79,8 @@
   LANGUAGE_CODE, STATIC_URL, STATICFILES_STORAGE, 
   TIME_ZONE, WSGI_APPLICATION.
 - Exposed a new Celery setting via the UI: CELERY_ALWAYS_EAGER.
-
+- Settings with lazy values are now more carefully checked
+  and converteed before serializing them.
 
 3.1.9 (2018-11-01)
 ==================

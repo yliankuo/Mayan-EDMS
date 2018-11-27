@@ -10,6 +10,7 @@ import yaml
 
 from django.apps import apps
 from django.conf import settings
+from django.utils import six
 from django.utils.functional import Promise
 from django.utils.encoding import force_text, python_2_unicode_compatible
 
@@ -79,11 +80,22 @@ class Setting(object):
         return yaml.safe_load(value)
 
     @staticmethod
-    def serialize_value(value):
-        if isinstance(value, Promise):
-            value = force_text(value)
+    def express_promises(value):
+        """
+        Walk all the elements of a value and force promises to text
+        """
+        if isinstance(value, (six.types.ListType, six.types.TupleType)):
+            return [Setting.express_promises(item) for item in value]
+        elif isinstance(value, Promise):
+            return force_text(value)
+        else:
+            return value
 
-        result = yaml.safe_dump(value, allow_unicode=True)
+    @staticmethod
+    def serialize_value(value):
+        result = yaml.safe_dump(
+            data=Setting.express_promises(value), allow_unicode=True
+        )
         # safe_dump returns bytestrings
         # Disregard the last 3 dots that mark the end of the YAML document
         if force_text(result).endswith('...\n'):
@@ -98,10 +110,7 @@ class Setting(object):
         for setting in cls.get_all():
             if (namespace and setting.namespace.name == namespace) or not namespace:
                 if (filter_term and filter_term.lower() in setting.global_name.lower()) or not filter_term:
-                    if isinstance(setting.value, Promise):
-                        dictionary[setting.global_name] = force_text(setting.value)
-                    else:
-                        dictionary[setting.global_name] = setting.value
+                    dictionary[setting.global_name] = Setting.express_promises(setting.value)
 
         return yaml.safe_dump(dictionary, default_flow_style=False)
 
@@ -152,7 +161,7 @@ class Setting(object):
         if environment_value:
             self.environment_variable = True
             try:
-                self.raw_value = environment_value
+                self.raw_value = yaml.safe_load(environment_value)
             except yaml.YAMLError as exception:
                 raise type(exception)(
                     'Error interpreting environment variable: {} with '
