@@ -74,7 +74,11 @@
 - Remove usage of django-environ.
 - Reduce attach surface by only loading a restricted list of
   settings during the initial configuration loading.
-
+- Exposed new Django settings via the UI: AUTH_PASSWORD_VALIDATORS,
+  DEBUG, DEFAULT_FROM_EMAIL, INTERNAL_IPS, LANGUAGES,
+  LANGUAGE_CODE, STATIC_URL, STATICFILES_STORAGE, 
+  TIME_ZONE, WSGI_APPLICATION.
+- Exposed a new Celery setting via the UI: CELERY_ALWAYS_EAGER.
 
 
 3.1.9 (2018-11-01)

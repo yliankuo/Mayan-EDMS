@@ -108,15 +108,12 @@ setting_django_append_slash = namespace.add_setting(
         'PREPEND_WWW.'
     )
 )
-setting_django_databases = namespace.add_setting(
-    global_name='DATABASES', default=settings.DATABASES,
+setting_django_auth_password_validators = namespace.add_setting(
+    global_name='AUTH_PASSWORD_VALIDATORS',
+    default=settings.AUTH_PASSWORD_VALIDATORS,
     help_text=_(
-        'A dictionary containing the settings for all databases to be used '
-        'with Django. It is a nested dictionary whose contents map a '
-        'database alias to a dictionary containing the options for an '
-        'individual database. The DATABASES setting must configure a '
-        'default database; any number of additional databases may also '
-        'be specified.'
+        'The list of validators that are used to check the strength of '
+        'user\'s passwords.'
     ),
 )
 setting_django_data_upload_max_memory_size = namespace.add_setting(
@@ -137,6 +134,53 @@ setting_django_data_upload_max_memory_size = namespace.add_setting(
         'servers don\'t typically perform deep request inspection, it\'s '
         'not possible to perform a similar check at that level. See also '
         'FILE_UPLOAD_MAX_MEMORY_SIZE.'
+    ),
+)
+setting_django_databases = namespace.add_setting(
+    global_name='DATABASES', default=settings.DATABASES,
+    help_text=_(
+        'A dictionary containing the settings for all databases to be used '
+        'with Django. It is a nested dictionary whose contents map a '
+        'database alias to a dictionary containing the options for an '
+        'individual database. The DATABASES setting must configure a '
+        'default database; any number of additional databases may also '
+        'be specified.'
+    ),
+)
+setting_django_debug = namespace.add_setting(
+    global_name='DEBUG',
+    default=settings.DEBUG,
+    help_text=_(
+        'Default: False. A boolean that turns on/off debug mode. '
+        'Never deploy a site into production with DEBUG turned on. '
+        'One of the main features of debug mode is the display of detailed '
+        'error pages. If your app raises an exception when DEBUG is True, '
+        'Django will display a detailed traceback, including a lot of '
+        'metadata about your environment, such as all the currently defined '
+        'Django settings (from settings.py). '
+        'As a security measure, Django will not include settings that might '
+        'be sensitive, such as SECRET_KEY. Specifically, it will exclude any '
+        'setting whose name includes any of the following: API, KEY, PASS, '
+        'SECRET, SIGNATURE, TOKEN. Note that these are partial matches. '
+        '"PASS" will also match PASSWORD, just as "TOKEN" will also match '
+        'TOKENIZED and so on. Still, note that there are always going to '
+        'be sections of your debug output that are inappropriate for '
+        'public consumption. File paths, configuration options and the '
+        'like all give attackers extra information about your server. '
+        'It is also important to remember that when running with DEBUG '
+        'turned on, Django will remember every SQL query it executes. '
+        'This is useful when you\'re debugging, but it\'ll rapidly consume '
+        'memory on a production server.'
+    ),
+)
+setting_django_default_from_email = namespace.add_setting(
+    global_name='DEFAULT_FROM_EMAIL',
+    default=settings.DEFAULT_FROM_EMAIL,
+    help_text=_(
+        'Default: \'webmaster@localhost\' '
+        'Default email address to use for various automated correspondence '
+        'from the site manager(s). This doesn\'t include error messages sent '
+        'to ADMINS and MANAGERS; for that, see SERVER_EMAIL.'
     ),
 )
 setting_django_disallowed_user_agents = namespace.add_setting(
@@ -192,14 +236,12 @@ setting_django_email_port = namespace.add_setting(
         'Default: 25. Port to use for the SMTP server defined in EMAIL_HOST.'
     ),
 )
-setting_django_email_user_tls = namespace.add_setting(
-    global_name='EMAIL_USE_TLS',
-    default=settings.EMAIL_USE_TLS,
+setting_django_email_timeout = namespace.add_setting(
+    global_name='EMAIL_TIMEOUT',
+    default=settings.EMAIL_TIMEOUT,
     help_text=_(
-        'Default: False. Whether to use a TLS (secure) connection when '
-        'talking to the SMTP server. This is used for explicit TLS '
-        'connections, generally on port 587. If you are experiencing '
-        'hanging connections, see the implicit TLS setting EMAIL_USE_SSL.'
+        'Default: None. Specifies a timeout in seconds for blocking '
+        'operations like the connection attempt.'
     ),
 )
 setting_django_email_user_ssl = namespace.add_setting(
@@ -214,12 +256,14 @@ setting_django_email_user_ssl = namespace.add_setting(
         'are mutually exclusive, so only set one of those settings to True.'
     ),
 )
-setting_django_email_timeout = namespace.add_setting(
-    global_name='EMAIL_TIMEOUT',
-    default=settings.EMAIL_TIMEOUT,
+setting_django_email_user_tls = namespace.add_setting(
+    global_name='EMAIL_USE_TLS',
+    default=settings.EMAIL_USE_TLS,
     help_text=_(
-        'Default: None. Specifies a timeout in seconds for blocking '
-        'operations like the connection attempt.'
+        'Default: False. Whether to use a TLS (secure) connection when '
+        'talking to the SMTP server. This is used for explicit TLS '
+        'connections, generally on port 587. If you are experiencing '
+        'hanging connections, see the implicit TLS setting EMAIL_USE_SSL.'
     ),
 )
 setting_django_file_upload_max_memory_size = namespace.add_setting(
@@ -250,6 +294,45 @@ setting_django_installed_apps = namespace.add_setting(
         'or a package containing an application.'
     ),
 )
+setting_django_internal_ips = namespace.add_setting(
+    global_name='INTERNAL_IPS',
+    default=settings.INTERNAL_IPS,
+    help_text=_(
+        'A list of IP addresses, as strings, that: Allow the debug() '
+        'context processor to add some variables to the template context. '
+        'Can use the admindocs bookmarklets even if not logged in as a '
+        'staff user. Are marked as "internal" (as opposed to "EXTERNAL") '
+        'in AdminEmailHandler emails.'
+    ),
+)
+setting_django_languages = namespace.add_setting(
+    global_name='LANGUAGES',
+    default=settings.LANGUAGES,
+    help_text=_(
+        'A list of all available languages. The list is a list of '
+        'two-tuples in the format (language code, language name) '
+        'for example, (\'ja\', \'Japanese\'). This specifies which '
+        'languages are available for language selection. '
+        'Generally, the default value should suffice. Only set this '
+        'setting if you want to restrict language selection to a '
+        'subset of the Django-provided languages. '
+    ),
+)
+setting_django_language_code = namespace.add_setting(
+    global_name='LANGUAGE_CODE',
+    default=settings.LANGUAGE_CODE,
+    help_text=_(
+        'A string representing the language code for this installation. '
+        'This should be in standard language ID format. For example, U.S. '
+        'English is "en-us". It serves two purposes: If the locale '
+        'middleware isn\'t in use, it decides which translation is served '
+        'to all users. If the locale middleware is active, it provides a '
+        'fallback language in case the user\'s preferred language can\'t '
+        'be determined or is not supported by the website. It also provides '
+        'the fallback translation when a translation for a given literal '
+        'doesn\'t exist for the user\'s preferred language.'
+    ),
+)
 setting_django_login_url = namespace.add_setting(
     global_name='LOGIN_URL',
     default=settings.LOGIN_URL,
@@ -274,9 +357,63 @@ setting_django_login_redirect_url = namespace.add_setting(
         'have to define the URL in two places (settings and URLconf).'
     ),
 )
+setting_django_static_url = namespace.add_setting(
+    global_name='STATIC_URL',
+    default=settings.STATIC_URL,
+    help_text=_(
+        'URL to use when referring to static files located in STATIC_ROOT. '
+        'Example: "/static/" or "http://static.example.com/" '
+        'If not None, this will be used as the base path for asset '
+        'definitions (the Media class) and the staticfiles app.'
+        'It must end in a slash if set to a non-empty value.'
+    ),
+)
+setting_django_staticfiles_storage = namespace.add_setting(
+    global_name='STATICFILES_STORAGE',
+    default=settings.STATICFILES_STORAGE,
+    help_text=_(
+        'The file storage engine to use when collecting static files with '
+        'the collectstatic management command. A ready-to-use instance of '
+        'the storage backend defined in this setting can be found at '
+        'django.contrib.staticfiles.storage.staticfiles_storage.'
+    ),
+)
+setting_django_time_zone = namespace.add_setting(
+    global_name='TIME_ZONE',
+    default=settings.TIME_ZONE,
+    help_text=_(
+        'A string representing the time zone for this installation. '
+        'Note that this isn\'t necessarily the time zone of the server. '
+        'For example, one server may serve multiple Django-powered sites, '
+        'each with a separate time zone setting.'
+    ),
+)
+setting_django_wsgi_application = namespace.add_setting(
+    global_name='WSGI_APPLICATION',
+    default=settings.WSGI_APPLICATION,
+    help_text=_(
+        'The full Python path of the WSGI application object that Django\'s '
+        'built-in servers (e.g. runserver) will use. The django-admin '
+        'startproject management command will create a simple wsgi.py '
+        'file with an application callable in it, and point this setting '
+        'to that application.'
+    ),
+)
 
 namespace = Namespace(name='celery', label=_('Celery'))
 
+setting_celery_always_eager = namespace.add_setting(
+    global_name='CELERY_ALWAYS_EAGER',
+    default=settings.CELERY_ALWAYS_EAGER,
+    help_text=_(
+        'If this is True, all tasks will be executed locally by blocking '
+        'until the task returns. apply_async() and Task.delay() will return '
+        'an EagerResult instance, which emulates the API and behavior of '
+        'AsyncResult, except the result is already evaluated.'
+        'That is, tasks will be executed locally instead of being sent '
+        'to the queue.'
+    )
+)
 setting_celery_broker_url = namespace.add_setting(
     global_name='BROKER_URL', default=settings.BROKER_URL,
     help_text=_(
