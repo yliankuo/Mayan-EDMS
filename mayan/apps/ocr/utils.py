@@ -13,7 +13,7 @@ def get_document_ocr_content(document):
         try:
             page_content = page.ocr_content.content
         except DocumentPageOCRContent.DoesNotExist:
-            yield ''
+            return
         else:
             yield force_text(page_content)
 

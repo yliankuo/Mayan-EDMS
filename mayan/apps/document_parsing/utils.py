@@ -14,7 +14,7 @@ def get_document_content(document):
         try:
             page_content = page.content.content
         except DocumentPageContent.DoesNotExist:
-            yield ''
+            return
         else:
             yield conditional_escape(force_text(page_content))
 
