@@ -15,6 +15,7 @@ class DocumentAutoParsingTestCase(GenericDocumentTestCase):
     def test_disable_auto_parsing(self):
         self._create_document_type()
         self.document = self.upload_document()
+
         with self.assertRaises(StopIteration):
             next(self.document.latest_version.content())
 
@@ -23,5 +24,5 @@ class DocumentAutoParsingTestCase(GenericDocumentTestCase):
         self._create_document_type()
         self.document = self.upload_document()
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in next(self.document.content())
+            TEST_DOCUMENT_CONTENT in self.document.content
         )
