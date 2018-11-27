@@ -7,7 +7,6 @@ from kombu import Exchange, Queue
 
 from django.apps import apps
 from django.db.models.signals import post_save
-from django.utils.encoding import force_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -42,7 +41,7 @@ from .permissions import (
 )
 from .queues import *  # NOQA
 from .signals import post_document_version_ocr
-from .utils import document_property_ocr_content, get_document_ocr_content
+from .utils import document_property_ocr_content
 
 logger = logging.getLogger(__name__)
 
