@@ -86,11 +86,11 @@ Index by OCR content
 This example indexes documents in a "quarterly report" level if they have the
 fragment “quarterly report” in the OCR text::
 
-    {% if "quarterly report" in document.latest_version.ocr_content|join:" "|lower %}Quarterly reports{% endif %}
+    {% if "quarterly report" in document.ocr_content.lower() %}Quarterly reports{% endif %}
 
 The same applies to text content extracted for the document::
 
-    {% if "quarterly report" in document.latest_version.content|join:" "|lower %}Quarterly reports{% endif %}
+    {% if "quarterly report" in document.content.lower() %}Quarterly reports{% endif %}
 
 
 
