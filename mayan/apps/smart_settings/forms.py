@@ -20,8 +20,6 @@ class SettingForm(forms.Form):
         self.fields['value'].initial = self.setting.serialized_value
 
     def clean(self):
-        quotes = ['"', "'"]
-
         try:
             yaml.safe_load(self.cleaned_data['value'])
         except yaml.YAMLError:

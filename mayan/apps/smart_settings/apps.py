@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from common import (
-    MayanAppConfig, menu_facet, menu_sidebar, menu_setup, menu_object
-)
+from common import MayanAppConfig, menu_facet, menu_setup, menu_object
 from navigation import SourceColumn
 
 from .classes import Namespace, Setting
