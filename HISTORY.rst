@@ -92,6 +92,11 @@
   address. Closes GitLab issue #522.
 - Add support for subfolder scanning to watchfolders. Closes
   GitLab issue #498.
+- Increased the default value of the index mirroring cache timeout
+  from 10 seconds to 5 minutes. Since version 3.1.5, mirror
+  cache invalidation is tied to index updates. This makes the
+  timeout less relevant. The purpose of the cache timeout is
+  now avoid runaway memory usage.
 
 3.1.9 (2018-11-01)
 ==================
