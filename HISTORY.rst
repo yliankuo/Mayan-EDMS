@@ -85,6 +85,9 @@
   to a document's OCR content for indexing and other purposes.
 - Add the 'content' attribute to documents to allow access
   to a document's parsed content for indexing and other purposes.
+- Two new custom password validators added. One ensures
+  passwords have a minimum number of uppercase letters and the
+  other ensures passwords have a minimum amount of numbers.
 
 3.1.9 (2018-11-01)
 ==================
