@@ -136,8 +136,8 @@ Views
 
 The module common.generics provides custom generic class based views to be used.
 The basic views used to create, edit, view and delete objects in Mayan EDMS
-are: SingleObjectCreateView, SingleObjectDetailView, SingleObjectEditView,
-and SingleObjectListView
+are: ``SingleObjectCreateView``, ``SingleObjectDetailView``,
+``SingleObjectEditView``, and ``SingleObjectListView``.
 
 These views handle aspects relating to view permissions, object permissions,
 post action redirection and template context generation.
