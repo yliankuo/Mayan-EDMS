@@ -123,7 +123,10 @@ class Setting(object):
         return sorted(cls._registry.values(), key=lambda x: x.global_name)
 
     @classmethod
-    def save_configuration(cls, path=settings.CONFIGURATION_FILEPATH):
+    def save_configuration(cls, path=None):
+        if not path:
+            path = settings.CONFIGURATION_FILEPATH
+
         try:
             with open(path, 'w') as file_object:
                 file_object.write(cls.dump_data())
@@ -171,6 +174,7 @@ class Setting(object):
                 )
         else:
             self.raw_value = getattr(settings, self.global_name, self.default)
+
         self.yaml = Setting.serialize_value(self.raw_value)
         self.loaded = True
 
