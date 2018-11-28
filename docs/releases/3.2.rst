@@ -77,6 +77,7 @@ Backward incompatible changes
 Bugs fixed or issues closed
 ---------------------------
 
+* :gitlab-issue:`498` Can't scan subdirectories
 * :gitlab-issue:`522` Office 365 SMTP
 * :gitlab-issue:`539` Setting for default email sender is missing
 

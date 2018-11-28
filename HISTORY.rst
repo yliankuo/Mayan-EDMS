@@ -90,6 +90,8 @@
   other ensures passwords have a minimum amount of numbers.
 - Add support to the mailing profiles for specifying a from
   address. Closes GitLab issue #522.
+- Add support for subfolder scanning to watchfolders. Closes
+  GitLab issue #498.
 
 3.1.9 (2018-11-01)
 ==================
