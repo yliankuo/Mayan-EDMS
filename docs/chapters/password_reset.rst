@@ -15,6 +15,7 @@ via the :ref:`configuration file <configuration_file>`.
 
 Example::
 
+    DEFAULT_FROM_EMAIL: '<your administrator email>'
     EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
     EMAIL_HOST: '<your smtp ip address or hostname>'
     EMAIL_HOST_PASSWORD: '<your smtp password>'

@@ -37,6 +37,7 @@ http://yaml.org/). Here is an example of what the looks like::
 
     DOCUMENT_PARSING_AUTO_PARSING: true
     DOCUMENT_PARSING_PDFTOTEXT_PATH: /usr/bin/pdftotext
+    DEFAUL_FROM_EMAIL: mayan.admin@example.com
     EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
     EMAIL_HOST: localhost
     EMAIL_HOST_PASSWORD: ''
