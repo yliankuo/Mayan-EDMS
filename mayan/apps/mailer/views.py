@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -243,7 +244,21 @@ class UserMailerTestView(FormView):
     object_permission = permission_user_mailer_edit
 
     def form_valid(self, form):
-        self.get_object().test(to=form.cleaned_data['email'])
+        obj = self.get_object()
+
+        # Separate getting the object from executing the test method to avoid
+        # catching PermissionDenied exception.
+        try:
+            obj.test(to=form.cleaned_data['email'])
+        except Exception as exception:
+            messages.error(
+                self.request, _('Error sending test message; %s.') % exception
+            )
+        else:
+            messages.success(
+                self.request, _('Successfully sent test message.')
+            )
+
         return super(UserMailerTestView, self).form_valid(form=form)
 
     def get_extra_context(self):
