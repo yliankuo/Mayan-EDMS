@@ -447,13 +447,28 @@ Version numbering
 =================
 
 Mayan EDMS uses the Semantic Versioning (http://semver.org/) method to choose
-version numbers along with Python's PEP-0440 (https://www.python.org/dev/peps/pep-0440/)
-to format them.
+version numbers along with Python's PEP-0440
+(https://www.python.org/dev/peps/pep-0440/) to format them.
 
-X.YaN   # Alpha release
-X.YbN   # Beta release
-X.YrcN  # Release Candidate
-X.Y     # Final release
++----------------+-------------------+-----------------------------------------+
+| Version number | Name              | Description                             |
++================+===================+=========================================+
+| X.YalphaN      | Alpha release     | Usable but unstable, API changes.       |
++----------------+-------------------+-----------------------------------------+
+| X.YbetaN       | Beta release      | Code is frozen, testing.                |
++----------------+-------------------+-----------------------------------------+
+| X.YrcN         | Release Candidate | Almost ready for production, not major  |
+|                |                   | changes between this version and the    |
+|                |                   | final release.                          |
++----------------+-------------------+-----------------------------------------+
+| X.Y            | Final release     | API changes, many backward incompatible |
+|                |                   | changes.                                |
++----------------+-------------------+-----------------------------------------+
+| X.Y+1          | Minor release     | Minor changes, minor backwards          |
+|                |                   | incompatible changes                    |
++----------------+-------------------+-----------------------------------------+
+| X.Y.Z          | Micro release     | Minor changes, bugfixes.                |
++----------------+-------------------+-----------------------------------------+
 
 
 Release checklist
