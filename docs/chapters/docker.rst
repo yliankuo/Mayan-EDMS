@@ -1,118 +1,10 @@
-============
+************
 Docker image
-============
+************
 
-How to use this image
-=====================
-
-.. _docker_install:
-
-Start a Mayan EDMS image
-------------------------
-
-With Docker properly installed, proceed to download the Mayan EDMS image using the command::
-
-    docker pull mayanedms/mayanedms:<version>
-
-Then download version 9.5 of the Docker PostgreSQL image::
-
-    docker pull postgres:9.5
-
-Create and run a PostgreSQL container::
-
-    docker run -d \
-    --name mayan-edms-postgres \
-    --restart=always \
-    -p 5432:5432 \
-    -e POSTGRES_USER=mayan \
-    -e POSTGRES_DB=mayan \
-    -e POSTGRES_PASSWORD=mayanuserpass \
-    -v /docker-volumes/mayan-edms/postgres:/var/lib/postgresql/data \
-    -d postgres:9.5
-
-The PostgreSQL container will have one database named ``mayan``, with an user
-named ``mayan`` too, with a password of ``mayanuserpass``. The container will
-expose its internal 5432 port (PostgreSQL's default port) via the host's
-5432 port. The data of this container will reside on the host's
-``/docker-volumes/mayan-edms/postgres`` folder.
-
-Finally create and run a Mayan EDMS container. Change <version> with the
-latest version in numeric form (example: 2.7.3) or use the ``latest``
-identifier::
-
-    docker run -d \
-    --name mayan-edms \
-    --restart=always \
-    -p 80:8000 \
-    -e MAYAN_DATABASE_ENGINE=django.db.backends.postgresql \
-    -e MAYAN_DATABASE_HOST=172.17.0.1 \
-    -e MAYAN_DATABASE_NAME=mayan \
-    -e MAYAN_DATABASE_PASSWORD=mayanuserpass \
-    -e MAYAN_DATABASE_USER=mayan \
-    -e MAYAN_DATABASE_CONN_MAX_AGE=60 \
-    -v /docker-volumes/mayan-edms/media:/var/lib/mayan \
-    mayanedms/mayanedms:<version>
-
-The Mayan EDMS container will connect to the PostgreSQL container via the
-``172.17.0.1`` IP address (the Docker host's default IP address). It will
-connect using the ``django.db.backends.postgresql`` database driver and
-connect to the ``mayan`` database using the ``mayan`` user with the password
-``mayanuserpass``. The container will keep connections to the database
-for up to 60 seconds in an attempt to reuse them increasing response time
-and reducing memory usage. The files of the container will be store in the
-host's ``/docker-volumes/mayan-edms/media`` folder. The container will
-expose its web service running on port 8000 on the host's port 80.
-
-The container will be available by browsing to ``http://localhost`` or to
-the IP address of the computer running the container.
-
-If another web server is running on port 80 use a different port in the
-``-p`` option. For example: ``-p 81:8000``.
-
-
-Using a dedicated Docker network
---------------------------------
-Use this method to avoid having to expose PostreSQL port to the host's network
-or if you have other PostgreSQL instances but still want to use the default
-port of 5432 for this installation.
-
-Create the network::
-
-    docker network create mayan
-
-Launch the PostgreSQL container with the network option and remove the port
-binding (``-p 5432:5432``)::
-
-    docker run -d \
-    --name mayan-edms-postgres \
-    --network=mayan \
-    --restart=always \
-    -e POSTGRES_USER=mayan \
-    -e POSTGRES_DB=mayan \
-    -e POSTGRES_PASSWORD=mayanuserpass \
-    -v /docker-volumes/mayan-edms/postgres:/var/lib/postgresql/data \
-    -d postgres:9.5
-
-Launch the Mayan EDMS container with the network option and change the
-database hostname to the PostgreSQL container name (``mayan-edms-postgres``)
-instead of the IP address of the Docker host (``172.17.0.1``)::
-
-    docker run -d \
-    --name mayan-edms \
-    --network=mayan \
-    --restart=always \
-    -p 80:8000 \
-    -e MAYAN_DATABASE_ENGINE=django.db.backends.postgresql \
-    -e MAYAN_DATABASE_HOST=mayan-edms-postgres \
-    -e MAYAN_DATABASE_NAME=mayan \
-    -e MAYAN_DATABASE_PASSWORD=mayanuserpass \
-    -e MAYAN_DATABASE_USER=mayan \
-    -e MAYAN_DATABASE_CONN_MAX_AGE=60 \
-    -v /docker-volumes/mayan-edms/media:/var/lib/mayan \
-    mayanedms/mayanedms:<version>
 
 Stopping and starting the container
------------------------------------
+===================================
 
 To stop the container use::
 
@@ -127,9 +19,11 @@ To start the container again::
 .. _docker_environment_variables:
 
 Environment Variables
----------------------
+=====================
 
-The Mayan EDMS image can be configure via environment variables.
+In addition to the all the environment variables supported by Mayan EDMS, the
+Mayan EDMS image provides some additional variables to configure the Docker
+specifics of the image.
 
 ``MAYAN_DATABASE_ENGINE``
 
@@ -144,27 +38,6 @@ supported by this Docker image are:
 When using the SQLite backend, the database file will be saved in the Docker
 volume. The SQLite database as used by Mayan EDMS is meant only for development
 or testing, never use it in production.
-
-``MAYAN_DATABASE_NAME``
-
-Defaults to 'mayan'. This optional environment variable can be used to define
-the database name that Mayan EDMS will connect to. For more information read
-the pertinent Django documentation page:
-:django-docs:`Connecting to the database <ref/databases/#connecting-to-the-database>`
-
-``MAYAN_DATABASE_USER``
-
-Defaults to 'mayan'. This optional environment variable is used to set the
-username that will be used to connect to the database. For more information
-read the pertinent Django documentation page:
-:django-docs:`Settings, USER <ref/settings/#user>`
-
-``MAYAN_DATABASE_PASSWORD``
-
-Defaults to ''. This optional environment variable is used to set the
-password that will be used to connect to the database. For more information
-read the pertinent Django documentation page:
-:django-docs:`Settings, PASSWORD <ref/settings/#password>`
 
 ``MAYAN_DATABASE_HOST``
 
@@ -215,12 +88,6 @@ be disabled.
 
 Optional. Allows loading an alternate settings file.
 
-``MAYAN_DATABASE_CONN_MAX_AGE``
-
-Amount in seconds to keep a database connection alive. Allow reuse of database
-connections. For more information read the pertinent Django documentation
-page: :django-docs:`Settings, CONN_MAX_AGE <ref/settings/#conn-max-age>`
-
 ``MAYAN_GUNICORN_WORKERS``
 
 Optional. This environment variable controls the number of frontend workers
@@ -251,6 +118,7 @@ worker consuming the queues in the slow (high latency, very long running tasks)
 category. Default is 1. Use 0 to disable hardcoded concurrency and allow the
 Celery worker to launch its default number of child processes (equal to the
 number of CPUs detected).
+
 
 Accessing outside data
 ======================
@@ -297,12 +165,14 @@ too need to be backed up using their respective procedures. A simple solution
 is to copy the entire database container volume after the container has
 been stopped.
 
+
 Restoring from a backup
 =======================
 
 Uncompress the backup archive in the original docker volume using::
 
     sudo tar -xvzf backup.tar.gz -C /
+
 
 Upgrading
 =========
@@ -333,6 +203,7 @@ Start the container again with the new image version::
 
     docker run -d --name mayan-edms --restart=always -p 80:8000 -v /docker-volumes/mayan:/var/lib/mayan mayanedms/mayanedms:latest
 
+
 Building the image
 ==================
 
@@ -355,8 +226,10 @@ Or using an apt cacher to speed up the build::
 Replace the IP address `172.17.0.1` with the IP address of the computer
 running the APT proxy and caching service.
 
+
 Customizing the image
 =====================
+
 
 Simple method
 -------------
@@ -378,6 +251,7 @@ and Spanish add the following in your ``docker start`` command line::
 Specifies a list of Python packages to be installed via ``pip``. Packages will
 be downloaded from the Python Package Index (https://pypi.python.org) by
 default.
+
 
 Using Docker compose
 ====================

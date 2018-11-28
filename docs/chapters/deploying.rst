@@ -73,9 +73,8 @@ Initialize the project:
 -----------------------
 ::
 
-    sudo -u mayan MAYAN_DATABASE_ENGINE=django.db.backends.postgresql MAYAN_DATABASE_NAME=mayan \
-    MAYAN_DATABASE_PASSWORD=mayanuserpass MAYAN_DATABASE_USER=mayan \
-    MAYAN_DATABASE_HOST=127.0.0.1 MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
+    sudo -u mayan MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}' \
+    MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
     /opt/mayan-edms/bin/mayan-edms.py initialsetup
 
 Collect the static files:
@@ -96,12 +95,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
         MAYAN_BROKER_URL="redis://127.0.0.1:6379/0",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
-        MAYAN_DATABASE_ENGINE=django.db.backends.postgresql,
-        MAYAN_DATABASE_HOST=127.0.0.1,
-        MAYAN_DATABASE_NAME=mayan,
-        MAYAN_DATABASE_PASSWORD=mayanuserpass,
-        MAYAN_DATABASE_USER=mayan,
-        MAYAN_DATABASE_CONN_MAX_AGE=60,
+        MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}',
         DJANGO_SETTINGS_MODULE=mayan.settings.production
 
     [program:mayan-gunicorn]
@@ -240,9 +234,8 @@ Initialize the project:
 -----------------------
 ::
 
-    sudo -u mayan MAYAN_DATABASE_ENGINE=django.db.backends.postgresql MAYAN_DATABASE_NAME=mayan \
-    MAYAN_DATABASE_PASSWORD=mayanuserpass MAYAN_DATABASE_USER=mayan \
-    MAYAN_DATABASE_HOST=127.0.0.1 MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
+    sudo -u mayan MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}' \
+    MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
     /opt/mayan-edms/bin/mayan-edms.py initialsetup
 
 Collect the static files:
@@ -271,12 +264,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
         MAYAN_BROKER_URL="amqp://mayan:mayanrabbitmqpassword@localhost:5672/mayan",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
-        MAYAN_DATABASE_ENGINE=django.db.backends.postgresql,
-        MAYAN_DATABASE_HOST=127.0.0.1,
-        MAYAN_DATABASE_NAME=mayan,
-        MAYAN_DATABASE_PASSWORD=mayanuserpass,
-        MAYAN_DATABASE_USER=mayan,
-        MAYAN_DATABASE_CONN_MAX_AGE=360,
+        MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}',
         DJANGO_SETTINGS_MODULE=mayan.settings.production
 
     [program:mayan-gunicorn]
@@ -344,6 +332,36 @@ Enable and restart the services [1_]:
 
     systemctl enable supervisor
     systemctl restart supervisor
+
+
+Troubleshooting
+===============
+
+- Due to OS differences some binaries might reside in different locations.
+  Use environment variables or the configuration file to tell Mayan EDMS where
+  to file these binaries.
+
+  Example: OpenBSD. Add the following entries to supervisor configuration files.
+  ::
+
+      MAYAN_DOCUMENT_PARSING_PDFTOTEXT_PATH=/usr/local/bin/pdftotext,
+      MAYAN_SIGNATURES_GPG_PATH=/usr/local/bin/gpg,
+      MAYAN_SOURCES_SCANIMAGE_PATH: /usr/local/bin/scanimage,
+
+  Alternatively a symlink from the actual binary location to where Mayan
+  EDMS is expecting them to be found by default also works for some users::
+
+      ln -s /usr/local/bin/gpg /usr/bin/gpg1
+
+  Example 2: Ubuntu 16.04. Add the following entries to supervisor
+  configuration files.
+  ::
+
+      MAYAN_SIGNATURES_GPG_PATH=/usr/bin/gpg1,
+
+  Or add a symlink::
+
+      ln -s /usr/bin/gpg /usr/bin/gpg1
 
 [1]: https://bugs.launchpad.net/ubuntu/+source/supervisor/+bug/1594740
 

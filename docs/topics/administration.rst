@@ -9,3 +9,4 @@ Administration
 .. include:: ../chapters/backups.rst
 .. include:: ../chapters/scaling_up.rst
 .. include:: ../chapters/database_conversion.rst
+.. include:: ../chapters/docker.rst
