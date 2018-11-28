@@ -12,10 +12,10 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_EMAIL_ADDRESS, TEST_USER_MAILER_BACKEND_PATH, TEST_USER_MAILER_LABEL,
-    TEST_RECIPIENTS_MULTIPLE_COMMA, TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT,
-    TEST_RECIPIENTS_MULTIPLE_MIXED, TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT,
-    TEST_RECIPIENTS_MULTIPLE_SEMICOLON,
+    TEST_EMAIL_ADDRESS, TEST_EMAIL_FROM_ADDRESS, TEST_USER_MAILER_BACKEND_PATH,
+    TEST_USER_MAILER_LABEL, TEST_RECIPIENTS_MULTIPLE_COMMA,
+    TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT, TEST_RECIPIENTS_MULTIPLE_MIXED,
+    TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT, TEST_RECIPIENTS_MULTIPLE_SEMICOLON,
     TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT
 )
 from .mailers import TestBackend
@@ -90,6 +90,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_link_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(mail.outbox[0].to, [TEST_EMAIL_ADDRESS])
 
     def test_mail_document_view_no_permissions(self):
@@ -111,6 +112,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(mail.outbox[0].to, [TEST_EMAIL_ADDRESS])
 
     def test_user_mailer_create_view_no_permissions(self):
@@ -206,6 +208,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(mail.outbox[0].to, [TEST_EMAIL_ADDRESS])
 
     def test_send_multiple_recipients_comma(self):
@@ -220,6 +223,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         response = self._request_user_mailer_test()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT
         )
@@ -236,6 +240,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         response = self._request_user_mailer_test()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT
         )
@@ -252,6 +257,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         response = self._request_user_mailer_test()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT
         )
@@ -267,6 +273,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_link_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT
         )
@@ -282,6 +289,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_link_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT
         )
@@ -297,6 +305,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_link_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT
         )
@@ -312,6 +321,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT
         )
@@ -327,6 +337,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT
         )
@@ -342,6 +353,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         self._request_document_send()
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
         self.assertEqual(
             mail.outbox[0].to, TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT
         )

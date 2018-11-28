@@ -88,6 +88,8 @@
 - Two new custom password validators added. One ensures
   passwords have a minimum number of uppercase letters and the
   other ensures passwords have a minimum amount of numbers.
+- Add support to the mailing profiles for specifying a from
+  address. Closes GitLab issue #522.
 
 3.1.9 (2018-11-01)
 ==================
