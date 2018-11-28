@@ -73,7 +73,7 @@ Initialize the project:
 -----------------------
 ::
 
-    sudo -u mayan MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}' \
+    sudo -u mayan MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}}' \
     MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
     /opt/mayan-edms/bin/mayan-edms.py initialsetup
 
@@ -95,7 +95,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
         MAYAN_BROKER_URL="redis://127.0.0.1:6379/0",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
-        MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}',
+        MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}',
         DJANGO_SETTINGS_MODULE=mayan.settings.production
 
     [program:mayan-gunicorn]
@@ -234,7 +234,7 @@ Initialize the project:
 -----------------------
 ::
 
-    sudo -u mayan MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}' \
+    sudo -u mayan MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, HOST=127.0.0.1}}' \
     MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
     /opt/mayan-edms/bin/mayan-edms.py initialsetup
 
@@ -264,7 +264,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
         MAYAN_BROKER_URL="amqp://mayan:mayanrabbitmqpassword@localhost:5672/mayan",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
-        MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}',
+        MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}',
         DJANGO_SETTINGS_MODULE=mayan.settings.production
 
     [program:mayan-gunicorn]

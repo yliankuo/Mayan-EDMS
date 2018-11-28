@@ -51,7 +51,7 @@ identifier::
     --name mayan-edms \
     --restart=always \
     -p 80:8000 \
-    -e MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: 172.17.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}' \
+    -e MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: 172.17.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}' \
     -v /docker-volumes/mayan-edms/media:/var/lib/mayan \
     mayanedms/mayanedms:<version>
 
@@ -104,6 +104,6 @@ instead of the IP address of the Docker host (``172.17.0.1``)::
     --network=mayan \
     --restart=always \
     -p 80:8000 \
-    -e MAYAN_DATABASES='{ENGINE: django.db.backends.postgresql, HOST: mayan-edms-postgres, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}' \
+    -e MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: mayan-edms-postgres, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}' \
     -v /docker-volumes/mayan-edms/media:/var/lib/mayan \
     mayanedms/mayanedms:<version>
