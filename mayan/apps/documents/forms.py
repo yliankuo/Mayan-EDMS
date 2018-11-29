@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentPageForm(forms.Form):
+    document_page = DocumentPageField()
+
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop('instance', None)
         rotation = kwargs.pop('rotation', None)
@@ -37,26 +39,24 @@ class DocumentPageForm(forms.Form):
             'rotation': rotation,
         })
 
-    document_page = DocumentPageField()
-
 
 # Document forms
 class DocumentPreviewForm(forms.Form):
+    document = DocumentField()
+
     def __init__(self, *args, **kwargs):
         document = kwargs.pop('instance', None)
         super(DocumentPreviewForm, self).__init__(*args, **kwargs)
         self.fields['document'].initial = document
 
-    document = DocumentField()
-
 
 class DocumentVersionPreviewForm(forms.Form):
+    document_version = DocumentVersionField()
+
     def __init__(self, *args, **kwargs):
         document_version = kwargs.pop('instance', None)
         super(DocumentVersionPreviewForm, self).__init__(*args, **kwargs)
         self.fields['document_version'].initial = document_version
-
-    document_version = DocumentVersionField()
 
 
 class DocumentForm(forms.ModelForm):
