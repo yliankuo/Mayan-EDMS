@@ -23,8 +23,8 @@ from .views import (
     SetupWorkflowTransitionEditView,
     SetupWorkflowTransitionTriggerEventListView, ToolLaunchAllWorkflows,
     WorkflowDocumentListView, WorkflowInstanceDetailView,
-    WorkflowImageView, WorkflowInstanceTransitionView, WorkflowListView,
-    WorkflowPreviewView, WorkflowStateDocumentListView, WorkflowStateListView,
+    WorkflowInstanceTransitionView, WorkflowListView, WorkflowPreviewView,
+    WorkflowStateDocumentListView, WorkflowStateListView,
 )
 
 urlpatterns = [
@@ -165,11 +165,6 @@ urlpatterns = [
         r'^(?P<pk>\d+)/states/$',
         WorkflowStateListView.as_view(),
         name='workflow_state_list'
-    ),
-    url(
-        r'^(?P<pk>\d+)/image/$',
-        WorkflowImageView.as_view(),
-        name='workflow_image'
     ),
     url(
         r'^(?P<pk>\d+)/preview/$',

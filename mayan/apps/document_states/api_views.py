@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.cache import cache_control, patch_cache_control
 
 from rest_framework import generics
 
@@ -24,6 +25,7 @@ from .serializers import (
     WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
     WritableWorkflowTransitionSerializer
 )
+from .settings import settings_workflow_image_cache_time
 from .storages import storage_workflowimagecache
 from .tasks import task_generate_workflow_image
 
@@ -243,6 +245,7 @@ class APIWorkflowImageView(generics.RetrieveAPIView):
     def get_serializer_class(self):
         return None
 
+    @cache_control(private=True)
     def retrieve(self, request, *args, **kwargs):
         task = task_generate_workflow_image.apply_async(
             kwargs=dict(
@@ -253,6 +256,11 @@ class APIWorkflowImageView(generics.RetrieveAPIView):
         cache_filename = task.get(timeout=WORKFLOW_IMAGE_TASK_TIMEOUT)
         with storage_workflowimagecache.open(cache_filename) as file_object:
             response = HttpResponse(file_object.read(), content_type='image')
+            if '_hash' in request.GET:
+                patch_cache_control(
+                    response,
+                    max_age=settings_workflow_image_cache_time.value
+                )
             return response
 
 

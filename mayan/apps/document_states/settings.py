@@ -9,6 +9,13 @@ from smart_settings import Namespace
 
 namespace = Namespace(name='document_states', label=_('Workflows'))
 
+settings_workflow_image_cache_time = namespace.add_setting(
+    global_name='WORKFLOWS_IMAGE_CACHE_TIME', default='31556926',
+    help_text=_(
+        'Time in seconds that the browser should cache the supplied workflow '
+        'images. The default of 31559626 seconds corresponde to 1 year.'
+    )
+)
 setting_workflowimagecache_storage = namespace.add_setting(
     global_name='WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND',
     default='django.core.files.storage.FileSystemStorage', help_text=_(

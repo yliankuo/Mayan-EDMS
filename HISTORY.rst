@@ -100,6 +100,10 @@
 - Refactored the workflow preview generation to work as an
   background task API service. Solves GitLab issue #532.
   A new task queue named "document_states_fast" was created.
+  The settings WORKFLOWS_IMAGE_CACHE_TIME,
+  WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND,
+  WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND_ARGUMENTS we added.
+
 
 3.1.9 (2018-11-01)
 ==================

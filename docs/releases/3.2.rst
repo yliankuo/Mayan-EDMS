@@ -80,6 +80,7 @@ Bugs fixed or issues closed
 * :gitlab-issue:`487` gnupg1 Issue with Ubuntu 16.04 - Could not show/view documents
 * :gitlab-issue:`498` Can't scan subdirectories
 * :gitlab-issue:`522` Office 365 SMTP
+* :gitlab-issue:`532` Workflow preview isn't updated right after transitions are modified
 * :gitlab-issue:`539` Setting for default email sender is missing
 
 

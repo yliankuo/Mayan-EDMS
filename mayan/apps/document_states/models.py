@@ -1,11 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
+import hashlib
 import json
 import logging
 
+from furl import furl
 from graphviz import Digraph
 
 from django.conf import settings
+from django.core import serializers
 from django.core.files.base import ContentFile
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, models
@@ -65,7 +68,7 @@ class Workflow(models.Model):
         return self.label
 
     def generate_image(self):
-        cache_filename = '{}'.format(self.id)
+        cache_filename = '{}-{}'.format(self.id, self.get_hash())
         image = self.render()
 
         # Since open "wb+" doesn't create files, check if the file
@@ -80,8 +83,29 @@ class Workflow(models.Model):
 
         return cache_filename
 
+    def get_api_image_url(self, *args, **kwargs):
+        final_url = furl()
+        final_url.args = kwargs
+        final_url.path = reverse('rest_api:workflow-image', args=(self.pk,))
+        final_url.args['_hash'] = self.get_hash()
+
+        return final_url.tostr()
+
     def get_document_types_not_in_workflow(self):
         return DocumentType.objects.exclude(pk__in=self.document_types.all())
+
+    def get_hash(self):
+        objects_lists = list(
+            Workflow.objects.filter(pk=self.pk)
+        ) + list(
+            WorkflowState.objects.filter(workflow__pk=self.pk)
+        ) + list(
+            WorkflowTransition.objects.filter(workflow__pk=self.pk)
+        )
+
+        return hashlib.sha256(
+            serializers.serialize('json', objects_lists)
+        ).hexdigest()
 
     def get_initial_state(self):
         try:
