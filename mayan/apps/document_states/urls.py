@@ -4,9 +4,10 @@ from django.conf.urls import url
 
 from .api_views import (
     APIDocumentTypeWorkflowListView, APIWorkflowDocumentTypeList,
-    APIWorkflowDocumentTypeView, APIWorkflowInstanceListView,
-    APIWorkflowInstanceView, APIWorkflowInstanceLogEntryListView,
-    APIWorkflowListView, APIWorkflowStateListView, APIWorkflowStateView,
+    APIWorkflowDocumentTypeView, APIWorkflowImageView,
+    APIWorkflowInstanceListView, APIWorkflowInstanceView,
+    APIWorkflowInstanceLogEntryListView, APIWorkflowListView,
+    APIWorkflowStateListView, APIWorkflowStateView,
     APIWorkflowTransitionListView, APIWorkflowTransitionView, APIWorkflowView
 )
 from .views import (
@@ -187,6 +188,10 @@ api_urls = [
     url(
         r'^workflows/(?P<pk>[0-9]+)/$', APIWorkflowView.as_view(),
         name='workflow-detail'
+    ),
+    url(
+        r'^workflows/(?P<pk>[0-9]+)/image/$',
+        APIWorkflowImageView.as_view(), name='workflow-image'
     ),
     url(
         r'^workflows/(?P<pk>[0-9]+)/document_types/$',

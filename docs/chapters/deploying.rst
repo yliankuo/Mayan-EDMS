@@ -107,7 +107,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-fast]
     autorestart = true
     autostart = true
-    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,sources_fast -n mayan-worker-fast.%%h --concurrency=1
+    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -276,7 +276,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-fast]
     autorestart = true
     autostart = true
-    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,sources_fast -n mayan-worker-fast.%%h
+    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h
     killasgroup = true
     numprocs = 1
     priority = 998

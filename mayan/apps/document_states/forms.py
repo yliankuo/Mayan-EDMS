@@ -178,7 +178,7 @@ class WorkflowInstanceTransitionForm(forms.Form):
 
 
 class WorkflowPreviewForm(forms.Form):
-    preview = forms.CharField(widget=WorkflowImageWidget())
+    preview = forms.IntegerField(widget=WorkflowImageWidget())
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.pop('instance', None)

@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
@@ -10,6 +11,7 @@ from documents.permissions import permission_document_type_view
 from rest_api.filters import MayanObjectPermissionsFilter
 from rest_api.permissions import MayanPermission
 
+from .literals import WORKFLOW_IMAGE_TASK_TIMEOUT
 from .models import Workflow
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
@@ -22,6 +24,8 @@ from .serializers import (
     WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
     WritableWorkflowTransitionSerializer
 )
+from .storages import storage_workflowimagecache
+from .tasks import task_generate_workflow_image
 
 
 class APIDocumentTypeWorkflowListView(generics.ListAPIView):
@@ -221,6 +225,35 @@ class APIWorkflowView(generics.RetrieveUpdateDestroyAPIView):
             return WorkflowSerializer
         else:
             return WritableWorkflowSerializer
+
+
+class APIWorkflowImageView(generics.RetrieveAPIView):
+    """
+    get: Returns an image representation of the selected workflow.
+    """
+    filter_backends = (MayanObjectPermissionsFilter,)
+    mayan_object_permissions = {
+        'GET': (permission_workflow_view,),
+    }
+    queryset = Workflow.objects.all()
+
+    def get_serializer(self, *args, **kwargs):
+        return None
+
+    def get_serializer_class(self):
+        return None
+
+    def retrieve(self, request, *args, **kwargs):
+        task = task_generate_workflow_image.apply_async(
+            kwargs=dict(
+                document_state_id=self.get_object().pk,
+            )
+        )
+
+        cache_filename = task.get(timeout=WORKFLOW_IMAGE_TASK_TIMEOUT)
+        with storage_workflowimagecache.open(cache_filename) as file_object:
+            response = HttpResponse(file_object.read(), content_type='image')
+            return response
 
 
 # Workflow state views

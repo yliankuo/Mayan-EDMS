@@ -248,11 +248,22 @@ class DocumentStatesApp(MayanAppConfig):
                 ),
             )
         )
+        app.conf.CELERY_QUEUES.extend(
+            (
+                Queue(
+                    'document_states_fast', Exchange('document_states_fast'),
+                    routing_key='document_states_fast'
+                ),
+            )
+        )
 
         app.conf.CELERY_ROUTES.update(
             {
-                'document_states.tasks.task_launch_all_workflows': {
+                'document_states.tasks.task_generate_document_state_image': {
                     'queue': 'document_states'
+                },
+                'document_states.tasks.task_launch_all_workflows': {
+                    'queue': 'document_states_fast'
                 },
             }
         )

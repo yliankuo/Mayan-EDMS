@@ -97,6 +97,9 @@
   cache invalidation is tied to index updates. This makes the
   timeout less relevant. The purpose of the cache timeout is
   now avoid runaway memory usage.
+- Refactored the workflow preview generation to work as an
+  background task API service. Solves GitLab issue #532.
+  A new task queue named "document_states_fast" was created.
 
 3.1.9 (2018-11-01)
 ==================

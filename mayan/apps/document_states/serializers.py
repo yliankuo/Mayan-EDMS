@@ -174,6 +174,7 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
     document_types_url = serializers.HyperlinkedIdentityField(
         view_name='rest_api:workflow-document-type-list'
     )
+    image_url = serializers.SerializerMethodField()
     states = WorkflowStateSerializer(many=True, required=False)
     transitions = WorkflowTransitionSerializer(many=True, required=False)
 
@@ -182,10 +183,17 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
             'url': {'view_name': 'rest_api:workflow-detail'},
         }
         fields = (
-            'document_types_url', 'id', 'internal_name', 'label', 'states',
-            'transitions', 'url'
+            'document_types_url', 'image_url', 'id', 'internal_name', 'label',
+            'states', 'transitions', 'url'
         )
         model = Workflow
+
+    def get_image_url(self, instance):
+        return reverse(
+            'rest_api:workflow-image', args=(
+                instance.pk,
+            ), request=self.context['request'], format=self.context['format']
+        )
 
 
 class WorkflowInstanceLogEntrySerializer(serializers.ModelSerializer):
