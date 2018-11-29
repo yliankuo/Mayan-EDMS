@@ -8,8 +8,8 @@ from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
 from common import (
-    MayanAppConfig, menu_facet, menu_object, menu_main, menu_multi_item,
-    menu_sidebar
+    MayanAppConfig, menu_facet, menu_list_facet, menu_object, menu_main,
+    menu_multi_item, menu_sidebar
 )
 from common.classes import ModelField
 from documents.search import document_page_search, document_search
@@ -25,9 +25,10 @@ from .events import (
 )
 from .handlers import handler_index_document, handler_tag_pre_delete
 from .links import (
-    link_multiple_documents_attach_tag, link_multiple_documents_tag_remove,
-    link_single_document_multiple_tag_remove, link_tag_attach, link_tag_create,
-    link_tag_delete, link_tag_document_list, link_tag_edit, link_tag_list,
+    link_document_tag_list, link_multiple_documents_attach_tag,
+    link_multiple_documents_tag_remove,
+    link_single_document_multiple_tag_remove, link_tag_attach,
+    link_tag_create, link_tag_delete, link_tag_edit, link_tag_list,
     link_tag_multiple_delete, link_tag_tagged_item_list
 )
 from .menus import menu_tags
@@ -138,13 +139,16 @@ class TagsApp(MayanAppConfig):
         document_search.add_model_field(field='tags__label', label=_('Tags'))
 
         menu_facet.bind_links(
-            links=(link_tag_document_list,), sources=(Document,)
+            links=(link_document_tag_list,), sources=(Document,)
         )
 
-        menu_tags.bind_links(
+        menu_list_facet.bind_links(
             links=(
-                link_tag_list, link_tag_create
-            )
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_tag_tagged_item_list,
+            ),
+            sources=(Tag,)
         )
 
         menu_main.bind_links(links=(menu_tags,), position=98)
@@ -161,10 +165,7 @@ class TagsApp(MayanAppConfig):
         )
         menu_object.bind_links(
             links=(
-                link_tag_tagged_item_list, link_tag_edit, link_acl_list,
-                link_events_for_object,
-                link_object_event_types_user_subcriptions_list,
-                link_tag_delete
+                link_tag_edit, link_tag_delete
             ),
             sources=(Tag,)
         )
@@ -175,6 +176,12 @@ class TagsApp(MayanAppConfig):
                 'tags:single_document_multiple_tag_remove'
             )
         )
+        menu_tags.bind_links(
+            links=(
+                link_tag_list, link_tag_create
+            )
+        )
+
         registry.register(Tag)
 
         # Index update

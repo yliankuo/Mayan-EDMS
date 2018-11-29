@@ -5,8 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from kombu import Exchange, Queue
 
 from common import (
-    MayanAppConfig, MissingItem, menu_object, menu_secondary, menu_sidebar,
-    menu_setup
+    MayanAppConfig, MissingItem, menu_list_facet, menu_object, menu_secondary,
+    menu_sidebar, menu_setup
 )
 from common.signals import post_initial_setup, post_upgrade
 from converter.links import link_transformation_list
@@ -122,10 +122,18 @@ class SourcesApp(MayanAppConfig):
         )
         menu_documents.bind_links(links=(link_document_create_multiple,))
 
+        menu_list_facet.bind_links(
+            links=(
+                link_setup_source_logs, link_transformation_list,
+            ), sources=(
+                POP3Email, IMAPEmail, SaneScanner, StagingFolderSource,
+                WatchFolderSource, WebFormSource
+            )
+        )
+
         menu_object.bind_links(
             links=(
                 link_setup_source_edit, link_setup_source_delete,
-                link_transformation_list, link_setup_source_logs
             ), sources=(
                 POP3Email, IMAPEmail, SaneScanner, StagingFolderSource,
                 WatchFolderSource, WebFormSource

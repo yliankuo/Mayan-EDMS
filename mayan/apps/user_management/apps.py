@@ -8,7 +8,9 @@ from django.utils.translation import ugettext_lazy as _
 from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
-from common import menu_multi_item, menu_object, menu_secondary, menu_setup
+from common import (
+    menu_list_facet, menu_multi_item, menu_object, menu_secondary, menu_setup
+)
 from common.apps import MayanAppConfig
 from common.widgets import TwoStateWidget
 from metadata import MetadataLookup
@@ -109,22 +111,32 @@ class UserManagementApp(MayanAppConfig):
             ).render()
         )
 
+        menu_list_facet.bind_links(
+            links=(
+                link_acl_list, link_group_members,
+            ), sources=(Group,)
+        )
+        menu_list_facet.bind_links(
+            links=(
+                link_acl_list, link_user_groups
+            ), sources=(User,)
+        )
         menu_multi_item.bind_links(
             links=(link_user_multiple_set_password, link_user_multiple_delete),
             sources=('user_management:user_list',)
         )
         menu_object.bind_links(
-            links=(link_group_edit, link_group_members,),
+            links=(link_group_edit,),
             sources=(Group,)
         )
         menu_object.bind_links(
-            links=(link_acl_list, link_group_delete,), position=99,
+            links=(link_group_delete,), position=99,
             sources=(Group,)
         )
         menu_object.bind_links(
             links=(
-                link_user_edit, link_user_set_password, link_user_groups,
-                link_user_set_options, link_acl_list, link_user_delete
+                link_user_edit, link_user_set_password, link_user_set_options,
+                link_user_delete
             ), sources=(User,)
         )
         menu_secondary.bind_links(

@@ -11,8 +11,9 @@ from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
 from common import (
-    MayanAppConfig, MissingItem, menu_facet, menu_main, menu_object,
-    menu_secondary, menu_setup, menu_sidebar, menu_multi_item, menu_tools
+    MayanAppConfig, MissingItem, menu_facet, menu_list_facet, menu_main,
+    menu_object, menu_secondary, menu_setup, menu_sidebar, menu_multi_item,
+    menu_tools
 )
 from common.classes import ModelField, Template
 from common.dashboards import dashboard_main
@@ -446,12 +447,16 @@ class DocumentsApp(MayanAppConfig):
         )
 
         # Document type links
+        menu_list_facet.bind_links(
+            links=(
+                link_document_type_filename_list,
+                link_acl_list, link_object_event_types_user_subcriptions_list,
+                link_events_for_object,
+            ), sources=(DocumentType,)
+        )
         menu_object.bind_links(
             links=(
-                link_document_type_edit, link_document_type_filename_list,
-                link_acl_list, link_object_event_types_user_subcriptions_list,
-                link_document_type_delete,
-                link_events_for_object,
+                link_document_type_edit, link_document_type_delete,
             ), sources=(DocumentType,)
         )
         menu_object.bind_links(

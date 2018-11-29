@@ -286,6 +286,7 @@ class UserOptionsEditView(SingleObjectEditView):
 
     def get_extra_context(self):
         return {
+            'object': self.get_user(),
             'title': _(
                 'Edit options for user: %s'
             ) % self.get_user()

@@ -9,7 +9,8 @@ from documents.permissions import (
 from navigation import Link
 
 from .icons import (
-    icon_document_create_multiple, icon_setup_sources, icon_source_create
+    icon_document_create_multiple, icon_log, icon_setup_sources,
+    icon_source_create
 )
 from .literals import (
     SOURCE_CHOICE_WEB_FORM, SOURCE_CHOICE_EMAIL_IMAP, SOURCE_CHOICE_EMAIL_POP3,
@@ -111,7 +112,7 @@ link_upload_version = Link(
     text=_('Upload new version'), view='sources:upload_version',
 )
 link_setup_source_logs = Link(
-    args=('resolved_object.pk',),
+    args=('resolved_object.pk',), icon_class=icon_log,
     permissions=(permission_sources_setup_view,), text=_('Logs'),
     view='sources:setup_source_logs',
 )

@@ -8,6 +8,7 @@ icon_index_level_up = Icon(
 )
 icon_index = Icon(driver_name='fontawesome', symbol='list-ul')
 icon_index_create = Icon(driver_name='fontawesome', symbol='plus')
+icon_index_setup_view = Icon(driver_name='fontawesome', symbol='folder-open')
 icon_node_with_documents = Icon(driver_name='fontawesome', symbol='folder')
 icon_rebuild_index_instances = Icon(
     driver_name='fontawesome', symbol='list-ul'

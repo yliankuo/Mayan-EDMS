@@ -2,11 +2,13 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+from documents.icons import icon_document_type
 from documents.permissions import permission_document_type_edit
 from navigation import Link
 
 from .icons import (
-    icon_document_metadata_add, icon_metadata_view, icon_metadata_type_create
+    icon_document_metadata_add, icon_metadata_type, icon_metadata_view,
+    icon_metadata_type_create
 )
 from .permissions import (
     permission_metadata_document_add, permission_metadata_document_edit,
@@ -43,12 +45,14 @@ link_metadata_view = Link(
     view='metadata:metadata_view',
 )
 link_setup_document_type_metadata_types = Link(
-    args='resolved_object.pk', permissions=(permission_document_type_edit,),
-    text=_('Metadata types'), view='metadata:setup_document_type_metadata_types',
+    args='resolved_object.pk', icon_class=icon_metadata_type,
+    permissions=(permission_document_type_edit,), text=_('Metadata types'),
+    view='metadata:setup_document_type_metadata_types',
 )
 link_setup_metadata_type_document_types = Link(
-    args='resolved_object.pk', permissions=(permission_document_type_edit,),
-    text=_('Document types'), view='metadata:setup_metadata_type_document_types',
+    args='resolved_object.pk', icon_class=icon_document_type,
+    permissions=(permission_document_type_edit,), text=_('Document types'),
+    view='metadata:setup_metadata_type_document_types',
 )
 link_setup_metadata_type_create = Link(
     icon_class=icon_metadata_type_create,

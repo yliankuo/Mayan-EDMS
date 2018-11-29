@@ -9,8 +9,8 @@ from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
 from common import (
-    MayanAppConfig, menu_object, menu_multi_item, menu_secondary, menu_setup,
-    menu_tools
+    MayanAppConfig, menu_list_facet, menu_object, menu_multi_item,
+    menu_secondary, menu_setup, menu_tools
 )
 from common.widgets import TwoStateWidget
 from mayan.celery import app
@@ -100,6 +100,12 @@ class MailerApp(MayanAppConfig):
             }
         )
 
+        menu_list_facet.bind_links(
+            links=(
+                link_acl_list, link_user_mailer_log_list,
+            ), sources=(UserMailer,)
+        )
+
         menu_multi_item.bind_links(
             links=(
                 link_send_multiple_document, link_send_multiple_document_link
@@ -114,17 +120,18 @@ class MailerApp(MayanAppConfig):
 
         menu_object.bind_links(
             links=(
-                link_user_mailer_edit, link_user_mailer_log_list,
-                link_user_mailer_test, link_acl_list, link_user_mailer_delete,
+                link_user_mailer_edit, link_user_mailer_test,
+                link_user_mailer_delete,
             ), sources=(UserMailer,)
         )
 
         menu_secondary.bind_links(
             links=(
-                link_user_mailer_list, link_user_mailer_create,
+                link_user_mailer_create, link_user_mailer_list,
             ), sources=(
                 UserMailer, 'mailer:user_mailer_list',
-                'mailer:user_mailer_create'
+                'mailer:user_mailer_backend_selection',
+                'mailer:user_mailer_create',
             )
         )
 

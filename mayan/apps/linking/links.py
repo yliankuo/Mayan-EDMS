@@ -2,12 +2,14 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+from documents.icons import icon_document_type
 from documents.permissions import permission_document_view
 from navigation import Link
 
 from .icons import (
-    icon_smart_link_condition_create, icon_smart_link_create,
-    icon_smart_link_instances_for_document, icon_smart_link_setup
+    icon_smart_link_condition, icon_smart_link_condition_create,
+    icon_smart_link_create, icon_smart_link_instances_for_document,
+    icon_smart_link_setup
 )
 from .permissions import (
     permission_smart_link_create, permission_smart_link_delete,
@@ -29,8 +31,9 @@ link_smart_link_condition_edit = Link(
     text=_('Edit'), view='linking:smart_link_condition_edit',
 )
 link_smart_link_condition_list = Link(
-    args='object.pk', permissions=(permission_smart_link_edit,),
-    text=_('Conditions'), view='linking:smart_link_condition_list',
+    args='object.pk', icon_class=icon_smart_link_condition,
+    permissions=(permission_smart_link_edit,), text=_('Conditions'),
+    view='linking:smart_link_condition_list',
 )
 link_smart_link_create = Link(
     icon_class=icon_smart_link_create,
@@ -42,8 +45,9 @@ link_smart_link_delete = Link(
     tags='dangerous', text=_('Delete'), view='linking:smart_link_delete',
 )
 link_smart_link_document_types = Link(
-    args='object.pk', permissions=(permission_smart_link_edit,),
-    text=_('Document types'), view='linking:smart_link_document_types',
+    args='object.pk', icon_class=icon_document_type,
+    permissions=(permission_smart_link_edit,), text=_('Document types'),
+    view='linking:smart_link_document_types',
 )
 link_smart_link_edit = Link(
     args='object.pk', permissions=(permission_smart_link_edit,),

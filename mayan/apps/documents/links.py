@@ -19,10 +19,10 @@ from .icons import (
     icon_document_page_zoom_out, icon_document_pages, icon_document_preview,
     icon_document_properties, icon_document_type_create,
     icon_document_type_delete, icon_document_type_edit,
-    icon_document_type_filename_create, icon_document_type_setup,
-    icon_document_version_list, icon_document_version_return_document,
-    icon_document_version_return_list, icon_duplicated_document_list,
-    icon_duplicated_document_scan
+    icon_document_type_filename, icon_document_type_filename_create,
+    icon_document_type_setup, icon_document_version_list,
+    icon_document_version_return_document, icon_document_version_return_list,
+    icon_duplicated_document_list, icon_duplicated_document_scan
 )
 from .permissions import (
     permission_document_delete, permission_document_download,
@@ -348,8 +348,9 @@ link_document_type_filename_edit = Link(
     text=_('Edit'), view='documents:document_type_filename_edit',
 )
 link_document_type_filename_list = Link(
-    args='resolved_object.id', permissions=(permission_document_type_view,),
-    text=_('Quick labels'), view='documents:document_type_filename_list',
+    args='resolved_object.id', icon_class=icon_document_type_filename,
+    permissions=(permission_document_type_view,), text=_('Quick labels'),
+    view='documents:document_type_filename_list',
 )
 link_document_type_list = Link(
     permissions=(permission_document_type_view,), text=_('Document types'),

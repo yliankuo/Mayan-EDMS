@@ -5,7 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from navigation import Link
 
 from .icons import (
-    icon_group_create, icon_group_setup, icon_user_create, icon_user_setup
+    icon_group, icon_group_create, icon_group_members, icon_group_setup,
+    icon_user_create, icon_user_setup
 )
 from .permissions import (
     permission_group_create, permission_group_delete, permission_group_edit,
@@ -30,7 +31,8 @@ link_group_list = Link(
     view='user_management:group_list'
 )
 link_group_members = Link(
-    args='object.id', permissions=(permission_group_edit,), text=_('Users'),
+    args='object.id', icon_class=icon_group_members,
+    permissions=(permission_group_edit,), text=_('Users'),
     view='user_management:group_members',
 )
 link_group_setup = Link(
@@ -50,7 +52,8 @@ link_user_edit = Link(
     view='user_management:user_edit',
 )
 link_user_groups = Link(
-    args='object.id', permissions=(permission_user_edit,), text=_('Groups'),
+    args='object.id', icon_class=icon_group,
+    permissions=(permission_user_edit,), text=_('Groups'),
     view='user_management:user_groups',
 )
 link_user_list = Link(

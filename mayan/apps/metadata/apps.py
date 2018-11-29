@@ -12,8 +12,8 @@ from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
 from common import (
-    MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_secondary,
-    menu_setup, menu_sidebar
+    MayanAppConfig, menu_facet, menu_list_facet, menu_multi_item, menu_object,
+    menu_secondary, menu_setup, menu_sidebar
 )
 from common.classes import ModelAttribute, ModelField
 from common.widgets import TwoStateWidget
@@ -201,6 +201,18 @@ class MetadataApp(MayanAppConfig):
         )
 
         menu_facet.bind_links(links=(link_metadata_view,), sources=(Document,))
+        menu_list_facet.bind_links(
+            links=(
+                link_setup_document_type_metadata_types,
+            ), sources=(DocumentType,)
+        )
+        menu_list_facet.bind_links(
+            links=(
+                link_acl_list, link_setup_metadata_type_document_types,
+                link_object_event_types_user_subcriptions_list,
+                link_events_for_object,
+            ), sources=(MetadataType,)
+        )
         menu_multi_item.bind_links(
             links=(
                 link_metadata_multiple_add, link_metadata_multiple_edit,
@@ -209,15 +221,8 @@ class MetadataApp(MayanAppConfig):
         )
         menu_object.bind_links(
             links=(
-                link_setup_document_type_metadata_types,
-            ), sources=(DocumentType,)
-        )
-        menu_object.bind_links(
-            links=(
                 link_setup_metadata_type_edit,
-                link_setup_metadata_type_document_types, link_acl_list,
-                link_object_event_types_user_subcriptions_list,
-                link_events_for_object, link_setup_metadata_type_delete,
+                link_setup_metadata_type_delete,
             ), sources=(MetadataType,)
         )
         menu_secondary.bind_links(

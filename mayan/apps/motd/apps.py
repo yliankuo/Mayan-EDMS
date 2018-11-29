@@ -7,7 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 from acls import ModelPermission
 from acls.links import link_acl_list
 from acls.permissions import permission_acl_edit, permission_acl_view
-from common import MayanAppConfig, menu_object, menu_secondary, menu_setup
+from common import (
+    MayanAppConfig, menu_list_facet, menu_object, menu_secondary, menu_setup
+)
 from navigation import SourceColumn
 
 from .links import (
@@ -51,13 +53,18 @@ class MOTDApp(MayanAppConfig):
             func=lambda context: context['object'].end_datetime or _('None')
         )
 
+        menu_list_facet.bind_links(
+            links=(
+                link_acl_list,
+            ), sources=(Message,)
+        )
         menu_object.bind_links(
             links=(
-                link_message_edit, link_acl_list, link_message_delete
+                link_message_edit, link_message_delete
             ), sources=(Message,)
         )
         menu_secondary.bind_links(
-            links=(link_message_create,),
+            links=(link_message_create, link_message_list),
             sources=(Message, 'motd:message_list', 'motd:message_create')
         )
         menu_setup.bind_links(

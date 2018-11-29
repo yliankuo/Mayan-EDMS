@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+from documents.icons import icon_document_list
 from navigation import Link, get_cascade_condition
 
 from .icons import (
@@ -13,6 +14,11 @@ from .permissions import (
 )
 
 
+link_document_tag_list = Link(
+    args='resolved_object.pk', icon_class=icon_tag_document_list,
+    permissions=(permission_tag_view,), text=_('Tags'),
+    view='tags:document_tags',
+)
 link_multiple_documents_tag_remove = Link(
     text=_('Remove tag'), view='tags:multiple_documents_selection_tag_remove'
 )
@@ -40,11 +46,6 @@ link_tag_edit = Link(
     args='object.id', permissions=(permission_tag_edit,), text=_('Edit'),
     view='tags:tag_edit',
 )
-link_tag_document_list = Link(
-    args='resolved_object.pk', icon_class=icon_tag_document_list,
-    permissions=(permission_tag_view,), text=_('Tags'),
-    view='tags:document_tags',
-)
 link_tag_list = Link(
     condition=get_cascade_condition(
         app_label='tags', model_name='Tag',
@@ -56,5 +57,6 @@ link_tag_multiple_delete = Link(
     view='tags:tag_multiple_delete'
 )
 link_tag_tagged_item_list = Link(
-    args='object.id', text=('Documents'), view='tags:tag_tagged_item_list',
+    args='object.id', icon_class=icon_document_list, text=('Documents'),
+    view='tags:tag_tagged_item_list',
 )

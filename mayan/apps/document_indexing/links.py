@@ -4,9 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from navigation import Link, get_cascade_condition
 
+from documents.icons import icon_document_type
+
 from .icons import (
     icon_document_index_list, icon_index, icon_index_create,
-    icon_rebuild_index_instances,
+    icon_index_setup_view, icon_rebuild_index_instances,
 )
 from .permissions import (
     permission_document_indexing_create, permission_document_indexing_edit,
@@ -58,12 +60,12 @@ link_index_setup_delete = Link(
     text=_('Delete'), view='indexing:index_setup_delete',
 )
 link_index_setup_view = Link(
-    args='resolved_object.pk',
+    args='resolved_object.pk', icon_class=icon_index_setup_view,
     permissions=(permission_document_indexing_edit,), text=_('Tree template'),
     view='indexing:index_setup_view',
 )
 link_index_setup_document_types = Link(
-    args='resolved_object.pk',
+    args='resolved_object.pk', icon_class=icon_document_type,
     permissions=(permission_document_indexing_edit,), text=_('Document types'),
     view='indexing:index_setup_document_types',
 )

@@ -103,6 +103,8 @@
   The settings WORKFLOWS_IMAGE_CACHE_TIME,
   WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND,
   WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND_ARGUMENTS we added.
+- Added new list facet navigation menu. Used to provide facets
+  to the setup menu items.
 
 
 3.1.9 (2018-11-01)

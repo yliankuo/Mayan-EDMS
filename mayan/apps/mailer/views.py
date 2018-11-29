@@ -205,7 +205,7 @@ class UserMailerLogEntryListView(SingleObjectListView):
         return {
             'hide_object': True,
             'object': self.get_user_mailer(),
-            'title': _('%s error log') % self.get_user_mailer(),
+            'title': _('Error log for mailing profile: %s') % self.get_user_mailer(),
         }
 
     def get_object_list(self):

@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from navigation import Link
+from user_management.icons import icon_group
 from user_management.permissions import permission_group_edit
 
-from .icons import icon_role_create, icon_role_list
+from .icons import icon_permission, icon_role_create, icon_role_list
 from .permissions import (
     permission_permission_grant, permission_permission_revoke,
     permission_role_create, permission_role_delete, permission_role_edit,
@@ -13,7 +14,8 @@ from .permissions import (
 )
 
 link_group_roles = Link(
-    args='object.id', permissions=(permission_group_edit,), text=_('Roles'),
+    args='object.id', icon_class=icon_role_list,
+    permissions=(permission_group_edit,), text=_('Roles'),
     view='permissions:group_roles',
 )
 link_permission_grant = Link(
@@ -41,11 +43,12 @@ link_role_list = Link(
     text=_('Roles'), view='permissions:role_list'
 )
 link_role_groups = Link(
-    args='object.id', permissions=(permission_role_edit,), text=_('Groups'),
+    args='object.id', icon_class=icon_group,
+    permissions=(permission_role_edit,), text=_('Groups'),
     view='permissions:role_groups',
 )
 link_role_permissions = Link(
-    args='object.id',
+    args='object.id', icon_class=icon_permission,
     permissions=(permission_permission_grant, permission_permission_revoke),
     text=_('Role permissions'), view='permissions:role_permissions',
 )

@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from common import MayanAppConfig, menu_facet, menu_setup, menu_object
+from common import (
+    MayanAppConfig, menu_facet, menu_list_facet, menu_setup,
+    menu_object, menu_secondary
+)
 from navigation import SourceColumn
 
 from .classes import Namespace, Setting
@@ -41,7 +44,7 @@ class SmartSettingsApp(MayanAppConfig):
             func=lambda context: _('Yes') if context['object'].environment_variable else _('No')
         )
 
-        menu_facet.bind_links(
+        menu_secondary.bind_links(
             links=(link_namespace_root_list,), sources=(
                 Namespace, Setting, 'settings:namespace_list',
             )

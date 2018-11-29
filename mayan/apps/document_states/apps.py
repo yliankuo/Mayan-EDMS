@@ -9,8 +9,8 @@ from kombu import Exchange, Queue
 from acls import ModelPermission
 from acls.links import link_acl_list
 from common import (
-    MayanAppConfig, menu_facet, menu_main, menu_object, menu_secondary,
-    menu_setup, menu_sidebar, menu_tools
+    MayanAppConfig, menu_facet, menu_list_facet, menu_main, menu_object,
+    menu_secondary, menu_setup, menu_sidebar, menu_tools
 )
 from common.classes import ModelAttribute
 from common.links import link_object_error_list
@@ -271,12 +271,17 @@ class DocumentStatesApp(MayanAppConfig):
         menu_facet.bind_links(
             links=(link_document_workflow_instance_list,), sources=(Document,)
         )
+        menu_list_facet.bind_links(
+            links=(
+                link_setup_workflow_document_types,
+                link_setup_workflow_states, link_setup_workflow_transitions,
+                link_workflow_preview, link_acl_list
+            ), sources=(Workflow,)
+        )
         menu_main.bind_links(links=(link_workflow_list,), position=10)
         menu_object.bind_links(
             links=(
-                link_setup_workflow_states, link_setup_workflow_transitions,
-                link_setup_workflow_document_types, link_setup_workflow_edit,
-                link_acl_list, link_workflow_preview,
+                link_setup_workflow_edit,
                 link_setup_workflow_delete
             ), sources=(Workflow,)
         )
@@ -340,9 +345,19 @@ class DocumentStatesApp(MayanAppConfig):
         menu_setup.bind_links(links=(link_setup_workflow_list,))
         menu_sidebar.bind_links(
             links=(
+                link_setup_workflow_transition_create,
+            ), sources=(
+                WorkflowTransition,
+                'document_states:setup_workflow_transition_list',
+            )
+        )
+        menu_sidebar.bind_links(
+            links=(
                 link_setup_workflow_state_create,
-                link_setup_workflow_transition_create
-            ), sources=(Workflow,)
+            ), sources=(
+                WorkflowState,
+                'document_states:setup_workflow_state_list',
+            )
         )
         menu_tools.bind_links(links=(link_tool_launch_all_workflows,))
 

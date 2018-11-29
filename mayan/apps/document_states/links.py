@@ -2,12 +2,14 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+from documents.icons import icon_document_type
 from navigation import Link
 
 from .icons import (
     icon_document_workflow_instance_list, icon_setup_workflow_list,
     icon_tool_launch_all_workflows, icon_workflow_create, icon_workflow_list,
-    icon_workflow_state, icon_workflow_state_action, icon_workflow_transition
+    icon_workflow_preview, icon_workflow_state, icon_workflow_state_action,
+    icon_workflow_transition
 )
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
@@ -30,7 +32,7 @@ link_setup_workflow_delete = Link(
     view='document_states:setup_workflow_delete',
 )
 link_setup_workflow_document_types = Link(
-    args='resolved_object.pk',
+    args='resolved_object.pk', icon_class=icon_document_type,
     permissions=(permission_workflow_edit,), text=_('Document types'),
     view='document_states:setup_workflow_document_types',
 )
@@ -138,6 +140,7 @@ link_workflow_instance_transition_events = Link(
     view='document_states:setup_workflow_transition_events'
 )
 link_workflow_preview = Link(
-    args='resolved_object.pk', permissions=(permission_workflow_view,),
-    text=_('Preview'), view='document_states:workflow_preview'
+    args='resolved_object.pk', icon_class=icon_workflow_preview,
+    permissions=(permission_workflow_view,), text=_('Preview'),
+    view='document_states:workflow_preview'
 )
