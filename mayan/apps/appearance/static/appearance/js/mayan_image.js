@@ -63,6 +63,7 @@ class MayanImage {
     }
 
     load () {
+        var self = this;
         var container = this.element.parent().parent().parent();
         var dataURL = this.element.attr('data-url');
 
@@ -70,17 +71,19 @@ class MayanImage {
             container.html(MayanImage.options.templateInvalidDocument);
         } else {
             this.element.attr('src', dataURL);
-            this.element.on('error', function() {
-                // Check the .complete property to see if it is a real error
-                // or it was a cached image
-                if (this.complete === false) {
-                    // It is a cached image, set the src attribute to trigger
-                    // it's display.
-                    this.src = this.src;
-                } else {
-                    container.html(MayanImage.options.templateInvalidDocument);
-                }
-            });
+            setTimeout(function () {
+                self.element.on('error', function () {
+                    // Check the .complete property to see if it is a real error
+                    // or it was a cached image
+                    if (this.complete === false) {
+                        // It is a cached image, set the src attribute to trigger
+                        // it's display.
+                        this.src = dataURL;
+                    } else {
+                        container.html(MayanImage.options.templateInvalidDocument);
+                    }
+                });
+            }, 1);
         }
     };
 }
