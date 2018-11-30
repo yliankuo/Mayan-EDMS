@@ -7,7 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from smart_settings import Namespace
 
-from .literals import DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_CODES
+from .literals import (
+    DEFAULT_DOCUMENTS_CACHE_MAXIMUM_SIZE, DEFAULT_LANGUAGE, DEFAULT_LANGUAGE_CODES
+)
 
 namespace = Namespace(name='documents', label=_('Documents'))
 
@@ -23,6 +25,15 @@ setting_documentimagecache_storage_arguments = namespace.add_setting(
     default={'location': os.path.join(settings.MEDIA_ROOT, 'document_cache')},
     help_text=_(
         'Arguments to pass to the DOCUMENT_CACHE_STORAGE_BACKEND.'
+    )
+)
+setting_document_cache_maximum_size = namespace.add_setting(
+    global_name='DOCUMENTS_CACHE_MAXIMUM_SIZE',
+    default=DEFAULT_DOCUMENTS_CACHE_MAXIMUM_SIZE,
+    help_text=_(
+        'The threshold at which the DOCUMENT_CACHE_STORAGE_BACKEND will start '
+        'deleting the oldest document image cache files. Specify the size in '
+        'bytes.'
     )
 )
 setting_disable_base_image_cache = namespace.add_setting(

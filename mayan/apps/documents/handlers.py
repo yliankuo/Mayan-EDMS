@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.apps import apps
+from django.utils.translation import ugettext_lazy as _
 
 from .literals import DEFAULT_DOCUMENT_TYPE_LABEL
 from .signals import post_initial_document_type
@@ -19,6 +20,14 @@ def create_default_document_type(sender, **kwargs):
         post_initial_document_type.send(
             sender=DocumentType, instance=document_type
         )
+
+
+def handler_create_document_cache(sender, **kwargs):
+    Cache = apps.get_model(app_label='common', model_name='Cache')
+    Cache.objects.get_or_create(
+        name='document_images', label=_('Document images'),
+        storage_instance_path='documents.storages.storage_documentimagecache'
+    )
 
 
 def handler_scan_duplicates_for(sender, instance, **kwargs):

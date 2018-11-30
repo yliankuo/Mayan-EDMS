@@ -8,7 +8,10 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Sum
 from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.functional import cached_property
+from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
 from .managers import ErrorLogEntryManager, UserLocaleProfileManager
@@ -17,6 +20,67 @@ from .storages import storage_sharedupload
 
 def upload_to(instance, filename):
     return 'shared-file-{}'.format(uuid.uuid4().hex)
+
+
+@python_2_unicode_compatible
+class Cache(models.Model):
+    name = models.CharField(max_length=128, verbose_name=_('Name'))
+    label = models.CharField(max_length=128, verbose_name=_('Label'))
+    maximum_size = models.PositiveIntegerField(verbose_name=_('Maximum size'))
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    storage_instance_path = models.CharField(
+        max_length=255, verbose_name=_('Storage instance path')
+    )
+
+    class Meta:
+        verbose_name = _('Cache')
+        verbose_name_plural = _('Caches')
+
+    def __str__(self):
+        return self.label
+
+    def get_total_size(self):
+        return self.files.aggregate(
+            file_size__sum=Sum('file_size')
+        )['file_size__sum']
+
+    def prune(self):
+        while self.get_total_size() > self.maximum_size:
+            self.files.earliest().delete()
+
+    @cached_property
+    def storage_instance(self):
+        return import_string(self.storage_instance_path)
+
+
+class CacheFile(models.Model):
+    cache = models.ForeignKey(
+        on_delete=models.CASCADE, related_name='files',
+        to=Cache, verbose_name=_('Cache')
+    )
+    datetime = models.DateTimeField(
+        auto_now_add=True, db_index=True, verbose_name=_('Date time')
+    )
+    filename = models.CharField(max_length=128, verbose_name=_('Filename'))
+    file_size = models.PositiveIntegerField(
+        db_index=True, default=0, verbose_name=_('File size')
+    )
+
+    class Meta:
+        get_latest_by = 'datetime'
+        verbose_name = _('Cache file')
+        verbose_name_plural = _('Cache files')
+
+    def delete(self, *args, **kwargs):
+        self.cache.storage_instance.delete(self.filename)
+        return super(CacheFile, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.cache.prune()
+        self.file_size = self.cache.storage_instance.size(self.filename)
+        return super(CacheFile, self).save(*args, **kwargs)
 
 
 class ErrorLogEntry(models.Model):

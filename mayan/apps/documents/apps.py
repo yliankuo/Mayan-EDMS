@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from kombu import Exchange, Queue
 
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_migrate
 from django.utils.translation import ugettext_lazy as _
 
 from acls import ModelPermission
@@ -48,8 +48,8 @@ from .events import (
     event_document_view
 )
 from .handlers import (
-    create_default_document_type, handler_remove_empty_duplicates_lists,
-    handler_scan_duplicates_for,
+    create_default_document_type, handler_create_document_cache,
+    handler_remove_empty_duplicates_lists, handler_scan_duplicates_for,
 )
 from .links import (
     link_clear_image_cache, link_document_clear_transformations,
@@ -590,6 +590,10 @@ class DocumentsApp(MayanAppConfig):
         post_initial_setup.connect(
             create_default_document_type,
             dispatch_uid='create_default_document_type'
+        )
+        post_migrate.connect(
+            dispatch_uid='documents_handler_create_document_cache',
+            receiver=handler_create_document_cache,
         )
         post_version_upload.connect(
             handler_scan_duplicates_for,
