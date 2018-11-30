@@ -36,7 +36,7 @@ def read_configuration_file(path):
                     )
     except IOError as exception:
         if exception.errno == errno.ENOENT:
-            pass
+            return {}
         else:
             raise
 
