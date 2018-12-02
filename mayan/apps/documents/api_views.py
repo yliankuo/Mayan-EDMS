@@ -234,7 +234,8 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
         )
 
         cache_filename = task.get(timeout=DOCUMENT_IMAGE_TASK_TIMEOUT)
-        with storage_documentimagecache.open(cache_filename) as file_object:
+        #with storage_documentimagecache.open(cache_filename) as file_object:
+        with self.get_object().cache_partition.get_file(filename=cache_filename).open() as file_object:
             response = HttpResponse(file_object.read(), content_type='image')
             if '_hash' in request.GET:
                 patch_cache_control(

@@ -7,6 +7,7 @@ import uuid
 
 from furl import furl
 
+from django.apps import apps
 from django.conf import settings
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -14,6 +15,7 @@ from django.db import models, transaction
 from django.template import Template, Context
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext, ugettext_lazy as _
 
@@ -26,6 +28,7 @@ from converter import (
 from converter.exceptions import InvalidOfficeFormat, PageCountError
 from converter.literals import DEFAULT_ZOOM_LEVEL, DEFAULT_ROTATION
 from converter.models import Transformation
+from lock_manager import LockError
 from mimetype.api import get_mimetype
 
 from .events import (
@@ -34,7 +37,9 @@ from .events import (
     event_document_type_created, event_document_type_edited,
     event_document_version_revert
 )
-from .literals import DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT
+from .literals import (
+    DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT, DOCUMENT_IMAGES_CACHE_NAME
+)
 from .managers import (
     DocumentManager, DocumentPageCachedImage, DocumentPageManager,
     DocumentVersionManager, DocumentTypeManager, DuplicatedDocumentManager,
@@ -50,7 +55,7 @@ from .settings import (
 from .signals import (
     post_document_created, post_document_type_change, post_version_upload
 )
-from .storages import storage_documentversion, storage_documentimagecache
+from .storages import storage_documentversion
 
 logger = logging.getLogger(__name__)
 
@@ -472,9 +477,17 @@ class DocumentVersion(models.Model):
     def __str__(self):
         return self.get_rendered_string()
 
-    @property
-    def cache_filename(self):
-        return 'document-version-{}'.format(self.uuid)
+    @cached_property
+    def cache(self):
+        Cache = apps.get_model(app_label='common', model_name='Cache')
+        return Cache.objects.get(name=DOCUMENT_IMAGES_CACHE_NAME)
+
+    @cached_property
+    def cache_partition(self):
+        partition, created = self.cache.partitions.get_or_create(
+            name='version-{}'.format(self.uuid)
+        )
+        return partition
 
     def delete(self, *args, **kwargs):
         for page in self.pages.all():
@@ -511,34 +524,34 @@ class DocumentVersion(models.Model):
             return first_page.get_api_image_url(*args, **kwargs)
 
     def get_intermidiate_file(self):
-        cache_filename = self.cache_filename
-        logger.debug('Intermidiate filename: %s', cache_filename)
+        import time
 
-        if storage_documentimagecache.exists(cache_filename):
-            logger.debug('Intermidiate file "%s" found.', cache_filename)
-
-            return storage_documentimagecache.open(cache_filename)
+        cache_file = self.cache_partition.get_file(filename='intermediate_file')
+        if cache_file:
+            logger.debug('Intermidiate file found.')
+            return cache_file.open()
         else:
-            logger.debug('Intermidiate file "%s" not found.', cache_filename)
+            logger.debug('Intermidiate file not found.')
 
             try:
                 converter = converter_class(file_object=self.open())
                 pdf_file_object = converter.to_pdf()
 
-                with storage_documentimagecache.open(cache_filename, mode='wb+') as file_object:
-                    for chunk in pdf_file_object:
-                        file_object.write(chunk)
+                try:
+                    with self.cache_partition.create_file(filename='intermediate_file') as file_object:
+                        for chunk in pdf_file_object:
+                            file_object.write(chunk)
+                except LockError:
+                    time.sleep(0.1)
+                    return self.get_intermidiate_file()
 
-                return storage_documentimagecache.open(cache_filename)
+                return self.cache_partition.get_file(filename='intermediate_file').open()
             except InvalidOfficeFormat:
                 return self.open()
             except Exception as exception:
-                # Cleanup in case of error
                 logger.error(
-                    'Error creating intermediate file "%s"; %s.',
-                    cache_filename, exception
+                    'Error creating intermediate file; %s.', exception
                 )
-                storage_documentimagecache.delete(cache_filename)
                 raise
 
     def get_rendered_string(self, preserve_extension=False):
@@ -562,7 +575,7 @@ class DocumentVersion(models.Model):
     natural_key.dependencies = ['documents.Document']
 
     def invalidate_cache(self):
-        storage_documentimagecache.delete(self.cache_filename)
+        self.cache_partition.purge()
         for page in self.pages.all():
             page.invalidate_cache()
 
@@ -743,35 +756,10 @@ class DocumentVersion(models.Model):
 
             return detected_pages
 
-    @property
+    @cached_property
     def uuid(self):
         # Make cache UUID a mix of document UUID, version ID
         return '{}-{}'.format(self.document.uuid, self.pk)
-
-
-@python_2_unicode_compatible
-class DocumentTypeFilename(models.Model):
-    """
-    List of labels available to a specific document type for the
-    quick rename functionality
-    """
-    document_type = models.ForeignKey(
-        on_delete=models.CASCADE, related_name='filenames', to=DocumentType,
-        verbose_name=_('Document type')
-    )
-    filename = models.CharField(
-        db_index=True, max_length=128, verbose_name=_('Label')
-    )
-    enabled = models.BooleanField(default=True, verbose_name=_('Enabled'))
-
-    class Meta:
-        ordering = ('filename',)
-        unique_together = ('document_type', 'filename')
-        verbose_name = _('Quick label')
-        verbose_name_plural = _('Quick labels')
-
-    def __str__(self):
-        return self.filename
 
 
 @python_2_unicode_compatible
@@ -804,9 +792,12 @@ class DocumentPage(models.Model):
             'total_pages': self.document_version.pages.count()
         }
 
-    @property
-    def cache_filename(self):
-        return 'page-cache-{}'.format(self.uuid)
+    @cached_property
+    def cache_partition(self):
+        partition, created = self.document_version.cache.partitions.get_or_create(
+            name=self.uuid
+        )
+        return partition
 
     def delete(self, *args, **kwargs):
         self.invalidate_cache()
@@ -822,35 +813,30 @@ class DocumentPage(models.Model):
                 page_number=self.page_number
             )
 
-    @property
+    @cached_property
     def document(self):
         return self.document_version.document
 
     def generate_image(self, *args, **kwargs):
         transformation_list = self.get_combined_transformation_list(*args, **kwargs)
-
-        cache_filename = '{}-{}'.format(
-            self.cache_filename, BaseTransformation.combine(transformation_list)
-        )
+        combined_cache_filename = BaseTransformation.combine(transformation_list)
 
         # Check is transformed image is available
-        logger.debug('transformations cache filename: %s', cache_filename)
+        logger.debug('transformations cache filename: %s', combined_cache_filename)
 
-        if not setting_disable_transformed_image_cache.value and storage_documentimagecache.exists(cache_filename):
+        if not setting_disable_transformed_image_cache.value and self.cache_partition.get_file(filename=combined_cache_filename):
             logger.debug(
-                'transformations cache file "%s" found', cache_filename
+                'transformations cache file "%s" found', combined_cache_filename
             )
         else:
             logger.debug(
-                'transformations cache file "%s" not found', cache_filename
+                'transformations cache file "%s" not found', combined_cache_filename
             )
             image = self.get_image(transformations=transformation_list)
-            with storage_documentimagecache.open(cache_filename, 'wb+') as file_object:
+            with self.cache_partition.create_file(filename=combined_cache_filename) as file_object:
                 file_object.write(image.getvalue())
 
-            self.cached_images.create(filename=cache_filename)
-
-        return cache_filename
+        return combined_cache_filename
 
     def get_absolute_url(self):
         return reverse('documents:document_page_view', args=(self.pk,))
@@ -913,7 +899,6 @@ class DocumentPage(models.Model):
             zoom_level = setting_zoom_max_level.value
 
         # Generate transformation hash
-
         transformation_list = []
 
         # Stored transformations first
@@ -940,42 +925,29 @@ class DocumentPage(models.Model):
         return transformation_list
 
     def get_image(self, transformations=None):
-        cache_filename = self.cache_filename
+        cache_filename = 'base_image'
         logger.debug('Page cache filename: %s', cache_filename)
 
-        if not setting_disable_base_image_cache.value and storage_documentimagecache.exists(cache_filename):
+        cache_file = self.cache_partition.get_file(filename=cache_filename)
+        if not setting_disable_base_image_cache.value and cache_file:
             logger.debug('Page cache file "%s" found', cache_filename)
             converter = converter_class(
-                file_object=storage_documentimagecache.open(cache_filename)
+                file_object=cache_file.open()
             )
 
             converter.seek(0)
         else:
             logger.debug('Page cache file "%s" not found', cache_filename)
 
-            try:
-                converter = converter_class(
-                    file_object=self.document_version.get_intermidiate_file()
-                )
-                converter.seek(page_number=self.page_number - 1)
+            converter = converter_class(
+                file_object=self.document_version.get_intermidiate_file()
+            )
+            converter.seek(page_number=self.page_number - 1)
 
-                page_image = converter.get_page()
+            page_image = converter.get_page()
 
-                # Since open "wb+" doesn't create files, check if the file
-                # exists, if not then create it
-                if not storage_documentimagecache.exists(cache_filename):
-                    storage_documentimagecache.save(name=cache_filename, content=ContentFile(content=''))
-
-                with storage_documentimagecache.open(cache_filename, 'wb+') as file_object:
-                    file_object.write(page_image.getvalue())
-            except Exception as exception:
-                # Cleanup in case of error
-                logger.error(
-                    'Error creating page cache file "%s"; %s',
-                    cache_filename, exception
-                )
-                storage_documentimagecache.delete(cache_filename)
-                raise
+            with self.cache_partition.create_file(filename=cache_filename) as file_object:
+                file_object.write(page_image.getvalue())
 
         for transformation in transformations:
             converter.transform(transformation=transformation)
@@ -983,9 +955,7 @@ class DocumentPage(models.Model):
         return converter.get_page()
 
     def invalidate_cache(self):
-        storage_documentimagecache.delete(self.cache_filename)
-        for cached_image in self.cached_images.all():
-            cached_image.delete()
+        self.cache_partition.purge()
 
     @property
     def is_in_trash(self):
@@ -1001,10 +971,10 @@ class DocumentPage(models.Model):
             document_version=self.document_version
         )
 
-    @property
+    @cached_property
     def uuid(self):
         """
-        Make cache UUID a mix of version ID and page ID to avoid using stale
+        Make cache UUID a mix of version UUID and page ID to avoid using stale
         images
         """
         return '{}-{}'.format(self.document_version.uuid, self.pk)
@@ -1029,17 +999,17 @@ class DocumentPageCachedImage(models.Model):
         verbose_name = _('Document page cached image')
         verbose_name_plural = _('Document page cached images')
 
-    def delete(self, *args, **kwargs):
-        storage_documentimagecache.delete(self.filename)
-        return super(DocumentPageCachedImage, self).delete(*args, **kwargs)
+    #def delete(self, *args, **kwargs):
+    #    storage_documentimagecache.delete(self.filename)
+    #    return super(DocumentPageCachedImage, self).delete(*args, **kwargs)
 
     def natural_key(self):
         return (self.filename, self.document_page.natural_key())
     natural_key.dependencies = ['documents.DocumentPage']
 
-    def save(self, *args, **kwargs):
-        self.file_size = storage_documentimagecache.size(self.filename)
-        return super(DocumentPageCachedImage, self).save(*args, **kwargs)
+    #def save(self, *args, **kwargs):
+    #    self.file_size = storage_documentimagecache.size(self.filename)
+    #    return super(DocumentPageCachedImage, self).save(*args, **kwargs)
 
 
 class DocumentPageResult(DocumentPage):
@@ -1048,6 +1018,31 @@ class DocumentPageResult(DocumentPage):
         proxy = True
         verbose_name = _('Document page')
         verbose_name_plural = _('Document pages')
+
+
+@python_2_unicode_compatible
+class DocumentTypeFilename(models.Model):
+    """
+    List of labels available to a specific document type for the
+    quick rename functionality
+    """
+    document_type = models.ForeignKey(
+        on_delete=models.CASCADE, related_name='filenames', to=DocumentType,
+        verbose_name=_('Document type')
+    )
+    filename = models.CharField(
+        db_index=True, max_length=128, verbose_name=_('Label')
+    )
+    enabled = models.BooleanField(default=True, verbose_name=_('Enabled'))
+
+    class Meta:
+        ordering = ('filename',)
+        unique_together = ('document_type', 'filename')
+        verbose_name = _('Quick label')
+        verbose_name_plural = _('Quick labels')
+
+    def __str__(self):
+        return self.filename
 
 
 @python_2_unicode_compatible

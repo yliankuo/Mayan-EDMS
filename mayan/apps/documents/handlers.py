@@ -3,7 +3,11 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
-from .literals import DEFAULT_DOCUMENT_TYPE_LABEL
+from .literals import (
+    DEFAULT_DOCUMENT_TYPE_LABEL, DOCUMENT_CACHE_STORAGE_INSTANCE_PATH,
+    DOCUMENT_IMAGES_CACHE_NAME
+)
+from .settings import setting_document_cache_maximum_size
 from .signals import post_initial_document_type
 from .tasks import task_clean_empty_duplicate_lists, task_scan_duplicates_for
 
@@ -24,9 +28,12 @@ def create_default_document_type(sender, **kwargs):
 
 def handler_create_document_cache(sender, **kwargs):
     Cache = apps.get_model(app_label='common', model_name='Cache')
-    Cache.objects.get_or_create(
-        name='document_images', label=_('Document images'),
-        storage_instance_path='documents.storages.storage_documentimagecache'
+    Cache.objects.update_or_create(
+        defaults={
+            'label': _('Document images'),
+            'storage_instance_path': DOCUMENT_CACHE_STORAGE_INSTANCE_PATH,
+            'maximum_size': setting_document_cache_maximum_size.value,
+        }, name=DOCUMENT_IMAGES_CACHE_NAME,
     )
 
 

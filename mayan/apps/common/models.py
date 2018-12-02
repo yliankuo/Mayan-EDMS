@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from contextlib import contextmanager
+import logging
 import uuid
 
 from pytz import common_timezones
@@ -7,15 +9,21 @@ from pytz import common_timezones
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.core.files.base import ContentFile
+from django.db import models, transaction, OperationalError
 from django.db.models import Sum
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
+from lock_manager import LockError
+from lock_manager.runtime import locking_backend
+
 from .managers import ErrorLogEntryManager, UserLocaleProfileManager
 from .storages import storage_sharedupload
+
+logger = logging.getLogger(__name__)
 
 
 def upload_to(instance, filename):
@@ -24,14 +32,13 @@ def upload_to(instance, filename):
 
 @python_2_unicode_compatible
 class Cache(models.Model):
-    name = models.CharField(max_length=128, verbose_name=_('Name'))
+    name = models.CharField(
+        max_length=128, unique=True, verbose_name=_('Name')
+    )
     label = models.CharField(max_length=128, verbose_name=_('Label'))
     maximum_size = models.PositiveIntegerField(verbose_name=_('Maximum size'))
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
     storage_instance_path = models.CharField(
-        max_length=255, verbose_name=_('Storage instance path')
+        max_length=255, unique=True, verbose_name=_('Storage instance path')
     )
 
     class Meta:
@@ -41,46 +48,143 @@ class Cache(models.Model):
     def __str__(self):
         return self.label
 
+    def get_files(self):
+        return CachePartitionFile.objects.filter(partition__cache__id=self.pk)
+
     def get_total_size(self):
-        return self.files.aggregate(
+        return self.get_files().aggregate(
             file_size__sum=Sum('file_size')
-        )['file_size__sum']
+        )['file_size__sum'] or 0
 
     def prune(self):
         while self.get_total_size() > self.maximum_size:
-            self.files.earliest().delete()
+            self.get_files().earliest().delete()
+
+    def purge(self):
+        for partition in self.partitions.all():
+            partition.purge()
 
     @cached_property
-    def storage_instance(self):
+    def storage(self):
         return import_string(self.storage_instance_path)
 
 
-class CacheFile(models.Model):
+class CachePartition(models.Model):
     cache = models.ForeignKey(
-        on_delete=models.CASCADE, related_name='files',
+        on_delete=models.CASCADE, related_name='partitions',
         to=Cache, verbose_name=_('Cache')
+    )
+    name = models.CharField(
+        max_length=128, verbose_name=_('Name')
+    )
+
+    class Meta:
+        unique_together = ('cache', 'name')
+        verbose_name = _('Cache partition')
+        verbose_name_plural = _('Cache partitions')
+
+    @staticmethod
+    def get_combined_filename(parent, filename):
+        return '{}-{}'.format(parent, filename)
+
+    @contextmanager
+    def create_file(self, filename):
+        lock_id = 'cache_partition-create_file-{}-{}'.format(self.pk, filename)
+        try:
+            logger.debug('trying to acquire lock: %s', lock_id)
+            lock = locking_backend.acquire_lock(lock_id)#, LOCK_EXPIRE)
+            logger.debug('acquired lock: %s', lock_id)
+            try:
+                self.cache.prune()
+
+                # Since open "wb+" doesn't create files force the creation of an
+                # empty file.
+                self.cache.storage.save(
+                    name=self.get_full_filename(filename=filename),
+                    content=ContentFile(content='')
+                )
+
+                try:
+                    with transaction.atomic():
+                        partition_file = self.files.create(filename=filename)
+                        yield partition_file.open(mode='wb')
+                        partition_file.update_size()
+                except Exception as exception:
+                    logger.error(
+                        'Unexpected exception while trying to save new '
+                        'cache file.'
+                    )
+                    self.cache.storage.delete(
+                        name=self.get_full_filename(filename=filename)
+                    )
+                    raise
+            finally:
+                lock.release()
+        except LockError:
+            logger.debug('unable to obtain lock: %s' % lock_id)
+            raise
+
+    def get_file(self, filename):
+        try:
+            return self.files.get(filename=filename)
+        except self.files.model.DoesNotExist:
+            return None
+
+    def get_full_filename(self, filename):
+        return CachePartition.get_combined_filename(
+            parent=self.name, filename=filename
+        )
+
+    def purge(self):
+        for parition_file in self.files.all():
+            parition_file.delete()
+
+
+class CachePartitionFile(models.Model):
+    partition = models.ForeignKey(
+        on_delete=models.CASCADE, related_name='files',
+        to=CachePartition, verbose_name=_('Cache partition')
     )
     datetime = models.DateTimeField(
         auto_now_add=True, db_index=True, verbose_name=_('Date time')
     )
-    filename = models.CharField(max_length=128, verbose_name=_('Filename'))
+    filename = models.CharField(max_length=255, verbose_name=_('Filename'))
     file_size = models.PositiveIntegerField(
         db_index=True, default=0, verbose_name=_('File size')
     )
 
     class Meta:
         get_latest_by = 'datetime'
-        verbose_name = _('Cache file')
-        verbose_name_plural = _('Cache files')
+        unique_together = ('partition', 'filename')
+        verbose_name = _('Cache partition file')
+        verbose_name_plural = _('Cache partition files')
 
     def delete(self, *args, **kwargs):
-        self.cache.storage_instance.delete(self.filename)
-        return super(CacheFile, self).delete(*args, **kwargs)
+        self.partition.cache.storage.delete(name=self.full_filename)
+        return super(CachePartitionFile, self).delete(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
-        self.cache.prune()
-        self.file_size = self.cache.storage_instance.size(self.filename)
-        return super(CacheFile, self).save(*args, **kwargs)
+    @cached_property
+    def full_filename(self):
+        return CachePartition.get_combined_filename(
+            parent=self.partition.name, filename=self.filename
+        )
+
+    def open(self, mode='rb'):
+        try:
+            return self.partition.cache.storage.open(
+                name=self.full_filename, mode=mode
+            )
+        except Exception as exception:
+            logger.error(
+                'Unexpected exception opening the cache file; %s', exception
+            )
+            raise
+
+    def update_size(self):
+        self.file_size = self.partition.cache.storage.size(
+            name=self.full_filename
+        )
+        self.save()
 
 
 class ErrorLogEntry(models.Model):
