@@ -10,7 +10,6 @@ from furl import furl
 from django.apps import apps
 from django.conf import settings
 from django.core.files import File
-from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.template import Template, Context
 from django.urls import reverse
@@ -28,7 +27,6 @@ from converter import (
 from converter.exceptions import InvalidOfficeFormat, PageCountError
 from converter.literals import DEFAULT_ZOOM_LEVEL, DEFAULT_ROTATION
 from converter.models import Transformation
-from lock_manager import LockError
 from mimetype.api import get_mimetype
 
 from .events import (
@@ -524,8 +522,6 @@ class DocumentVersion(models.Model):
             return first_page.get_api_image_url(*args, **kwargs)
 
     def get_intermidiate_file(self):
-        import time
-
         cache_file = self.cache_partition.get_file(filename='intermediate_file')
         if cache_file:
             logger.debug('Intermidiate file found.')
@@ -537,13 +533,9 @@ class DocumentVersion(models.Model):
                 converter = converter_class(file_object=self.open())
                 pdf_file_object = converter.to_pdf()
 
-                try:
-                    with self.cache_partition.create_file(filename='intermediate_file') as file_object:
-                        for chunk in pdf_file_object:
-                            file_object.write(chunk)
-                except LockError:
-                    time.sleep(0.1)
-                    return self.get_intermidiate_file()
+                with self.cache_partition.create_file(filename='intermediate_file') as file_object:
+                    for chunk in pdf_file_object:
+                        file_object.write(chunk)
 
                 return self.cache_partition.get_file(filename='intermediate_file').open()
             except InvalidOfficeFormat:

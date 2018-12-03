@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
-from django.db import models, transaction, OperationalError
+from django.db import models, transaction
 from django.db.models import Sum
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -92,13 +92,16 @@ class CachePartition(models.Model):
         lock_id = 'cache_partition-create_file-{}-{}'.format(self.pk, filename)
         try:
             logger.debug('trying to acquire lock: %s', lock_id)
-            lock = locking_backend.acquire_lock(lock_id)#, LOCK_EXPIRE)
+            lock = locking_backend.acquire_lock(lock_id)
             logger.debug('acquired lock: %s', lock_id)
             try:
                 self.cache.prune()
 
                 # Since open "wb+" doesn't create files force the creation of an
                 # empty file.
+                self.cache.storage.delete(
+                    name=self.get_full_filename(filename=filename)
+                )
                 self.cache.storage.save(
                     name=self.get_full_filename(filename=filename),
                     content=ContentFile(content='')
@@ -112,7 +115,7 @@ class CachePartition(models.Model):
                 except Exception as exception:
                     logger.error(
                         'Unexpected exception while trying to save new '
-                        'cache file.'
+                        'cache file; %s', exception
                     )
                     self.cache.storage.delete(
                         name=self.get_full_filename(filename=filename)
@@ -150,7 +153,7 @@ class CachePartitionFile(models.Model):
     )
     filename = models.CharField(max_length=255, verbose_name=_('Filename'))
     file_size = models.PositiveIntegerField(
-        db_index=True, default=0, verbose_name=_('File size')
+        default=0, verbose_name=_('File size')
     )
 
     class Meta:

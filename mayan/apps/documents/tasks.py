@@ -7,10 +7,13 @@ from django.contrib.auth import get_user_model
 from django.db import OperationalError
 
 from converter.transformations import BaseTransformation
+from lock_manager import LockError
+from lock_manager.decorators import retry_on_lock_error
 from mayan.celery import app
 
 from .literals import (
-    UPDATE_PAGE_COUNT_RETRY_DELAY, UPLOAD_NEW_VERSION_RETRY_DELAY
+    TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES, UPDATE_PAGE_COUNT_RETRY_DELAY,
+    UPLOAD_NEW_VERSION_RETRY_DELAY
 )
 
 logger = logging.getLogger(__name__)
@@ -76,8 +79,8 @@ def task_delete_stubs():
     logger.info('Finshed')
 
 
-@app.task()
-def task_generate_document_page_image(document_page_id, transformation_list=None, *args, **kwargs):
+@app.task(bind=True, retry_backoff=True, max_retries=TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES, retry_jitter=True)
+def task_generate_document_page_image(self, document_page_id, transformation_list=None, *args, **kwargs):
     """
     Arguments:
         * transformation_list: List of dictionaties with keys: name and kwargs
@@ -97,7 +100,27 @@ def task_generate_document_page_image(document_page_id, transformation_list=None
             )(**transformation.get('kwargs', {}))
         )
 
-    return document_page.generate_image(transformations=transformations, *args, **kwargs)
+    def task_core_function():
+        return document_page.generate_image(
+            transformations=transformations, *args, **kwargs
+        )
+
+    if self.request.is_eager:
+        # Task is running on eager mode, probably in development mode, so
+        # retry the task manually.
+        @retry_on_lock_error(
+            retries=TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES
+        )
+        def retry_task():
+            return task_core_function()
+
+        return retry_task()
+    else:
+        # Setup retrying the task via Celery
+        try:
+            return task_core_function()
+        except LockError as exception:
+            raise self.retry(exc=exception)
 
 
 @app.task(ignore_result=True)
