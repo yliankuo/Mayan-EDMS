@@ -64,6 +64,11 @@ class Cache(models.Model):
         for partition in self.partitions.all():
             partition.purge()
 
+    def save(self, *args, **kwargs):
+        result = super(Cache, self).save(*args, **kwargs)
+        self.prune()
+        return result
+
     @cached_property
     def storage(self):
         return import_string(self.storage_instance_path)
