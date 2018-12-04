@@ -18,20 +18,37 @@ logger = logging.getLogger(__name__)
 
 class ResultsView(SearchModelMixin, SingleObjectListView):
     def get_extra_context(self):
+        search_query = self.get_search_query()
+
         context = {
             'hide_links': True,
             'list_as_items': True,
             'no_results_icon': icon_search_submit,
             'no_results_text': _(
-                'Try again using different terms. '
+                'Try again using different terms.'
             ),
             'no_results_title': _('No search results'),
             'search_model': self.search_model,
             'search_results_limit': setting_limit.value,
-            'title': _('Search results for: %s') % self.search_model.label,
+            'subtitle': search_query,
+            'title': _('Search results for: %s') % self.get_search_model(),
         }
 
         return context
+
+    def get_search_query(self):
+        if self.request.GET:
+            # Only do search if there is user input, otherwise just render
+            # the template with the extra_context
+
+            if self.request.GET.get('_match_all', 'off') == 'on':
+                global_and_search = True
+            else:
+                global_and_search = False
+
+            return self.search_model.get_search_query(
+                query_string=self.request.GET, global_and_search=global_and_search
+            )
 
     def get_object_list(self):
         self.search_model = self.get_search_model()
@@ -45,7 +62,7 @@ class ResultsView(SearchModelMixin, SingleObjectListView):
             else:
                 global_and_search = False
 
-            queryset, timedelta = self.search_model.search(
+            queryset = self.search_model.search(
                 query_string=self.request.GET, user=self.request.user,
                 global_and_search=global_and_search
             )
