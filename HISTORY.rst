@@ -105,7 +105,12 @@
   WORKFLOWS_IMAGE_CACHE_STORAGE_BACKEND_ARGUMENTS we added.
 - Added new list facet navigation menu. Used to provide facets
   to the setup menu items.
-
+- Add reusable, smart file caching system.
+- Use the new caching system to cache document version images,
+  document page images and transformes document page images.
+  The maximum size of the document cache is controlled
+  by the new DOCUMENTS_CACHE_MAXIMUM_SIZE setting.
+  This setting defaults to 500 megabytes.
 
 3.1.9 (2018-11-01)
 ==================

@@ -1,7 +1,7 @@
-Version 3.2
+Version 4.0
 ===========
 
-Released: December XX, XX
+Released: XX XX, 2019
 
 
 Changes
@@ -77,6 +77,7 @@ Backward incompatible changes
 Bugs fixed or issues closed
 ---------------------------
 
+* :gitlab-issue:`395` Add support to limit the size of the cache.
 * :gitlab-issue:`487` gnupg1 Issue with Ubuntu 16.04 - Could not show/view documents
 * :gitlab-issue:`498` Can't scan subdirectories
 * :gitlab-issue:`522` Office 365 SMTP
