@@ -415,14 +415,6 @@ class DocumentVersion(models.Model):
     _pre_open_hooks = {}
     _post_save_hooks = {}
 
-    @classmethod
-    def register_pre_open_hook(cls, order, func):
-        cls._pre_open_hooks[order] = func
-
-    @classmethod
-    def register_post_save_hook(cls, order, func):
-        cls._post_save_hooks[order] = func
-
     document = models.ForeignKey(
         on_delete=models.CASCADE, related_name='versions', to=Document,
         verbose_name=_('Document')
@@ -474,6 +466,14 @@ class DocumentVersion(models.Model):
 
     def __str__(self):
         return self.get_rendered_string()
+
+    @classmethod
+    def register_pre_open_hook(cls, order, func):
+        cls._pre_open_hooks[order] = func
+
+    @classmethod
+    def register_post_save_hook(cls, order, func):
+        cls._post_save_hooks[order] = func
 
     @cached_property
     def cache(self):
