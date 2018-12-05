@@ -80,9 +80,7 @@ class IndexFilesystem(Operations):
                     if access_only:
                         return True
                     else:
-                        return Document.objects.get(
-                            is_stub=False, pk=document_pk
-                        )
+                        return Document.objects.get(pk=document_pk)
 
             for count, part in enumerate(parts[1:]):
                 try:

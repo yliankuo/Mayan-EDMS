@@ -242,34 +242,34 @@ class DocumentVersionTestCase(GenericDocumentTestCase):
 
 
 @override_settings(OCR_AUTO_OCR=False)
-class DocumentManagerTestCase(BaseTestCase):
+class DocumentPassthroughManagerTestCase(BaseTestCase):
     def setUp(self):
-        super(DocumentManagerTestCase, self).setUp()
+        super(DocumentPassthroughManagerTestCase, self).setUp()
         self.document_type = DocumentType.objects.create(
             label=TEST_DOCUMENT_TYPE_LABEL
         )
 
     def tearDown(self):
         self.document_type.delete()
-        super(DocumentManagerTestCase, self).tearDown()
+        super(DocumentPassthroughManagerTestCase, self).tearDown()
 
     def test_document_stubs_deletion(self):
         document_stub = Document.objects.create(
             document_type=self.document_type
         )
 
-        Document.objects.delete_stubs()
+        Document.passthrough.delete_stubs()
 
-        self.assertEqual(Document.objects.count(), 1)
+        self.assertEqual(Document.passthrough.count(), 1)
 
         document_stub.date_added = document_stub.date_added - timedelta(
             seconds=STUB_EXPIRATION_INTERVAL + 1
         )
         document_stub.save()
 
-        Document.objects.delete_stubs()
+        Document.passthrough.delete_stubs()
 
-        self.assertEqual(Document.objects.count(), 0)
+        self.assertEqual(Document.passthrough.count(), 0)
 
 
 class DuplicatedDocumentsTestCase(GenericDocumentTestCase):
