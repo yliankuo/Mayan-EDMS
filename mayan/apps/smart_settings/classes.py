@@ -10,7 +10,6 @@ import yaml
 
 from django.apps import apps
 from django.conf import settings
-from django.utils import six
 from django.utils.functional import Promise
 from django.utils.encoding import force_text, python_2_unicode_compatible
 
@@ -84,7 +83,7 @@ class Setting(object):
         """
         Walk all the elements of a value and force promises to text
         """
-        if isinstance(value, (six.types.ListType, six.types.TupleType)):
+        if isinstance(value, (list, tuple)):
             return [Setting.express_promises(item) for item in value]
         elif isinstance(value, Promise):
             return force_text(value)
