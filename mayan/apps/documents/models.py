@@ -971,7 +971,7 @@ class DocumentPage(models.Model):
         return '{}-{}'.format(self.document_version.uuid, self.pk)
 
 
-class DocumentPageResult(DocumentPage):
+class DocumentPageSearchResult(DocumentPage):
     class Meta:
         ordering = ('document_version__document', 'page_number')
         proxy = True

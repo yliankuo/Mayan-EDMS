@@ -58,8 +58,8 @@ class TagsApp(MayanAppConfig):
             app_label='documents', model_name='Document'
         )
 
-        DocumentPageResult = apps.get_model(
-            app_label='documents', model_name='DocumentPageResult'
+        DocumentPageSearchResult = apps.get_model(
+            app_label='documents', model_name='DocumentPageSearchResult'
         )
 
         DocumentTag = self.get_model('DocumentTag')
@@ -115,7 +115,7 @@ class TagsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Tags'),
+            source=DocumentPageSearchResult, label=_('Tags'),
             func=lambda context: widget_document_tags(
                 document=context['object'].document,
                 user=context['request'].user

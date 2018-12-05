@@ -124,7 +124,7 @@ class DocumentsApp(MayanAppConfig):
         DeletedDocument = self.get_model('DeletedDocument')
         Document = self.get_model('Document')
         DocumentPage = self.get_model('DocumentPage')
-        DocumentPageResult = self.get_model('DocumentPageResult')
+        DocumentPageSearchResult = self.get_model('DocumentPageSearchResult')
         DocumentType = self.get_model('DocumentType')
         DocumentTypeFilename = self.get_model('DocumentTypeFilename')
         DocumentVersion = self.get_model('DocumentVersion')
@@ -217,7 +217,7 @@ class DocumentsApp(MayanAppConfig):
             model=DocumentPage, related='document_version__document',
         )
         ModelPermission.register_inheritance(
-            model=DocumentPageResult, related='document_version__document',
+            model=DocumentPageSearchResult, related='document_version__document',
         )
         ModelPermission.register_inheritance(
             model=DocumentTypeFilename, related='document_type',
@@ -260,14 +260,14 @@ class DocumentsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Thumbnail'),
+            source=DocumentPageSearchResult, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             )
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Type'),
+            source=DocumentPageSearchResult, label=_('Type'),
             attribute='document_version.document.document_type'
         )
 

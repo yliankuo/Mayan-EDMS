@@ -77,8 +77,8 @@ class MetadataApp(MayanAppConfig):
         Document = apps.get_model(
             app_label='documents', model_name='Document'
         )
-        DocumentPageResult = apps.get_model(
-            app_label='documents', model_name='DocumentPageResult'
+        DocumentPageSearchResult = apps.get_model(
+            app_label='documents', model_name='DocumentPageSearchResult'
         )
 
         DocumentType = apps.get_model(
@@ -154,7 +154,7 @@ class MetadataApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Metadata'),
+            source=DocumentPageSearchResult, label=_('Metadata'),
             func=lambda context: get_metadata_string(
                 context['object'].document
             )
