@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from documents.icons import icon_document_type
-from navigation import Link
+from mayan.apps.documents.icons import icon_document_type
+from mayan.apps.navigation import Link
 
 from .icons import (
     icon_document_workflow_instance_list, icon_setup_workflow_list,

@@ -6,9 +6,9 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import OperationalError
 
-from converter.transformations import BaseTransformation
-from lock_manager import LockError
-from lock_manager.decorators import retry_on_lock_error
+from mayan.apps.converter.transformations import BaseTransformation
+from mayan.apps.lock_manager import LockError
+from mayan.apps.lock_manager.decorators import retry_on_lock_error
 from mayan.celery import app
 
 from .literals import (

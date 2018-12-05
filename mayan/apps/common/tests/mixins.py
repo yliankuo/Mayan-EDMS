@@ -8,10 +8,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core import management
 
-from acls.models import AccessControlList
-from permissions.models import Role
-from permissions.tests.literals import TEST_ROLE_LABEL
-from user_management.tests import (
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.permissions.models import Role
+from mayan.apps.permissions.tests.literals import TEST_ROLE_LABEL
+from mayan.apps.user_management.tests import (
     TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_ADMIN_EMAIL,
     TEST_GROUP_NAME, TEST_USER_EMAIL, TEST_USER_USERNAME, TEST_USER_PASSWORD
 )

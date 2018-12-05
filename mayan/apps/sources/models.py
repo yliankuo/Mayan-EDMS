@@ -19,17 +19,17 @@ from django.utils.encoding import (
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from djcelery.models import PeriodicTask, IntervalSchedule
 from model_utils.managers import InheritanceManager
 
-from common.compressed_files import Archive
-from common.exceptions import NoMIMETypeMatch
-from common.utils import TemporaryFile
-from converter.models import Transformation
-from djcelery.models import PeriodicTask, IntervalSchedule
-from documents.models import Document, DocumentType
-from documents.settings import setting_language
-from metadata.api import set_bulk_metadata
-from metadata.models import MetadataType
+from mayan.apps.common.compressed_files import Archive
+from mayan.apps.common.exceptions import NoMIMETypeMatch
+from mayan.apps.common.utils import TemporaryFile
+from mayan.apps.converter.models import Transformation
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.settings import setting_language
+from mayan.apps.metadata.api import set_bulk_metadata
+from mayan.apps.metadata.models import MetadataType
 
 from .classes import PseudoFile, SourceUploadedFile, StagingFile
 from .exceptions import SourceException

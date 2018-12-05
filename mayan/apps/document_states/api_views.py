@@ -6,11 +6,11 @@ from django.views.decorators.cache import cache_control, patch_cache_control
 
 from rest_framework import generics
 
-from acls.models import AccessControlList
-from documents.models import Document, DocumentType
-from documents.permissions import permission_document_type_view
-from rest_api.filters import MayanObjectPermissionsFilter
-from rest_api.permissions import MayanPermission
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.permissions import permission_document_type_view
+from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
+from mayan.apps.rest_api.permissions import MayanPermission
 
 from .literals import WORKFLOW_IMAGE_TASK_TIMEOUT
 from .models import Workflow

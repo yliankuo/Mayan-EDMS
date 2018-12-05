@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from documents.icons import icon_document_list
-from navigation import Link, get_cascade_condition
+from mayan.apps.documents.icons import icon_document_list
+from mayan.apps.navigation import Link, get_cascade_condition
 
 from .icons import (
     icon_tag_attach, icon_tag_create, icon_tag_document_list, icon_tag_list

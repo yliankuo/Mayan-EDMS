@@ -10,9 +10,9 @@ from django.urls import clear_url_caches, reverse
 
 from django_downloadview import assert_download_response
 
-from permissions.classes import Permission
-from smart_settings.classes import Namespace
-from user_management.tests import (
+from mayan.apps.permissions.classes import Permission
+from mayan.apps.smart_settings.classes import Namespace
+from mayan.apps.user_management.tests import (
     TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_USERNAME,
     TEST_USER_PASSWORD
 )

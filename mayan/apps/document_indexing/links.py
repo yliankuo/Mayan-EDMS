@@ -2,9 +2,8 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link, get_cascade_condition
-
-from documents.icons import icon_document_type
+from mayan.apps.navigation import Link, get_cascade_condition
+from mayan.apps.documents.icons import icon_document_type
 
 from .icons import (
     icon_document_index_list, icon_index, icon_index_create,
