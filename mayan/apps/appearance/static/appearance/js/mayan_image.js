@@ -43,7 +43,7 @@ class MayanImage {
 
         $('.lazy-load').one('load', function() {
             $(this).hide();
-            $(this).fadeIn(300);
+            $(this).fadeIn(200);
             $(this).siblings('.spinner-container').remove();
             $(this).removeClass('lazy-load pull-left');
             clearTimeout(MayanImage.timer);
@@ -52,7 +52,7 @@ class MayanImage {
 
         $('.lazy-load-carousel').one('load', function() {
             $(this).hide();
-            $(this).fadeIn(300);
+            $(this).fadeIn(200);
             $(this).siblings('.spinner-container').remove();
             $(this).removeClass('lazy-load-carousel pull-left');
         });
