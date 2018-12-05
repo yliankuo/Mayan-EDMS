@@ -119,7 +119,7 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={'top': '10'}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
     def test_crop_transformation_invalid_arguments(self):
         document_page = self.document.pages.first()
@@ -129,7 +129,7 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={'top': 'x', 'left': '-'}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
     def test_crop_transformation_non_valid_range_arguments(self):
         document_page = self.document.pages.first()
@@ -139,7 +139,7 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={'top': '-1000', 'bottom': '100000000'}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
     def test_crop_transformation_overlapping_ranges_arguments(self):
         document_page = self.document.pages.first()
@@ -154,7 +154,7 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={'left': '1000', 'right': '10000'}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
     def test_lineart_transformations(self):
         document_page = self.document.pages.first()
@@ -164,7 +164,7 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
     def test_rotate_transformations(self):
         document_page = self.document.pages.first()
@@ -174,18 +174,18 @@ class TransformationTestCase(GenericDocumentTestCase):
             arguments={}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
         Transformation.objects.add_for_model(
             obj=document_page, transformation=TransformationRotate180,
             arguments={}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
 
         Transformation.objects.add_for_model(
             obj=document_page, transformation=TransformationRotate270,
             arguments={}
         )
 
-        self.assertTrue(document_page.generate_image().startswith('page'))
+        self.assertTrue(document_page.generate_image() is not None)
