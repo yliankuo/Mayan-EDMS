@@ -191,7 +191,8 @@ class CommonApp(MayanAppConfig):
                 'disable_existing_loggers': False,
                 'formatters': {
                     'intermediate': {
-                        'format': '%(name)s <%(process)d> [%(levelname)s] "%(funcName)s() line %(lineno)d %(message)s"'
+                        '()': 'common.log.ColorFormatter',
+                        'format': '%(name)s <%(process)d> [%(levelname)s] "%(funcName)s() line %(lineno)d %(message)s"',
                     },
                     'logfile': {
                         'format': '%(asctime)s %(name)s <%(process)d> [%(levelname)s] "%(funcName)s() line %(lineno)d %(message)s"'
