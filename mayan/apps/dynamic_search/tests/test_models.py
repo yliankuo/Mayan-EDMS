@@ -20,7 +20,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         document versions and document version pages
         """
         self.document = self.upload_document()
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'q': 'Mayan'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 1)
@@ -29,14 +29,14 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
     def test_advanced_search_after_related_name_change(self):
         # Test versions__filename
         self.document = self.upload_document()
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': self.document.label}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.document in queryset)
 
         # Test versions__mimetype
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'versions__mimetype': self.document.file_mimetype},
             user=self.admin_user
         )
@@ -50,7 +50,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.label = 'second_doc.pdf'
         self.document_2.save()
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'q': 'Mayan OR second'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 2)
@@ -63,12 +63,12 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.label = 'second_doc.pdf'
         self.document_2.save()
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'q': 'non_valid second'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 0)
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'q': 'second non_valid'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 0)
@@ -79,27 +79,27 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.label = 'second_doc.pdf'
         self.document_2.save()
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'q': '-non_valid second'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 1)
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': '-second'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 0)
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': '-second -Mayan'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 0)
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': '-second OR -Mayan'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 1)
 
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': '-non_valid -second'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), 0)

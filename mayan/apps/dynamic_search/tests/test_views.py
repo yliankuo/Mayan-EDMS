@@ -38,7 +38,7 @@ class Issue46TestCase(GenericViewTestCase):
 
     def test_advanced_search_past_first_page(self):
         # Make sure all documents are returned by the search
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': 'test document'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), self.document_count)
