@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
+DEFAULT_GPG_PATH = '/usr/bin/gpg1'
+DEFAULT_SETTING_GPG_BACKEND = 'mayan.apps.django_gpg.classes.PythonGNUPGBackend'
+
 KEY_TYPES = {
     'pub': _('Public'),
     'sec': _('Secret'),
