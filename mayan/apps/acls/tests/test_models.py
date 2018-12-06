@@ -7,8 +7,8 @@ from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import (
-    TEST_SMALL_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
-    TEST_DOCUMENT_TYPE_2_LABEL
+    TEST_DOCUMENT_TYPE_2_LABEL, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_SMALL_DOCUMENT_PATH
 )
 
 from ..models import AccessControlList

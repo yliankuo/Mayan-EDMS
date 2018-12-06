@@ -4,8 +4,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import (
-    login, password_change, password_reset, password_reset_confirm,
-    password_reset_complete, password_reset_done
+    login, password_change, password_reset, password_reset_complete,
+    password_reset_confirm, password_reset_done
 )
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, resolve_url
@@ -16,7 +16,9 @@ from django.utils.translation import ugettext_lazy as _
 from stronghold.decorators import public
 
 import mayan
-from mayan.apps.common.settings import setting_project_title, setting_project_url
+from mayan.apps.common.settings import (
+    setting_project_title, setting_project_url
+)
 
 from .forms import EmailAuthenticationForm, UsernameAuthenticationForm
 from .settings import setting_login_method, setting_maximum_session_length

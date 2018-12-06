@@ -13,7 +13,7 @@ from .events import (
     event_document_forceful_check_in
 )
 from .exceptions import DocumentNotCheckedOut
-from .literals import STATE_CHECKED_OUT, STATE_CHECKED_IN
+from .literals import STATE_CHECKED_IN, STATE_CHECKED_OUT
 
 logger = logging.getLogger(__name__)
 

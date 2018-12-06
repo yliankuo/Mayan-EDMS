@@ -8,7 +8,8 @@ from ..permissions import (
     permission_cabinet_delete, permission_cabinet_edit,
     permission_cabinet_remove_document, permission_cabinet_view
 )
-from .literals import TEST_CABINET_LABEL, TEST_CABINET_EDITED_LABEL
+
+from .literals import TEST_CABINET_EDITED_LABEL, TEST_CABINET_LABEL
 
 
 class CabinetViewTestCase(GenericDocumentViewTestCase):

@@ -3,13 +3,14 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIDocumentCabinetListView, APICabinetDocumentListView,
-    APICabinetDocumentView, APICabinetListView, APICabinetView
+    APICabinetDocumentListView, APICabinetDocumentView, APICabinetListView,
+    APICabinetView, APIDocumentCabinetListView
 )
 from .views import (
+    CabinetChildAddView, CabinetCreateView, CabinetDeleteView,
+    CabinetDetailView, CabinetEditView, CabinetListView,
     DocumentAddToCabinetView, DocumentCabinetListView,
-    DocumentRemoveFromCabinetView, CabinetChildAddView, CabinetCreateView,
-    CabinetDeleteView, CabinetDetailView, CabinetEditView, CabinetListView,
+    DocumentRemoveFromCabinetView
 )
 
 urlpatterns = [

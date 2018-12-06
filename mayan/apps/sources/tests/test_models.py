@@ -8,13 +8,13 @@ from pathlib2 import Path
 from django.test import override_settings
 from django.utils.encoding import force_text
 
-from mayan.apps.common.utils import mkdtemp
 from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.common.utils import mkdtemp
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.tests import (
-    DocumentTestMixin, TEST_COMPRESSED_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
-    TEST_NON_ASCII_DOCUMENT_FILENAME, TEST_NON_ASCII_DOCUMENT_PATH,
-    TEST_NON_ASCII_COMPRESSED_DOCUMENT_PATH
+    TEST_COMPRESSED_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_NON_ASCII_COMPRESSED_DOCUMENT_PATH, TEST_NON_ASCII_DOCUMENT_FILENAME,
+    TEST_NON_ASCII_DOCUMENT_PATH, DocumentTestMixin
 )
 from mayan.apps.metadata.models import MetadataType
 

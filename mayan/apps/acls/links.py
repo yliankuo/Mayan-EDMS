@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.navigation import Link
 
 from .icons import icon_acl_list, icon_acl_new
-from .permissions import permission_acl_view, permission_acl_edit
+from .permissions import permission_acl_edit, permission_acl_view
 
 
 def get_kwargs_factory(variable_name):

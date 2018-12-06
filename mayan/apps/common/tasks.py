@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from django.apps import apps
 from django.utils.timezone import now

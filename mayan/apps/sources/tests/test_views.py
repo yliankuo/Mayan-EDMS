@@ -11,9 +11,9 @@ from mayan.apps.common.utils import fs_cleanup, mkdtemp
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_create
 from mayan.apps.documents.tests import (
-    GenericDocumentViewTestCase, TEST_DOCUMENT_DESCRIPTION,
-    TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_CHECKSUM,
-    TEST_SMALL_DOCUMENT_PATH,
+    TEST_DOCUMENT_DESCRIPTION, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_SMALL_DOCUMENT_CHECKSUM, TEST_SMALL_DOCUMENT_PATH,
+    GenericDocumentViewTestCase
 )
 
 from ..links import link_upload_version

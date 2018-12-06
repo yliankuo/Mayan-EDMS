@@ -6,15 +6,16 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse_lazy
-from django.utils.translation import ugettext_lazy as _, ungettext
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.views import (
     MultipleObjectFormActionView, SingleObjectCreateView,
     SingleObjectDeleteView, SingleObjectEditView, SingleObjectListView
 )
-from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.models import Document
+from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.views import DocumentListView
 
 from .forms import CabinetListForm
@@ -26,7 +27,7 @@ from .models import Cabinet
 from .permissions import (
     permission_cabinet_add_document, permission_cabinet_create,
     permission_cabinet_delete, permission_cabinet_edit,
-    permission_cabinet_view, permission_cabinet_remove_document
+    permission_cabinet_remove_document, permission_cabinet_view
 )
 from .widgets import jstree_data
 

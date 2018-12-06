@@ -23,14 +23,13 @@ from .forms import (
 )
 from .generics import (  # NOQA
     AssignRemoveView, ConfirmView, FormView, MultiFormView,
-    MultipleObjectConfirmActionView, MultipleObjectFormActionView,
-    SingleObjectCreateView, SingleObjectDeleteView,
-    SingleObjectDetailView, SingleObjectDynamicFormCreateView,
-    SingleObjectDynamicFormEditView, SingleObjectDownloadView,
-    SingleObjectEditView, SingleObjectListView, SimpleView
+    MultipleObjectConfirmActionView, MultipleObjectFormActionView, SimpleView,
+    SingleObjectCreateView, SingleObjectDeleteView, SingleObjectDetailView,
+    SingleObjectDownloadView, SingleObjectDynamicFormCreateView,
+    SingleObjectDynamicFormEditView, SingleObjectEditView, SingleObjectListView
 )
 from .icons import icon_setup
-from .menus import menu_tools, menu_setup
+from .menus import menu_setup, menu_tools
 from .permissions_runtime import permission_error_log_view
 from .utils import check_version
 
