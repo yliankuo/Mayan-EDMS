@@ -4,7 +4,9 @@ from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
-from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_main, menu_multi_item, menu_object,
     menu_sidebar
@@ -13,12 +15,11 @@ from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.navigation import SourceColumn
 
 from .links import (
-    link_cabinet_list, link_document_cabinet_list,
-    link_document_cabinet_remove, link_cabinet_add_document,
-    link_cabinet_add_multiple_documents, link_cabinet_child_add,
-    link_cabinet_create, link_cabinet_delete, link_cabinet_edit,
-    link_cabinet_view, link_custom_acl_list,
-    link_multiple_document_cabinet_remove
+    link_cabinet_add_document, link_cabinet_add_multiple_documents,
+    link_cabinet_child_add, link_cabinet_create, link_cabinet_delete,
+    link_cabinet_edit, link_cabinet_list, link_cabinet_view,
+    link_custom_acl_list, link_document_cabinet_list,
+    link_document_cabinet_remove, link_multiple_document_cabinet_remove
 )
 from .menus import menu_cabinets
 from .permissions import (

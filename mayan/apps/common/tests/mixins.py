@@ -12,8 +12,9 @@ from mayan.apps.acls.models import AccessControlList
 from mayan.apps.permissions.models import Role
 from mayan.apps.permissions.tests.literals import TEST_ROLE_LABEL
 from mayan.apps.user_management.tests import (
-    TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_ADMIN_EMAIL,
-    TEST_GROUP_NAME, TEST_USER_EMAIL, TEST_USER_USERNAME, TEST_USER_PASSWORD
+    TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME,
+    TEST_GROUP_NAME, TEST_USER_EMAIL, TEST_USER_PASSWORD,
+    TEST_USER_USERNAME
 )
 
 from ..settings import setting_temporary_directory

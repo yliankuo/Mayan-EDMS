@@ -15,7 +15,7 @@ from mayan.apps.common.views import (
     AssignRemoveView, SingleObjectCreateView, SingleObjectDeleteView,
     SingleObjectListView
 )
-from mayan.apps.permissions import PermissionNamespace, Permission
+from mayan.apps.permissions import Permission, PermissionNamespace
 from mayan.apps.permissions.models import StoredPermission
 
 from .classes import ModelPermission

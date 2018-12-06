@@ -7,14 +7,13 @@ from django.template import Context, Template
 from django.test import TestCase
 from django.test.utils import ContextList
 from django.urls import clear_url_caches, reverse
-
 from django_downloadview import assert_download_response
 
 from mayan.apps.permissions.classes import Permission
 from mayan.apps.smart_settings.classes import Namespace
 from mayan.apps.user_management.tests import (
-    TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_USERNAME,
-    TEST_USER_PASSWORD
+    TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_PASSWORD,
+    TEST_USER_USERNAME
 )
 
 from .literals import TEST_VIEW_NAME, TEST_VIEW_URL

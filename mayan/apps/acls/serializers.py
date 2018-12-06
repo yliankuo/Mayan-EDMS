@@ -12,7 +12,9 @@ from rest_framework.reverse import reverse
 from mayan.apps.common.serializers import ContentTypeSerializer
 from mayan.apps.permissions import Permission
 from mayan.apps.permissions.models import Role, StoredPermission
-from mayan.apps.permissions.serializers import PermissionSerializer, RoleSerializer
+from mayan.apps.permissions.serializers import (
+    PermissionSerializer, RoleSerializer
+)
 
 from .models import AccessControlList
 

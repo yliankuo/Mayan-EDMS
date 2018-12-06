@@ -8,7 +8,8 @@ Changes
 -------
 
 * Convert the furl instance to text to allow serializing it into
-  JSON to be passed as arguments to the background task.
+  JSON and be passed as arguments to the background task. Fixes
+  metadata assignment issues when uploading new documents.
 
 Removals
 --------

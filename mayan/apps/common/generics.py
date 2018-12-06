@@ -7,9 +7,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic import (
-    FormView as DjangoFormView, DetailView, TemplateView
-)
+from django.views.generic import DetailView
+from django.views.generic import FormView as DjangoFormView
+from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import (
     CreateView, DeleteView, FormMixin, ModelFormMixin, UpdateView
@@ -29,7 +29,6 @@ from .mixins import (
     ObjectListPermissionFilterMixin, ObjectNameMixin,
     ObjectPermissionCheckMixin, RedirectionMixin, ViewPermissionCheckMixin
 )
-
 from .settings import setting_paginate_by
 
 __all__ = (

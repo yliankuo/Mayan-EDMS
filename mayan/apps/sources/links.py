@@ -13,8 +13,9 @@ from .icons import (
     icon_source_create
 )
 from .literals import (
-    SOURCE_CHOICE_WEB_FORM, SOURCE_CHOICE_EMAIL_IMAP, SOURCE_CHOICE_EMAIL_POP3,
-    SOURCE_CHOICE_SANE_SCANNER, SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH
+    SOURCE_CHOICE_EMAIL_IMAP, SOURCE_CHOICE_EMAIL_POP3,
+    SOURCE_CHOICE_SANE_SCANNER, SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH,
+    SOURCE_CHOICE_WEB_FORM
 )
 from .permissions import (
     permission_sources_setup_create, permission_sources_setup_delete,

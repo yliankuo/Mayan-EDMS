@@ -18,11 +18,11 @@ from mayan.apps.common import menu_facet
 from mayan.apps.common.models import SharedUploadedFile
 from mayan.apps.common.utils import encapsulate
 from mayan.apps.common.views import (
-    ConfirmView, MultiFormView, SingleObjectCreateView,
-    SingleObjectDeleteView, SingleObjectEditView, SingleObjectListView
+    ConfirmView, MultiFormView, SingleObjectCreateView, SingleObjectDeleteView,
+    SingleObjectEditView, SingleObjectListView
 )
 from mayan.apps.common.widgets import TwoStateWidget
-from mayan.apps.documents.models import DocumentType, Document
+from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import (
     permission_document_create, permission_document_new_version
 )
@@ -34,16 +34,14 @@ from .forms import (
     NewDocumentForm, NewVersionForm, WebFormUploadForm, WebFormUploadFormHTML5
 )
 from .icons import icon_log, icon_setup_sources, icon_upload_view_link
-from .literals import SOURCE_UNCOMPRESS_CHOICE_ASK, SOURCE_UNCOMPRESS_CHOICE_Y
 from .links import (
     link_setup_source_create_imap_email, link_setup_source_create_pop3_email,
+    link_setup_source_create_sane_scanner,
     link_setup_source_create_staging_folder,
-    link_setup_source_create_watch_folder, link_setup_source_create_webform,
-    link_setup_source_create_sane_scanner
+    link_setup_source_create_watch_folder, link_setup_source_create_webform
 )
-from .models import (
-    InteractiveSource, Source, SaneScanner, StagingFolderSource
-)
+from .literals import SOURCE_UNCOMPRESS_CHOICE_ASK, SOURCE_UNCOMPRESS_CHOICE_Y
+from .models import InteractiveSource, SaneScanner, Source, StagingFolderSource
 from .permissions import (
     permission_sources_setup_create, permission_sources_setup_delete,
     permission_sources_setup_edit, permission_sources_setup_view,

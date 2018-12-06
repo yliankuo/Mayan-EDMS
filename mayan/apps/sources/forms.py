@@ -10,8 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.documents.forms import DocumentForm
 
 from .models import (
-    IMAPEmail, POP3Email, SaneScanner, StagingFolderSource, WebFormSource,
-    WatchFolderSource
+    IMAPEmail, POP3Email, SaneScanner, StagingFolderSource, WatchFolderSource,
+    WebFormSource
 )
 
 logger = logging.getLogger(__name__)

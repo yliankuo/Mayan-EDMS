@@ -10,7 +10,8 @@ from mayan.apps.common.utils import mkdtemp
 
 
 class GPGBackend(object):
-    def __init__(self, **kwargs):
+    def __init__(self, gpg_path, **kwargs):
+        self.gpg_path = gpg_path
         self.kwargs = kwargs
 
 
@@ -76,7 +77,7 @@ class PythonGNUPGBackend(GPGBackend):
         os.chmod(temporary_directory, 0x1C0)
 
         gpg = gnupg.GPG(
-            gnupghome=temporary_directory, gpgbinary=self.kwargs['binary_path']
+            gnupghome=temporary_directory, gpgbinary=self.gpg_path
         )
 
         result = function(gpg=gpg, **kwargs)

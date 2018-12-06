@@ -8,8 +8,8 @@ from django.utils.timezone import now
 
 from rest_framework import status
 
-from mayan.apps.documents.tests import DocumentTestMixin
 from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.documents.tests import DocumentTestMixin
 from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..models import DocumentCheckout

@@ -15,7 +15,7 @@ from .icons import (
 from .permissions import (
     permission_cabinet_add_document, permission_cabinet_create,
     permission_cabinet_delete, permission_cabinet_edit,
-    permission_cabinet_view, permission_cabinet_remove_document
+    permission_cabinet_remove_document, permission_cabinet_view
 )
 
 # Document links

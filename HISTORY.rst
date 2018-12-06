@@ -111,6 +111,50 @@
   The maximum size of the document cache is controlled
   by the new DOCUMENTS_CACHE_MAXIMUM_SIZE setting.
   This setting defaults to 500 megabytes.
+- Add support for post edit callbacks to settings. This
+  callback willl execute when a settings's value is changed.
+- Switch to full app paths. Instead of inserting the path
+  of the apps into the Python app, the apps are now
+  referenced by their full import path. This avoid app name
+  clashes with external or native Python libraries.
+  Example: Mayan statistics app vs. Python new statistics library.
+  Every app reference is now prepended with 'mayan.apps'.
+  Existing config.yml files need to be updated manually.
+- Added a colorized console log formatter. New log formatter
+  that colors the output depending on the log level of the
+  message. The default palette handles: INFO, SUCCESS, ERROR,
+  DEBUG and CRITICAL.
+- Decreased the thumbnail fade-in duration. Reduce the
+  document thumbnail fadein animation length to speed up
+  display of resolved thumbnails. Seems to reduce browser
+  load in FireFox.
+- Document stubs are now filtered from the search results.
+- Replaced deprecated string_concat in preparation for an
+  eventual Django 2.x upgrade.
+- Removed the converter's base64 image support as it was
+  no longer being used by any stock app.
+- Removed the SIGNATURES_GPG_HOME settings. The GPG keys 
+  are no longer stored in disk but in the database itself
+  making this setting obsolete. This changed happened 
+  several versions ago and this removal doesn't affect 
+  any code path.
+- Added two new settings to the django_gpg app: 
+  SIGNATURES_GPG_BACKEND and SIGNATURES_GPG_BACKEND_ARGUMENTS.
+  These settings allow changing the GPG backend that the 
+  app will use.
+- Removed the settings SIGNATURES_GPG_PATH. The path to the
+  GPG binary is now passed via the
+  SIGNATURES_GPG_BACKEND_ARGUMENTS.
+- Renamed the setting ``SIGNATURES_STORAGE_BACKEND`` to
+  ``DOCUMENT_SIGNATURES_STORAGE_BACKEND`` and the setting
+  ``SIGNATURES_STORAGE_BACKEND_ARGUMENTS`` to
+  ``DOCUMENT_SIGNATURES_STORAGE_BACKEND_ARGUMENTS``. This
+  change differentiates them from the setting from the 
+  django_gpg app.
+- Updated the django_gpg app to work with the latest
+  version of the python-gnupg package (0.4.3).
+- Set sensible default path for binaries by detecting
+  the operating system.
 
 3.1.9 (2018-11-01)
 ==================

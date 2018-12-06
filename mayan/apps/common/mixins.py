@@ -6,7 +6,8 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
-from django.utils.translation import ungettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.permissions import Permission

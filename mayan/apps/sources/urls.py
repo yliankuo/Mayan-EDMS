@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIStagingSourceFileView, APIStagingSourceFileImageView,
+    APIStagingSourceFileImageView, APIStagingSourceFileView,
     APIStagingSourceListView, APIStagingSourceView
 )
 from .views import (

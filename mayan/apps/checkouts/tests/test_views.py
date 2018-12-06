@@ -9,8 +9,8 @@ from mayan.apps.common.literals import TIME_DELTA_UNIT_DAYS
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 from mayan.apps.sources.links import link_upload_version
 from mayan.apps.user_management.tests import (
-    TEST_USER_PASSWORD, TEST_USER_USERNAME, TEST_ADMIN_PASSWORD,
-    TEST_ADMIN_USERNAME,
+    TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_PASSWORD,
+    TEST_USER_USERNAME
 )
 
 from ..models import DocumentCheckout

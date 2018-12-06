@@ -15,7 +15,7 @@ from mayan.apps.documents.models import Document
 from mayan.apps.documents.views import DocumentListView
 
 from .exceptions import DocumentAlreadyCheckedOut, DocumentNotCheckedOut
-from .forms import DocumentCheckoutForm, DocumentCheckoutDefailForm
+from .forms import DocumentCheckoutDefailForm, DocumentCheckoutForm
 from .icons import icon_checkout_info
 from .models import DocumentCheckout
 from .permissions import (

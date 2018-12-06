@@ -6,7 +6,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_list_facet, menu_object, menu_secondary,
-    menu_sidebar, menu_setup
+    menu_setup, menu_sidebar
 )
 from mayan.apps.common.signals import post_initial_setup, post_upgrade
 from mayan.apps.converter.links import link_transformation_list
@@ -21,13 +21,13 @@ from .handlers import (
     initialize_periodic_tasks
 )
 from .links import (
-    link_document_create_multiple, link_setup_sources,
-    link_setup_source_check_now, link_setup_source_create_imap_email,
-    link_setup_source_create_pop3_email, link_setup_source_create_sane_scanner,
+    link_document_create_multiple, link_setup_source_check_now,
+    link_setup_source_create_imap_email, link_setup_source_create_pop3_email,
+    link_setup_source_create_sane_scanner,
+    link_setup_source_create_staging_folder,
     link_setup_source_create_watch_folder, link_setup_source_create_webform,
-    link_setup_source_create_staging_folder, link_setup_source_delete,
-    link_setup_source_edit, link_setup_source_logs, link_staging_file_delete,
-    link_upload_version
+    link_setup_source_delete, link_setup_source_edit, link_setup_source_logs,
+    link_setup_sources, link_staging_file_delete, link_upload_version
 )
 from .queues import *  # NOQA
 from .widgets import StagingFileThumbnailWidget

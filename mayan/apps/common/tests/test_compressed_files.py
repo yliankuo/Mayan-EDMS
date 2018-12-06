@@ -5,7 +5,7 @@ from mayan.apps.common.tests import BaseTestCase
 from ..compressed_files import Archive, TarArchive, ZipArchive
 
 from .literals import (
-    TEST_COMPRESSED_FILE_CONTENTS, TEST_FILE_CONTENTS_1, TEST_FILE3_PATH,
+    TEST_COMPRESSED_FILE_CONTENTS, TEST_FILE3_PATH, TEST_FILE_CONTENTS_1,
     TEST_FILENAME1, TEST_FILENAME3, TEST_TAR_BZ2_FILE_PATH,
     TEST_TAR_FILE_PATH, TEST_TAR_GZ_FILE_PATH, TEST_ZIP_FILE_PATH
 )

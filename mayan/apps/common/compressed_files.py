@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from io import BytesIO
 import tarfile
 import zipfile
-
 try:
     import zlib  # NOQA
     COMPRESSION = zipfile.ZIP_DEFLATED
