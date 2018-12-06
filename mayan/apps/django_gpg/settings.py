@@ -1,8 +1,5 @@
 from __future__ import unicode_literals
 
-import os
-
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.smart_settings import Namespace

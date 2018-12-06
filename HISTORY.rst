@@ -151,6 +151,9 @@
   ``DOCUMENT_SIGNATURES_STORAGE_BACKEND_ARGUMENTS``. This
   change differentiates them from the setting from the 
   django_gpg app.
+- Updated the django_gpg app to work with the latest
+  version of the python-gnupg package (0.4.3).
+
 
 3.1.9 (2018-11-01)
 ==================

@@ -5,6 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 DEFAULT_GPG_PATH = '/usr/bin/gpg1'
 DEFAULT_SETTING_GPG_BACKEND = 'mayan.apps.django_gpg.classes.PythonGNUPGBackend'
 
+ERROR_MSG_BAD_PASSPHRASE = 'BAD_PASSPHRASE'
+ERROR_MSG_MISSING_PASSPHRASE = 'MISSING_PASSPHRASE'
+
 KEY_TYPES = {
     'pub': _('Public'),
     'sec': _('Secret'),
@@ -34,13 +37,14 @@ KEY_SECONDARY_CLASSES = (
 
 KEYSERVER_DEFAULT_PORT = 11371
 
+OUTPUT_MESSAGE_CONTAINS_PRIVATE_KEY = 'Contains private key'
+
 SIGNATURE_STATE_BAD = 'signature bad'
 SIGNATURE_STATE_NONE = None
 SIGNATURE_STATE_ERROR = 'signature error'
 SIGNATURE_STATE_NO_PUBLIC_KEY = 'no public key'
 SIGNATURE_STATE_GOOD = 'signature good'
 SIGNATURE_STATE_VALID = 'signature valid'
-
 SIGNATURE_STATES = {
     SIGNATURE_STATE_BAD: {
         'text': _('Bad signature.'),
@@ -64,8 +68,3 @@ SIGNATURE_STATES = {
         'text': _('Document is signed with a valid signature.'),
     },
 }
-
-ERROR_MSG_NEED_PASSPHRASE = 'NEED_PASSPHRASE'
-ERROR_MSG_BAD_PASSPHRASE = 'BAD_PASSPHRASE'
-ERROR_MSG_GOOD_PASSPHRASE = 'GOOD_PASSPHRASE'
-OUTPUT_MESSAGE_CONTAINS_PRIVATE_KEY = 'Contains private key'
