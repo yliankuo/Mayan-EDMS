@@ -145,7 +145,12 @@
 - Removed the settings SIGNATURES_GPG_PATH. The path to the
   GPG binary is now passed via the
   SIGNATURES_GPG_BACKEND_ARGUMENTS.
-
+- Renamed the setting ``SIGNATURES_STORAGE_BACKEND`` to
+  ``DOCUMENT_SIGNATURES_STORAGE_BACKEND`` and the setting
+  ``SIGNATURES_STORAGE_BACKEND_ARGUMENTS`` to
+  ``DOCUMENT_SIGNATURES_STORAGE_BACKEND_ARGUMENTS``. This
+  change differentiates them from the setting from the 
+  django_gpg app.
 
 3.1.9 (2018-11-01)
 ==================
