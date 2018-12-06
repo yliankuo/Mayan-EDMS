@@ -1,6 +1,13 @@
 from __future__ import unicode_literals
 
+import platform
+
 from django.utils.translation import ugettext_lazy as _
+
+if platform.system() == 'OpenBSD':
+    DEFAULT_SCANIMAGE_PATH = '/usr/local/bin/scanimage'
+else:
+    DEFAULT_SCANIMAGE_PATH = '/usr/bin/scanimage'
 
 DEFAULT_IMAP_MAILBOX = 'INBOX'
 DEFAULT_INTERVAL = 600

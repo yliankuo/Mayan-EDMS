@@ -153,7 +153,8 @@
   django_gpg app.
 - Updated the django_gpg app to work with the latest
   version of the python-gnupg package (0.4.3).
-
+- Set sensible default path for binaries by detecting
+  the operating system.
 
 3.1.9 (2018-11-01)
 ==================

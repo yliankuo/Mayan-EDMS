@@ -7,10 +7,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.smart_settings import Namespace
 
+from .literals import DEFAULT_SCANIMAGE_PATH
+
 namespace = Namespace(name='sources', label=_('Sources'))
 
 setting_scanimage_path = namespace.add_setting(
-    global_name='SOURCES_SCANIMAGE_PATH', default='/usr/bin/scanimage',
+    global_name='SOURCES_SCANIMAGE_PATH', default=DEFAULT_SCANIMAGE_PATH,
     help_text=_(
         'File path to the scanimage program used to control image scanners.'
     ),

@@ -1,8 +1,14 @@
 from __future__ import unicode_literals
 
+import platform
+
 from django.utils.translation import ugettext_lazy as _
 
-DEFAULT_GPG_PATH = '/usr/bin/gpg1'
+if platform.system() == 'OpenBSD':
+    DEFAULT_GPG_PATH = '/usr/local/bin/gpg'
+else:
+    DEFAULT_GPG_PATH = '/usr/bin/gpg1'
+
 DEFAULT_SETTING_GPG_BACKEND = 'mayan.apps.django_gpg.classes.PythonGNUPGBackend'
 
 ERROR_MSG_BAD_PASSPHRASE = 'BAD_PASSPHRASE'
