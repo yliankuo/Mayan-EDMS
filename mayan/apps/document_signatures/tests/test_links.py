@@ -4,18 +4,19 @@ from django.core.files import File
 from django.urls import reverse
 
 from mayan.apps.documents.tests import (
-    GenericDocumentViewTestCase, TEST_DOCUMENT_PATH
+    TEST_DOCUMENT_PATH, GenericDocumentViewTestCase
 )
 
 from ..links import (
     link_document_version_signature_delete,
-    link_document_version_signature_details,
+    link_document_version_signature_details
 )
 from ..models import DetachedSignature
 from ..permissions import (
     permission_document_version_signature_delete,
     permission_document_version_signature_view
 )
+
 from .literals import TEST_SIGNATURE_FILE_PATH, TEST_SIGNED_DOCUMENT_PATH
 
 

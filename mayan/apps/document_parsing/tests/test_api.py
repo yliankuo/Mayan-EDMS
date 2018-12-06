@@ -4,7 +4,7 @@ from django.test import override_settings
 
 from rest_framework import status
 
-from mayan.apps.documents.tests import DocumentTestMixin, TEST_HYBRID_DOCUMENT
+from mayan.apps.documents.tests import TEST_HYBRID_DOCUMENT, DocumentTestMixin
 from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..permissions import permission_content_view

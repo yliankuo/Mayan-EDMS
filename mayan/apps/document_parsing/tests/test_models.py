@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from mayan.apps.documents.tests import GenericDocumentTestCase, TEST_HYBRID_DOCUMENT
+from mayan.apps.documents.tests import (
+    TEST_HYBRID_DOCUMENT, GenericDocumentTestCase
+)
 
-TEST_DOCUMENT_CONTENT = 'Sample text'
+from .literals import TEST_DOCUMENT_CONTENT
 
 
 class DocumentAutoParsingTestCase(GenericDocumentTestCase):

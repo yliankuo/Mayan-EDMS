@@ -2,22 +2,22 @@ from __future__ import unicode_literals
 
 from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.documents.tests import (
-    GenericDocumentViewTestCase, TEST_SMALL_DOCUMENT_PATH
+    TEST_SMALL_DOCUMENT_PATH, GenericDocumentViewTestCase
 )
 
 from ..models import Workflow, WorkflowState, WorkflowTransition
 from ..permissions import (
     permission_workflow_create, permission_workflow_delete,
-    permission_workflow_edit, permission_workflow_view,
-    permission_workflow_tools, permission_workflow_transition
+    permission_workflow_edit, permission_workflow_tools,
+    permission_workflow_transition, permission_workflow_view
 )
 
 from .literals import (
-    TEST_WORKFLOW_INITIAL_STATE_LABEL, TEST_WORKFLOW_INITIAL_STATE_COMPLETION,
+    TEST_WORKFLOW_INITIAL_STATE_COMPLETION, TEST_WORKFLOW_INITIAL_STATE_LABEL,
     TEST_WORKFLOW_INTERNAL_NAME, TEST_WORKFLOW_LABEL,
-    TEST_WORKFLOW_LABEL_EDITED, TEST_WORKFLOW_STATE_LABEL,
-    TEST_WORKFLOW_STATE_LABEL_EDITED, TEST_WORKFLOW_STATE_COMPLETION,
-    TEST_WORKFLOW_TRANSITION_LABEL, TEST_WORKFLOW_TRANSITION_LABEL_EDITED,
+    TEST_WORKFLOW_LABEL_EDITED, TEST_WORKFLOW_STATE_COMPLETION,
+    TEST_WORKFLOW_STATE_LABEL, TEST_WORKFLOW_STATE_LABEL_EDITED,
+    TEST_WORKFLOW_TRANSITION_LABEL, TEST_WORKFLOW_TRANSITION_LABEL_EDITED
 )
 from .mixins import WorkflowTestMixin
 

@@ -24,22 +24,23 @@ from .handlers import (
     handler_index_document, handler_trigger_transition, launch_workflow
 )
 from .links import (
-    link_document_workflow_instance_list, link_setup_workflow_document_types,
-    link_setup_workflow_create, link_setup_workflow_delete,
+    link_document_workflow_instance_list, link_setup_workflow_create,
+    link_setup_workflow_delete, link_setup_workflow_document_types,
     link_setup_workflow_edit, link_setup_workflow_list,
-    link_setup_workflow_states, link_setup_workflow_state_action_delete,
+    link_setup_workflow_state_action_delete,
     link_setup_workflow_state_action_edit,
     link_setup_workflow_state_action_list,
     link_setup_workflow_state_action_selection,
     link_setup_workflow_state_create, link_setup_workflow_state_delete,
-    link_setup_workflow_state_edit, link_setup_workflow_transitions,
+    link_setup_workflow_state_edit, link_setup_workflow_states,
     link_setup_workflow_transition_create,
     link_setup_workflow_transition_delete, link_setup_workflow_transition_edit,
-    link_tool_launch_all_workflows, link_workflow_instance_detail,
-    link_workflow_instance_transition, link_workflow_document_list,
-    link_workflow_list, link_workflow_preview,
-    link_workflow_state_document_list, link_workflow_state_list,
-    link_workflow_instance_transition_events
+    link_setup_workflow_transitions, link_tool_launch_all_workflows,
+    link_workflow_document_list, link_workflow_instance_detail,
+    link_workflow_instance_transition,
+    link_workflow_instance_transition_events, link_workflow_list,
+    link_workflow_preview, link_workflow_state_document_list,
+    link_workflow_state_list
 )
 from .permissions import (
     permission_workflow_delete, permission_workflow_edit,

@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 
-from datetime import timedelta
 import logging
-
-from kombu import Exchange, Queue
+from datetime import timedelta
 
 from django.apps import apps
 from django.db.models.signals import post_save
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+
+from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
@@ -17,7 +17,7 @@ from mayan.apps.common import (
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.common.settings import settings_db_sync_task_delay
-from mayan.apps.documents.search import document_search, document_page_search
+from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.signals import post_version_upload
 from mayan.apps.documents.widgets import document_link
 from mayan.apps.navigation import SourceColumn
@@ -29,9 +29,9 @@ from .handlers import (
     handler_parse_document_version
 )
 from .links import (
-    link_document_content, link_document_page_content,
-    link_document_content_download, link_document_parsing_errors_list,
-    link_document_submit_multiple, link_document_submit,
+    link_document_content, link_document_content_download,
+    link_document_page_content, link_document_parsing_errors_list,
+    link_document_submit, link_document_submit_multiple,
     link_document_type_parsing_settings, link_document_type_submit,
     link_error_list
 )

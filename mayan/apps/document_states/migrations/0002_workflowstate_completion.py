@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,10 +14,10 @@ class Migration(migrations.Migration):
             model_name='workflowstate',
             name='completion',
             field=models.IntegerField(
-                default=0, help_text='Enter the percent of completion that '
-                'this state represents in relation to the workflow. Use '
-                'numbers without the percent sign.', verbose_name='Completion',
-                blank=True
+                blank=True, default=0, help_text='Enter the percent of '
+                'completion that this state represents in relation to the '
+                'workflow. Use numbers without the percent sign.',
+                verbose_name='Completion',
             ),
             preserve_default=True,
         ),

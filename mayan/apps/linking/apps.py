@@ -5,7 +5,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
-from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_object, menu_secondary,
     menu_setup, menu_sidebar
@@ -14,9 +16,9 @@ from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
 
 from .links import (
-    link_smart_link_create, link_smart_link_condition_create,
-    link_smart_link_condition_delete, link_smart_link_condition_edit,
-    link_smart_link_condition_list, link_smart_link_delete,
+    link_smart_link_condition_create, link_smart_link_condition_delete,
+    link_smart_link_condition_edit, link_smart_link_condition_list,
+    link_smart_link_create, link_smart_link_delete,
     link_smart_link_document_types, link_smart_link_edit,
     link_smart_link_instance_view, link_smart_link_instances_for_document,
     link_smart_link_list, link_smart_link_setup

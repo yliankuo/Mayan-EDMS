@@ -9,7 +9,7 @@ from django_downloadview.test import assert_download_response
 from mayan.apps.django_gpg.models import Key
 from mayan.apps.documents.models import DocumentVersion
 from mayan.apps.documents.tests import (
-    GenericDocumentViewTestCase, TEST_DOCUMENT_PATH
+    TEST_DOCUMENT_PATH, GenericDocumentViewTestCase
 )
 
 from ..models import DetachedSignature, EmbeddedSignature
@@ -22,7 +22,7 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_SIGNATURE_FILE_PATH, TEST_SIGNED_DOCUMENT_PATH, TEST_KEY_FILE
+    TEST_KEY_FILE, TEST_SIGNATURE_FILE_PATH, TEST_SIGNED_DOCUMENT_PATH
 )
 
 TEST_UNSIGNED_DOCUMENT_COUNT = 4

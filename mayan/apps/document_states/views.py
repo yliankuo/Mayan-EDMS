@@ -32,18 +32,17 @@ from .icons import (
     icon_workflow_transition
 )
 from .links import (
-    link_setup_workflow_create, link_setup_workflow_state_create,
-    link_setup_workflow_state_action_selection,
-    link_setup_workflow_transition_create
+    link_setup_workflow_create, link_setup_workflow_state_action_selection,
+    link_setup_workflow_state_create, link_setup_workflow_transition_create
 )
 from .models import (
-    Workflow, WorkflowInstance, WorkflowState, WorkflowStateAction,
-    WorkflowTransition, WorkflowRuntimeProxy, WorkflowStateRuntimeProxy,
+    Workflow, WorkflowInstance, WorkflowRuntimeProxy, WorkflowState,
+    WorkflowStateAction, WorkflowStateRuntimeProxy, WorkflowTransition
 )
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
     permission_workflow_edit, permission_workflow_tools,
-    permission_workflow_view,
+    permission_workflow_view
 )
 from .tasks import task_launch_all_workflows
 

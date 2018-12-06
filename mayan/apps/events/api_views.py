@@ -14,7 +14,7 @@ from .classes import EventType, EventTypeNamespace
 from .models import Notification
 from .permissions import permission_events_view
 from .serializers import (
-    EventSerializer, EventTypeSerializer, EventTypeNamespaceSerializer,
+    EventSerializer, EventTypeNamespaceSerializer, EventTypeSerializer,
     NotificationSerializer
 )
 

@@ -9,8 +9,8 @@ from graphviz import Digraph
 
 from django.conf import settings
 from django.core import serializers
-from django.core.files.base import ContentFile
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.files.base import ContentFile
 from django.db import IntegrityError, models
 from django.db.models import F, Max, Q
 from django.urls import reverse
@@ -25,8 +25,8 @@ from mayan.apps.events.models import StoredEventType
 
 from .error_logs import error_log_state_actions
 from .literals import (
-    WORKFLOW_ACTION_WHEN_CHOICES, WORKFLOW_ACTION_ON_ENTRY,
-    WORKFLOW_ACTION_ON_EXIT
+    WORKFLOW_ACTION_ON_ENTRY, WORKFLOW_ACTION_ON_EXIT,
+    WORKFLOW_ACTION_WHEN_CHOICES
 )
 from .managers import WorkflowManager
 from .permissions import permission_workflow_transition

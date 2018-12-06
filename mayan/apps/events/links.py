@@ -6,9 +6,9 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.navigation import Link
 
 from .icons import (
-    icon_events_list, icon_events_for_object,
-    icon_event_types_subscriptions_list,
-    icon_events_user_list, icon_object_event_types_user_subcriptions_list,
+    icon_event_types_subscriptions_list, icon_events_for_object,
+    icon_events_list, icon_events_user_list,
+    icon_object_event_types_user_subcriptions_list,
     icon_user_notifications_list
 )
 from .permissions import permission_events_view

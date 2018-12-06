@@ -10,7 +10,6 @@ from .permissions import (
     permission_message_edit, permission_message_view
 )
 
-
 link_message_create = Link(
     icon_class=icon_message_create, permissions=(permission_message_create,),
     text=_('Create message'), view='motd:message_create'

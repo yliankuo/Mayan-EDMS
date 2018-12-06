@@ -7,7 +7,8 @@ from jinja2 import Template
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
@@ -19,7 +20,7 @@ from mayan.apps.lock_manager import LockError
 from mayan.apps.lock_manager.runtime import locking_backend
 
 from .managers import (
-    DocumentIndexInstanceNodeManager, IndexManager, IndexInstanceNodeManager
+    DocumentIndexInstanceNodeManager, IndexInstanceNodeManager, IndexManager
 )
 
 logger = logging.getLogger(__name__)

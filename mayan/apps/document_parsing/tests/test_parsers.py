@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.documents.tests import DocumentTestMixin, TEST_HYBRID_DOCUMENT
+from mayan.apps.documents.tests import TEST_HYBRID_DOCUMENT, DocumentTestMixin
 
 from ..parsers import PopplerParser
 
-TEST_DOCUMENT_CONTENT = 'Sample text'
+from .literals import TEST_DOCUMENT_CONTENT
 
 
 @override_settings(OCR_AUTO_OCR=False)

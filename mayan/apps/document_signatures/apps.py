@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 
 import logging
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.utils.translation import ugettext_lazy as _
+
+from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
@@ -17,15 +17,14 @@ from mayan.celery import app
 
 from .handlers import unverify_key_signatures, verify_key_signatures
 from .links import (
-    link_all_document_version_signature_verify,
-    link_document_signature_list,
+    link_all_document_version_signature_verify, link_document_signature_list,
     link_document_version_signature_delete,
     link_document_version_signature_detached_create,
-    link_document_version_signature_embedded_create,
     link_document_version_signature_details,
     link_document_version_signature_download,
+    link_document_version_signature_embedded_create,
     link_document_version_signature_list,
-    link_document_version_signature_upload,
+    link_document_version_signature_upload
 )
 from .permissions import (
     permission_document_version_sign_detached,
@@ -33,7 +32,7 @@ from .permissions import (
     permission_document_version_signature_delete,
     permission_document_version_signature_download,
     permission_document_version_signature_upload,
-    permission_document_version_signature_view,
+    permission_document_version_signature_view
 )
 from .queues import *  # NOQA
 

@@ -22,8 +22,7 @@ from mayan.apps.django_gpg.permissions import permission_key_sign
 from mayan.apps.documents.models import DocumentVersion
 
 from .forms import (
-    DocumentVersionSignatureCreateForm,
-    DocumentVersionSignatureDetailForm
+    DocumentVersionSignatureCreateForm, DocumentVersionSignatureDetailForm
 )
 from .icons import icon_document_signature_list
 from .links import (
@@ -39,7 +38,7 @@ from .permissions import (
     permission_document_version_signature_download,
     permission_document_version_signature_upload,
     permission_document_version_signature_verify,
-    permission_document_version_signature_view,
+    permission_document_version_signature_view
 )
 from .tasks import task_verify_missing_embedded_signature
 

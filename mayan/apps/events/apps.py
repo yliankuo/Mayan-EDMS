@@ -11,12 +11,12 @@ from mayan.apps.common import (
 from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
 
-from .links import (
-    link_events_list, link_event_types_subscriptions_list,
-    link_notification_mark_read, link_notification_mark_read_all,
-    link_user_events, link_user_notifications_list,
-)
 from .licenses import *  # NOQA
+from .links import (
+    link_event_types_subscriptions_list, link_events_list,
+    link_notification_mark_read, link_notification_mark_read_all,
+    link_user_events, link_user_notifications_list
+)
 from .widgets import event_object_link, event_type_link, event_user_link
 
 

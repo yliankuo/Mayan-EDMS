@@ -5,13 +5,13 @@ from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.tests import (
-    DocumentTestMixin, TEST_SMALL_DOCUMENT_PATH
+    TEST_SMALL_DOCUMENT_PATH, DocumentTestMixin
 )
 from mayan.apps.documents.tests.literals import (
     TEST_DOCUMENT_DESCRIPTION, TEST_DOCUMENT_DESCRIPTION_EDITED,
     TEST_DOCUMENT_LABEL_EDITED
 )
-from mayan.apps.metadata.models import MetadataType, DocumentTypeMetadataType
+from mayan.apps.metadata.models import DocumentTypeMetadataType, MetadataType
 
 from ..models import Index, IndexInstanceNode, IndexTemplateNode
 

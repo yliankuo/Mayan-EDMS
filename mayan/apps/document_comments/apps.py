@@ -4,7 +4,9 @@ from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
-from mayan.apps.common import MayanAppConfig, menu_facet, menu_object, menu_sidebar
+from mayan.apps.common import (
+    MayanAppConfig, menu_facet, menu_object, menu_sidebar
+)
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.events import ModelEventType
 from mayan.apps.navigation import SourceColumn

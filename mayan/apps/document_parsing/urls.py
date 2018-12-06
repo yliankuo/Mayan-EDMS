@@ -4,10 +4,9 @@ from django.conf.urls import url
 
 from .api_views import APIDocumentPageContentView
 from .views import (
-    DocumentContentView, DocumentContentDownloadView,
-    DocumentPageContentView, DocumentParsingErrorsListView,
-    DocumentSubmitView, DocumentTypeSettingsEditView, DocumentTypeSubmitView,
-    ParseErrorListView
+    DocumentContentDownloadView, DocumentContentView, DocumentPageContentView,
+    DocumentParsingErrorsListView, DocumentSubmitView,
+    DocumentTypeSettingsEditView, DocumentTypeSubmitView, ParseErrorListView
 )
 
 urlpatterns = [

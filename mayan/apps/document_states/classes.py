@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-from importlib import import_module
 import logging
+from importlib import import_module
 
 from django.apps import apps
 from django.utils import six

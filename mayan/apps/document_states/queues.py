@@ -4,7 +4,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.task_manager.classes import CeleryQueue
 
-
 queue_document_states = CeleryQueue(
     name='document_states', label=_('Document states')
 )

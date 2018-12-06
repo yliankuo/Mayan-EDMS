@@ -9,8 +9,8 @@ from .api_views import (
 )
 from .views import (
     DocumentIndexNodeListView, IndexInstanceNodeView, IndexListView,
-    RebuildIndexesView, SetupIndexDocumentTypesView, SetupIndexCreateView,
-    SetupIndexDeleteView, SetupIndexEditView, SetupIndexListView,
+    RebuildIndexesView, SetupIndexCreateView, SetupIndexDeleteView,
+    SetupIndexDocumentTypesView, SetupIndexEditView, SetupIndexListView,
     SetupIndexTreeTemplateListView, TemplateNodeCreateView,
     TemplateNodeDeleteView, TemplateNodeEditView
 )

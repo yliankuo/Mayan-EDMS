@@ -13,14 +13,16 @@ from mayan.apps.django_gpg.tests.literals import (
     TEST_KEY_DATA, TEST_KEY_PASSPHRASE
 )
 from mayan.apps.documents.models import DocumentType, DocumentVersion
-from mayan.apps.documents.tests import TEST_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
+)
 
 from ..models import DetachedSignature, EmbeddedSignature
 from ..tasks import task_verify_missing_embedded_signature
 
 from .literals import (
-    TEST_SIGNED_DOCUMENT_PATH, TEST_SIGNATURE_FILE_PATH, TEST_KEY_FILE,
-    TEST_KEY_ID, TEST_SIGNATURE_ID
+    TEST_KEY_FILE, TEST_KEY_ID, TEST_SIGNATURE_FILE_PATH, TEST_SIGNATURE_ID,
+    TEST_SIGNED_DOCUMENT_PATH
 )
 
 

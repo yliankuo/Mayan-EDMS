@@ -1,37 +1,41 @@
 from __future__ import absolute_import, unicode_literals
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.utils.translation import ugettext_lazy as _
 
+from kombu import Exchange, Queue
+
 from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
-from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_main, menu_object,
     menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.widgets import TwoStateWidget
-from mayan.apps.documents.signals import post_document_created, post_initial_document_type
+from mayan.apps.documents.signals import (
+    post_document_created, post_initial_document_type
+)
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
 from .handlers import (
     create_default_document_index, handler_delete_empty,
-    handler_index_document, handler_remove_document,
-    handler_post_save_index_document
+    handler_index_document, handler_post_save_index_document,
+    handler_remove_document
 )
+from .licenses import *  # NOQA
 from .links import (
     link_document_index_list, link_index_main_menu, link_index_setup,
-    link_index_setup_create, link_index_setup_document_types,
-    link_index_setup_delete, link_index_setup_edit, link_index_setup_list,
-    link_index_setup_view, link_rebuild_index_instances,
+    link_index_setup_create, link_index_setup_delete,
+    link_index_setup_document_types, link_index_setup_edit,
+    link_index_setup_list, link_index_setup_view, link_rebuild_index_instances,
     link_template_node_create, link_template_node_delete,
     link_template_node_edit
 )
-from .licenses import *  # NOQA
 from .permissions import (
     permission_document_indexing_create, permission_document_indexing_delete,
     permission_document_indexing_edit,

@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from rest_framework import status
 
-from mayan.apps.documents.search import document_search
 from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.documents.search import document_search
 from mayan.apps.documents.tests import DocumentTestMixin
 from mayan.apps.rest_api.tests import BaseAPITestCase
 

@@ -8,7 +8,7 @@ from django.views.generic.base import RedirectView
 
 from mayan.apps.common.generics import SimpleView, SingleObjectListView
 
-from .forms import SearchForm, AdvancedSearchForm
+from .forms import AdvancedSearchForm, SearchForm
 from .icons import icon_search_submit
 from .mixins import SearchModelMixin
 from .settings import setting_limit

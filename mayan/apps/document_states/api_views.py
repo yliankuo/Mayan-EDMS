@@ -20,7 +20,7 @@ from .permissions import (
 )
 from .serializers import (
     NewWorkflowDocumentTypeSerializer, WorkflowDocumentTypeSerializer,
-    WorkflowInstanceSerializer, WorkflowInstanceLogEntrySerializer,
+    WorkflowInstanceLogEntrySerializer, WorkflowInstanceSerializer,
     WorkflowSerializer, WorkflowStateSerializer, WorkflowTransitionSerializer,
     WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
     WritableWorkflowTransitionSerializer
