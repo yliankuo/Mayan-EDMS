@@ -242,7 +242,6 @@ TEST_RUNNER = 'mayan.apps.common.tests.runner.MayanTestRunner'
 
 # --------- Django -------------------
 
-HOME_VIEW = yaml_loads(os.environ.get('MAYAN_HOME_VIEW', 'common:home'))
 LOGIN_URL = yaml_loads(
     os.environ.get('MAYAN_LOGIN_URL', 'authentication:login_view')
 )

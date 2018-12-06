@@ -31,6 +31,7 @@ from .generics import (  # NOQA
 from .icons import icon_setup
 from .menus import menu_setup, menu_tools
 from .permissions_runtime import permission_error_log_view
+from .settings import setting_home_view
 from .utils import check_version
 
 
@@ -242,7 +243,7 @@ class PackagesLicensesView(SimpleView):
 
 
 class RootView(SimpleView):
-    extra_context = {'home_view': settings.HOME_VIEW}
+    extra_context = {'home_view': setting_home_view.value}
     template_name = 'appearance/root.html'
 
 

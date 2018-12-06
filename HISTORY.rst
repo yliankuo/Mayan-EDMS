@@ -155,6 +155,9 @@
   version of the python-gnupg package (0.4.3).
 - Set sensible default path for binaries by detecting
   the operating system.
+- The HOME_VIEW setting is not a Django setting but a setting
+  from the common app. The HOME_VIEW has been moved to the
+  COMMON namespace and renamed to COMMON_HOME_VIEW.
 
 3.1.9 (2018-11-01)
 ==================
