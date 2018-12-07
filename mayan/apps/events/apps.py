@@ -13,9 +13,10 @@ from mayan.apps.navigation import SourceColumn
 
 from .licenses import *  # NOQA
 from .links import (
-    link_event_types_subscriptions_list, link_events_list,
-    link_notification_mark_read, link_notification_mark_read_all,
-    link_user_events, link_user_notifications_list
+    link_current_user_events, link_event_types_subscriptions_list,
+    link_events_list, link_notification_mark_read,
+    link_notification_mark_read_all, link_user_events,
+    link_user_notifications_list
 )
 from .widgets import event_object_link, event_type_link, event_user_link
 
@@ -96,4 +97,8 @@ class EventsApp(MayanAppConfig):
             sources=('events:user_notifications_list',)
         )
         menu_tools.bind_links(links=(link_events_list,))
-        menu_user.bind_links(links=(link_event_types_subscriptions_list,))
+        menu_user.bind_links(
+            links=(
+                link_event_types_subscriptions_list, link_current_user_events
+            )
+        )

@@ -298,6 +298,13 @@ class UserEventListView(SingleObjectListView):
         return get_object_or_404(get_user_model(), pk=self.kwargs['pk'])
 
 
+class CurrentUserEventListView(UserEventListView):
+    view_permission = None
+
+    def get_user(self):
+        return self.request.user
+
+
 class VerbEventListView(SingleObjectListView):
     def get_extra_context(self):
         return {

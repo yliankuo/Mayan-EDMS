@@ -36,9 +36,9 @@ def get_notification_count(context):
     return context['request'].user.notifications.filter(read=False).count()
 
 
-link_events_list = Link(
-    icon_class=icon_events_list, permissions=(permission_events_view,),
-    text=_('Events'), view='events:events_list'
+link_current_user_events = Link(
+    icon_class=icon_events_user_list, text=_('My events'),
+    view='events:current_user_events'
 )
 link_events_details = Link(
     text=_('Events'), view='events:events_list'
@@ -48,6 +48,10 @@ link_events_for_object = Link(
     kwargs=get_kwargs_factory('resolved_object'),
     permissions=(permission_events_view,), text=_('Events'),
     view='events:events_for_object',
+)
+link_events_list = Link(
+    icon_class=icon_events_list, permissions=(permission_events_view,),
+    text=_('Events'), view='events:events_list'
 )
 link_event_types_subscriptions_list = Link(
     icon_class=icon_event_types_subscriptions_list,
