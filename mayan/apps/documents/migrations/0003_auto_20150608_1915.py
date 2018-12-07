@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='uuid',
             field=models.CharField(
-                default=mayan.apps.documents.models.UUID_FUNCTION,
+                default=mayan.apps.documents.utils.document_uuid_function,
                 editable=False, max_length=48,
             ),
             preserve_default=True,
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name='file',
             field=models.FileField(
                 storage=FileSystemStorage(),
-                upload_to=mayan.apps.documents.models.UUID_FUNCTION,
+                upload_to=mayan.apps.documents.utils.document_uuid_function,
                 verbose_name='File'
             ),
             preserve_default=True,

@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import hashlib
 import logging
 import os
 import uuid
@@ -55,17 +54,9 @@ from .signals import (
     post_document_created, post_document_type_change, post_version_upload
 )
 from .storages import storage_documentversion
+from .utils import document_hash_function, document_uuid_function
 
 logger = logging.getLogger(__name__)
-
-
-# document image cache name hash function
-def HASH_FUNCTION(data):
-    return hashlib.sha256(data).hexdigest()
-
-
-def UUID_FUNCTION(*args, **kwargs):
-    return force_text(uuid.uuid4())
 
 
 @python_2_unicode_compatible
@@ -433,7 +424,7 @@ class DocumentVersion(models.Model):
 
     # File related fields
     file = models.FileField(
-        storage=storage_documentversion, upload_to=UUID_FUNCTION,
+        storage=storage_documentversion, upload_to=document_uuid_function,
         verbose_name=_('File')
     )
     mimetype = models.CharField(
@@ -701,7 +692,7 @@ class DocumentVersion(models.Model):
         """
         if self.exists():
             source = self.open()
-            self.checksum = force_text(HASH_FUNCTION(source.read()))
+            self.checksum = force_text(document_hash_function(source.read()))
             source.close()
             if save:
                 self.save()

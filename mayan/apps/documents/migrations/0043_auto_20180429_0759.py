@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             field=models.FileField(
                 storage=django.core.files.storage.FileSystemStorage(
                     location=b'/home/rosarior/development/mayan-edms/mayan/media/document_storage'
-                ), upload_to=mayan.apps.documents.models.UUID_FUNCTION,
+                ), upload_to=mayan.apps.documents.utils.document_uuid_function,
                 verbose_name='File'
             ),
             model_name='documentversion', name='file',
