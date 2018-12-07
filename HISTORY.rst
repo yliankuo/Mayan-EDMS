@@ -159,6 +159,10 @@
   from the common app. The HOME_VIEW has been moved to the
   COMMON namespace and renamed to COMMON_HOME_VIEW.
 - New link added to display the events of the current user.
+- Incorporate the django-autoadmin app and convert it
+  into a Mayan app. With change adds the new settings:
+  "COMMON_AUTOADMIN_EMAIL", "AUTOADMIN_PASSWORD", and
+  "AUTOADMIN_USERNAME".
 
 3.1.9 (2018-11-01)
 ==================
