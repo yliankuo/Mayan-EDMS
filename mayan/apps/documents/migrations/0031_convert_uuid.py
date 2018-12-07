@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import uuid
@@ -6,7 +5,7 @@ import uuid
 from django.db import migrations
 
 
-def convert_uuid_to_hex(apps, schema_editor):
+def operation_convert_uuid_to_hex(apps, schema_editor):
     Document = apps.get_model('documents', 'Document')
 
     for document in Document.objects.using(schema_editor.connection.alias).all():
@@ -21,5 +20,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(convert_uuid_to_hex),
+        migrations.RunPython(code=operation_convert_uuid_to_hex),
     ]

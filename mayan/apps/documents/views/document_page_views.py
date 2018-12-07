@@ -20,8 +20,8 @@ from ..forms import DocumentPageForm
 from ..models import Document, DocumentPage
 from ..permissions import permission_document_view
 from ..settings import (
-    setting_rotation_step, setting_zoom_percent_step, setting_zoom_max_level,
-    setting_zoom_min_level
+    setting_rotation_step, setting_zoom_max_level, setting_zoom_min_level,
+    setting_zoom_percent_step
 )
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.permissions import permission_document_view
-from mayan.apps.documents.search import document_search, document_page_search
+from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.tests import DocumentTestMixin
 
 

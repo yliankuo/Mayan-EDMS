@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-
 DEFAULT_DOCUMENT_BODY_TEMPLATE = _(
     'Attached to this email is the document: {{ document }}\n\n '
     '--------\n '

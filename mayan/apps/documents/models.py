@@ -11,21 +11,22 @@ from django.apps import apps
 from django.conf import settings
 from django.core.files import File
 from django.db import models, transaction
-from django.template import Template, Context
+from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.literals import TIME_DELTA_UNIT_CHOICES
 from mayan.apps.converter import (
-    converter_class, BaseTransformation, TransformationResize,
-    TransformationRotate, TransformationZoom
+    BaseTransformation, TransformationResize, TransformationRotate,
+    TransformationZoom, converter_class
 )
 from mayan.apps.converter.exceptions import InvalidOfficeFormat, PageCountError
-from mayan.apps.converter.literals import DEFAULT_ZOOM_LEVEL, DEFAULT_ROTATION
+from mayan.apps.converter.literals import DEFAULT_ROTATION, DEFAULT_ZOOM_LEVEL
 from mayan.apps.converter.models import Transformation
 from mayan.apps.mimetype.api import get_mimetype
 
@@ -36,17 +37,18 @@ from .events import (
     event_document_version_revert
 )
 from .literals import (
-    DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT, DOCUMENT_IMAGES_CACHE_NAME
+    DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT,
+    DOCUMENT_IMAGES_CACHE_NAME
 )
 from .managers import (
-    DocumentManager, DocumentPageManager, DocumentVersionManager,
-    DocumentTypeManager, DuplicatedDocumentManager, FavoriteDocumentManager,
+    DocumentManager, DocumentPageManager, DocumentTypeManager,
+    DocumentVersionManager, DuplicatedDocumentManager, FavoriteDocumentManager,
     PassthroughManager, RecentDocumentManager, TrashCanManager
 )
 from .permissions import permission_document_view
 from .settings import (
     setting_disable_base_image_cache, setting_disable_transformed_image_cache,
-    setting_display_width, setting_display_height, setting_fix_orientation,
+    setting_display_height, setting_display_width, setting_fix_orientation,
     setting_language, setting_zoom_max_level, setting_zoom_min_level
 )
 from .signals import (

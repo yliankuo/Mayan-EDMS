@@ -7,8 +7,8 @@ from django.conf import settings
 from ..models import DocumentType
 
 from .literals import (
-    TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_FILENAME,
-    TEST_DOCUMENT_TYPE_QUICK_LABEL
+    TEST_DOCUMENT_TYPE_LABEL, TEST_DOCUMENT_TYPE_QUICK_LABEL,
+    TEST_SMALL_DOCUMENT_FILENAME
 )
 
 __all__ = ('DocumentTestMixin',)

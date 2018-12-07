@@ -7,7 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.forms import DynamicModelForm
-from mayan.apps.common.settings import setting_project_title, setting_project_url
+from mayan.apps.common.settings import (
+    setting_project_title, setting_project_url
+)
 
 from .classes import MailerBackend
 from .models import UserMailer

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='description',
             field=models.TextField(
-                default='', null=True, verbose_name='Description', blank=True
+                blank=True, default='', null=True, verbose_name='Description'
             ),
             preserve_default=True,
         ),
@@ -23,9 +22,9 @@ class Migration(migrations.Migration):
             model_name='document',
             name='label',
             field=models.CharField(
-                default='', max_length=255, blank=True,
-                help_text='The name of the document', null=True,
-                verbose_name='Label', db_index=True
+                blank=True, db_index=True, default='',
+                help_text='The name of the document', max_length=255,
+                null=True, verbose_name='Label'
             ),
             preserve_default=True,
         ),
@@ -33,7 +32,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='language',
             field=models.CharField(
-                default='eng', choices=[
+                blank=True, choices=[
                     ['aar', 'Afar'],
                     ['abk', 'Abkhazian'],
                     ['ace', 'Achinese'],
@@ -539,9 +538,8 @@ class Migration(migrations.Migration):
                     ['zun', 'Zuni'],
                     ['zxx', 'No linguistic content; Not applicable'],
                     ['zza', 'Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki']
-                ], max_length=8, blank=True, null=True,
+                ], default='eng', max_length=8, null=True,
                 verbose_name='Language'
-            ),
-            preserve_default=True,
+            ), preserve_default=True,
         ),
     ]

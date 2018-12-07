@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import os
@@ -22,7 +20,7 @@ from ..permissions import (
 from .base import GenericDocumentViewTestCase
 from .literals import (
     TEST_DOCUMENT_TYPE_2_LABEL, TEST_SMALL_DOCUMENT_FILENAME,
-    TEST_TRANSFORMATION_ARGUMENT, TEST_TRANSFORMATION_NAME,
+    TEST_TRANSFORMATION_ARGUMENT, TEST_TRANSFORMATION_NAME
 )
 from .mixins import DocumentTypeQuickLabelTestMixin
 

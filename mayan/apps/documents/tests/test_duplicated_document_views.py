@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 from ..permissions import permission_document_view
 
 from .base import GenericDocumentViewTestCase
-from .literals import (
-    TEST_SMALL_DOCUMENT_FILENAME, TEST_SMALL_DOCUMENT_PATH,
-)
+from .literals import TEST_SMALL_DOCUMENT_FILENAME, TEST_SMALL_DOCUMENT_PATH
 
 
 class DuplicatedDocumentsViewsTestCase(GenericDocumentViewTestCase):

@@ -14,9 +14,7 @@ from mayan.apps.common.generics import (
 )
 
 from ..forms import DocumentTypeFilenameForm_create
-from ..icons import (
-    icon_document_type_filename, icon_document_type_setup
-)
+from ..icons import icon_document_type_filename, icon_document_type_setup
 from ..links import (
     link_document_type_create, link_document_type_filename_create
 )

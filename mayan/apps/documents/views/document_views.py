@@ -8,7 +8,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.http import urlencode
-from django.utils.translation import ugettext_lazy as _, ungettext
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.compressed_files import ZipArchive
@@ -29,14 +30,14 @@ from ..events import event_document_download, event_document_view
 from ..forms import (
     DocumentDownloadForm, DocumentForm, DocumentPageNumberForm,
     DocumentPreviewForm, DocumentPrintForm, DocumentPropertiesForm,
-    DocumentTypeSelectForm,
+    DocumentTypeSelectForm
 )
 from ..icons import (
     icon_document_list, icon_document_list_deleted,
     icon_document_list_favorites, icon_document_list_recent_access,
     icon_document_list_recent_added, icon_duplicated_document_list
 )
-from ..literals import PAGE_RANGE_RANGE, DEFAULT_ZIP_FILENAME
+from ..literals import DEFAULT_ZIP_FILENAME, PAGE_RANGE_RANGE
 from ..models import (
     DeletedDocument, Document, DuplicatedDocument, FavoriteDocument,
     RecentDocument
@@ -49,7 +50,7 @@ from ..permissions import (
     permission_empty_trash
 )
 from ..settings import (
-    setting_favorite_count, setting_print_width, setting_print_height,
+    setting_favorite_count, setting_print_height, setting_print_width,
     setting_recent_added_count
 )
 from ..tasks import task_delete_document, task_update_page_count

@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 from ..permissions import (
-    permission_document_version_revert, permission_document_version_view,
+    permission_document_version_revert, permission_document_version_view
 )
 
 from .base import GenericDocumentViewTestCase
-from .literals import (
-    TEST_SMALL_DOCUMENT_PATH, TEST_VERSION_COMMENT
-)
+from .literals import TEST_SMALL_DOCUMENT_PATH, TEST_VERSION_COMMENT
 
 
 class DocumentVersionTestCase(GenericDocumentViewTestCase):

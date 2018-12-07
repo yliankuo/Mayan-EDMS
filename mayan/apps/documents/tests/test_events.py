@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 from actstream.models import Action
@@ -15,7 +13,6 @@ from ..permissions import (
 )
 
 from .base import GenericDocumentViewTestCase
-
 
 TEST_DOCUMENT_TYPE_EDITED_LABEL = 'test document type edited label'
 TEST_DOCUMENT_TYPE_2_LABEL = 'test document type 2 label'

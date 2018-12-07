@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import migrations, models
@@ -12,31 +11,36 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='DocumentPageCachedImage',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('filename', models.CharField(max_length=128, verbose_name='Filename')),
-            ],
-            options={
+                (
+                    'id', models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID',
+                    )
+                ),
+                (
+                    'filename', models.CharField(
+                        max_length=128, verbose_name='Filename'
+                    )
+                ),
+            ], name='DocumentPageCachedImage', options={
                 'verbose_name': 'Document page cached image',
                 'verbose_name_plural': 'Document page cached images',
             },
         ),
         migrations.CreateModel(
-            name='DocumentPageResult',
-            fields=[
-            ],
-            options={
+            bases=('documents.documentpage',), fields=[],
+            name='DocumentPageResult', options={
                 'ordering': ('document_version__document', 'page_number'),
-                'verbose_name': 'Document page',
-                'proxy': True,
+                'proxy': True, 'verbose_name': 'Document page',
                 'verbose_name_plural': 'Document pages',
             },
-            bases=('documents.documentpage',),
         ),
         migrations.AddField(
-            model_name='documentpagecachedimage',
-            name='document_page',
-            field=models.ForeignKey(related_name='cached_images', verbose_name='Document page', to='documents.DocumentPage'),
+            field=models.ForeignKey(
+                related_name='cached_images', to='documents.DocumentPage',
+                verbose_name='Document page'
+            ),
+            model_name='documentpagecachedimage', name='document_page',
         ),
     ]

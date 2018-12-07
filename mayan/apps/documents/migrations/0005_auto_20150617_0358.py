@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import migrations
@@ -12,8 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameField(
-            model_name='documentpage',
+            model_name='documentpage', new_name='content_old',
             old_name='content',
-            new_name='content_old',
         ),
     ]

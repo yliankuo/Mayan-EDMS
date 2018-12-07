@@ -7,16 +7,14 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.common.classes import DashboardWidgetNumeric
 
 from .icons import (
-    icon_dashboard_documents_in_trash, icon_dashboard_document_types,
-    icon_dashboard_pages_per_month, icon_dashboard_new_documents_this_month,
+    icon_dashboard_document_types, icon_dashboard_documents_in_trash,
+    icon_dashboard_new_documents_this_month, icon_dashboard_pages_per_month,
     icon_dashboard_total_document
 )
 from .permissions import (
-    permission_document_view, permission_document_type_view
+    permission_document_type_view, permission_document_view
 )
-from .statistics import (
-    new_document_pages_this_month, new_documents_this_month,
-)
+from .statistics import new_document_pages_this_month, new_documents_this_month
 
 
 class DashboardWidgetDocumentPagesTotal(DashboardWidgetNumeric):

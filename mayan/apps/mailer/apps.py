@@ -1,15 +1,17 @@
 from __future__ import unicode_literals
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
+from kombu import Exchange, Queue
+
 from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
-from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
 from mayan.apps.common import (
-    MayanAppConfig, menu_list_facet, menu_object, menu_multi_item,
+    MayanAppConfig, menu_list_facet, menu_multi_item, menu_object,
     menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.widgets import TwoStateWidget
@@ -18,7 +20,7 @@ from mayan.celery import app
 
 from .classes import MailerBackend
 from .links import (
-    link_send_document_link, link_send_document, link_send_multiple_document,
+    link_send_document, link_send_document_link, link_send_multiple_document,
     link_send_multiple_document_link, link_system_mailer_error_log,
     link_user_mailer_create, link_user_mailer_delete, link_user_mailer_edit,
     link_user_mailer_list, link_user_mailer_log_list, link_user_mailer_setup,
@@ -27,7 +29,7 @@ from .links import (
 from .permissions import (
     permission_mailing_link, permission_mailing_send_document,
     permission_user_mailer_delete, permission_user_mailer_edit,
-    permission_user_mailer_use, permission_user_mailer_view,
+    permission_user_mailer_use, permission_user_mailer_view
 )
 from .queues import *  # NOQA
 

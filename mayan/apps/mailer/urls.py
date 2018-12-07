@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .views import (
-    SystemMailerLogEntryListView, MailDocumentLinkView, MailDocumentView,
-    UserMailerBackendSelectionView, UserMailingCreateView,
-    UserMailingDeleteView, UserMailingEditView, UserMailerLogEntryListView,
-    UserMailerTestView, UserMailerListView
+    MailDocumentLinkView, MailDocumentView, SystemMailerLogEntryListView,
+    UserMailerBackendSelectionView, UserMailerListView,
+    UserMailerLogEntryListView, UserMailerTestView, UserMailingCreateView,
+    UserMailingDeleteView, UserMailingEditView
 )
 
 urlpatterns = [

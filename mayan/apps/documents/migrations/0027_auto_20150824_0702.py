@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -20,22 +19,18 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AlterField(
-            model_name='document',
-            name='is_stub',
             field=models.BooleanField(
-                default=True, help_text='A document stub is a document with '
-                'an entry on the database but no file uploaded. This could '
-                'be an interrupted upload or a deferred upload via the API.',
-                verbose_name='Is stub?', editable=False
-            ),
-            preserve_default=True,
+                default=True, editable=False, help_text='A document stub is '
+                'a document with an entry on the database but no file '
+                'uploaded. This could be an interrupted upload or a '
+                'deferred upload via the API.',
+                verbose_name='Is stub?'
+            ), model_name='document', name='is_stub', preserve_default=True
         ),
         migrations.AlterField(
-            model_name='documenttypefilename',
-            name='filename',
             field=models.CharField(
-                max_length=128, verbose_name='Label', db_index=True
-            ),
-            preserve_default=True,
+                db_index=True, max_length=128, verbose_name='Label'
+            ), model_name='documenttypefilename', name='filename',
+            preserve_default=True
         ),
     ]

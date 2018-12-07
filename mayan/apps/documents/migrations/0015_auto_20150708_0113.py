@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='documenttype',
             name='label',
             field=models.CharField(
-                unique=True, max_length=32, verbose_name='Label'
+                max_length=32, unique=True, verbose_name='Label'
             ),
             preserve_default=True,
         ),

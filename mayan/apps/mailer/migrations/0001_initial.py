@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -11,12 +10,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='LogEntry',
-            fields=[
+            bases=(models.Model,), fields=[
                 (
                     'id', models.AutoField(
-                        verbose_name='ID', serialize=False, auto_created=True,
-                        primary_key=True
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID'
                     )
                 ),
                 (
@@ -26,16 +24,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'message', models.TextField(
-                        verbose_name='Message', editable=False, blank=True
+                        blank=True, editable=False, verbose_name='Message'
                     )
                 ),
-            ],
-            options={
-                'ordering': ('-datetime',),
-                'get_latest_by': 'datetime',
+            ], name='LogEntry', options={
+                'get_latest_by': 'datetime', 'ordering': ('-datetime',),
                 'verbose_name': 'Log entry',
                 'verbose_name_plural': 'Log entries',
             },
-            bases=(models.Model,),
         ),
     ]

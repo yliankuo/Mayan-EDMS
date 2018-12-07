@@ -5,7 +5,8 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse, reverse_lazy
-from django.utils.translation import ungettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (

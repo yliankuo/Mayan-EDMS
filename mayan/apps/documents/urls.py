@@ -4,17 +4,16 @@ from django.conf.urls import url
 
 from .api_views import (
     APIDeletedDocumentListView, APIDeletedDocumentRestoreView,
-    APIDeletedDocumentView, APIDocumentDownloadView, APIDocumentView,
-    APIDocumentListView, APIDocumentVersionDownloadView,
+    APIDeletedDocumentView, APIDocumentDownloadView, APIDocumentListView,
     APIDocumentPageImageView, APIDocumentPageView,
     APIDocumentTypeDocumentListView, APIDocumentTypeListView,
-    APIDocumentTypeView, APIDocumentVersionsListView,
-    APIDocumentVersionPageListView, APIDocumentVersionView,
-    APIRecentDocumentListView
+    APIDocumentTypeView, APIDocumentVersionDownloadView,
+    APIDocumentVersionPageListView, APIDocumentVersionsListView,
+    APIDocumentVersionView, APIDocumentView, APIRecentDocumentListView
 )
 from .views import (
-    ClearImageCacheView, DeletedDocumentDeleteView,
-    DeletedDocumentDeleteManyView, DeletedDocumentListView,
+    ClearImageCacheView, DeletedDocumentDeleteManyView,
+    DeletedDocumentDeleteView, DeletedDocumentListView,
     DocumentDocumentTypeEditView, DocumentDownloadFormView,
     DocumentDownloadView, DocumentDuplicatesListView, DocumentEditView,
     DocumentListView, DocumentPageListView, DocumentPageNavigationFirst,
@@ -22,13 +21,13 @@ from .views import (
     DocumentPageNavigationPrevious, DocumentPageRotateLeftView,
     DocumentPageRotateRightView, DocumentPageView, DocumentPageViewResetView,
     DocumentPageZoomInView, DocumentPageZoomOutView, DocumentPreviewView,
-    DocumentPrint, DocumentRestoreView, DocumentRestoreManyView,
+    DocumentPrint, DocumentRestoreManyView, DocumentRestoreView,
     DocumentTransformationsClearView, DocumentTransformationsCloneView,
-    DocumentTrashView, DocumentTrashManyView, DocumentTypeCreateView,
-    DocumentTypeDeleteView, DocumentTypeDocumentListView,
+    DocumentTrashManyView, DocumentTrashView, DocumentTypeCreateView,
+    DocumentTypeDeleteView, DocumentTypeDocumentListView, DocumentTypeEditView,
     DocumentTypeFilenameCreateView, DocumentTypeFilenameDeleteView,
     DocumentTypeFilenameEditView, DocumentTypeFilenameListView,
-    DocumentTypeListView, DocumentTypeEditView, DocumentUpdatePageCountView,
+    DocumentTypeListView, DocumentUpdatePageCountView,
     DocumentVersionDownloadFormView, DocumentVersionDownloadView,
     DocumentVersionListView, DocumentVersionRevertView, DocumentVersionView,
     DocumentView, DuplicatedDocumentListView, EmptyTrashCanView,
@@ -36,7 +35,6 @@ from .views import (
     RecentAccessDocumentListView, RecentAddedDocumentListView,
     ScanDuplicatedDocuments
 )
-
 
 urlpatterns = [
     url(r'^list/$', DocumentListView.as_view(), name='document_list'),

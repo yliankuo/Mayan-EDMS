@@ -17,25 +17,23 @@ from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
 from mayan.apps.rest_api.permissions import MayanPermission
 
 from .literals import DOCUMENT_IMAGE_TASK_TIMEOUT
-from .models import (
-    Document, DocumentType, RecentDocument
-)
+from .models import Document, DocumentType, RecentDocument
 from .permissions import (
     permission_document_create, permission_document_delete,
     permission_document_download, permission_document_edit,
     permission_document_new_version, permission_document_properties_edit,
     permission_document_restore, permission_document_trash,
-    permission_document_view, permission_document_type_create,
-    permission_document_type_delete, permission_document_type_edit,
-    permission_document_type_view, permission_document_version_revert,
-    permission_document_version_view
+    permission_document_type_create, permission_document_type_delete,
+    permission_document_type_edit, permission_document_type_view,
+    permission_document_version_revert, permission_document_version_view,
+    permission_document_view
 )
 from .serializers import (
     DeletedDocumentSerializer, DocumentPageSerializer, DocumentSerializer,
-    DocumentTypeSerializer, DocumentVersionSerializer,
-    NewDocumentSerializer, NewDocumentVersionSerializer,
-    RecentDocumentSerializer, WritableDocumentSerializer,
-    WritableDocumentTypeSerializer, WritableDocumentVersionSerializer
+    DocumentTypeSerializer, DocumentVersionSerializer, NewDocumentSerializer,
+    NewDocumentVersionSerializer, RecentDocumentSerializer,
+    WritableDocumentSerializer, WritableDocumentTypeSerializer,
+    WritableDocumentVersionSerializer
 )
 from .settings import settings_document_page_image_cache_time
 from .tasks import task_generate_document_page_image
