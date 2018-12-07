@@ -312,7 +312,9 @@ class SignaturesViewTestCase(GenericDocumentViewTestCase):
 
     def test_missing_signature_verify_view_no_permission(self):
         # Silence converter logging
-        logging.getLogger('converter.backends').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.converter.backends').setLevel(
+            level=logging.CRITICAL
+        )
 
         for document in self.document_type.documents.all():
             document.delete(to_trash=False)
@@ -350,7 +352,9 @@ class SignaturesViewTestCase(GenericDocumentViewTestCase):
 
     def test_missing_signature_verify_view_with_permission(self):
         # Silence converter logging
-        logging.getLogger('converter.backends').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.converter.backends').setLevel(
+            level=logging.CRITICAL
+        )
 
         for document in self.document_type.documents.all():
             document.delete(to_trash=False)

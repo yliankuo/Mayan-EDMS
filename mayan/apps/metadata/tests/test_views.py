@@ -154,9 +154,6 @@ class DocumentMetadataTestCase(GenericDocumentViewTestCase):
         self.assertEqual(len(self.document.metadata.all()), 1)
 
     def test_metadata_remove_view_with_permission(self):
-        # Silence unrelated logging
-        logging.getLogger('navigation.classes').setLevel(logging.CRITICAL)
-
         self.login_user()
 
         document_metadata = self.document.metadata.create(
@@ -167,6 +164,11 @@ class DocumentMetadataTestCase(GenericDocumentViewTestCase):
 
         self.grant_permission(permission=permission_document_view)
         self.grant_permission(permission=permission_metadata_document_remove)
+
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.navigation.classes').setLevel(
+            level=logging.CRITICAL
+        )
 
         # Test display of metadata removal form
         response = self.get(

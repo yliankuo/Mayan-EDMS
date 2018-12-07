@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import logging
 import os
 import shutil
 
@@ -40,6 +41,8 @@ class DocumentUploadTestCase(GenericDocumentViewTestCase):
         self.document.delete()
 
     def _request_upload_wizard_view(self):
+        logging.getLogger('django.request').setLevel(level=logging.CRITICAL)
+
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
             return self.post(
                 viewname='sources:upload_interactive', args=(self.source.pk,),
@@ -95,6 +98,8 @@ class DocumentUploadTestCase(GenericDocumentViewTestCase):
         self.assertEqual(Document.objects.count(), 1)
 
     def _request_upload_interactive_view(self):
+        logging.getLogger('django.request').setLevel(level=logging.CRITICAL)
+
         return self.get(
             viewname='sources:upload_interactive', data={
                 'document_type_id': self.document_type.pk,

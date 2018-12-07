@@ -151,10 +151,12 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         # Forcefully checking in a document by a user without adequate
         # permissions throws out an error
 
-        # Silence unrelated logging
-        logging.getLogger('navigation.classes').setLevel(logging.CRITICAL)
-
         expiration_datetime = now() + datetime.timedelta(days=1)
+
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.navigation.classes').setLevel(
+            level=logging.CRITICAL
+        )
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,

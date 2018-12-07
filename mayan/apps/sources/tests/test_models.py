@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import logging
 import shutil
 
 import mock
@@ -122,6 +123,10 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
 
     def test_decode_email_with_attachment_and_inline_image(self):
         self._create_email_source()
+
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )
@@ -167,6 +172,9 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
         self.source.store_body = False
         self.source.save()
 
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )
@@ -177,6 +185,9 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
     def test_document_upload_with_body(self):
         self._create_email_source()
 
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )

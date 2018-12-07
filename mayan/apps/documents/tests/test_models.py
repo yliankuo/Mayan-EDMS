@@ -6,6 +6,7 @@ import time
 from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.common.tests.utils import mute_stdout
 
 from ..literals import STUB_EXPIRATION_INTERVAL
 from ..models import (
@@ -27,7 +28,8 @@ from .mixins import DocumentTestMixin
 class DocumentTestCase(DocumentTestMixin, BaseTestCase):
     def test_natural_keys(self):
         self.document.pages.first().generate_image()
-        self._test_database_conversion('documents')
+        with mute_stdout():
+            self._test_database_conversion('documents')
 
     def test_document_creation(self):
         self.assertEqual(self.document_type.label, TEST_DOCUMENT_TYPE_LABEL)
