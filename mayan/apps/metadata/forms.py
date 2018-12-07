@@ -62,11 +62,15 @@ class DocumentMetadataForm(forms.Form):
                     self.fields['value'] = forms.ChoiceField(
                         label=self.fields['value'].label
                     )
-                    choices = self.metadata_type.get_lookup_values()
-                    choices = list(zip(choices, choices))
+
                     if not required:
-                        choices.insert(0, ('', '------'))
-                    self.fields['value'].choices = choices
+                        first_choice=('', '------')
+                    else:
+                        first_choice=None
+
+                    self.fields['value'].choices = self.metadata_type.get_lookup_choices(
+                        first_choice=first_choice
+                    )
                     self.fields['value'].required = required
                     self.fields['value'].widget.attrs.update(
                         {'class': 'metadata-value'}

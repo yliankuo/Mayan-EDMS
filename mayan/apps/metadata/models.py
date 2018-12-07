@@ -123,6 +123,16 @@ class MetadataType(models.Model):
         template = Template(self.default)
         return template.render()
 
+    def get_lookup_choices(self, first_choice=None):
+        template = Template(self.lookup)
+        context = MetadataLookup.get_as_context()
+
+        if first_choice:
+            yield first_choice
+
+        for value in MetadataType.comma_splitter(template.render(**context)):
+            yield (value, value)
+
     def get_lookup_values(self):
         template = Template(self.lookup)
         context = MetadataLookup.get_as_context()
