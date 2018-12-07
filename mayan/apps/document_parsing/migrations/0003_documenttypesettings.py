@@ -4,7 +4,7 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def create_parsing_setting_for_existing_document_types(apps, schema_editor):
+def operation_create_parsing_setting_for_existing_document_types(apps, schema_editor):
     DocumentType = apps.get_model('documents', 'DocumentType')
     DocumentTypeSettings = apps.get_model(
         'document_parsing', 'DocumentTypeSettings'
@@ -19,7 +19,7 @@ def create_parsing_setting_for_existing_document_types(apps, schema_editor):
             pass
 
 
-def delete_parsing_setting_for_existing_document_types(apps, schema_editor):
+def operation_delete_parsing_setting_for_existing_document_types(apps, schema_editor):
     DocumentType = apps.get_model('documents', 'DocumentType')
     DocumentTypeSettings = apps.get_model(
         'document_parsing', 'DocumentTypeSettings'
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RunPython(
-            code=create_parsing_setting_for_existing_document_types,
-            reverse_code=delete_parsing_setting_for_existing_document_types,
+            code=operation_create_parsing_setting_for_existing_document_types,
+            reverse_code=operation_delete_parsing_setting_for_existing_document_types,
         )
     ]

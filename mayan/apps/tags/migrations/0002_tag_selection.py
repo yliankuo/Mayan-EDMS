@@ -31,7 +31,7 @@ RGB_VALUES = {
 }
 
 
-def convert_color_names_to_rgb(apps, schema_editor):
+def operation_convert_color_names_to_rgb(apps, schema_editor):
     Tag = apps.get_model('tags', 'Tag')
 
     for tag in Tag.objects.using(schema_editor.connection.alias).all():
@@ -52,5 +52,5 @@ class Migration(migrations.Migration):
             field=colorful.fields.RGBColorField(default='#FFFFFF'),
             preserve_default=False,
         ),
-        migrations.RunPython(convert_color_names_to_rgb),
+        migrations.RunPython(code=operation_convert_color_names_to_rgb),
     ]

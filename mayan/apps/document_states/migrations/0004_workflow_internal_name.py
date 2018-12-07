@@ -6,7 +6,7 @@ from django.utils.text import slugify
 from mayan.apps.common.validators import validate_internal_name
 
 
-def generate_internal_name(apps, schema_editor):
+def operation_generate_internal_name(apps, schema_editor):
     Workflow = apps.get_model('document_states', 'Workflow')
     internal_names = []
 
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
 
         # Generate the slugs based on the labels
         migrations.RunPython(
-            generate_internal_name, reverse_code=migrations.RunPython.noop
+            code=operation_generate_internal_name, reverse_code=migrations.RunPython.noop
         ),
 
         # Make the internal name field unique

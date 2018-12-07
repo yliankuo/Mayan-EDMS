@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def add_user_options_to_existing_users(apps, schema_editor):
+def operation_add_user_options_to_existing_users(apps, schema_editor):
     User = apps.get_model(settings.AUTH_USER_MODEL)
     UserOptions = apps.get_model(
         app_label='user_management', model_name='UserOptions'
@@ -19,7 +19,7 @@ def add_user_options_to_existing_users(apps, schema_editor):
         ).create(user=user)
 
 
-def remove_user_options_from_existing_users(apps, schema_editor):
+def operation_remove_user_options_from_existing_users(apps, schema_editor):
     User = apps.get_model(settings.AUTH_USER_MODEL)
     UserOptions = apps.get_model(
         app_label='user_management', model_name='UserOptions'
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.RunPython(
-            code=add_user_options_to_existing_users,
-            reverse_code=remove_user_options_from_existing_users
+            code=operation_add_user_options_to_existing_users,
+            reverse_code=operation_remove_user_options_from_existing_users
         ),
     ]

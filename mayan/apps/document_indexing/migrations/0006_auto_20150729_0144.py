@@ -4,7 +4,7 @@ from django.db import migrations
 from django.template.defaultfilters import slugify
 
 
-def assign_slugs(apps, schema_editor):
+def operation_assign_slugs(apps, schema_editor):
     Index = apps.get_model('document_indexing', 'Index')
 
     for index in Index.objects.using(schema_editor.connection.alias).all():
@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(assign_slugs),
+        migrations.RunPython(code=operation_assign_slugs),
     ]

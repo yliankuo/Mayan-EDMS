@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 
-def move_content_from_documents_to_ocr_app(apps, schema_editor):
+def operation_move_content_from_documents_to_ocr_app(apps, schema_editor):
     DocumentPage = apps.get_model('documents', 'DocumentPage')
     DocumentPageContent = apps.get_model('ocr', 'DocumentPageContent')
 
@@ -22,5 +22,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(move_content_from_documents_to_ocr_app),
+        migrations.RunPython(code=operation_move_content_from_documents_to_ocr_app),
     ]
