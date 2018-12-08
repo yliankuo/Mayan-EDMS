@@ -19,6 +19,9 @@ from mayan.apps.user_management.tests import (
 
 from ..settings import setting_temporary_directory
 
+from .utils import mute_stdout
+
+
 if getattr(settings, 'COMMON_TEST_FILE_HANDLES', False):
     import psutil
 
@@ -49,9 +52,10 @@ class ContentTypeCheckMixin(object):
 
 class DatabaseConversionMixin(object):
     def _test_database_conversion(self, *app_labels):
-        management.call_command(
-            'convertdb', *app_labels, force=True
-        )
+        with mute_stdout():
+            management.call_command(
+                'convertdb', *app_labels, force=True
+            )
 
 
 class OpenFileCheckMixin(object):
