@@ -27,7 +27,7 @@ def create_default_document_type(sender, **kwargs):
 
 
 def handler_create_document_cache(sender, **kwargs):
-    Cache = apps.get_model(app_label='common', model_name='Cache')
+    Cache = apps.get_model(app_label='file_caching', model_name='Cache')
     Cache.objects.update_or_create(
         defaults={
             'label': _('Document images'),

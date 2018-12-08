@@ -112,7 +112,7 @@ class DocumentVersion(models.Model):
 
     @cached_property
     def cache(self):
-        Cache = apps.get_model(app_label='common', model_name='Cache')
+        Cache = apps.get_model(app_label='file_caching', model_name='Cache')
         return Cache.objects.get(name=DOCUMENT_IMAGES_CACHE_NAME)
 
     @cached_property
