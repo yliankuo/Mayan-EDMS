@@ -165,7 +165,13 @@
   "AUTOADMIN_USERNAME".
 - Changed the use of the list/zip combinarion to generate
   the full list of metadata lookup choices to a generator.
+- Squash migrations:
   
+  - Common: 0010 to 0011
+  - Documents: 0029 to 0037
+  - Documents: 0042 to 0043
+  - Tags: 0001 to 0008
+
 3.1.9 (2018-11-01)
 ==================
 - Convert the furl instance to text to allow serializing it into
