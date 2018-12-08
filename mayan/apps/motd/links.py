@@ -2,14 +2,13 @@ from __future__ import absolute_import, unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link, get_cascade_condition
+from mayan.apps.navigation import Link, get_cascade_condition
 
 from .icons import icon_message_create, icon_message_list
 from .permissions import (
     permission_message_create, permission_message_delete,
     permission_message_edit, permission_message_view
 )
-
 
 link_message_create = Link(
     icon_class=icon_message_create, permissions=(permission_message_create,),

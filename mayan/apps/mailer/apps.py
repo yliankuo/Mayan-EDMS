@@ -1,24 +1,26 @@
 from __future__ import unicode_literals
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
-from acls import ModelPermission
-from acls.links import link_acl_list
-from acls.permissions import permission_acl_edit, permission_acl_view
-from common import (
-    MayanAppConfig, menu_list_facet, menu_object, menu_multi_item,
+from kombu import Exchange, Queue
+
+from mayan.apps.acls import ModelPermission
+from mayan.apps.acls.links import link_acl_list
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
+from mayan.apps.common import (
+    MayanAppConfig, menu_list_facet, menu_multi_item, menu_object,
     menu_secondary, menu_setup, menu_tools
 )
-from common.widgets import TwoStateWidget
+from mayan.apps.common.widgets import TwoStateWidget
+from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
-from navigation import SourceColumn
 
 from .classes import MailerBackend
 from .links import (
-    link_send_document_link, link_send_document, link_send_multiple_document,
+    link_send_document, link_send_document_link, link_send_multiple_document,
     link_send_multiple_document_link, link_system_mailer_error_log,
     link_user_mailer_create, link_user_mailer_delete, link_user_mailer_edit,
     link_user_mailer_list, link_user_mailer_log_list, link_user_mailer_setup,
@@ -27,14 +29,16 @@ from .links import (
 from .permissions import (
     permission_mailing_link, permission_mailing_send_document,
     permission_user_mailer_delete, permission_user_mailer_edit,
-    permission_user_mailer_use, permission_user_mailer_view,
+    permission_user_mailer_use, permission_user_mailer_view
 )
 from .queues import *  # NOQA
 
 
 class MailerApp(MayanAppConfig):
+    app_namespace = 'mailer'
+    app_url = 'mailer'
     has_tests = True
-    name = 'mailer'
+    name = 'mayan.apps.mailer'
     verbose_name = _('Mailer')
 
     def ready(self):
@@ -94,7 +98,7 @@ class MailerApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'mailer.tasks.task_send_document': {
+                'mayan.apps.mailer.tasks.task_send_document': {
                     'queue': 'mailing'
                 },
             }

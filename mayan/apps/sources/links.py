@@ -3,18 +3,19 @@ from __future__ import absolute_import, unicode_literals
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
-from documents.permissions import (
+from mayan.apps.documents.permissions import (
     permission_document_create, permission_document_new_version
 )
-from navigation import Link
+from mayan.apps.navigation import Link
 
 from .icons import (
     icon_document_create_multiple, icon_log, icon_setup_sources,
     icon_source_create
 )
 from .literals import (
-    SOURCE_CHOICE_WEB_FORM, SOURCE_CHOICE_EMAIL_IMAP, SOURCE_CHOICE_EMAIL_POP3,
-    SOURCE_CHOICE_SANE_SCANNER, SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH
+    SOURCE_CHOICE_EMAIL_IMAP, SOURCE_CHOICE_EMAIL_POP3,
+    SOURCE_CHOICE_SANE_SCANNER, SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH,
+    SOURCE_CHOICE_WEB_FORM
 )
 from .permissions import (
     permission_sources_setup_create, permission_sources_setup_delete,

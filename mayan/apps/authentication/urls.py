@@ -10,7 +10,6 @@ from .views import (
     password_reset_done_view, password_reset_view
 )
 
-
 urlpatterns = [
     url(r'^login/$', login_view, name='login_view'),
     url(

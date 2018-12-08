@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from .models import (
-    DocumentPageContent, DocumentVersionParseError
-)
+from .models import DocumentPageContent, DocumentVersionParseError
 
 
 @admin.register(DocumentPageContent)

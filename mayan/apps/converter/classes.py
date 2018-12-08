@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import base64
 from io import BytesIO
 import logging
 import os
@@ -10,9 +9,9 @@ import sh
 
 from django.utils.translation import ugettext_lazy as _
 
-from common.settings import setting_temporary_directory
-from common.utils import fs_cleanup, mkdtemp, mkstemp
-from mimetype.api import get_mimetype
+from mayan.apps.common.settings import setting_temporary_directory
+from mayan.apps.common.utils import fs_cleanup, mkdtemp, mkstemp
+from mayan.apps.mimetype.api import get_mimetype
 
 from .exceptions import InvalidOfficeFormat, OfficeConversionError
 from .literals import (
@@ -178,7 +177,7 @@ class ConverterBase(object):
         fs_cleanup(input_filepath)
         fs_cleanup(converted_output)
 
-    def get_page(self, output_format=None, as_base64=False):
+    def get_page(self, output_format=None):
         output_format = output_format or setting_graphics_backend_arguments.value.get(
             'pillow_format', DEFAULT_PILLOW_FORMAT
         )
@@ -196,10 +195,7 @@ class ConverterBase(object):
 
         self.image.convert(new_mode).save(image_buffer, format=output_format)
 
-        if as_base64:
-            return 'data:{};base64,{}'.format(Image.MIME[output_format], base64.b64encode(image_buffer.getvalue()))
-        else:
-            image_buffer.seek(0)
+        image_buffer.seek(0)
 
         return image_buffer
 

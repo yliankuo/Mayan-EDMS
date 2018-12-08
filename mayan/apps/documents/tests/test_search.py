@@ -2,10 +2,10 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from common.tests import BaseTestCase
-from documents.permissions import permission_document_view
-from documents.search import document_search, document_page_search
-from documents.tests import DocumentTestMixin
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.documents.search import document_page_search, document_search
+from mayan.apps.documents.tests import DocumentTestMixin
 
 
 @override_settings(OCR_AUTO_OCR=False)
@@ -21,23 +21,23 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         )
 
     def test_document_page_search_no_access(self):
-        queryset, elapsed_time = self._perform_document_page_search()
+        queryset = self._perform_document_page_search()
         self.assertFalse(self.document.pages.first() in queryset)
 
     def test_document_page_search_with_access(self):
         self.grant_access(
             permission=permission_document_view, obj=self.document
         )
-        queryset, elapsed_time = self._perform_document_page_search()
+        queryset = self._perform_document_page_search()
         self.assertTrue(self.document.pages.first() in queryset)
 
     def test_document_search_no_access(self):
-        queryset, elapsed_time = self._perform_document_search()
+        queryset = self._perform_document_search()
         self.assertFalse(self.document in queryset)
 
     def test_document_search_with_access(self):
         self.grant_access(
             permission=permission_document_view, obj=self.document
         )
-        queryset, elapsed_time = self._perform_document_search()
+        queryset = self._perform_document_search()
         self.assertTrue(self.document in queryset)

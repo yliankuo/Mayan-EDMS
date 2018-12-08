@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import logging
 import shutil
 
 import mock
@@ -8,15 +9,15 @@ from pathlib2 import Path
 from django.test import override_settings
 from django.utils.encoding import force_text
 
-from common.utils import mkdtemp
-from common.tests import BaseTestCase
-from documents.models import Document, DocumentType
-from documents.tests import (
-    DocumentTestMixin, TEST_COMPRESSED_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
-    TEST_NON_ASCII_DOCUMENT_FILENAME, TEST_NON_ASCII_DOCUMENT_PATH,
-    TEST_NON_ASCII_COMPRESSED_DOCUMENT_PATH
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.common.utils import mkdtemp
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.tests import (
+    TEST_COMPRESSED_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_NON_ASCII_COMPRESSED_DOCUMENT_PATH, TEST_NON_ASCII_DOCUMENT_FILENAME,
+    TEST_NON_ASCII_DOCUMENT_PATH, DocumentTestMixin
 )
-from metadata.models import MetadataType
+from mayan.apps.metadata.models import MetadataType
 
 from ..literals import SOURCE_UNCOMPRESS_CHOICE_Y
 from ..models import (
@@ -122,6 +123,10 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
 
     def test_decode_email_with_attachment_and_inline_image(self):
         self._create_email_source()
+
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )
@@ -167,6 +172,9 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
         self.source.store_body = False
         self.source.save()
 
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )
@@ -177,6 +185,9 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
     def test_document_upload_with_body(self):
         self._create_email_source()
 
+        logging.getLogger('mayan.apps.converter').setLevel(
+            level=logging.CRITICAL
+        )
         EmailBaseModel.process_message(
             source=self.source, message_text=TEST_EMAIL_ATTACHMENT_AND_INLINE
         )

@@ -4,9 +4,9 @@ import copy
 
 from django.utils.translation import ugettext_lazy as _
 
-from acls.links import link_acl_list
-from documents.permissions import permission_document_view
-from navigation import Link, get_cascade_condition
+from mayan.apps.acls.links import link_acl_list
+from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.navigation import Link, get_cascade_condition
 
 from .icons import (
     icon_cabinet_add, icon_cabinet_child_add, icon_cabinet_create,
@@ -15,7 +15,7 @@ from .icons import (
 from .permissions import (
     permission_cabinet_add_document, permission_cabinet_create,
     permission_cabinet_delete, permission_cabinet_edit,
-    permission_cabinet_view, permission_cabinet_remove_document
+    permission_cabinet_remove_document, permission_cabinet_view
 )
 
 # Document links

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import time
@@ -10,17 +8,17 @@ from django.utils.encoding import force_text
 from django_downloadview import assert_download_response
 from rest_framework import status
 
-from rest_api.tests import BaseAPITestCase
+from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..models import Document, DocumentType
 from ..permissions import (
-    permission_document_create, permission_document_download,
-    permission_document_delete, permission_document_edit,
+    permission_document_create, permission_document_delete,
+    permission_document_download, permission_document_edit,
     permission_document_new_version, permission_document_properties_edit,
     permission_document_restore, permission_document_trash,
-    permission_document_view, permission_document_type_create,
-    permission_document_type_delete, permission_document_type_edit,
-    permission_document_version_revert, permission_document_version_view
+    permission_document_type_create, permission_document_type_delete,
+    permission_document_type_edit, permission_document_version_revert,
+    permission_document_version_view, permission_document_view
 )
 
 from .literals import (

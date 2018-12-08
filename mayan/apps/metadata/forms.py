@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.formsets import formset_factory
-from django.utils.translation import string_concat, ugettext_lazy as _
+from django.utils.text import format_lazy
+from django.utils.translation import ugettext_lazy as _
 
 from .classes import MetadataLookup
 from .models import DocumentTypeMetadataType, MetadataType
@@ -61,11 +62,15 @@ class DocumentMetadataForm(forms.Form):
                     self.fields['value'] = forms.ChoiceField(
                         label=self.fields['value'].label
                     )
-                    choices = self.metadata_type.get_lookup_values()
-                    choices = list(zip(choices, choices))
+
                     if not required:
-                        choices.insert(0, ('', '------'))
-                    self.fields['value'].choices = choices
+                        first_choice=('', '------')
+                    else:
+                        first_choice=None
+
+                    self.fields['value'].choices = self.metadata_type.get_lookup_choices(
+                        first_choice=first_choice
+                    )
                     self.fields['value'].required = required
                     self.fields['value'].widget.attrs.update(
                         {'class': 'metadata-value'}
@@ -146,8 +151,8 @@ class DocumentAddMetadataForm(forms.Form):
 class MetadataTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MetadataTypeForm, self).__init__(*args, **kwargs)
-        self.fields['lookup'].help_text = string_concat(
-            self.fields['lookup'].help_text,
+        self.fields['lookup'].help_text = format_lazy(
+            '{}{}{}', self.fields['lookup'].help_text,
             _(' Available template context variables: '),
             MetadataLookup.get_as_help_text()
         )

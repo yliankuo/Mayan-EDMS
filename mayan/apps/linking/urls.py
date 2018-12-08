@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIResolvedSmartLinkView, APIResolvedSmartLinkDocumentListView,
-    APIResolvedSmartLinkListView, APISmartLinkListView, APISmartLinkView,
-    APISmartLinkConditionListView, APISmartLinkConditionView
+    APIResolvedSmartLinkDocumentListView, APIResolvedSmartLinkListView,
+    APIResolvedSmartLinkView, APISmartLinkConditionListView,
+    APISmartLinkConditionView, APISmartLinkListView, APISmartLinkView
 )
 from .views import (
     DocumentSmartLinkListView, ResolvedSmartLinkView,
-    SetupSmartLinkDocumentTypesView, SmartLinkConditionListView,
-    SmartLinkConditionCreateView, SmartLinkConditionEditView,
-    SmartLinkConditionDeleteView, SmartLinkCreateView, SmartLinkDeleteView,
+    SetupSmartLinkDocumentTypesView, SmartLinkConditionCreateView,
+    SmartLinkConditionDeleteView, SmartLinkConditionEditView,
+    SmartLinkConditionListView, SmartLinkCreateView, SmartLinkDeleteView,
     SmartLinkEditView, SmartLinkListView
 )
 

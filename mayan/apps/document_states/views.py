@@ -9,17 +9,17 @@ from django.template import RequestContext
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
-from acls.models import AccessControlList
-from common.views import (
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.views import (
     AssignRemoveView, ConfirmView, FormView, SingleObjectCreateView,
     SingleObjectDeleteView, SingleObjectDetailView,
     SingleObjectDynamicFormCreateView, SingleObjectDynamicFormEditView,
     SingleObjectEditView, SingleObjectListView
 )
-from documents.models import Document
-from documents.views import DocumentListView
-from events.classes import EventType
-from events.models import StoredEventType
+from mayan.apps.documents.models import Document
+from mayan.apps.documents.views import DocumentListView
+from mayan.apps.events.classes import EventType
+from mayan.apps.events.models import StoredEventType
 
 from .classes import WorkflowAction
 from .forms import (
@@ -32,18 +32,17 @@ from .icons import (
     icon_workflow_transition
 )
 from .links import (
-    link_setup_workflow_create, link_setup_workflow_state_create,
-    link_setup_workflow_state_action_selection,
-    link_setup_workflow_transition_create
+    link_setup_workflow_create, link_setup_workflow_state_action_selection,
+    link_setup_workflow_state_create, link_setup_workflow_transition_create
 )
 from .models import (
-    Workflow, WorkflowInstance, WorkflowState, WorkflowStateAction,
-    WorkflowTransition, WorkflowRuntimeProxy, WorkflowStateRuntimeProxy,
+    Workflow, WorkflowInstance, WorkflowRuntimeProxy, WorkflowState,
+    WorkflowStateAction, WorkflowStateRuntimeProxy, WorkflowTransition
 )
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
     permission_workflow_edit, permission_workflow_tools,
-    permission_workflow_view,
+    permission_workflow_view
 )
 from .tasks import task_launch_all_workflows
 

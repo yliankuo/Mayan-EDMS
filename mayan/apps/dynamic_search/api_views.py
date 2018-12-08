@@ -5,7 +5,7 @@ from django.utils.encoding import force_text
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 
-from rest_api.filters import MayanObjectPermissionsFilter
+from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
 
 from .classes import SearchModel
 from .mixins import SearchModelMixin
@@ -29,7 +29,7 @@ class APISearchView(SearchModelMixin, generics.ListAPIView):
             self.mayan_object_permissions = {'GET': (search_model.permission,)}
 
         try:
-            queryset, timedelta = search_model.search(
+            queryset = search_model.search(
                 query_string=self.request.GET, user=self.request.user
             )
         except Exception as exception:
@@ -68,7 +68,7 @@ class APIAdvancedSearchView(SearchModelMixin, generics.ListAPIView):
             global_and_search = False
 
         try:
-            queryset, timedelta = self.search_model.search(
+            queryset = self.search_model.search(
                 query_string=self.request.GET, user=self.request.user,
                 global_and_search=global_and_search
             )

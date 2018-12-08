@@ -2,54 +2,54 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import timedelta
 
-from kombu import Exchange, Queue
-
 from django.db.models.signals import post_delete, post_migrate
 from django.utils.translation import ugettext_lazy as _
 
-from acls import ModelPermission
-from acls.links import link_acl_list
-from acls.permissions import permission_acl_edit, permission_acl_view
-from common import (
+from kombu import Exchange, Queue
+
+from mayan.apps.acls import ModelPermission
+from mayan.apps.acls.links import link_acl_list
+from mayan.apps.acls.permissions import (
+    permission_acl_edit, permission_acl_view
+)
+from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_facet, menu_list_facet, menu_main,
-    menu_object, menu_secondary, menu_setup, menu_sidebar, menu_multi_item,
+    menu_multi_item, menu_object, menu_secondary, menu_setup, menu_sidebar,
     menu_tools
 )
-from common.classes import ModelField, Template
-from common.dashboards import dashboard_main
-from common.signals import post_initial_setup
-from common.widgets import TwoStateWidget
-from converter.links import link_transformation_list
-from converter.permissions import (
-    permission_transformation_create,
-    permission_transformation_delete, permission_transformation_edit,
-    permission_transformation_view,
+from mayan.apps.common.classes import ModelField, Template
+from mayan.apps.common.dashboards import dashboard_main
+from mayan.apps.common.signals import post_initial_setup
+from mayan.apps.common.widgets import TwoStateWidget
+from mayan.apps.converter.links import link_transformation_list
+from mayan.apps.converter.permissions import (
+    permission_transformation_create, permission_transformation_delete,
+    permission_transformation_edit, permission_transformation_view
 )
-from events import ModelEventType
-from events.links import (
-    link_events_for_object, link_object_event_types_user_subcriptions_list,
+from mayan.apps.events import ModelEventType
+from mayan.apps.events.links import (
+    link_events_for_object, link_object_event_types_user_subcriptions_list
 )
-from events.permissions import permission_events_view
+from mayan.apps.events.permissions import permission_events_view
+from mayan.apps.navigation import SourceColumn
+from mayan.apps.rest_api.fields import DynamicSerializerField
 from mayan.celery import app
-from navigation import SourceColumn
-from rest_api.fields import DynamicSerializerField
 
 from .dashboard_widgets import (
     DashboardWidgetDocumentPagesTotal, DashboardWidgetDocumentsInTrash,
     DashboardWidgetDocumentsNewThisMonth,
     DashboardWidgetDocumentsPagesNewThisMonth, DashboardWidgetDocumentsTotal,
-    DashboardWidgetDocumentsTypesTotal,
+    DashboardWidgetDocumentsTypesTotal
 )
 from .events import (
-    event_document_create, event_document_download,
+    event_document_create, event_document_download, event_document_new_version,
     event_document_properties_edit, event_document_type_change,
     event_document_type_created, event_document_type_edited,
-    event_document_new_version, event_document_version_revert,
-    event_document_view
+    event_document_version_revert, event_document_view
 )
 from .handlers import (
     create_default_document_type, handler_create_document_cache,
-    handler_remove_empty_duplicates_lists, handler_scan_duplicates_for,
+    handler_remove_empty_duplicates_lists, handler_scan_duplicates_for
 )
 from .links import (
     link_clear_image_cache, link_document_clear_transformations,
@@ -71,17 +71,18 @@ from .links import (
     link_document_page_rotate_right, link_document_page_view,
     link_document_page_view_reset, link_document_page_zoom_in,
     link_document_page_zoom_out, link_document_pages, link_document_preview,
-    link_document_print, link_document_properties, link_document_quick_download,
-    link_document_restore, link_document_trash, link_document_type_create,
-    link_document_type_delete, link_document_type_edit,
-    link_document_type_filename_create, link_document_type_filename_delete,
-    link_document_type_filename_edit, link_document_type_filename_list,
-    link_document_type_list, link_document_type_setup,
-    link_document_update_page_count, link_document_version_download,
-    link_document_version_list, link_document_version_return_document,
-    link_document_version_return_list, link_document_version_revert,
-    link_document_version_view, link_duplicated_document_list,
-    link_duplicated_document_scan, link_trash_can_empty
+    link_document_print, link_document_properties,
+    link_document_quick_download, link_document_restore, link_document_trash,
+    link_document_type_create, link_document_type_delete,
+    link_document_type_edit, link_document_type_filename_create,
+    link_document_type_filename_delete, link_document_type_filename_edit,
+    link_document_type_filename_list, link_document_type_list,
+    link_document_type_setup, link_document_update_page_count,
+    link_document_version_download, link_document_version_list,
+    link_document_version_return_document, link_document_version_return_list,
+    link_document_version_revert, link_document_version_view,
+    link_duplicated_document_list, link_duplicated_document_scan,
+    link_trash_can_empty
 )
 from .literals import (
     CHECK_DELETE_PERIOD_INTERVAL, CHECK_TRASH_PERIOD_INTERVAL,
@@ -100,7 +101,7 @@ from .permissions import (
 )
 from .queues import *  # NOQA
 # Just import to initialize the search models
-from .search import document_search, document_page_search  # NOQA
+from .search import document_page_search, document_search  # NOQA
 from .signals import post_version_upload
 from .statistics import *  # NOQA
 from .widgets import (
@@ -110,9 +111,11 @@ from .widgets import (
 
 
 class DocumentsApp(MayanAppConfig):
+    app_namespace = 'documents'
+    app_url = 'documents'
     has_rest_api = True
     has_tests = True
-    name = 'documents'
+    name = 'mayan.apps.documents'
     verbose_name = _('Documents')
 
     def ready(self):
@@ -122,7 +125,7 @@ class DocumentsApp(MayanAppConfig):
         DeletedDocument = self.get_model('DeletedDocument')
         Document = self.get_model('Document')
         DocumentPage = self.get_model('DocumentPage')
-        DocumentPageResult = self.get_model('DocumentPageResult')
+        DocumentPageSearchResult = self.get_model('DocumentPageSearchResult')
         DocumentType = self.get_model('DocumentType')
         DocumentTypeFilename = self.get_model('DocumentTypeFilename')
         DocumentVersion = self.get_model('DocumentVersion')
@@ -130,7 +133,7 @@ class DocumentsApp(MayanAppConfig):
 
         DynamicSerializerField.add_serializer(
             klass=Document,
-            serializer_class='documents.serializers.DocumentSerializer'
+            serializer_class='mayan.apps.documents.serializers.DocumentSerializer'
         )
 
         MissingItem(
@@ -215,7 +218,7 @@ class DocumentsApp(MayanAppConfig):
             model=DocumentPage, related='document_version__document',
         )
         ModelPermission.register_inheritance(
-            model=DocumentPageResult, related='document_version__document',
+            model=DocumentPageSearchResult, related='document_version__document',
         )
         ModelPermission.register_inheritance(
             model=DocumentTypeFilename, related='document_type',
@@ -258,14 +261,14 @@ class DocumentsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Thumbnail'),
+            source=DocumentPageSearchResult, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             )
         )
 
         SourceColumn(
-            source=DocumentPageResult, label=_('Type'),
+            source=DocumentPageSearchResult, label=_('Type'),
             attribute='document_version.document.document_type'
         )
 
@@ -340,17 +343,17 @@ class DocumentsApp(MayanAppConfig):
         app.conf.CELERYBEAT_SCHEDULE.update(
             {
                 'task_check_delete_periods': {
-                    'task': 'documents.tasks.task_check_delete_periods',
+                    'task': 'mayan.apps.documents.tasks.task_check_delete_periods',
                     'schedule': timedelta(
                         seconds=CHECK_DELETE_PERIOD_INTERVAL
                     ),
                 },
                 'task_check_trash_periods': {
-                    'task': 'documents.tasks.task_check_trash_periods',
+                    'task': 'mayan.apps.documents.tasks.task_check_trash_periods',
                     'schedule': timedelta(seconds=CHECK_TRASH_PERIOD_INTERVAL),
                 },
                 'task_delete_stubs': {
-                    'task': 'documents.tasks.task_delete_stubs',
+                    'task': 'mayan.apps.documents.tasks.task_delete_stubs',
                     'schedule': timedelta(seconds=DELETE_STALE_STUBS_INTERVAL),
                 },
             }
@@ -375,37 +378,37 @@ class DocumentsApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'documents.tasks.task_check_delete_periods': {
+                'mayan.apps.documents.tasks.task_check_delete_periods': {
                     'queue': 'documents_periodic'
                 },
-                'documents.tasks.task_check_trash_periods': {
+                'mayan.apps.documents.tasks.task_check_trash_periods': {
                     'queue': 'documents_periodic'
                 },
-                'documents.tasks.task_clean_empty_duplicate_lists': {
+                'mayan.apps.documents.tasks.task_clean_empty_duplicate_lists': {
                     'queue': 'documents'
                 },
-                'documents.tasks.task_clear_image_cache': {
+                'mayan.apps.documents.tasks.task_clear_image_cache': {
                     'queue': 'tools'
                 },
-                'documents.tasks.task_delete_document': {
+                'mayan.apps.documents.tasks.task_delete_document': {
                     'queue': 'documents'
                 },
-                'documents.tasks.task_delete_stubs': {
+                'mayan.apps.documents.tasks.task_delete_stubs': {
                     'queue': 'documents_periodic'
                 },
-                'documents.tasks.task_generate_document_page_image': {
+                'mayan.apps.documents.tasks.task_generate_document_page_image': {
                     'queue': 'converter'
                 },
-                'documents.tasks.task_scan_duplicates_all': {
+                'mayan.apps.documents.tasks.task_scan_duplicates_all': {
                     'queue': 'tools'
                 },
-                'documents.tasks.task_scan_duplicates_for': {
+                'mayan.apps.documents.tasks.task_scan_duplicates_for': {
                     'queue': 'uploads'
                 },
-                'documents.tasks.task_update_page_count': {
+                'mayan.apps.documents.tasks.task_update_page_count': {
                     'queue': 'uploads'
                 },
-                'documents.tasks.task_upload_new_version': {
+                'mayan.apps.documents.tasks.task_upload_new_version': {
                     'queue': 'uploads'
                 },
             }

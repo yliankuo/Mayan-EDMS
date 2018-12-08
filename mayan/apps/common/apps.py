@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-from datetime import timedelta
 import logging
 import os
 import warnings
+from datetime import timedelta
 
 from kombu import Exchange, Queue
 
@@ -19,21 +19,18 @@ from mayan.celery import app
 
 from .classes import Template
 from .handlers import (
-    handler_pre_initial_setup, handler_pre_upgrade,
-    user_locale_profile_session_config, user_locale_profile_create
+    handler_pre_initial_setup, handler_pre_upgrade, user_locale_profile_create,
+    user_locale_profile_session_config
 )
+from .licenses import *  # NOQA
 from .links import (
     link_about, link_check_version, link_current_user_details,
     link_current_user_edit, link_current_user_locale_profile_edit,
     link_license, link_object_error_list_clear, link_packages_licenses,
     link_setup, link_tools, separator_user_label, text_user_label
 )
-
 from .literals import DELETE_STALE_UPLOADS_INTERVAL, MESSAGE_SQLITE_WARNING
-from .menus import (
-    menu_about, menu_main, menu_secondary, menu_user
-)
-from .licenses import *  # NOQA
+from .menus import menu_about, menu_main, menu_secondary, menu_user
 from .queues import *  # NOQA - Force queues registration
 from .settings import (
     setting_auto_logging, setting_production_error_log_path,
@@ -47,10 +44,11 @@ logger = logging.getLogger(__name__)
 
 
 class MayanAppConfig(apps.AppConfig):
-    app_url = None
     app_namespace = None
+    app_url = None
 
     def ready(self):
+        logger.debug('Initializing app: %s', self.name)
         from mayan.urls import urlpatterns
 
         if self.app_url:
@@ -70,7 +68,7 @@ class MayanAppConfig(apps.AppConfig):
             ),
         except ImportError as exception:
             if force_text(exception) not in ('No module named urls', 'No module named \'{}.urls\''.format(self.name)):
-                logger.error(
+                logger.exception(
                     'Import time error when running AppConfig.ready() of app '
                     '"%s".', self.name
                 )
@@ -78,10 +76,11 @@ class MayanAppConfig(apps.AppConfig):
 
 
 class CommonApp(MayanAppConfig):
+    app_namespace = 'common'
     app_url = ''
     has_rest_api = True
     has_tests = True
-    name = 'common'
+    name = 'mayan.apps.common'
     verbose_name = _('Common')
 
     def ready(self):
@@ -96,7 +95,7 @@ class CommonApp(MayanAppConfig):
         app.conf.CELERYBEAT_SCHEDULE.update(
             {
                 'task_delete_stale_uploads': {
-                    'task': 'common.tasks.task_delete_stale_uploads',
+                    'task': 'mayan.apps.common.tasks.task_delete_stale_uploads',
                     'schedule': timedelta(
                         seconds=DELETE_STALE_UPLOADS_INTERVAL
                     ),
@@ -119,7 +118,7 @@ class CommonApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'common.tasks.task_delete_stale_uploads': {
+                'mayan.apps.common.tasks.task_delete_stale_uploads': {
                     'queue': 'common_periodic'
                 },
             }
@@ -191,7 +190,7 @@ class CommonApp(MayanAppConfig):
                 'disable_existing_loggers': False,
                 'formatters': {
                     'intermediate': {
-                        '()': 'common.log.ColorFormatter',
+                        '()': 'mayan.apps.common.log.ColorFormatter',
                         'format': '%(name)s <%(process)d> [%(levelname)s] "%(funcName)s() line %(lineno)d %(message)s"',
                     },
                     'logfile': {

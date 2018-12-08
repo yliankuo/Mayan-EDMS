@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from documents.tests import GenericDocumentTestCase
+from mayan.apps.documents.tests import GenericDocumentTestCase
 
 from ..models import SmartLink
 
-from .literals import TEST_SMART_LINK_LABEL, TEST_SMART_LINK_DYNAMIC_LABEL
+from .literals import TEST_SMART_LINK_DYNAMIC_LABEL, TEST_SMART_LINK_LABEL
 
 
 @override_settings(OCR_AUTO_OCR=False)

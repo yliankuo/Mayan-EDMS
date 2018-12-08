@@ -4,19 +4,17 @@ from django.apps import apps
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
-from common.classes import DashboardWidgetNumeric
+from mayan.apps.common.classes import DashboardWidgetNumeric
 
 from .icons import (
-    icon_dashboard_documents_in_trash, icon_dashboard_document_types,
-    icon_dashboard_pages_per_month, icon_dashboard_new_documents_this_month,
+    icon_dashboard_document_types, icon_dashboard_documents_in_trash,
+    icon_dashboard_new_documents_this_month, icon_dashboard_pages_per_month,
     icon_dashboard_total_document
 )
 from .permissions import (
-    permission_document_view, permission_document_type_view
+    permission_document_type_view, permission_document_view
 )
-from .statistics import (
-    new_document_pages_this_month, new_documents_this_month,
-)
+from .statistics import new_document_pages_this_month, new_documents_this_month
 
 
 class DashboardWidgetDocumentPagesTotal(DashboardWidgetNumeric):
@@ -55,7 +53,7 @@ class DashboardWidgetDocumentsTotal(DashboardWidgetNumeric):
         )
         self.count = AccessControlList.objects.filter_by_access(
             permission=permission_document_view, user=request.user,
-            queryset=Document.objects.filter(is_stub=False)
+            queryset=Document.objects.all()
         ).count()
         return super(DashboardWidgetDocumentsTotal, self).render(request)
 

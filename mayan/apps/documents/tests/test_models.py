@@ -5,7 +5,8 @@ import time
 
 from django.test import override_settings
 
-from common.tests import BaseTestCase
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.common.tests.utils import mute_stdout
 
 from ..literals import STUB_EXPIRATION_INTERVAL
 from ..models import (
@@ -14,8 +15,8 @@ from ..models import (
 
 from .base import GenericDocumentTestCase
 from .literals import (
-    TEST_DOCUMENT_TYPE_LABEL, TEST_DOCUMENT_PATH, TEST_MULTI_PAGE_TIFF_PATH,
-    TEST_PDF_INDIRECT_ROTATE_PATH, TEST_OFFICE_DOCUMENT_PATH,
+    TEST_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL, TEST_MULTI_PAGE_TIFF_PATH,
+    TEST_OFFICE_DOCUMENT_PATH, TEST_PDF_INDIRECT_ROTATE_PATH,
     TEST_SMALL_DOCUMENT_CHECKSUM, TEST_SMALL_DOCUMENT_FILENAME,
     TEST_SMALL_DOCUMENT_MIMETYPE, TEST_SMALL_DOCUMENT_PATH,
     TEST_SMALL_DOCUMENT_SIZE
@@ -27,7 +28,8 @@ from .mixins import DocumentTestMixin
 class DocumentTestCase(DocumentTestMixin, BaseTestCase):
     def test_natural_keys(self):
         self.document.pages.first().generate_image()
-        self._test_database_conversion('documents')
+        with mute_stdout():
+            self._test_database_conversion('documents')
 
     def test_document_creation(self):
         self.assertEqual(self.document_type.label, TEST_DOCUMENT_TYPE_LABEL)
@@ -242,34 +244,34 @@ class DocumentVersionTestCase(GenericDocumentTestCase):
 
 
 @override_settings(OCR_AUTO_OCR=False)
-class DocumentManagerTestCase(BaseTestCase):
+class DocumentPassthroughManagerTestCase(BaseTestCase):
     def setUp(self):
-        super(DocumentManagerTestCase, self).setUp()
+        super(DocumentPassthroughManagerTestCase, self).setUp()
         self.document_type = DocumentType.objects.create(
             label=TEST_DOCUMENT_TYPE_LABEL
         )
 
     def tearDown(self):
         self.document_type.delete()
-        super(DocumentManagerTestCase, self).tearDown()
+        super(DocumentPassthroughManagerTestCase, self).tearDown()
 
     def test_document_stubs_deletion(self):
         document_stub = Document.objects.create(
             document_type=self.document_type
         )
 
-        Document.objects.delete_stubs()
+        Document.passthrough.delete_stubs()
 
-        self.assertEqual(Document.objects.count(), 1)
+        self.assertEqual(Document.passthrough.count(), 1)
 
         document_stub.date_added = document_stub.date_added - timedelta(
             seconds=STUB_EXPIRATION_INTERVAL + 1
         )
         document_stub.save()
 
-        Document.objects.delete_stubs()
+        Document.passthrough.delete_stubs()
 
-        self.assertEqual(Document.objects.count(), 0)
+        self.assertEqual(Document.passthrough.count(), 0)
 
 
 class DuplicatedDocumentsTestCase(GenericDocumentTestCase):

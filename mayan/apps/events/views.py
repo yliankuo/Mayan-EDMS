@@ -11,10 +11,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from actstream.models import Action, any_stream
 
-from acls.models import AccessControlList
-from common.generics import FormView, SimpleView
-from common.utils import encapsulate
-from common.views import SingleObjectListView
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.generics import FormView, SimpleView
+from mayan.apps.common.utils import encapsulate
+from mayan.apps.common.views import SingleObjectListView
 
 from .classes import EventType, ModelEventType
 from .forms import (
@@ -296,6 +296,13 @@ class UserEventListView(SingleObjectListView):
 
     def get_user(self):
         return get_object_or_404(get_user_model(), pk=self.kwargs['pk'])
+
+
+class CurrentUserEventListView(UserEventListView):
+    view_permission = None
+
+    def get_user(self):
+        return self.request.user
 
 
 class VerbEventListView(SingleObjectListView):

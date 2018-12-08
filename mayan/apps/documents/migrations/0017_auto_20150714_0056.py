@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='date_added',
             field=models.DateTimeField(
-                auto_now_add=True, verbose_name='Added', db_index=True
+                auto_now_add=True, db_index=True, verbose_name='Added'
             ),
             preserve_default=True,
         ),
@@ -23,7 +22,7 @@ class Migration(migrations.Migration):
             model_name='documentversion',
             name='timestamp',
             field=models.DateTimeField(
-                auto_now_add=True, verbose_name='Timestamp', db_index=True
+                auto_now_add=True, db_index=True, verbose_name='Timestamp'
             ),
             preserve_default=True,
         ),

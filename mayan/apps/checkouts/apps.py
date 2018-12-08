@@ -8,10 +8,12 @@ from django.apps import apps
 from django.db.models.signals import pre_save
 from django.utils.translation import ugettext_lazy as _
 
-from acls import ModelPermission
-from common import MayanAppConfig, menu_facet, menu_main, menu_sidebar
-from common.dashboards import dashboard_main
-from events import ModelEventType
+from mayan.apps.acls import ModelPermission
+from mayan.apps.common import (
+    MayanAppConfig, menu_facet, menu_main, menu_sidebar
+)
+from mayan.apps.common.dashboards import dashboard_main
+from mayan.apps.events import ModelEventType
 from mayan.celery import app
 
 from .dashboard_widgets import DashboardWidgetTotalCheckouts
@@ -30,14 +32,16 @@ from .permissions import (
     permission_document_checkout, permission_document_checkout_detail_view
 )
 from .queues import *  # NOQA
-from .tasks import task_check_expired_check_outs  # NOQA
 # This import is required so that celerybeat can find the task
+from .tasks import task_check_expired_check_outs  # NOQA
 
 
 class CheckoutsApp(MayanAppConfig):
+    app_namespace = 'checkouts'
+    app_url = 'checkouts'
     has_rest_api = True
     has_tests = True
-    name = 'checkouts'
+    name = 'mayan.apps.checkouts'
     verbose_name = _('Checkouts')
 
     def ready(self):
@@ -94,7 +98,7 @@ class CheckoutsApp(MayanAppConfig):
         app.conf.CELERYBEAT_SCHEDULE.update(
             {
                 'task_check_expired_check_outs': {
-                    'task': 'checkouts.tasks.task_check_expired_check_outs',
+                    'task': 'mayan.apps.checkouts.tasks.task_check_expired_check_outs',
                     'schedule': timedelta(
                         seconds=CHECK_EXPIRED_CHECK_OUTS_INTERVAL
                     ),
@@ -111,7 +115,7 @@ class CheckoutsApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'checkouts.tasks.task_check_expired_check_outs': {
+                'mayan.apps.checkouts.tasks.task_check_expired_check_outs': {
                     'queue': 'checkouts_periodic'
                 },
             }

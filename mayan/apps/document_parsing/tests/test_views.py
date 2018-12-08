@@ -2,14 +2,16 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from documents.tests import GenericDocumentViewTestCase, TEST_HYBRID_DOCUMENT
+from mayan.apps.documents.tests import (
+    TEST_HYBRID_DOCUMENT, GenericDocumentViewTestCase
+)
 
 from ..permissions import (
     permission_content_view, permission_document_type_parsing_setup
 )
 from ..utils import get_document_content
 
-TEST_DOCUMENT_CONTENT = 'Sample text'
+from .literals import TEST_DOCUMENT_CONTENT
 
 
 @override_settings(DOCUMENT_PARSING_AUTO_PARSING=True)

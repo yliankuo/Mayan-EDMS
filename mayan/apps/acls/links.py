@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link
+from mayan.apps.navigation import Link
 
 from .icons import icon_acl_list, icon_acl_new
-from .permissions import permission_acl_view, permission_acl_edit
+from .permissions import permission_acl_edit, permission_acl_view
 
 
 def get_kwargs_factory(variable_name):

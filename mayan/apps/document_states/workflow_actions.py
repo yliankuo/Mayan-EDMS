@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import logging
 import json
+import logging
 
 from jinja2 import Template
 import requests

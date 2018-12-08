@@ -5,10 +5,10 @@ from django.conf.urls import url
 from .api_views import (
     APIDocumentTypeWorkflowListView, APIWorkflowDocumentTypeList,
     APIWorkflowDocumentTypeView, APIWorkflowImageView,
-    APIWorkflowInstanceListView, APIWorkflowInstanceView,
-    APIWorkflowInstanceLogEntryListView, APIWorkflowListView,
-    APIWorkflowStateListView, APIWorkflowStateView,
-    APIWorkflowTransitionListView, APIWorkflowTransitionView, APIWorkflowView
+    APIWorkflowInstanceListView, APIWorkflowInstanceLogEntryListView,
+    APIWorkflowInstanceView, APIWorkflowListView, APIWorkflowStateListView,
+    APIWorkflowStateView, APIWorkflowTransitionListView,
+    APIWorkflowTransitionView, APIWorkflowView
 )
 from .views import (
     DocumentWorkflowInstanceListView, SetupWorkflowCreateView,
@@ -18,13 +18,13 @@ from .views import (
     SetupWorkflowStateActionEditView, SetupWorkflowStateActionListView,
     SetupWorkflowStateActionSelectionView, SetupWorkflowStateCreateView,
     SetupWorkflowStateDeleteView, SetupWorkflowStateEditView,
-    SetupWorkflowStateListView, SetupWorkflowTransitionListView,
-    SetupWorkflowTransitionCreateView, SetupWorkflowTransitionDeleteView,
-    SetupWorkflowTransitionEditView,
+    SetupWorkflowStateListView, SetupWorkflowTransitionCreateView,
+    SetupWorkflowTransitionDeleteView, SetupWorkflowTransitionEditView,
+    SetupWorkflowTransitionListView,
     SetupWorkflowTransitionTriggerEventListView, ToolLaunchAllWorkflows,
     WorkflowDocumentListView, WorkflowInstanceDetailView,
     WorkflowInstanceTransitionView, WorkflowListView, WorkflowPreviewView,
-    WorkflowStateDocumentListView, WorkflowStateListView,
+    WorkflowStateDocumentListView, WorkflowStateListView
 )
 
 urlpatterns = [

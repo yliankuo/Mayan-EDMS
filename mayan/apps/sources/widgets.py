@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 from django.template.loader import render_to_string
 
-from documents.settings import (
-    setting_preview_width, setting_preview_height, setting_thumbnail_width,
-    setting_thumbnail_height
+from mayan.apps.documents.settings import (
+    setting_preview_height, setting_preview_width, setting_thumbnail_height,
+    setting_thumbnail_width
 )
 
 

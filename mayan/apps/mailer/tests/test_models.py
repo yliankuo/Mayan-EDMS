@@ -2,14 +2,14 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core import mail
 
-from documents.tests.test_models import GenericDocumentTestCase
+from mayan.apps.documents.tests.test_models import GenericDocumentTestCase
 
 from .literals import (
     TEST_BODY_HTML, TEST_EMAIL_ADDRESS, TEST_EMAIL_FROM_ADDRESS,
     TEST_RECIPIENTS_MULTIPLE_COMMA, TEST_RECIPIENTS_MULTIPLE_COMMA_RESULT,
+    TEST_RECIPIENTS_MULTIPLE_MIXED, TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT,
     TEST_RECIPIENTS_MULTIPLE_SEMICOLON,
-    TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT, TEST_RECIPIENTS_MULTIPLE_MIXED,
-    TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT,
+    TEST_RECIPIENTS_MULTIPLE_SEMICOLON_RESULT
 )
 from .mixins import MailerTestMixin
 

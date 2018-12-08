@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import migrations
@@ -20,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RenameField(
             model_name='documenttype',
-            old_name='name',
             new_name='label',
+            old_name='name'
         ),
     ]

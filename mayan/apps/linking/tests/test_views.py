@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-from documents.permissions import permission_document_view
-from documents.tests import GenericDocumentViewTestCase
+from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
 from ..models import SmartLink
 from ..permissions import (
@@ -10,8 +10,8 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_SMART_LINK_DYNAMIC_LABEL, TEST_SMART_LINK_LABEL_EDITED,
-    TEST_SMART_LINK_LABEL
+    TEST_SMART_LINK_DYNAMIC_LABEL, TEST_SMART_LINK_LABEL,
+    TEST_SMART_LINK_LABEL_EDITED
 )
 
 

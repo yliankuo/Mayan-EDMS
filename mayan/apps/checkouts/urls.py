@@ -4,7 +4,7 @@ from django.conf.urls import url
 
 from .api_views import APICheckedoutDocumentListView, APICheckedoutDocumentView
 from .views import (
-    CheckoutDocumentView, CheckoutDetailView, CheckoutListView,
+    CheckoutDetailView, CheckoutDocumentView, CheckoutListView,
     DocumentCheckinView
 )
 

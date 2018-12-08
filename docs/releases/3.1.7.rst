@@ -12,10 +12,10 @@ Changes
 * Remove duplicate YAML loading of environment variables.
 * Don't load development apps if they are already loaded.
 * Make sure all key used as input for the cache key hash are
-  bytes and not unicode. GitLab issue #520. Thanks to TheOneValen
-  @TheOneValen for the report.
+  bytes and not unicode. GitLab issue #520. Thanks to @TheOneValen for
+  the report.
 * Ignore document stub from the index mirror. GitLab issue
-  #520. Thanks to TheOneValen @TheOneValen for the report.
+  #520. Thanks to @TheOneValen for the report.
 * Fix for the Docker image INSTALL_FLAG path. Thanks to
   Mark Maglana @relaxdiego for the report and to Hamish Farroq @farroq_HAM
   for the patch. GitLab issue #525.

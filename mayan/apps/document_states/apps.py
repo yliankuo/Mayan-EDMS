@@ -6,40 +6,41 @@ from django.utils.translation import ugettext_lazy as _
 
 from kombu import Exchange, Queue
 
-from acls import ModelPermission
-from acls.links import link_acl_list
-from common import (
+from mayan.apps.acls import ModelPermission
+from mayan.apps.acls.links import link_acl_list
+from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_main, menu_object,
     menu_secondary, menu_setup, menu_sidebar, menu_tools
 )
-from common.classes import ModelAttribute
-from common.links import link_object_error_list
-from common.permissions_runtime import permission_error_log_view
-from common.widgets import TwoStateWidget
+from mayan.apps.common.classes import ModelAttribute
+from mayan.apps.common.links import link_object_error_list
+from mayan.apps.common.permissions_runtime import permission_error_log_view
+from mayan.apps.common.widgets import TwoStateWidget
+from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
-from navigation import SourceColumn
 
 from .classes import DocumentStateHelper, WorkflowAction
 from .handlers import (
     handler_index_document, handler_trigger_transition, launch_workflow
 )
 from .links import (
-    link_document_workflow_instance_list, link_setup_workflow_document_types,
-    link_setup_workflow_create, link_setup_workflow_delete,
+    link_document_workflow_instance_list, link_setup_workflow_create,
+    link_setup_workflow_delete, link_setup_workflow_document_types,
     link_setup_workflow_edit, link_setup_workflow_list,
-    link_setup_workflow_states, link_setup_workflow_state_action_delete,
+    link_setup_workflow_state_action_delete,
     link_setup_workflow_state_action_edit,
     link_setup_workflow_state_action_list,
     link_setup_workflow_state_action_selection,
     link_setup_workflow_state_create, link_setup_workflow_state_delete,
-    link_setup_workflow_state_edit, link_setup_workflow_transitions,
+    link_setup_workflow_state_edit, link_setup_workflow_states,
     link_setup_workflow_transition_create,
     link_setup_workflow_transition_delete, link_setup_workflow_transition_edit,
-    link_tool_launch_all_workflows, link_workflow_instance_detail,
-    link_workflow_instance_transition, link_workflow_document_list,
-    link_workflow_list, link_workflow_preview,
-    link_workflow_state_document_list, link_workflow_state_list,
-    link_workflow_instance_transition_events
+    link_setup_workflow_transitions, link_tool_launch_all_workflows,
+    link_workflow_document_list, link_workflow_instance_detail,
+    link_workflow_instance_transition,
+    link_workflow_instance_transition_events, link_workflow_list,
+    link_workflow_preview, link_workflow_state_document_list,
+    link_workflow_state_list
 )
 from .permissions import (
     permission_workflow_delete, permission_workflow_edit,
@@ -50,11 +51,12 @@ from .widgets import widget_transition_events
 
 
 class DocumentStatesApp(MayanAppConfig):
-    app_url = 'states'
+    app_namespace = 'document_states'
+    app_url = 'workflows'
     has_rest_api = True
     has_tests = True
-    name = 'document_states'
-    verbose_name = _('Document states')
+    name = 'mayan.apps.document_states'
+    verbose_name = _('Workflows')
 
     def ready(self):
         super(DocumentStatesApp, self).ready()
@@ -259,10 +261,10 @@ class DocumentStatesApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'document_states.tasks.task_generate_document_state_image': {
+                'mayan.apps.document_states.tasks.task_generate_document_state_image': {
                     'queue': 'document_states'
                 },
-                'document_states.tasks.task_launch_all_workflows': {
+                'mayan.apps.document_states.tasks.task_launch_all_workflows': {
                     'queue': 'document_states_fast'
                 },
             }

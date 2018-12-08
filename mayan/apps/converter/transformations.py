@@ -5,7 +5,8 @@ import logging
 
 from PIL import Image, ImageColor, ImageFilter
 
-from django.utils.translation import string_concat, ugettext_lazy as _
+from django.utils.text import format_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_bytes
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,9 @@ class BaseTransformation(object):
     @classmethod
     def get_label(cls):
         if cls.arguments:
-            return string_concat(cls.label, ': ', ', '.join(cls.arguments))
+            return format_lazy(
+                '{}{}{}', cls.label, ': ', ', '.join(cls.arguments)
+            )
         else:
             return cls.label
 

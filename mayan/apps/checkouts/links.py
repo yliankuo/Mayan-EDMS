@@ -2,12 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link
+from mayan.apps.navigation import Link
 
 from .icons import icon_checkout_info
 from .permissions import (
-    permission_document_checkout, permission_document_checkin,
-    permission_document_checkin_override
+    permission_document_checkin, permission_document_checkin_override,
+    permission_document_checkout
 )
 
 

@@ -3,12 +3,12 @@ from __future__ import absolute_import, unicode_literals
 from django.core.exceptions import PermissionDenied
 from django.test import override_settings
 
-from common.tests import BaseTestCase
-from documents.models import Document, DocumentType
-from documents.permissions import permission_document_view
-from documents.tests import (
-    TEST_SMALL_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
-    TEST_DOCUMENT_TYPE_2_LABEL
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.permissions import permission_document_view
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_TYPE_2_LABEL, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_SMALL_DOCUMENT_PATH
 )
 
 from ..models import AccessControlList

@@ -2,18 +2,20 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from common.tests import BaseTestCase
-from documents.models import DocumentType
-from documents.tests import TEST_SMALL_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
-from document_indexing.models import Index, IndexInstanceNode
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.document_indexing.models import Index, IndexInstanceNode
+from mayan.apps.documents.models import DocumentType
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_PATH
+)
 
 from ..models import Workflow
 
 from .literals import (
     TEST_INDEX_LABEL, TEST_INDEX_TEMPLATE_METADATA_EXPRESSION,
-    TEST_WORKFLOW_INTERNAL_NAME, TEST_WORKFLOW_INITIAL_STATE_LABEL,
-    TEST_WORKFLOW_INITIAL_STATE_COMPLETION, TEST_WORKFLOW_LABEL,
-    TEST_WORKFLOW_STATE_LABEL, TEST_WORKFLOW_STATE_COMPLETION,
+    TEST_WORKFLOW_INITIAL_STATE_COMPLETION, TEST_WORKFLOW_INITIAL_STATE_LABEL,
+    TEST_WORKFLOW_INTERNAL_NAME, TEST_WORKFLOW_LABEL,
+    TEST_WORKFLOW_STATE_COMPLETION, TEST_WORKFLOW_STATE_LABEL,
     TEST_WORKFLOW_TRANSITION_LABEL
 )
 

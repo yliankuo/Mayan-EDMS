@@ -10,14 +10,14 @@ from django.conf import settings
 from django.urls import resolve as django_resolve
 from django.urls.base import get_script_prefix
 from django.utils.datastructures import MultiValueDict
-from django.utils.http import (
-    urlencode as django_urlencode, urlquote as django_urlquote
-)
-from django.utils.six.moves import reduce as reduce_function, xmlrpc_client
+from django.utils.http import urlencode as django_urlencode
+from django.utils.http import urlquote as django_urlquote
+from django.utils.six.moves import reduce as reduce_function
+from django.utils.six.moves import xmlrpc_client
 from django.utils.translation import ugettext_lazy as _
 
-from common.compat import dict_type, dictionary_type
 import mayan
+from mayan.apps.common.compat import dict_type, dictionary_type
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
 from .literals import DJANGO_SQLITE_BACKEND, MAYAN_PYPI_NAME, PYPI_URL

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='description',
             field=models.TextField(
-                default='', verbose_name='Description', blank=True
+                blank=True, default='', verbose_name='Description'
             ),
             preserve_default=True,
         ),
@@ -23,9 +22,9 @@ class Migration(migrations.Migration):
             model_name='document',
             name='label',
             field=models.CharField(
-                default='', max_length=255, blank=True,
-                help_text='The name of the document', verbose_name='Label',
-                db_index=True
+                blank=True, default='', db_index=True,
+                help_text='The name of the document', max_length=255,
+                verbose_name='Label'
             ),
             preserve_default=True,
         ),
@@ -33,7 +32,7 @@ class Migration(migrations.Migration):
             model_name='documentversion',
             name='comment',
             field=models.TextField(
-                default='', verbose_name='Comment', blank=True
+                blank=True, default='', verbose_name='Comment'
             ),
             preserve_default=True,
         ),

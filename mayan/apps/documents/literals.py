@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from common.literals import TIME_DELTA_UNIT_DAYS
+from mayan.apps.common.literals import TIME_DELTA_UNIT_DAYS
 
 CHECK_DELETE_PERIOD_INTERVAL = 60
 CHECK_TRASH_PERIOD_INTERVAL = 60
@@ -31,7 +31,7 @@ DEFAULT_ZIP_FILENAME = 'document_bundle.zip'
 DEFAULT_DOCUMENT_TYPE_LABEL = _('Default')
 DOCUMENT_IMAGE_TASK_TIMEOUT = 120
 DOCUMENT_IMAGES_CACHE_NAME = 'document_images'
-DOCUMENT_CACHE_STORAGE_INSTANCE_PATH = 'documents.storages.storage_documentimagecache'
+DOCUMENT_CACHE_STORAGE_INSTANCE_PATH = 'mayan.apps.documents.storages.storage_documentimagecache'
 STUB_EXPIRATION_INTERVAL = 60 * 60 * 24  # 24 hours
 TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES = 6
 UPDATE_PAGE_COUNT_RETRY_DELAY = 10

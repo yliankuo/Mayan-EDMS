@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import uuid
@@ -6,14 +5,13 @@ import uuid
 from django.db import connection, migrations, models
 
 
-def forwards(apps, schema_editor):
+def operation_forwards(apps, schema_editor):
     if not schema_editor.connection.vendor == 'oracle':
         # Skip this migration for Oracle
         # GitHub issue #251
         migrations.AlterField(
-            model_name='document',
-            name='uuid',
             field=models.UUIDField(default=uuid.uuid4, editable=False),
+            model_name='document', name='uuid',
         )
 
 
@@ -23,7 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(forwards)
+        migrations.RunPython(code=operation_forwards)
     ]
 
     def __init__(self, *args, **kwargs):
@@ -32,6 +30,7 @@ class Migration(migrations.Migration):
         if connection.vendor == 'postgresql':
             self.operations.insert(
                 0, migrations.RunSQL(
-                    'ALTER TABLE documents_document ALTER COLUMN uuid SET DATA TYPE UUID USING uuid::uuid;'
+                    'ALTER TABLE documents_document ALTER COLUMN uuid SET '
+                    'DATA TYPE UUID USING uuid::uuid;'
                 )
             )

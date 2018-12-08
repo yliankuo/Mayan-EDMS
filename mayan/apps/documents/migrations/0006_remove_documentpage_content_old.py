@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import migrations
@@ -13,7 +12,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
-            model_name='documentpage',
-            name='content_old',
+            model_name='documentpage', name='content_old',
         ),
     ]

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 
-def move_from_content_type_user_to_foreign_key_field_user(apps, schema_editor):
+def operation_move_from_content_type_user_to_foreign_key_field_user(apps, schema_editor):
     # The model references the use who checked out the document using a
     # generic.GenericForeignKey. This migrations changes that to a simpler
     # ForeignKey to the User model
@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            move_from_content_type_user_to_foreign_key_field_user
+            code=operation_move_from_content_type_user_to_foreign_key_field_user
         ),
     ]

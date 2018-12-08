@@ -19,29 +19,29 @@ from django.utils.encoding import (
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from djcelery.models import IntervalSchedule, PeriodicTask
 from model_utils.managers import InheritanceManager
 
-from common.compressed_files import Archive
-from common.exceptions import NoMIMETypeMatch
-from common.utils import TemporaryFile
-from converter.models import Transformation
-from djcelery.models import PeriodicTask, IntervalSchedule
-from documents.models import Document, DocumentType
-from documents.settings import setting_language
-from metadata.api import set_bulk_metadata
-from metadata.models import MetadataType
+from mayan.apps.common.compressed_files import Archive
+from mayan.apps.common.exceptions import NoMIMETypeMatch
+from mayan.apps.common.utils import TemporaryFile
+from mayan.apps.converter.models import Transformation
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.settings import setting_language
+from mayan.apps.metadata.api import set_bulk_metadata
+from mayan.apps.metadata.models import MetadataType
 
 from .classes import PseudoFile, SourceUploadedFile, StagingFile
 from .exceptions import SourceException
 from .literals import (
-    DEFAULT_INTERVAL, DEFAULT_POP3_TIMEOUT, DEFAULT_IMAP_MAILBOX,
-    DEFAULT_METADATA_ATTACHMENT_NAME, SCANNER_ADF_MODE_CHOICES,
-    SCANNER_MODE_COLOR, SCANNER_MODE_CHOICES, SCANNER_SOURCE_CHOICES,
-    SOURCE_CHOICES, SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH,
-    SOURCE_CHOICE_WEB_FORM, SOURCE_INTERACTIVE_UNCOMPRESS_CHOICES,
-    SOURCE_UNCOMPRESS_CHOICES, SOURCE_UNCOMPRESS_CHOICE_N,
-    SOURCE_UNCOMPRESS_CHOICE_Y, SOURCE_CHOICE_EMAIL_IMAP,
+    DEFAULT_IMAP_MAILBOX, DEFAULT_INTERVAL, DEFAULT_METADATA_ATTACHMENT_NAME,
+    DEFAULT_POP3_TIMEOUT, SCANNER_ADF_MODE_CHOICES, SCANNER_MODE_CHOICES,
+    SCANNER_MODE_COLOR, SCANNER_SOURCE_CHOICES, SOURCE_CHOICE_EMAIL_IMAP,
     SOURCE_CHOICE_EMAIL_POP3, SOURCE_CHOICE_SANE_SCANNER,
+    SOURCE_CHOICE_STAGING, SOURCE_CHOICE_WATCH, SOURCE_CHOICE_WEB_FORM,
+    SOURCE_CHOICES, SOURCE_INTERACTIVE_UNCOMPRESS_CHOICES,
+    SOURCE_UNCOMPRESS_CHOICE_N, SOURCE_UNCOMPRESS_CHOICE_Y,
+    SOURCE_UNCOMPRESS_CHOICES
 )
 from .settings import setting_scanimage_path
 from .wizards import WizardStep

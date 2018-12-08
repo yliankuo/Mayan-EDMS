@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from documents.icons import icon_document_type
-from documents.permissions import permission_document_type_edit
-from navigation import Link
+from mayan.apps.documents.icons import icon_document_type
+from mayan.apps.documents.permissions import permission_document_type_edit
+from mayan.apps.navigation import Link
 
 from .icons import (
     icon_document_metadata_add, icon_metadata_type, icon_metadata_view,

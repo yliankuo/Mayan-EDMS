@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -23,11 +22,11 @@ class Migration(migrations.Migration):
             model_name='documenttype',
             name='delete_time_unit',
             field=models.CharField(
-                default='days', max_length=8, verbose_name='Delete time unit',
                 choices=[
                     ('days', 'Days'), ('hours', 'Hours'),
                     ('minutes', 'Minutes'), ('seconds', 'Seconds')
-                ]
+                ],
+                default='days', max_length=8, verbose_name='Delete time unit'
             ),
             preserve_default=True,
         ),
@@ -35,7 +34,7 @@ class Migration(migrations.Migration):
             model_name='documenttype',
             name='trash_time_period',
             field=models.PositiveIntegerField(
-                null=True, verbose_name='Trash time period', blank=True
+                blank=True, null=True, verbose_name='Trash time period'
             ),
             preserve_default=True,
         ),
@@ -43,20 +42,17 @@ class Migration(migrations.Migration):
             model_name='documenttype',
             name='trash_time_unit',
             field=models.CharField(
-                blank=True, max_length=8, null=True,
-                verbose_name='Trash time unit', choices=[
+                blank=True, choices=[
                     ('days', 'Days'), ('hours', 'Hours'),
                     ('minutes', 'Minutes'), ('seconds', 'Seconds')
-                ]
+                ], max_length=8, null=True, verbose_name='Trash time unit'
             ),
             preserve_default=True,
         ),
         migrations.AlterField(
-            model_name='document',
-            name='deleted_date_time',
             field=models.DateTimeField(
                 verbose_name='Date and time trashed', blank=True
-            ),
+            ), model_name='document', name='deleted_date_time',
             preserve_default=True,
         ),
     ]

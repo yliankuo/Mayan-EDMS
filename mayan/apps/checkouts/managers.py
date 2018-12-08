@@ -6,14 +6,14 @@ from django.apps import apps
 from django.db import models
 from django.utils.timezone import now
 
-from documents.models import Document
+from mayan.apps.documents.models import Document
 
 from .events import (
     event_document_auto_check_in, event_document_check_in,
     event_document_forceful_check_in
 )
 from .exceptions import DocumentNotCheckedOut
-from .literals import STATE_CHECKED_OUT, STATE_CHECKED_IN
+from .literals import STATE_CHECKED_IN, STATE_CHECKED_OUT
 
 logger = logging.getLogger(__name__)
 

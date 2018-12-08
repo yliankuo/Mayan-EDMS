@@ -17,8 +17,8 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
-from lock_manager import LockError
-from lock_manager.runtime import locking_backend
+from mayan.apps.lock_manager import LockError
+from mayan.apps.lock_manager.runtime import locking_backend
 
 from .managers import ErrorLogEntryManager, UserLocaleProfileManager
 from .storages import storage_sharedupload

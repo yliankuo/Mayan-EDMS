@@ -3,16 +3,15 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link
-from navigation.classes import Separator, Text
+from mayan.apps.navigation import Link
+from mayan.apps.navigation.classes import Separator, Text
 
 from .icons import (
     icon_about, icon_check_version, icon_current_user_details,
     icon_current_user_edit, icon_current_user_locale_profile_details,
-    icon_current_user_locale_profile_edit, icon_documentation,
-    icon_forum, icon_license, icon_object_error_list_with_icon,
-    icon_packages_licenses, icon_setup, icon_source_code, icon_support,
-    icon_tools
+    icon_current_user_locale_profile_edit, icon_documentation, icon_forum,
+    icon_license, icon_object_error_list_with_icon, icon_packages_licenses,
+    icon_setup, icon_source_code, icon_support, icon_tools
 )
 from .permissions_runtime import permission_error_log_view
 from .utils import get_user_label_text

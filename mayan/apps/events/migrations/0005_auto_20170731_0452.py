@@ -7,7 +7,7 @@ import re
 from django.db import migrations
 
 
-def update_event_types_names(apps, schema_editor):
+def operation_update_event_types_names(apps, schema_editor):
     Action = apps.get_model('actstream', 'Action')
     StoredEventType = apps.get_model('events', 'StoredEventType')
 
@@ -35,7 +35,7 @@ def update_event_types_names(apps, schema_editor):
         action.save()
 
 
-def revert_event_types_names(apps, schema_editor):
+def operation_revert_event_types_names(apps, schema_editor):
     Action = apps.get_model('actstream', 'Action')
     StoredEventType = apps.get_model('events', 'StoredEventType')
 
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            code=update_event_types_names,
-            reverse_code=revert_event_types_names
+            code=operation_update_event_types_names,
+            reverse_code=operation_revert_event_types_names
         ),
     ]

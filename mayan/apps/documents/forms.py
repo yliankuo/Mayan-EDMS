@@ -7,16 +7,12 @@ from django import forms
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
 
-from acls.models import AccessControlList
-from common.forms import DetailForm
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.forms import DetailForm
 
-from .fields import (
-    DocumentField, DocumentPageField, DocumentVersionField
-)
-from .models import (
-    Document, DocumentType, DocumentTypeFilename
-)
+from .fields import DocumentField, DocumentPageField, DocumentVersionField
 from .literals import DEFAULT_ZIP_FILENAME, PAGE_RANGE_ALL, PAGE_RANGE_CHOICES
+from .models import Document, DocumentType, DocumentTypeFilename
 from .permissions import permission_document_create
 from .runtime import language_choices
 

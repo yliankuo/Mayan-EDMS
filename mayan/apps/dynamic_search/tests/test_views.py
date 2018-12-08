@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 from django.test import override_settings
 
-from common.tests import GenericViewTestCase
-from documents.models import DocumentType
-from documents.search import document_search
-from documents.tests import TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_PATH
+from mayan.apps.common.tests import GenericViewTestCase
+from mayan.apps.documents.models import DocumentType
+from mayan.apps.documents.search import document_search
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_PATH
+)
 
 
 @override_settings(OCR_AUTO_OCR=False)
@@ -38,7 +40,7 @@ class Issue46TestCase(GenericViewTestCase):
 
     def test_advanced_search_past_first_page(self):
         # Make sure all documents are returned by the search
-        queryset, elapsed_time = document_search.search(
+        queryset = document_search.search(
             {'label': 'test document'}, user=self.admin_user
         )
         self.assertEqual(queryset.count(), self.document_count)

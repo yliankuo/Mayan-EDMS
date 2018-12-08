@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import os
@@ -7,8 +5,8 @@ import os
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_text
 
-from converter.models import Transformation
-from converter.permissions import permission_transformation_delete
+from mayan.apps.converter.models import Transformation
+from mayan.apps.converter.permissions import permission_transformation_delete
 
 from ..literals import PAGE_RANGE_ALL
 from ..models import DeletedDocument, Document, DocumentType
@@ -22,7 +20,7 @@ from ..permissions import (
 from .base import GenericDocumentViewTestCase
 from .literals import (
     TEST_DOCUMENT_TYPE_2_LABEL, TEST_SMALL_DOCUMENT_FILENAME,
-    TEST_TRANSFORMATION_ARGUMENT, TEST_TRANSFORMATION_NAME,
+    TEST_TRANSFORMATION_ARGUMENT, TEST_TRANSFORMATION_NAME
 )
 from .mixins import DocumentTypeQuickLabelTestMixin
 

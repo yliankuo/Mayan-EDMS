@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 from actstream.models import Action
 from django_downloadview import assert_download_response
 
-from user_management.tests.literals import (
+from mayan.apps.user_management.tests.literals import (
     TEST_USER_PASSWORD, TEST_USER_USERNAME
 )
 
@@ -15,7 +13,6 @@ from ..permissions import (
 )
 
 from .base import GenericDocumentViewTestCase
-
 
 TEST_DOCUMENT_TYPE_EDITED_LABEL = 'test document type edited label'
 TEST_DOCUMENT_TYPE_2_LABEL = 'test document type 2 label'

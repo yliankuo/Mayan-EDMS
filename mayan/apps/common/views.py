@@ -14,7 +14,7 @@ from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView, TemplateView
 
-from acls.models import AccessControlList
+from mayan.apps.acls.models import AccessControlList
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
 from .forms import (
@@ -23,15 +23,15 @@ from .forms import (
 )
 from .generics import (  # NOQA
     AssignRemoveView, ConfirmView, FormView, MultiFormView,
-    MultipleObjectConfirmActionView, MultipleObjectFormActionView,
-    SingleObjectCreateView, SingleObjectDeleteView,
-    SingleObjectDetailView, SingleObjectDynamicFormCreateView,
-    SingleObjectDynamicFormEditView, SingleObjectDownloadView,
-    SingleObjectEditView, SingleObjectListView, SimpleView
+    MultipleObjectConfirmActionView, MultipleObjectFormActionView, SimpleView,
+    SingleObjectCreateView, SingleObjectDeleteView, SingleObjectDetailView,
+    SingleObjectDownloadView, SingleObjectDynamicFormCreateView,
+    SingleObjectDynamicFormEditView, SingleObjectEditView, SingleObjectListView
 )
 from .icons import icon_setup
-from .menus import menu_tools, menu_setup
+from .menus import menu_setup, menu_tools
 from .permissions_runtime import permission_error_log_view
+from .settings import setting_home_view
 from .utils import check_version
 
 
@@ -243,7 +243,7 @@ class PackagesLicensesView(SimpleView):
 
 
 class RootView(SimpleView):
-    extra_context = {'home_view': settings.HOME_VIEW}
+    extra_context = {'home_view': setting_home_view.value}
     template_name = 'appearance/root.html'
 
 

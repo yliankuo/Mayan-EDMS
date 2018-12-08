@@ -5,12 +5,12 @@ import logging
 
 from django.utils.timezone import now
 
-from common.literals import TIME_DELTA_UNIT_DAYS
-from documents.tests import GenericDocumentViewTestCase
-from sources.links import link_upload_version
-from user_management.tests import (
-    TEST_USER_PASSWORD, TEST_USER_USERNAME, TEST_ADMIN_PASSWORD,
-    TEST_ADMIN_USERNAME,
+from mayan.apps.common.literals import TIME_DELTA_UNIT_DAYS
+from mayan.apps.documents.tests import GenericDocumentViewTestCase
+from mayan.apps.sources.links import link_upload_version
+from mayan.apps.user_management.tests import (
+    TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_PASSWORD,
+    TEST_USER_USERNAME
 )
 
 from ..models import DocumentCheckout
@@ -151,10 +151,12 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         # Forcefully checking in a document by a user without adequate
         # permissions throws out an error
 
-        # Silence unrelated logging
-        logging.getLogger('navigation.classes').setLevel(logging.CRITICAL)
-
         expiration_datetime = now() + datetime.timedelta(days=1)
+
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.navigation.classes').setLevel(
+            level=logging.CRITICAL
+        )
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,

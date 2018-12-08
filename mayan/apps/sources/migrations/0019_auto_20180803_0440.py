@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 
-def make_labels_unique(apps, schema_editor):
+def operation_make_labels_unique(apps, schema_editor):
     Source = apps.get_model('sources', 'Source')
 
     for source in Source.objects.using(schema_editor.connection.alias).all():
@@ -18,7 +18,7 @@ def make_labels_unique(apps, schema_editor):
             source.save()
 
 
-def make_labels_unique_reverse(apps, schema_editor):
+def operation_make_labels_unique_reverse(apps, schema_editor):
     Source = apps.get_model('sources', 'Source')
 
     for source in Source.objects.using(schema_editor.connection.alias).all():
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            make_labels_unique, reverse_code=make_labels_unique_reverse
+            code=operation_make_labels_unique, reverse_code=operation_make_labels_unique_reverse
         ),
         migrations.AlterField(
             model_name='source',

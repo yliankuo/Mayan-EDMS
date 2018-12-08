@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django import forms
 
-from .widgets import DocumentPagesCarouselWidget, DocumentPageImageWidget
+from .widgets import DocumentPageImageWidget, DocumentPagesCarouselWidget
 
 
 class DocumentField(forms.fields.Field):

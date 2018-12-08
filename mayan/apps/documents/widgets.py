@@ -6,8 +6,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from .settings import (
-    setting_display_width, setting_display_height, setting_preview_width,
-    setting_preview_height, setting_thumbnail_width, setting_thumbnail_height
+    setting_display_height, setting_display_width, setting_preview_height,
+    setting_preview_width, setting_thumbnail_height, setting_thumbnail_width
 )
 
 

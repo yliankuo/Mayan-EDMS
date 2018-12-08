@@ -5,10 +5,10 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from common.tests.mixins import UserMixin
-from permissions.classes import Permission
-from smart_settings.classes import Namespace
-from user_management.tests import (
+from mayan.apps.common.tests.mixins import UserMixin
+from mayan.apps.permissions.classes import Permission
+from mayan.apps.smart_settings.classes import Namespace
+from mayan.apps.user_management.tests import (
     TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_USER_USERNAME,
     TEST_USER_PASSWORD
 )

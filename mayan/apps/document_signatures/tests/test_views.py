@@ -6,10 +6,10 @@ from django.core.files import File
 
 from django_downloadview.test import assert_download_response
 
-from django_gpg.models import Key
-from documents.models import DocumentVersion
-from documents.tests import (
-    GenericDocumentViewTestCase, TEST_DOCUMENT_PATH
+from mayan.apps.django_gpg.models import Key
+from mayan.apps.documents.models import DocumentVersion
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_PATH, GenericDocumentViewTestCase
 )
 
 from ..models import DetachedSignature, EmbeddedSignature
@@ -22,7 +22,7 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_SIGNATURE_FILE_PATH, TEST_SIGNED_DOCUMENT_PATH, TEST_KEY_FILE
+    TEST_KEY_FILE, TEST_SIGNATURE_FILE_PATH, TEST_SIGNED_DOCUMENT_PATH
 )
 
 TEST_UNSIGNED_DOCUMENT_COUNT = 4
@@ -312,7 +312,9 @@ class SignaturesViewTestCase(GenericDocumentViewTestCase):
 
     def test_missing_signature_verify_view_no_permission(self):
         # Silence converter logging
-        logging.getLogger('converter.backends').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.converter.backends').setLevel(
+            level=logging.CRITICAL
+        )
 
         for document in self.document_type.documents.all():
             document.delete(to_trash=False)
@@ -350,7 +352,9 @@ class SignaturesViewTestCase(GenericDocumentViewTestCase):
 
     def test_missing_signature_verify_view_with_permission(self):
         # Silence converter logging
-        logging.getLogger('converter.backends').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.converter.backends').setLevel(
+            level=logging.CRITICAL
+        )
 
         for document in self.document_type.documents.all():
             document.delete(to_trash=False)

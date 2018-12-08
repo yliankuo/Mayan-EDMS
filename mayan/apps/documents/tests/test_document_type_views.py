@@ -1,12 +1,10 @@
 from __future__ import unicode_literals
 
-from ..literals import (
-    DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT
-)
+from ..literals import DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT
 from ..models import DocumentType
 from ..permissions import (
     permission_document_type_create, permission_document_type_delete,
-    permission_document_type_edit, permission_document_type_view,
+    permission_document_type_edit, permission_document_type_view
 )
 
 from .base import GenericDocumentViewTestCase

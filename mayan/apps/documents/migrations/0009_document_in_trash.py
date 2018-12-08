@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -15,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='document',
             name='in_trash',
             field=models.BooleanField(
-                default=False, verbose_name='In trash?', editable=False
+                default=False, editable=False, verbose_name='In trash?'
             ),
             preserve_default=True,
         ),

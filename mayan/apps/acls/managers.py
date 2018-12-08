@@ -6,14 +6,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
-from common.utils import return_attrib, return_related
-from permissions import Permission
-from permissions.models import StoredPermission
+from mayan.apps.common.utils import return_attrib, return_related
+from mayan.apps.permissions import Permission
+from mayan.apps.permissions.models import StoredPermission
 
-from .exceptions import PermissionNotValidForClass
 from .classes import ModelPermission
+from .exceptions import PermissionNotValidForClass
 
 logger = logging.getLogger(__name__)
 

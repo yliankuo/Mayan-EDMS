@@ -1,5 +1,5 @@
 from .forms import (
-    POP3EmailSetupForm, IMAPEmailSetupForm, SaneScannerSetupForm,
+    IMAPEmailSetupForm, POP3EmailSetupForm, SaneScannerSetupForm,
     SaneScannerUploadForm, StagingFolderSetupForm, StagingUploadForm,
     WatchFolderSetupForm, WebFormSetupForm, WebFormUploadForm
 )

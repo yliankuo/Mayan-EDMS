@@ -10,9 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from actstream.models import Action
 
 from .classes import EventType
-from .managers import (
-    EventSubscriptionManager, ObjectEventSubscriptionManager
-)
+from .managers import EventSubscriptionManager, ObjectEventSubscriptionManager
 
 
 @python_2_unicode_compatible

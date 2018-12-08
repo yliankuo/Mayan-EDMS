@@ -7,14 +7,14 @@ from django.shortcuts import get_object_or_404
 from actstream.models import Action, any_stream
 from rest_framework import generics
 
-from acls.models import AccessControlList
-from rest_api.permissions import MayanPermission
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.rest_api.permissions import MayanPermission
 
 from .classes import EventType, EventTypeNamespace
 from .models import Notification
 from .permissions import permission_events_view
 from .serializers import (
-    EventSerializer, EventTypeSerializer, EventTypeNamespaceSerializer,
+    EventSerializer, EventTypeNamespaceSerializer, EventTypeSerializer,
     NotificationSerializer
 )
 

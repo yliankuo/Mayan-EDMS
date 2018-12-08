@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.apps import apps
 from django.utils.encoding import force_text
-from django.utils.html import mark_safe, escape
+from django.utils.html import escape, mark_safe
 
 from .icons import icon_index, icon_index_level_up, icon_node_with_documents
 

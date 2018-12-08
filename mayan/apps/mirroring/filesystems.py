@@ -11,8 +11,8 @@ from fuse import FuseOSError, Operations
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Count, F, Func, Transform, Value
 
-from document_indexing.models import Index, IndexInstanceNode
-from documents.models import Document
+from mayan.apps.document_indexing.models import Index, IndexInstanceNode
+from mayan.apps.documents.models import Document
 
 from .literals import (
     MAX_FILE_DESCRIPTOR, MIN_FILE_DESCRIPTOR, FILE_MODE, DIRECTORY_MODE
@@ -80,9 +80,7 @@ class IndexFilesystem(Operations):
                     if access_only:
                         return True
                     else:
-                        return Document.objects.get(
-                            is_stub=False, pk=document_pk
-                        )
+                        return Document.objects.get(pk=document_pk)
 
             for count, part in enumerate(parts[1:]):
                 try:

@@ -7,18 +7,22 @@ import time
 from django.core.files import File
 from django.test import override_settings
 
-from common.tests import BaseTestCase
-from django_gpg.models import Key
-from django_gpg.tests.literals import TEST_KEY_DATA, TEST_KEY_PASSPHRASE
-from documents.models import DocumentType, DocumentVersion
-from documents.tests import TEST_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.django_gpg.models import Key
+from mayan.apps.django_gpg.tests.literals import (
+    TEST_KEY_DATA, TEST_KEY_PASSPHRASE
+)
+from mayan.apps.documents.models import DocumentType, DocumentVersion
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
+)
 
 from ..models import DetachedSignature, EmbeddedSignature
 from ..tasks import task_verify_missing_embedded_signature
 
 from .literals import (
-    TEST_SIGNED_DOCUMENT_PATH, TEST_SIGNATURE_FILE_PATH, TEST_KEY_FILE,
-    TEST_KEY_ID, TEST_SIGNATURE_ID
+    TEST_KEY_FILE, TEST_KEY_ID, TEST_SIGNATURE_FILE_PATH, TEST_SIGNATURE_ID,
+    TEST_SIGNED_DOCUMENT_PATH
 )
 
 
@@ -286,7 +290,9 @@ class EmbeddedSignaturesTestCase(BaseTestCase):
 
     def test_task_verify_missing_embedded_signature(self):
         # Silence converter logging
-        logging.getLogger('converter.backends').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.converter.backends').setLevel(
+            level=logging.CRITICAL
+        )
 
         old_hooks = DocumentVersion._post_save_hooks
 

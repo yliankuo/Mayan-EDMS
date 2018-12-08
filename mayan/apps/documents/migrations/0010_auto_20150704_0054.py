@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
 import datetime
+
+from django.db import migrations, models
 from django.utils.timezone import utc
 
 
@@ -15,8 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.CreateModel(
             name='DeletedDocument',
-            fields=[
-            ],
+            fields=[],
             options={
                 'proxy': True,
             },
@@ -26,9 +25,9 @@ class Migration(migrations.Migration):
             model_name='document',
             name='deleted_date_time',
             field=models.DateTimeField(
-                default=datetime.datetime(
+                blank=True, default=datetime.datetime(
                     2015, 7, 4, 0, 54, 7, 910642, tzinfo=utc
-                ), verbose_name='Date and time deleted', blank=True
+                ), verbose_name='Date and time deleted',
             ),
             preserve_default=False,
         ),

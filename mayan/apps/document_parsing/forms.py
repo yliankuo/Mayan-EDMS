@@ -4,11 +4,12 @@ from django import forms
 from django.utils.encoding import force_text
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import ugettext
+from django.utils.translation import ugettext_lazy as _
 
-from acls.models import AccessControlList
-from common.widgets import TextAreaDiv
-from documents.models import DocumentType
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.widgets import TextAreaDiv
+from mayan.apps.documents.models import DocumentType
 
 from .models import DocumentPageContent
 from .permissions import permission_parse_document

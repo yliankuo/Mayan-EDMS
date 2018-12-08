@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
-from documents.tests import GenericDocumentViewTestCase
+from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
 from ..links import (
-    link_acl_delete, link_acl_list, link_acl_create, link_acl_permissions
+    link_acl_create, link_acl_delete, link_acl_list, link_acl_permissions
 )
 from ..models import AccessControlList
 from ..permissions import permission_acl_edit, permission_acl_view

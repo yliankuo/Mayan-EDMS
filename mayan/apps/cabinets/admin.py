@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from .models import Cabinet
-
 from mptt.admin import MPTTModelAdmin
+
+from .models import Cabinet
 
 
 @admin.register(Cabinet)

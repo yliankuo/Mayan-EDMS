@@ -7,11 +7,11 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
-from documents.forms import DocumentForm
+from mayan.apps.documents.forms import DocumentForm
 
 from .models import (
-    IMAPEmail, POP3Email, SaneScanner, StagingFolderSource, WebFormSource,
-    WatchFolderSource
+    IMAPEmail, POP3Email, SaneScanner, StagingFolderSource, WatchFolderSource,
+    WebFormSource
 )
 
 logger = logging.getLogger(__name__)

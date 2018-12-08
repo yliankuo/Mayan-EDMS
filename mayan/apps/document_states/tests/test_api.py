@@ -4,12 +4,12 @@ from django.test import override_settings
 
 from rest_framework import status
 
-from documents.models import DocumentType
-from documents.permissions import permission_document_type_view
-from documents.tests.literals import (
+from mayan.apps.documents.models import DocumentType
+from mayan.apps.documents.permissions import permission_document_type_view
+from mayan.apps.documents.tests.literals import (
     TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_PATH
 )
-from rest_api.tests import BaseAPITestCase
+from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..models import Workflow
 from ..permissions import (
@@ -19,12 +19,12 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_WORKFLOW_INTERNAL_NAME, TEST_WORKFLOW_INITIAL_STATE_COMPLETION,
-    TEST_WORKFLOW_INITIAL_STATE_LABEL,
-    TEST_WORKFLOW_INSTANCE_LOG_ENTRY_COMMENT, TEST_WORKFLOW_LABEL,
-    TEST_WORKFLOW_LABEL_EDITED, TEST_WORKFLOW_STATE_COMPLETION,
-    TEST_WORKFLOW_STATE_LABEL, TEST_WORKFLOW_STATE_LABEL_EDITED,
-    TEST_WORKFLOW_TRANSITION_LABEL, TEST_WORKFLOW_TRANSITION_LABEL_EDITED
+    TEST_WORKFLOW_INITIAL_STATE_COMPLETION, TEST_WORKFLOW_INITIAL_STATE_LABEL,
+    TEST_WORKFLOW_INSTANCE_LOG_ENTRY_COMMENT, TEST_WORKFLOW_INTERNAL_NAME,
+    TEST_WORKFLOW_LABEL, TEST_WORKFLOW_LABEL_EDITED,
+    TEST_WORKFLOW_STATE_COMPLETION, TEST_WORKFLOW_STATE_LABEL,
+    TEST_WORKFLOW_STATE_LABEL_EDITED, TEST_WORKFLOW_TRANSITION_LABEL,
+    TEST_WORKFLOW_TRANSITION_LABEL_EDITED
 )
 
 

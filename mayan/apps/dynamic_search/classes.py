@@ -9,9 +9,8 @@ from django.utils.module_loading import import_string
 from django.utils.translation import ugettext as _
 
 from .literals import (
-    QUERY_OPERATION_AND, QUERY_OPERATION_OR, TERM_OPERATION_OR,
-    TERM_OPERATIONS, TERM_QUOTES, TERM_NEGATION_CHARACTER,
-    TERM_SPACE_CHARACTER
+    QUERY_OPERATION_AND, QUERY_OPERATION_OR, TERM_NEGATION_CHARACTER,
+    TERM_OPERATION_OR, TERM_OPERATIONS, TERM_QUOTES, TERM_SPACE_CHARACTER
 )
 from .settings import setting_limit
 

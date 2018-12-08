@@ -2,30 +2,29 @@ from __future__ import unicode_literals
 
 import logging
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.utils.translation import ugettext_lazy as _
 
-from acls import ModelPermission
-from common import (
+from kombu import Exchange, Queue
+
+from mayan.apps.acls import ModelPermission
+from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_object, menu_sidebar, menu_tools
 )
+from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
-from navigation import SourceColumn
 
 from .handlers import unverify_key_signatures, verify_key_signatures
 from .links import (
-    link_all_document_version_signature_verify,
-    link_document_signature_list,
+    link_all_document_version_signature_verify, link_document_signature_list,
     link_document_version_signature_delete,
     link_document_version_signature_detached_create,
-    link_document_version_signature_embedded_create,
     link_document_version_signature_details,
     link_document_version_signature_download,
+    link_document_version_signature_embedded_create,
     link_document_version_signature_list,
-    link_document_version_signature_upload,
+    link_document_version_signature_upload
 )
 from .permissions import (
     permission_document_version_sign_detached,
@@ -33,7 +32,7 @@ from .permissions import (
     permission_document_version_signature_delete,
     permission_document_version_signature_download,
     permission_document_version_signature_upload,
-    permission_document_version_signature_view,
+    permission_document_version_signature_view
 )
 from .queues import *  # NOQA
 
@@ -44,7 +43,7 @@ class DocumentSignaturesApp(MayanAppConfig):
     app_namespace = 'signatures'
     app_url = 'signatures'
     has_tests = True
-    name = 'document_signatures'
+    name = 'mayan.apps.document_signatures'
     verbose_name = _('Document signatures')
 
     def ready(self):
@@ -110,16 +109,16 @@ class DocumentSignaturesApp(MayanAppConfig):
 
         app.conf.CELERY_ROUTES.update(
             {
-                'document_signatures.tasks.task_verify_key_signatures': {
+                'mayan.apps.document_signatures.tasks.task_verify_key_signatures': {
                     'queue': 'signatures'
                 },
-                'document_signatures.tasks.task_unverify_key_signatures': {
+                'mayan.apps.document_signatures.tasks.task_unverify_key_signatures': {
                     'queue': 'signatures'
                 },
-                'document_signatures.tasks.task_verify_document_version': {
+                'mayan.apps.document_signatures.tasks.task_verify_document_version': {
                     'queue': 'signatures'
                 },
-                'document_signatures.tasks.task_verify_missing_embedded_signature': {
+                'mayan.apps.document_signatures.tasks.task_verify_missing_embedded_signature': {
                     'queue': 'tools'
                 },
             }

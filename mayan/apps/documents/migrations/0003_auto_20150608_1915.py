@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
 from django.core.files.storage import FileSystemStorage
+from django.db import migrations, models
 
-import documents.models
+import mayan.apps.documents.models
 
 
 class Migration(migrations.Migration):
@@ -18,8 +17,8 @@ class Migration(migrations.Migration):
             model_name='document',
             name='uuid',
             field=models.CharField(
-                default=documents.models.UUID_FUNCTION, max_length=48,
-                editable=False
+                default=mayan.apps.documents.utils.document_uuid_function,
+                editable=False, max_length=48,
             ),
             preserve_default=True,
         ),
@@ -27,8 +26,8 @@ class Migration(migrations.Migration):
             model_name='documentversion',
             name='file',
             field=models.FileField(
-                upload_to=documents.models.UUID_FUNCTION,
                 storage=FileSystemStorage(),
+                upload_to=mayan.apps.documents.utils.document_uuid_function,
                 verbose_name='File'
             ),
             preserve_default=True,

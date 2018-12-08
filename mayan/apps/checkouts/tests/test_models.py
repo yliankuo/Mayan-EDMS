@@ -7,9 +7,9 @@ import time
 from django.test import override_settings
 from django.utils.timezone import now
 
-from common.tests import BaseTestCase
-from documents.tests import DocumentTestMixin
-from documents.tests.literals import TEST_SMALL_DOCUMENT_PATH
+from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.documents.tests import DocumentTestMixin
+from mayan.apps.documents.tests.literals import TEST_SMALL_DOCUMENT_PATH
 
 from ..exceptions import (
     DocumentAlreadyCheckedOut, DocumentNotCheckedOut,
@@ -36,10 +36,12 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
         )
 
     def test_version_creation_blocking(self):
-        # Silence unrelated logging
-        logging.getLogger('documents.models').setLevel(logging.CRITICAL)
-
         expiration_datetime = now() + datetime.timedelta(days=1)
+
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.documents.models').setLevel(
+            level=logging.CRITICAL
+        )
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,
@@ -102,7 +104,9 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
 
     def test_blocking_new_versions(self):
         # Silence unrelated logging
-        logging.getLogger('documents.models').setLevel(logging.CRITICAL)
+        logging.getLogger('mayan.apps.documents.models').setLevel(
+            level=logging.CRITICAL
+        )
 
         NewVersionBlock.objects.block(document=self.document)
 

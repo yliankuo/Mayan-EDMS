@@ -12,7 +12,7 @@ from django.utils.module_loading import import_string
 from django.utils.six import PY2
 from django.utils.translation import ugettext_lazy as _
 
-from documents.models import Document, DocumentType
+from mayan.apps.documents.models import Document, DocumentType
 
 from .classes import MetadataLookup
 from .events import (
@@ -122,6 +122,16 @@ class MetadataType(models.Model):
     def get_default_value(self):
         template = Template(self.default)
         return template.render()
+
+    def get_lookup_choices(self, first_choice=None):
+        template = Template(self.lookup)
+        context = MetadataLookup.get_as_context()
+
+        if first_choice:
+            yield first_choice
+
+        for value in MetadataType.comma_splitter(template.render(**context)):
+            yield (value, value)
 
     def get_lookup_values(self):
         template = Template(self.lookup)

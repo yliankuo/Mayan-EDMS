@@ -2,17 +2,16 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from navigation import Link, get_cascade_condition
-
-from documents.icons import icon_document_type
+from mayan.apps.documents.icons import icon_document_type
+from mayan.apps.navigation import Link, get_cascade_condition
 
 from .icons import (
     icon_document_index_list, icon_index, icon_index_create,
-    icon_index_setup_view, icon_rebuild_index_instances,
+    icon_index_setup_view, icon_rebuild_index_instances
 )
 from .permissions import (
-    permission_document_indexing_create, permission_document_indexing_edit,
-    permission_document_indexing_delete,
+    permission_document_indexing_create, permission_document_indexing_delete,
+    permission_document_indexing_edit,
     permission_document_indexing_instance_view,
     permission_document_indexing_rebuild, permission_document_indexing_view
 )

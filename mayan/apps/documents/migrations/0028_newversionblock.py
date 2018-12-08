@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -12,24 +11,21 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='NewVersionBlock',
-            fields=[
+            bases=(models.Model,), fields=[
                 (
                     'id', models.AutoField(
-                        verbose_name='ID', serialize=False, auto_created=True,
-                        primary_key=True
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID'
                     )
                 ),
                 (
                     'document', models.ForeignKey(
-                        verbose_name='Document', to='documents.Document'
+                        to='documents.Document', verbose_name='Document'
                     )
                 ),
-            ],
-            options={
+            ], name='NewVersionBlock', options={
                 'verbose_name': 'New version block',
                 'verbose_name_plural': 'New version blocks',
             },
-            bases=(models.Model,),
         ),
     ]

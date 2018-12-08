@@ -2,12 +2,12 @@ from __future__ import unicode_literals
 
 from actstream.models import Action
 
-from documents.tests.literals import TEST_DOCUMENT_FILENAME
-from documents.tests.test_models import GenericDocumentTestCase
+from mayan.apps.documents.tests.literals import TEST_DOCUMENT_FILENAME
+from mayan.apps.documents.tests.test_models import GenericDocumentTestCase
 
 from ..events import (
-    event_parsing_document_version_submit,
-    event_parsing_document_version_finish
+    event_parsing_document_version_finish,
+    event_parsing_document_version_submit
 )
 
 

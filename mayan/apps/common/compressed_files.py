@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from io import BytesIO
 import tarfile
 import zipfile
-
 try:
     import zlib  # NOQA
     COMPRESSION = zipfile.ZIP_DEFLATED
@@ -12,7 +11,7 @@ except ImportError:
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from mimetype.api import get_mimetype
+from mayan.apps.mimetype.api import get_mimetype
 
 from .exceptions import NoMIMETypeMatch
 

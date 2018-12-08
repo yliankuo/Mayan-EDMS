@@ -1,19 +1,20 @@
 from __future__ import unicode_literals
 
+import logging
 import os
 import shutil
 
 from django.test import override_settings
 
-from checkouts.models import NewVersionBlock
-from common.tests import GenericViewTestCase
-from common.utils import fs_cleanup, mkdtemp
-from documents.models import Document, DocumentType
-from documents.permissions import permission_document_create
-from documents.tests import (
-    GenericDocumentViewTestCase, TEST_DOCUMENT_DESCRIPTION,
-    TEST_DOCUMENT_TYPE_LABEL, TEST_SMALL_DOCUMENT_CHECKSUM,
-    TEST_SMALL_DOCUMENT_PATH,
+from mayan.apps.checkouts.models import NewVersionBlock
+from mayan.apps.common.tests import GenericViewTestCase
+from mayan.apps.common.utils import fs_cleanup, mkdtemp
+from mayan.apps.documents.models import Document, DocumentType
+from mayan.apps.documents.permissions import permission_document_create
+from mayan.apps.documents.tests import (
+    TEST_DOCUMENT_DESCRIPTION, TEST_DOCUMENT_TYPE_LABEL,
+    TEST_SMALL_DOCUMENT_CHECKSUM, TEST_SMALL_DOCUMENT_PATH,
+    GenericDocumentViewTestCase
 )
 
 from ..links import link_upload_version
@@ -40,6 +41,8 @@ class DocumentUploadTestCase(GenericDocumentViewTestCase):
         self.document.delete()
 
     def _request_upload_wizard_view(self):
+        logging.getLogger('django.request').setLevel(level=logging.CRITICAL)
+
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
             return self.post(
                 viewname='sources:upload_interactive', args=(self.source.pk,),
@@ -95,6 +98,8 @@ class DocumentUploadTestCase(GenericDocumentViewTestCase):
         self.assertEqual(Document.objects.count(), 1)
 
     def _request_upload_interactive_view(self):
+        logging.getLogger('django.request').setLevel(level=logging.CRITICAL)
+
         return self.get(
             viewname='sources:upload_interactive', data={
                 'document_type_id': self.document_type.pk,
