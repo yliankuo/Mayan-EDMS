@@ -54,7 +54,6 @@ try:
 except sh.CommandNotFound:
     pdfinfo = None
 
-Image.init()
 logger = logging.getLogger(__name__)
 
 
@@ -69,6 +68,9 @@ class IteratorIO(object):
 
 
 class Python(ConverterBase):
+    def __init__(self, *args, **kwargs):
+        super(Python, self).__init__(*args, **kwargs)
+        Image.init()
 
     def convert(self, *args, **kwargs):
         super(Python, self).convert(*args, **kwargs)
