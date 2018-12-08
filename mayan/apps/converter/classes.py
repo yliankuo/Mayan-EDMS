@@ -89,11 +89,40 @@ class ConverterBase(object):
         )[0]
         self.soffice_file = None
 
-    def to_pdf(self):
-        if self.mime_type in CONVERTER_OFFICE_FILE_MIMETYPES:
-            return self.soffice()
-        else:
-            raise InvalidOfficeFormat(_('Not an office file format.'))
+    def convert(self, page_number=DEFAULT_PAGE_NUMBER):
+        self.page_number = page_number
+
+    def detect_orientation(self, page_number):
+        # Must be overrided by subclass
+        pass
+
+    def get_page(self, output_format=None):
+        output_format = output_format or setting_graphics_backend_arguments.value.get(
+            'pillow_format', DEFAULT_PILLOW_FORMAT
+        )
+
+        if not self.image:
+            self.seek(0)
+
+        image_buffer = BytesIO()
+        new_mode = self.image.mode
+
+        if output_format.upper() == 'JPEG':
+            # JPEG doesn't support transparency channel, convert the image to
+            # RGB. Removes modes: P and RGBA
+            new_mode = 'RGB'
+
+        self.image.convert(new_mode).save(image_buffer, format=output_format)
+
+        image_buffer.seek(0)
+
+        return image_buffer
+
+    def get_page_count(self):
+        try:
+            self.soffice_file = self.to_pdf()
+        except InvalidOfficeFormat as exception:
+            logger.debug('Is not an office format document; %s', exception)
 
     def seek(self, page_number):
         # Starting with #0
@@ -177,30 +206,11 @@ class ConverterBase(object):
         fs_cleanup(input_filepath)
         fs_cleanup(converted_output)
 
-    def get_page(self, output_format=None):
-        output_format = output_format or setting_graphics_backend_arguments.value.get(
-            'pillow_format', DEFAULT_PILLOW_FORMAT
-        )
-
-        if not self.image:
-            self.seek(0)
-
-        image_buffer = BytesIO()
-        new_mode = self.image.mode
-
-        if output_format.upper() == 'JPEG':
-            # JPEG doesn't support transparency channel, convert the image to
-            # RGB. Removes modes: P and RGBA
-            new_mode = 'RGB'
-
-        self.image.convert(new_mode).save(image_buffer, format=output_format)
-
-        image_buffer.seek(0)
-
-        return image_buffer
-
-    def convert(self, page_number=DEFAULT_PAGE_NUMBER):
-        self.page_number = page_number
+    def to_pdf(self):
+        if self.mime_type in CONVERTER_OFFICE_FILE_MIMETYPES:
+            return self.soffice()
+        else:
+            raise InvalidOfficeFormat(_('Not an office file format.'))
 
     def transform(self, transformation):
         if not self.image:
@@ -214,13 +224,3 @@ class ConverterBase(object):
 
         for transformation in transformations:
             self.image = transformation.execute_on(image=self.image)
-
-    def get_page_count(self):
-        try:
-            self.soffice_file = self.to_pdf()
-        except InvalidOfficeFormat as exception:
-            logger.debug('Is not an office format document; %s', exception)
-
-    def detect_orientation(self, page_number):
-        # Must be overrided by subclass
-        pass
