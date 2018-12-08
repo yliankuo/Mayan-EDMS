@@ -64,9 +64,9 @@ class DocumentMetadataForm(forms.Form):
                     )
 
                     if not required:
-                        first_choice=('', '------')
+                        first_choice = ('', '------')
                     else:
-                        first_choice=None
+                        first_choice = None
 
                     self.fields['value'].choices = self.metadata_type.get_lookup_choices(
                         first_choice=first_choice

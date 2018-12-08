@@ -15,9 +15,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.CreateModel(
             fields=[
-                ('id', models.AutoField(
-                    auto_created=True, primary_key=True, serialize=False,
-                    verbose_name='ID'
+                (
+                    'id', models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID'
                     )
                 ),
             ], name='FavoriteDocument', options={
@@ -29,7 +30,7 @@ class Migration(migrations.Migration):
             name='document', options={
                 'ordering': ('label',), 'verbose_name': 'Document',
                 'verbose_name_plural': 'Documents'
-                },
+            },
         ),
         migrations.AlterField(
             field=models.ForeignKey(

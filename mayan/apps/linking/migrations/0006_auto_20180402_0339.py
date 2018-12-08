@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('label',), 'verbose_name': 'Smart link',
                 'verbose_name_plural': 'Smart links'
-                },
+            },
         ),
         migrations.AlterField(
             model_name='smartlink',

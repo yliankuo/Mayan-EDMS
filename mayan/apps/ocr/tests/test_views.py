@@ -6,7 +6,6 @@ from ..permissions import (
     permission_ocr_content_view, permission_ocr_document,
     permission_document_type_ocr_setup
 )
-from ..utils import get_document_ocr_content
 
 TEST_DOCUMENT_CONTENT = 'Mayan EDMS Documentation'
 
