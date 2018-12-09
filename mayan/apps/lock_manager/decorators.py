@@ -20,8 +20,7 @@ def retry_on_lock_error(retries):
                     else:
                         retry_count = retry_count + 1
                         timeout = 2 ** retry_count
+                        timeout = random.randrange(timeout + 1)
                         time.sleep(timeout)
-                        # Add random jitter
-                        time.sleep(random.uniform(0.0, 1.0))
         return wrapper
     return decorator

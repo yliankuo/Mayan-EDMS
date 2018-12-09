@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import random
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -79,7 +80,7 @@ def task_delete_stubs():
     logger.info('Finshed')
 
 
-@app.task(bind=True, retry_backoff=True, max_retries=TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES, retry_jitter=True)
+@app.task(bind=True, max_retries=TASK_GENERATE_DODCUMENT_PAGE_IMAGE_RETRIES)
 def task_generate_document_page_image(self, document_page_id, transformation_list=None, *args, **kwargs):
     """
     Arguments:
@@ -120,7 +121,9 @@ def task_generate_document_page_image(self, document_page_id, transformation_lis
         try:
             return task_core_function()
         except LockError as exception:
-            raise self.retry(exc=exception)
+            countdown = 2.0 ** self.request.retries
+            countdown = random.randrange(countdown + 1)
+            raise self.retry(countdown=countdown, exc=exception)
 
 
 @app.task(ignore_result=True)
