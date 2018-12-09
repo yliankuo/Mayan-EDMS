@@ -355,6 +355,9 @@ class SingleObjectCreateView(ObjectNameMixin, ViewPermissionCheckMixin, ExtraCon
                     'error': exception
                 }
             )
+            return super(
+                SingleObjectCreateView, self
+            ).form_invalid(form=form)
         else:
             context = self.get_context_data()
 
@@ -452,8 +455,9 @@ class SingleObjectEditView(ObjectNameMixin, ViewPermissionCheckMixin, ObjectPerm
                     'error': exception
                 }
             )
-
-            raise exception
+            return super(
+                SingleObjectEditView, self
+            ).form_invalid(form=form)
         else:
             messages.success(
                 self.request,
