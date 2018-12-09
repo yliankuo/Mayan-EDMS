@@ -172,6 +172,10 @@
   - Documents: 0042 to 0043
   - Tags: 0001 to 0008
 
+- Upgraded from Celery 3.1.26 to 4.1.1. The following settings have been 
+  renamed: CELERY_ALWAYS_EAGER to CELERY_TASK_ALWAYS_EAGER, 
+  BROKER_URL to CELERY_BROKER_URL.
+
 3.1.9 (2018-11-01)
 ==================
 - Convert the furl instance to text to allow serializing it into

@@ -1,7 +1,7 @@
 Pillow==5.3.0
 PyYAML==3.13
 
-celery==3.1.26post2
+celery==4.1.1
 
 django-activity-stream==0.6.5
 django-autoadmin==1.1.1

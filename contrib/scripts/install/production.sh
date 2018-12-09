@@ -133,7 +133,7 @@ EOF
 echo -e "\n -> Creating the supervisor file for the Celery worker, /etc/supervisor/conf.d/mayan-celery.conf \n"
 cat > /etc/supervisor/conf.d/mayan-celery.conf << EOF
 [program:mayan-worker]
-command = ${INSTALLATION_DIRECTORY}bin/python ${INSTALLATION_DIRECTORY}bin/mayan-edms.py celery --settings=mayan.settings.production worker -Ofair -l ERROR
+command = ${INSTALLATION_DIRECTORY}bin/python ${INSTALLATION_DIRECTORY}bin/mayan-edms.py celery --settings=mayan.settings.production worker -l ERROR
 directory = ${INSTALLATION_DIRECTORY}
 user = www-data
 stdout_logfile = /var/log/mayan/worker-stdout.log

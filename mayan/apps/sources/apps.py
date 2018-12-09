@@ -90,7 +90,7 @@ class SourcesApp(MayanAppConfig):
             func=lambda context: context['object'].message
         )
 
-        app.conf.CELERY_QUEUES.extend(
+        app.conf.task_queues.extend(
             (
                 Queue(
                     'sources', Exchange('sources'), routing_key='sources'
@@ -106,7 +106,7 @@ class SourcesApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.sources.tasks.task_check_interval_source': {
                     'queue': 'sources_periodic'

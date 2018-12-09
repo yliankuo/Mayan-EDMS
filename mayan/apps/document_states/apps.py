@@ -242,7 +242,7 @@ class DocumentStatesApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_QUEUES.extend(
+        app.conf.task_queues.extend(
             (
                 Queue(
                     'document_states', Exchange('document_states'),
@@ -250,7 +250,8 @@ class DocumentStatesApp(MayanAppConfig):
                 ),
             )
         )
-        app.conf.CELERY_QUEUES.extend(
+
+        app.conf.task_queues.extend(
             (
                 Queue(
                     'document_states_fast', Exchange('document_states_fast'),
@@ -259,7 +260,7 @@ class DocumentStatesApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.document_states.tasks.task_generate_document_state_image': {
                     'queue': 'document_states'

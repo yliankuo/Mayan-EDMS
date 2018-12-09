@@ -126,13 +126,13 @@ Defaults to `None`. This optional environment variable is used to set the hostna
 
 Defaults to `None`. This optional environment variable is used to set the port number to use when connecting to the database. An empty string means the default port. Not used with SQLite. For more information read the pertinent Django documentation page: [Settings, PORT](https://docs.djangoproject.com/en/1.11/ref/settings/#port)
 
-### `MAYAN_BROKER_URL`
+### `MAYAN_CELERY_BROKER_URL`
 
 Defaults to 'redis://127.0.0.1:6379/0'. This optional environment variable is determines the broker that Celery will use to relay task messages between the frontend code and the background workers. For more information read the pertinent Celery Kombu documentation page: [Broker URL](http://kombu.readthedocs.io/en/latest/userguide/connections.html#connection-urls)
 
 This Docker image supports using Redis and RabbitMQ as brokers.
 
-Caveat: If the `MAYAN_BROKER_URL` and `MAYAN_CELERY_RESULT_BACKEND` environment variables are specified, the built-in Redis server inside the container will be disabled.
+Caveat: If the `MAYAN_CELERY_BROKER_URL` and `MAYAN_CELERY_RESULT_BACKEND` environment variables are specified, the built-in Redis server inside the container will be disabled.
 
 ### `MAYAN_CELERY_RESULT_BACKEND`
 
@@ -140,7 +140,7 @@ Defaults to 'redis://127.0.0.1:6379/0'. This optional environment variable is de
 
 This Docker image supports using Redis and RabbitMQ as result backends.
 
-Caveat: If the `MAYAN_BROKER_URL` and `MAYAN_CELERY_RESULT_BACKEND` environment variables are specified, the built-in Redis server inside the container will be disabled.
+Caveat: If the `MAYAN_CELERY_BROKER_URL` and `MAYAN_CELERY_RESULT_BACKEND` environment variables are specified, the built-in Redis server inside the container will be disabled.
 
 ### `MAYAN_NGINX_CLIENT_MAX_BODY_SIZE`
 

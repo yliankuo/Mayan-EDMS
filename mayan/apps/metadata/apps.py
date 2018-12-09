@@ -171,11 +171,11 @@ class MetadataApp(MayanAppConfig):
             ).render()
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue('metadata', Exchange('metadata'), routing_key='metadata'),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.metadata.tasks.task_remove_metadata_type': {
                     'queue': 'metadata'

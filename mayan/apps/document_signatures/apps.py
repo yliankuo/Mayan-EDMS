@@ -101,13 +101,13 @@ class DocumentSignaturesApp(MayanAppConfig):
             ).get_signature_type_display()
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue(
                 'signatures', Exchange('signatures'), routing_key='signatures'
             ),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.document_signatures.tasks.task_verify_key_signatures': {
                     'queue': 'signatures'

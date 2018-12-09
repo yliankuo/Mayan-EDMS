@@ -143,11 +143,11 @@ class DocumentParsingApp(MayanAppConfig):
             attribute='result'
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue('parsing', Exchange('parsing'), routing_key='parsing'),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.document_parsing.tasks.task_parse_document_version': {
                     'queue': 'parsing'

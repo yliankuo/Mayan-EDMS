@@ -92,7 +92,7 @@ class CommonApp(MayanAppConfig):
             name='main_menu', template_name='appearance/main_menu.html'
         )
 
-        app.conf.CELERYBEAT_SCHEDULE.update(
+        app.conf.beat_schedule.update(
             {
                 'task_delete_stale_uploads': {
                     'task': 'mayan.apps.common.tasks.task_delete_stale_uploads',
@@ -103,7 +103,7 @@ class CommonApp(MayanAppConfig):
             }
         )
 
-        app.conf.CELERY_QUEUES.extend(
+        app.conf.task_queues.extend(
             (
                 Queue('default', Exchange('default'), routing_key='default'),
                 Queue('tools', Exchange('tools'), routing_key='tools'),
@@ -114,9 +114,9 @@ class CommonApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_DEFAULT_QUEUE = 'default'
+        app.conf.task_default_queue = 'default'
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.common.tasks.task_delete_stale_uploads': {
                     'queue': 'common_periodic'

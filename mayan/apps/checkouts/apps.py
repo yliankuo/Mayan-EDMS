@@ -95,7 +95,7 @@ class CheckoutsApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERYBEAT_SCHEDULE.update(
+        app.conf.beat_schedule.update(
             {
                 'task_check_expired_check_outs': {
                     'task': 'mayan.apps.checkouts.tasks.task_check_expired_check_outs',
@@ -106,14 +106,14 @@ class CheckoutsApp(MayanAppConfig):
             }
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue(
                 'checkouts_periodic', Exchange('checkouts_periodic'),
                 routing_key='checkouts_periodic', delivery_mode=1
             ),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.checkouts.tasks.task_check_expired_check_outs': {
                     'queue': 'checkouts_periodic'

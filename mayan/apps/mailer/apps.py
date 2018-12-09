@@ -92,11 +92,11 @@ class MailerApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue('mailing', Exchange('mailing'), routing_key='mailing'),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.mailer.tasks.task_send_document': {
                     'queue': 'mailing'

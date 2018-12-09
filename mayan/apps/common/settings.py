@@ -405,8 +405,8 @@ setting_django_wsgi_application = namespace.add_setting(
 namespace = Namespace(name='celery', label=_('Celery'))
 
 setting_celery_always_eager = namespace.add_setting(
-    global_name='CELERY_ALWAYS_EAGER',
-    default=settings.CELERY_ALWAYS_EAGER,
+    global_name='CELERY_TASK_ALWAYS_EAGER',
+    default=settings.CELERY_TASK_ALWAYS_EAGER,
     help_text=_(
         'If this is True, all tasks will be executed locally by blocking '
         'until the task returns. apply_async() and Task.delay() will return '
@@ -417,7 +417,7 @@ setting_celery_always_eager = namespace.add_setting(
     )
 )
 setting_celery_broker_url = namespace.add_setting(
-    global_name='BROKER_URL', default=settings.BROKER_URL,
+    global_name='CELERY_BROKER_URL', default=settings.CELERY_BROKER_URL,
     help_text=_(
         'Default: "amqp://". Default broker URL. This must be a URL in '
         'the form of: transport://userid:password@hostname:port/virtual_host '

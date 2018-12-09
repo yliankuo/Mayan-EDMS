@@ -91,8 +91,8 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [supervisord]
     environment=
         MAYAN_ALLOWED_HOSTS='["*"]',  # Allow access to other network hosts other than localhost
+        MAYAN_CELERY_BROKER_URL="redis://127.0.0.1:6379/0",
         MAYAN_CELERY_RESULT_BACKEND="redis://127.0.0.1:6379/0",
-        MAYAN_BROKER_URL="redis://127.0.0.1:6379/0",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
         MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}',
@@ -107,7 +107,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-fast]
     autorestart = true
     autostart = true
-    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h --concurrency=1
+    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -118,7 +118,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-medium]
     autorestart = true
     autostart = true
-    command = nice -n 18 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
+    command = nice -n 18 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -129,7 +129,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-slow]
     autorestart = true
     autostart = true
-    command = nice -n 19 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
+    command = nice -n 19 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -260,8 +260,8 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [supervisord]
     environment=
         MAYAN_ALLOWED_HOSTS='["*"]',  # Allow access to other network hosts other than localhost
+        MAYAN_CELERY_BROKER_URL="amqp://mayan:mayanrabbitmqpassword@localhost:5672/mayan",
         MAYAN_CELERY_RESULT_BACKEND="redis://127.0.0.1:6379/0",
-        MAYAN_BROKER_URL="amqp://mayan:mayanrabbitmqpassword@localhost:5672/mayan",
         PYTHONPATH=/opt/mayan-edms/lib/python2.7/site-packages:/opt/mayan-edms/data,
         MAYAN_MEDIA_ROOT=/opt/mayan-edms/media,
         MAYAN_DATABASES='{default: {ENGINE: django.db.backends.postgresql, HOST: 127.0.0.1, NAME: mayan, PASSWORD: mayanuserpass, USER: mayan, CONN_MAX_AGE: 60}}',
@@ -276,7 +276,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-fast]
     autorestart = true
     autostart = true
-    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h
+    command = nice -n 1 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q converter,document_states_fast,sources_fast -n mayan-worker-fast.%%h
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -287,7 +287,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-medium]
     autorestart = true
     autostart = true
-    command = nice -n 18 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
+    command = nice -n 18 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998
@@ -298,7 +298,7 @@ Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
     [program:mayan-worker-slow]
     autorestart = true
     autostart = true
-    command = nice -n 19 /opt/mayan-edms/bin/mayan-edms.py celery worker -Ofair -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
+    command = nice -n 19 /opt/mayan-edms/bin/mayan-edms.py celery worker -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
     killasgroup = true
     numprocs = 1
     priority = 998

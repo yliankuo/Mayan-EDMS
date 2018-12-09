@@ -140,11 +140,11 @@ class OCRApp(MayanAppConfig):
             attribute='result'
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue('ocr', Exchange('ocr'), routing_key='ocr'),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.ocr.tasks.task_do_ocr': {
                     'queue': 'ocr'

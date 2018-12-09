@@ -1452,8 +1452,8 @@ cat > /etc/supervisor/conf.d/mayan.conf <<EOF
 [supervisord]
 environment=
         MAYAN_ALLOWED_HOSTS="*", # Allow access to other network hosts other than localhost
+        MAYAN_CELERY_BROKER_URL="redis://127.0.0.1:6379/0",
         MAYAN_CELERY_RESULT_BACKEND="redis://127.0.0.1:6379/0",
-        MAYAN_BROKER_URL="redis://127.0.0.1:6379/0",
         PYTHONPATH=${MAYAN_INSTALLATION_FOLDER}/lib/python2.7/site-packages:$MAYAN_MEDIA_ROOT,
         MAYAN_DATABASE_ENGINE=django.db.backends.postgresql,
         MAYAN_DATABASE_HOST=127.0.0.1,
@@ -1473,7 +1473,7 @@ user = mayan
 [program:mayan-worker-fast]
 autorestart = true
 autostart = true
-command = nice -n 1 ${MAYAN_BIN} celery worker -Ofair -l ERROR -Q converter -n mayan-worker-fast.%%h --concurrency=1
+command = nice -n 1 ${MAYAN_BIN} celery worker -l ERROR -Q converter -n mayan-worker-fast.%%h --concurrency=1
 killasgroup = true
 numprocs = 1
 priority = 998
@@ -1484,7 +1484,7 @@ user = mayan
 [program:mayan-worker-medium]
 autorestart = true
 autostart = true
-command = nice -n 18 ${MAYAN_BIN} celery worker -Ofair -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
+command = nice -n 18 ${MAYAN_BIN} celery worker -l ERROR -Q checkouts_periodic,documents_periodic,indexing,metadata,sources,sources_periodic,uploads,documents -n mayan-worker-medium.%%h --concurrency=1
 killasgroup = true
 numprocs = 1
 priority = 998
@@ -1495,7 +1495,7 @@ user = mayan
 [program:mayan-worker-slow]
 autorestart = true
 autostart = true
-command = nice -n 19 ${MAYAN_BIN} celery worker -Ofair -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
+command = nice -n 19 ${MAYAN_BIN} celery worker -l ERROR -Q mailing,tools,statistics,parsing,ocr -n mayan-worker-slow.%%h --concurrency=1
 killasgroup = true
 numprocs = 1
 priority = 998

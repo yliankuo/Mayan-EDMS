@@ -33,9 +33,8 @@ TEMPLATES[0]['OPTIONS']['loaders'] = (
     ),
 )
 
-CELERY_ALWAYS_EAGER = True
-CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
-BROKER_BACKEND = 'memory'
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
 
 # Remove middlewares not used for tests
 MIDDLEWARE = [

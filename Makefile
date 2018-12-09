@@ -283,7 +283,7 @@ test-with-docker-frontend:
 	./manage.py runserver --settings=mayan.settings.staging.docker
 
 test-with-docker-worker:
-	./manage.py celery worker --settings=mayan.settings.staging.docker -B -l INFO -O fair
+	./manage.py celery worker --settings=mayan.settings.staging.docker -B -l INFO
 
 docker-mysql-on:
 	docker run -d --name mysql -p 3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -e MYSQL_DATABASE=mayan_edms mysql

@@ -161,11 +161,11 @@ class DocumentIndexingApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_QUEUES.append(
+        app.conf.task_queues.append(
             Queue('indexing', Exchange('indexing'), routing_key='indexing'),
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.document_indexing.tasks.task_delete_empty': {
                     'queue': 'indexing'

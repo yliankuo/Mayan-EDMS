@@ -36,7 +36,7 @@ class StatisticsApp(MayanAppConfig):
             attribute='schedule',
         )
 
-        app.conf.CELERY_QUEUES.extend(
+        app.conf.task_queues.extend(
             (
                 Queue(
                     'statistics', Exchange('statistics'),
@@ -45,7 +45,7 @@ class StatisticsApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.mayan_statistics.tasks.task_execute_statistic': {
                     'queue': 'statistics'

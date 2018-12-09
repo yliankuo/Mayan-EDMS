@@ -340,7 +340,7 @@ class DocumentsApp(MayanAppConfig):
             func=lambda context: context['object'].documents.count()
         )
 
-        app.conf.CELERYBEAT_SCHEDULE.update(
+        app.conf.beat_schedule.update(
             {
                 'task_check_delete_periods': {
                     'task': 'mayan.apps.documents.tasks.task_check_delete_periods',
@@ -359,7 +359,7 @@ class DocumentsApp(MayanAppConfig):
             }
         )
 
-        app.conf.CELERY_QUEUES.extend(
+        app.conf.task_queues.extend(
             (
                 Queue(
                     'converter', Exchange('converter'),
@@ -376,7 +376,7 @@ class DocumentsApp(MayanAppConfig):
             )
         )
 
-        app.conf.CELERY_ROUTES.update(
+        app.conf.task_routes.update(
             {
                 'mayan.apps.documents.tasks.task_check_delete_periods': {
                     'queue': 'documents_periodic'
