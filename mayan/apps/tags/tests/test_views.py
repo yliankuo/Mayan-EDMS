@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
@@ -13,26 +14,14 @@ from .literals import (
     TEST_TAG_COLOR, TEST_TAG_COLOR_EDITED, TEST_TAG_LABEL,
     TEST_TAG_LABEL_EDITED
 )
+from .mixins import TagTestMixin
 
 
-class TagViewTestCase(GenericDocumentViewTestCase):
-    def _create_tag(self):
-        self.tag = Tag.objects.create(
-            color=TEST_TAG_COLOR, label=TEST_TAG_LABEL
-        )
-
-    def _request_create_tag_view(self):
-        return self.post(
-            viewname='tags:tag_create', data={
-                'label': TEST_TAG_LABEL,
-                'color': TEST_TAG_COLOR
-            }
-        )
-
+class TagViewTestCase(TagTestMixin, GenericViewTestCase):
     def test_tag_create_view_no_permissions(self):
         self.login_user()
 
-        response = self._request_create_tag_view()
+        response = self._request_tag_create_view()
         self.assertEqual(response.status_code, 403)
 
         self.assertEqual(Tag.objects.count(), 0)
@@ -41,7 +30,7 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         self.login_user()
 
         self.grant_permission(permission=permission_tag_create)
-        response = self._request_create_tag_view()
+        response = self._request_tag_create_view()
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Tag.objects.count(), 1)
@@ -49,16 +38,11 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(tag.label, TEST_TAG_LABEL)
         self.assertEqual(tag.color, TEST_TAG_COLOR)
 
-    def _request_delete_tag_view(self):
-        return self.post(
-            viewname='tags:tag_delete', args=(self.tag.pk,)
-        )
-
     def test_tag_delete_view_no_permissions(self):
         self.login_user()
         self._create_tag()
 
-        response = self._request_delete_tag_view()
+        response = self._request_tag_delete_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Tag.objects.count(), 1)
 
@@ -68,16 +52,10 @@ class TagViewTestCase(GenericDocumentViewTestCase):
 
         self.grant_access(obj=self.tag, permission=permission_tag_delete)
 
-        response = self._request_delete_tag_view()
+        response = self._request_tag_delete_view()
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Tag.objects.count(), 0)
-
-    def _request_multiple_delete_view(self):
-        return self.post(
-            viewname='tags:tag_multiple_delete',
-            data={'id_list': self.tag.pk},
-        )
 
     def test_tag_multiple_delete_view_no_permissions(self):
         self.login_user()
@@ -97,13 +75,6 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(Tag.objects.count(), 0)
-
-    def _request_edit_tag_view(self):
-        return self.post(
-            viewname='tags:tag_edit', args=(self.tag.pk,), data={
-                'label': TEST_TAG_LABEL_EDITED, 'color': TEST_TAG_COLOR_EDITED
-            }
-        )
 
     def test_tag_edit_view_no_permissions(self):
         self.login_user()
@@ -127,6 +98,8 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(tag.label, TEST_TAG_LABEL_EDITED)
         self.assertEqual(tag.color, TEST_TAG_COLOR_EDITED)
 
+
+class TagDocumentsViewTestCase(TagTestMixin, GenericDocumentViewTestCase):
     def _request_document_list_view(self):
         return self.get(viewname='documents:document_list')
 
@@ -154,14 +127,6 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         response = self._request_document_list_view()
         self.assertContains(
             response=response, text=TEST_TAG_LABEL, status_code=200
-        )
-
-    def _request_attach_tag_view(self):
-        return self.post(
-            viewname='tags:tag_attach', args=(self.document.pk,), data={
-                'tags': self.tag.pk,
-                'user': self.user.pk
-            }
         )
 
     def test_document_attach_tag_view_no_permission(self):
@@ -197,14 +162,6 @@ class TagViewTestCase(GenericDocumentViewTestCase):
             self.document.tags.all(), (repr(self.tag),)
         )
 
-    def _request_multiple_attach_tag_view(self):
-        return self.post(
-            viewname='tags:multiple_documents_tag_attach', data={
-                'id_list': self.document.pk, 'tags': self.tag.pk,
-                'user': self.user.pk
-            }
-        )
-
     def test_document_multiple_attach_tag_view_no_permission(self):
         self.login_user()
         self._create_tag()
@@ -231,15 +188,6 @@ class TagViewTestCase(GenericDocumentViewTestCase):
 
         self.assertQuerysetEqual(
             self.document.tags.all(), (repr(self.tag),)
-        )
-
-    def _request_single_document_multiple_tag_remove_view(self):
-        return self.post(
-            viewname='tags:single_document_multiple_tag_remove',
-            args=(self.document.pk,), data={
-                'id_list': self.document.pk,
-                'tags': self.tag.pk,
-            }
         )
 
     def test_single_document_multiple_tag_remove_view_no_permissions(self):
@@ -269,15 +217,6 @@ class TagViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(self.document.tags.count(), 0)
-
-    def _request_multiple_documents_selection_tag_remove_view(self):
-        return self.post(
-            viewname='tags:multiple_documents_selection_tag_remove',
-            data={
-                'id_list': self.document.pk,
-                'tags': self.tag.pk,
-            }
-        )
 
     def test_multiple_documents_selection_tag_remove_view_no_permissions(self):
         self.login_user()

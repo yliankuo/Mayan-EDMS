@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
@@ -15,7 +16,7 @@ from .literals import (
 )
 
 
-class SmartLinkViewTestCase(GenericDocumentViewTestCase):
+class SmartLinkViewTestCase(GenericViewTestCase):
     def setUp(self):
         super(SmartLinkViewTestCase, self).setUp()
         self.login_user()
@@ -97,6 +98,12 @@ class SmartLinkViewTestCase(GenericDocumentViewTestCase):
         smart_link = SmartLink.objects.get(pk=smart_link.pk)
         self.assertContains(response, text='update', status_code=200)
         self.assertEqual(smart_link.label, TEST_SMART_LINK_LABEL_EDITED)
+
+
+class SmartLinkDocumentsViewTestCase(GenericDocumentViewTestCase):
+    def setUp(self):
+        super(SmartLinkDocumentsViewTestCase, self).setUp()
+        self.login_user()
 
     def setup_smart_links(self):
         smart_link = SmartLink.objects.create(
