@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -427,6 +426,9 @@ class SetupWorkflowStateCreateView(SingleObjectCreateView):
             ) % self.get_workflow()
         }
 
+    def get_instance_extra_data(self):
+        return {'workflow': self.get_workflow()}
+
     def get_object_list(self):
         return self.get_workflow().states.all()
 
@@ -442,12 +444,6 @@ class SetupWorkflowStateCreateView(SingleObjectCreateView):
             user=self.request.user
         )
         return workflow
-
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.workflow = self.get_workflow()
-        self.object.save()
-        return super(SetupWorkflowStateCreateView, self).form_valid(form)
 
 
 class SetupWorkflowStateDeleteView(SingleObjectDeleteView):
@@ -543,21 +539,6 @@ class SetupWorkflowStateListView(SingleObjectListView):
 class SetupWorkflowTransitionCreateView(SingleObjectCreateView):
     form_class = WorkflowTransitionForm
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.workflow = self.get_workflow()
-        try:
-            self.object.save()
-        except IntegrityError:
-            messages.error(
-                self.request, _('Unable to save transition; integrity error.')
-            )
-            return super(
-                SetupWorkflowTransitionCreateView, self
-            ).form_invalid(form)
-        else:
-            return HttpResponseRedirect(self.get_success_url())
-
     def get_extra_context(self):
         return {
             'object': self.get_workflow(),
@@ -572,6 +553,9 @@ class SetupWorkflowTransitionCreateView(SingleObjectCreateView):
         ).get_form_kwargs()
         kwargs['workflow'] = self.get_workflow()
         return kwargs
+
+    def get_instance_extra_data(self):
+        return {'workflow': self.get_workflow()}
 
     def get_object_list(self):
         return self.get_workflow().transitions.all()
