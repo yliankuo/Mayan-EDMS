@@ -334,3 +334,10 @@ a i {
         transform: rotate(360deg);
     }
 }
+
+.pre-server-error {
+    background-color:#ffe7ae;
+    color: black;
+    font-size: 110%;
+    font-weight: bold;
+}

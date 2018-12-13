@@ -160,7 +160,13 @@ class PartialNavigation {
          */
 
         if (djangoDEBUG) {
-            $('#ajax-content').html('<pre class="text-primary" style="background-color:#ffe7ae"><code>' + jqXHR.statusText + '</code></pre>');
+            $('#ajax-content').html(
+                ' \
+                    <h4>Server Error</h4> \
+                    <pre class="pre-server-error"><code>' +  jqXHR.responseText || jqXHR.statusText +'</code> \
+                    </pre> \
+                '
+            );
         } else {
           if (jqXHR.status == 0) {
               $('#modal-server-error .modal-body').html($('#template-error').html());
