@@ -44,7 +44,7 @@ class Document(models.Model):
     """
     uuid = models.UUIDField(
         default=uuid.uuid4, editable=False, help_text=_(
-            'UUID of a document, universally Unique ID. An unique identifier'
+            'UUID of a document, universally Unique ID. An unique identifier '
             'generated for each document.'
         ), verbose_name=_('UUID')
     )
