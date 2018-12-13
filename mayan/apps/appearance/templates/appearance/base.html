@@ -63,14 +63,19 @@
                         <span class="sr-only">{% trans 'Toggle Dropdown' %}</span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        {% for links_set in links %}
-                            {% for entry in links_set %}
-                                <li><a class="btn-sm" href="{{ entry.url }}">{{ entry.text }}</a></li>
-                            {% endfor %}
+                        {% for object_navigation_links in links %}
+                            {% with 'true' as as_li %}
+                            {% with 'true' as hide_active_anchor %}
+                            {% with 'btn-sm' as link_classes %}
+                                {% include 'navigation/generic_navigation.html' %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
 
-                            {% if not forloop.last and links_set %}
+                            {% if not forloop.last and object_navigation_links %}
                                 <li class="divider"></li>
                             {% endif %}
+
                         {% endfor %}
                     </ul>
                 </div>
