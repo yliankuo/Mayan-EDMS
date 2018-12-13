@@ -8,6 +8,12 @@ icon_all_document_version_signature_verify = Icon(
 icon_document_signature_list = Icon(
     driver_name='fontawesome', symbol='certificate'
 )
+link_document_version_signature_detached_create = Icon(
+    driver_name='fontawesome', symbol='certificate'
+)
+icon_document_version_signature_embedded_create = Icon(
+    driver_name='fontawesome', symbol='certificate'
+)
 icon_document_version_signature_list = Icon(
     driver_name='fontawesome', symbol='certificate'
 )

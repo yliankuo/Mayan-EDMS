@@ -93,4 +93,10 @@ icon_duplicated_document_list = Icon(
 icon_duplicated_document_scan = Icon(
     driver_name='fontawesome', symbol='clone'
 )
+icon_document_version_download = Icon(
+    driver_name='fontawesome', symbol='download'
+)
+icon_document_version_view = Icon(
+    driver_name='fontawesome', symbol='eye'
+)
 icon_menu_documents = Icon(driver_name='fontawesome', symbol='file')

@@ -20,8 +20,9 @@ from .icons import (
     icon_document_properties, icon_document_type_create,
     icon_document_type_delete, icon_document_type_edit,
     icon_document_type_filename, icon_document_type_filename_create,
-    icon_document_type_setup, icon_document_version_list,
-    icon_document_version_return_document, icon_document_version_return_list,
+    icon_document_type_setup, icon_document_version_download,
+    icon_document_version_list, icon_document_version_return_document,
+    icon_document_version_return_list, icon_document_version_view,
     icon_duplicated_document_list, icon_duplicated_document_scan
 )
 from .permissions import (
@@ -186,7 +187,8 @@ link_document_multiple_restore = Link(
 
 # Versions
 link_document_version_download = Link(
-    args='resolved_object.pk', permissions=(permission_document_download,),
+    args='resolved_object.pk', icon_class=icon_document_version_download,
+    permissions=(permission_document_download,),
     text=_('Download version'), view='documents:document_version_download_form'
 )
 link_document_version_return_document = Link(
@@ -202,8 +204,9 @@ link_document_version_return_list = Link(
     view='documents:document_version_list',
 )
 link_document_version_view = Link(
-    args='resolved_object.pk', permissions=(permission_document_version_view,),
-    text=_('Details'), view='documents:document_version_view'
+    args='resolved_object.pk', icon_class=icon_document_version_view,
+    permissions=(permission_document_version_view,), text=_('Preview'),
+    view='documents:document_version_view'
 )
 
 # Views

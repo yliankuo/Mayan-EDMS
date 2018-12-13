@@ -7,6 +7,8 @@ from mayan.apps.navigation import Link
 
 from .icons import (
     icon_all_document_version_signature_verify, icon_document_signature_list,
+    link_document_version_signature_detached_create,
+    icon_document_version_signature_embedded_create,
     icon_document_version_signature_list
 )
 from .permissions import (
@@ -75,12 +77,14 @@ link_document_version_signature_upload = Link(
 )
 link_document_version_signature_detached_create = Link(
     args='resolved_object.pk',
+    icon_class=link_document_version_signature_detached_create,
     permissions=(permission_document_version_sign_detached,),
     permissions_related='document', text=_('Sign detached'),
     view='signatures:document_version_signature_detached_create',
 )
 link_document_version_signature_embedded_create = Link(
     args='resolved_object.pk',
+    icon_class=icon_document_version_signature_embedded_create,
     permissions=(permission_document_version_sign_embedded,),
     permissions_related='document', text=_('Sign embedded'),
     view='signatures:document_version_signature_embedded_create',

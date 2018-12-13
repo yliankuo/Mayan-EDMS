@@ -584,6 +584,9 @@ class DocumentsApp(MayanAppConfig):
         menu_facet.bind_links(
             links=(link_document_version_view,), sources=(DocumentVersion,)
         )
+        menu_object.bind_links(
+            links=(link_document_version_view,), sources=(DocumentVersion,)
+        )
 
         post_delete.connect(
             dispatch_uid='handler_remove_empty_duplicates_lists',
