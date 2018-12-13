@@ -138,7 +138,6 @@ class Permission(object):
                 namespace=self.namespace.name,
                 name=self.name,
             )
-            stored_permission.volatile_permission = self
             self.__class__._stored_permissions_cache[
                 self.uuid
             ] = stored_permission

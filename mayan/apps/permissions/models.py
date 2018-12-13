@@ -34,24 +34,26 @@ class StoredPermission(models.Model):
 
     def __str__(self):
         try:
-            return force_text(self.get_volatile_permission())
+            return force_text(self.volatile_permission)
         except KeyError:
             return self.name
 
-    def get_volatile_permission_id(self):
+    @property
+    def volatile_permission_id(self):
         """
         Return the identifier of the real permission class represented by
         this model instance.
         """
         return '{}.{}'.format(self.namespace, self.name)
 
-    def get_volatile_permission(self):
+    @property
+    def volatile_permission(self):
         """
         Returns the real class of the permission represented by this model
         instance.
         """
         return Permission.get(
-            pk=self.get_volatile_permission_id(), proxy_only=True
+            pk=self.volatile_permission_id, proxy_only=True
         )
 
     def natural_key(self):

@@ -173,8 +173,8 @@ class ACLPermissionsView(AssignRemoveView):
 
         entries = sorted(
             entries, key=lambda x: (
-                x.get_volatile_permission().namespace.label,
-                x.get_volatile_permission().label
+                x.volatile_permission.namespace.label,
+                x.volatile_permission.label
             )
         )
 
