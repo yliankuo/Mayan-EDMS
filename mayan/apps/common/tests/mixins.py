@@ -147,9 +147,9 @@ class UserMixin(object):
         self.group.user_set.add(self.user)
         self.role.groups.add(self.group)
 
-    def grant_access(self, permission, obj):
+    def grant_access(self, obj, permission):
         AccessControlList.objects.grant(
-            permission=permission, role=self.role, obj=obj
+            obj=obj, permission=permission, role=self.role
         )
 
     def grant_permission(self, permission):
