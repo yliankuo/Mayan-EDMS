@@ -13,6 +13,7 @@ TEST_DOCUMENT_CONTENT = 'Sample text'
 
 
 @override_settings(OCR_AUTO_OCR=False)
+@override_settings(DOCUMENT_PARSING_AUTO_PARSING=True)
 class DocumentParsingAPITestCase(DocumentTestMixin, BaseAPITestCase):
     test_document_filename = TEST_HYBRID_DOCUMENT
 

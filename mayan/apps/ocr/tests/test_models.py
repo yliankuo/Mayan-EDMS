@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from django.test import override_settings
+
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import DocumentType
 from mayan.apps.documents.runtime import language_choices
@@ -14,6 +16,7 @@ TEST_DOCUMENT_CONTENT_DEU_1 = 'Repository für elektronische Dokumente.'
 TEST_DOCUMENT_CONTENT_DEU_2 = 'Es bietet einen'
 
 
+@override_settings(OCR_AUTO_OCR=True)
 class DocumentOCRTestCase(DocumentTestMixin, BaseTestCase):
     # PyOCR's leak descriptor in get_available_languages and image_to_string
     # Disable descriptor leak test until fixed in upstream
@@ -24,6 +27,7 @@ class DocumentOCRTestCase(DocumentTestMixin, BaseTestCase):
         self.assertTrue(TEST_DOCUMENT_CONTENT in content)
 
 
+@override_settings(OCR_AUTO_OCR=True)
 class GermanOCRSupportTestCase(BaseTestCase):
     # PyOCR's leak descriptor in get_available_languages and image_to_string
     # Disable descriptor leak test until fixed in upstream
