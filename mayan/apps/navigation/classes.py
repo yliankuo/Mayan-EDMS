@@ -484,7 +484,7 @@ class SourceColumn(object):
             try:
                 field = model._meta.get_field(part)
             except FieldDoesNotExist:
-                break;
+                break
             else:
                 model = field.related_model or field.model
 
