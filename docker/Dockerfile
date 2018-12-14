@@ -21,6 +21,7 @@ RUN if [ "${APT_PROXY}" ]; then echo "Acquire::http { Proxy \"http://${APT_PROXY
 # Install base Ubuntu libraries
 RUN apt-get update && \
 apt-get install -y --no-install-recommends \
+        exiftool \
         g++ \
         gcc \
         ghostscript \
