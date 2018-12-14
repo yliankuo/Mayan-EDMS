@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import datetime
 
-from django.test import override_settings
 from django.utils.encoding import force_text
 from django.utils.timezone import now
 
@@ -18,7 +17,6 @@ from ..permissions import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def setUp(self):
         super(CheckoutsAPITestCase, self).setUp()

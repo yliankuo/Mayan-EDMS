@@ -4,8 +4,6 @@ import hashlib
 
 from fuse import FuseOSError
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import Document
 from mayan.apps.documents.tests import DocumentTestMixin
@@ -20,7 +18,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class IndexFilesystemTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
 

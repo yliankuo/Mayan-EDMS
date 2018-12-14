@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.documents.models import DocumentType
@@ -28,7 +26,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class WorkflowAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(WorkflowAPITestCase, self).setUp()
@@ -362,7 +359,6 @@ class WorkflowAPITestCase(BaseAPITestCase):
         self.assertEqual(response.data['results'][0]['label'], self.workflow.label)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class WorkflowStatesAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(WorkflowStatesAPITestCase, self).setUp()
@@ -538,7 +534,6 @@ class WorkflowStatesAPITestCase(BaseAPITestCase):
         )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class WorkflowTransitionsAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(WorkflowTransitionsAPITestCase, self).setUp()
@@ -774,7 +769,6 @@ class WorkflowTransitionsAPITestCase(BaseAPITestCase):
         )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentWorkflowsAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(DocumentWorkflowsAPITestCase, self).setUp()

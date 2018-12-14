@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.documents.models import DocumentType
@@ -337,7 +335,6 @@ class DocumentTypeMetadataTypeAPITestCase(BaseAPITestCase):
 
 
 class DocumentMetadataAPITestCase(BaseAPITestCase):
-    @override_settings(OCR_AUTO_OCR=False)
     def setUp(self):
         super(DocumentMetadataAPITestCase, self).setUp()
         self.login_user()

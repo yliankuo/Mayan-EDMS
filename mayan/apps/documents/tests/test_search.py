@@ -1,14 +1,11 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.tests import DocumentTestMixin
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
     def _perform_document_page_search(self):
         return document_page_search.search(

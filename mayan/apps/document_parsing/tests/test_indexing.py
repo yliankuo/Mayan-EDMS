@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.document_indexing.models import Index, IndexInstanceNode
 from mayan.apps.document_indexing.tests.literals import TEST_INDEX_LABEL
@@ -10,8 +8,6 @@ from mayan.apps.documents.tests import TEST_HYBRID_DOCUMENT, DocumentTestMixin
 from .literals import TEST_PARSING_INDEX_NODE_TEMPLATE
 
 
-@override_settings(DOCUMENT_PARSING_AUTO_PARSING=False)
-@override_settings(OCR_AUTO_OCR=False)
 class ParsingIndexingTestCase(DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
     test_document_filename = TEST_HYBRID_DOCUMENT

@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.documents.tests import DocumentTestMixin
@@ -16,7 +14,6 @@ from ..permissions import (
 from .literals import TEST_COMMENT_TEXT
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class CommentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def setUp(self):
         super(CommentAPITestCase, self).setUp()

@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
 from django.urls import reverse
 
 from rest_framework import status
@@ -13,7 +12,6 @@ from mayan.apps.rest_api.tests import BaseAPITestCase
 from ..classes import SearchModel
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class SearchAPITestCase(DocumentTestMixin, BaseAPITestCase):
     auto_upload_document = False
 

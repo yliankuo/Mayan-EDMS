@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.document_indexing.models import Index, IndexInstanceNode
 from mayan.apps.documents.models import DocumentType
@@ -20,7 +18,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentStateIndexingTestCase(BaseTestCase):
     def tearDown(self):
         self.document_type.delete()

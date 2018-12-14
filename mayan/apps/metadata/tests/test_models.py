@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ValidationError
-from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import DocumentType
@@ -18,7 +17,6 @@ from .literals import (
 from .mixins import MetadataTypeTestMixin
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
     def setUp(self):
         super(MetadataTestCase, self).setUp()

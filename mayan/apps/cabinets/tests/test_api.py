@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.encoding import force_text
 
@@ -18,7 +17,6 @@ from ..models import Cabinet
 from .literals import TEST_CABINET_EDITED_LABEL, TEST_CABINET_LABEL
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class CabinetAPITestCase(DocumentTestMixin, APITestCase):
     """
     Test the cabinet API endpoints

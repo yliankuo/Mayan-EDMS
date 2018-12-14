@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.documents.tests import GenericDocumentTestCase
 
 from ..models import SmartLink
@@ -9,7 +7,6 @@ from ..models import SmartLink
 from .literals import TEST_SMART_LINK_DYNAMIC_LABEL, TEST_SMART_LINK_LABEL
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class SmartLinkTestCase(GenericDocumentTestCase):
     def test_dynamic_label(self):
         smart_link = SmartLink.objects.create(

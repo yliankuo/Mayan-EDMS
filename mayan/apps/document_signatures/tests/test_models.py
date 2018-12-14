@@ -5,7 +5,6 @@ import logging
 import time
 
 from django.core.files import File
-from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.django_gpg.models import Key
@@ -26,7 +25,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentSignaturesTestCase(BaseTestCase):
     def setUp(self):
         super(DocumentSignaturesTestCase, self).setUp()
@@ -254,7 +252,6 @@ class DocumentSignaturesTestCase(BaseTestCase):
         self.assertEqual(signature.key_id, TEST_KEY_ID)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class EmbeddedSignaturesTestCase(BaseTestCase):
     def setUp(self):
         super(EmbeddedSignaturesTestCase, self).setUp()

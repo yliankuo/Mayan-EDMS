@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
 from django.utils.encoding import force_text
 
 from rest_framework import status
@@ -21,7 +20,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class TagAPITestCase(DocumentTestMixin, BaseAPITestCase):
     auto_upload_document = False
 

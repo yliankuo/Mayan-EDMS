@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import time
 
-from django.test import override_settings
 from django.utils.encoding import force_text
 
 from django_downloadview import assert_download_response
@@ -144,7 +143,6 @@ class DocumentTypeAPITestCase(BaseAPITestCase):
         self.assertEqual(DocumentType.objects.all().count(), 0)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     auto_upload_document = False
 
@@ -475,7 +473,6 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
         )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentPageAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def setUp(self):
         super(DocumentPageAPITestCase, self).setUp()
@@ -501,7 +498,6 @@ class DocumentPageAPITestCase(DocumentTestMixin, BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     auto_upload_document = False
 

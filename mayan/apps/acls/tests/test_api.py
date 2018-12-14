@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
-from django.test import override_settings
 
 from rest_framework import status
 
@@ -14,7 +13,6 @@ from ..models import AccessControlList
 from ..permissions import permission_acl_view
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def setUp(self):
         super(ACLAPITestCase, self).setUp()

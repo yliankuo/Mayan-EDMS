@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import PermissionDenied
-from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import Document, DocumentType
@@ -14,7 +13,6 @@ from mayan.apps.documents.tests import (
 from ..models import AccessControlList
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class PermissionTestCase(BaseTestCase):
     def setUp(self):
         super(PermissionTestCase, self).setUp()

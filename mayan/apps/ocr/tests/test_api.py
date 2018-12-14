@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.documents.tests import DocumentTestMixin
@@ -14,8 +12,6 @@ from ..permissions import (
 TEST_DOCUMENT_CONTENT = 'Mayan EDMS Documentation'
 
 
-@override_settings(OCR_AUTO_OCR=False)
-@override_settings(DOCUMENT_PARSING_AUTO_PARSING=False)
 class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     """
     Test the OCR app API endpoints

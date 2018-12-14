@@ -13,7 +13,6 @@ class DocumentAutoParsingTestCase(GenericDocumentTestCase):
     test_document_filename = TEST_HYBRID_DOCUMENT
     auto_create_document_type = False
 
-    @override_settings(DOCUMENT_PARSING_AUTO_PARSING=False)
     def test_disable_auto_parsing(self):
         self._create_document_type()
         self.document = self.upload_document()

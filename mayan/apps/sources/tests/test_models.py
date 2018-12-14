@@ -6,7 +6,6 @@ import shutil
 import mock
 from pathlib2 import Path
 
-from django.test import override_settings
 from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import BaseTestCase
@@ -32,7 +31,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class CompressedUploadsTestCase(BaseTestCase):
     def setUp(self):
         super(CompressedUploadsTestCase, self).setUp()
@@ -69,7 +67,6 @@ class CompressedUploadsTestCase(BaseTestCase):
         )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class EmailFilenameDecodingTestCase(BaseTestCase):
     def setUp(self):
         super(EmailFilenameDecodingTestCase, self).setUp()
@@ -196,7 +193,6 @@ class EmailFilenameDecodingTestCase(BaseTestCase):
         self.assertEqual(3, Document.objects.count())
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class POP3SourceTestCase(BaseTestCase):
     class MockMailbox(object):
         def dele(self, which):
@@ -246,7 +242,6 @@ class POP3SourceTestCase(BaseTestCase):
         )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class WatchFolderTestCase(DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
 

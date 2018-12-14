@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ValidationError
-from django.test import override_settings
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.tests import DocumentTestMixin
@@ -11,7 +10,6 @@ from ..models import Cabinet
 from .literals import TEST_CABINET_LABEL
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class CabinetTestCase(DocumentTestMixin, BaseTestCase):
     def test_cabinet_creation(self):
         cabinet = Cabinet.objects.create(label=TEST_CABINET_LABEL)

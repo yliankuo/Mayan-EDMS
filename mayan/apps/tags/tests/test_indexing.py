@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.tests import DocumentTestMixin
 from mayan.apps.document_indexing.models import Index, IndexInstanceNode
@@ -15,7 +13,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class TagSignalIndexingTestCase(DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
 

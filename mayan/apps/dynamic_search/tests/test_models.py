@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.search import document_search
 from mayan.apps.documents.tests import (
@@ -9,7 +7,6 @@ from mayan.apps.documents.tests import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
     test_document_filename = TEST_DOCUMENT_FILENAME

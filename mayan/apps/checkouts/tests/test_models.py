@@ -4,7 +4,6 @@ import datetime
 import logging
 import time
 
-from django.test import override_settings
 from django.utils.timezone import now
 
 from mayan.apps.common.tests import BaseTestCase
@@ -18,7 +17,6 @@ from ..exceptions import (
 from ..models import DocumentCheckout, NewVersionBlock
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
     def test_document_checkout(self):
         expiration_datetime = now() + datetime.timedelta(days=1)
@@ -115,7 +113,6 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
                 self.document.new_version(file_object=file_object)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class NewVersionBlockTestCase(DocumentTestMixin, BaseTestCase):
     def test_blocking(self):
         NewVersionBlock.objects.block(document=self.document)

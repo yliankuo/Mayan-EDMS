@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.documents.models import DocumentType
 from mayan.apps.documents.search import document_search
@@ -10,7 +8,6 @@ from mayan.apps.documents.tests import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class Issue46TestCase(GenericViewTestCase):
     """
     Functional tests to make sure issue 46 is fixed

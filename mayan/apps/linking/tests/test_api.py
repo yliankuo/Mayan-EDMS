@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.documents.models import DocumentType
@@ -27,7 +25,6 @@ from .literals import (
 )
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class SmartLinkAPITestCase(DocumentTestMixin, BaseAPITestCase):
     auto_create_document_type = False
     auto_upload_document = False
@@ -190,7 +187,6 @@ class SmartLinkAPITestCase(DocumentTestMixin, BaseAPITestCase):
         self.assertEqual(self.smart_link.label, TEST_SMART_LINK_LABEL_EDITED)
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class SmartLinkConditionAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(SmartLinkConditionAPITestCase, self).setUp()

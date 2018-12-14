@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
 from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import BaseTestCase
@@ -24,7 +23,6 @@ from .literals import (
 from .mixins import DocumentIndexingTestMixin
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
     def test_document_description_index(self):
         self._create_index()

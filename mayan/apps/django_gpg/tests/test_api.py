@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.test import override_settings
-
 from rest_framework import status
 
 from mayan.apps.rest_api.tests import BaseAPITestCase
@@ -14,7 +12,6 @@ from ..permissions import (
 from .literals import TEST_KEY_DATA, TEST_KEY_FINGERPRINT
 
 
-@override_settings(OCR_AUTO_OCR=False)
 class KeyAPITestCase(BaseAPITestCase):
     def setUp(self):
         super(KeyAPITestCase, self).setUp()
