@@ -53,8 +53,8 @@ class CabinetsApp(MayanAppConfig):
         # Add explicit order_by as DocumentCabinet ordering Meta option has no
         # effect.
         Document.add_to_class(
-            'document_cabinets',
-            lambda document: DocumentCabinet.objects.filter(documents=document).order_by('parent__label', 'label')
+            name='document_cabinets',
+            value=lambda document: DocumentCabinet.objects.filter(documents=document).order_by('parent__label', 'label')
         )
 
         ModelPermission.register(

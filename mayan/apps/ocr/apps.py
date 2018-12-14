@@ -95,12 +95,13 @@ class OCRApp(MayanAppConfig):
 
         DocumentVersionOCRError = self.get_model('DocumentVersionOCRError')
 
-        Document.add_to_class('submit_for_ocr', document_ocr_submit)
         Document.add_to_class(
-            'ocr_content', document_property_ocr_content
+            name='submit_for_ocr', value=document_ocr_submit)
+        Document.add_to_class(
+            name='ocr_content', value=document_property_ocr_content
         )
         DocumentVersion.add_to_class(
-            'submit_for_ocr', document_version_ocr_submit
+            name='submit_for_ocr', value=document_version_ocr_submit
         )
 
         ModelAttribute(

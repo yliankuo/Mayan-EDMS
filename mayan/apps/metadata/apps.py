@@ -2,11 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from kombu import Exchange, Queue
-
 from django.apps import apps
 from django.db.models.signals import post_delete, post_save
 from django.utils.translation import ugettext_lazy as _
+
+from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
@@ -90,7 +90,8 @@ class MetadataApp(MayanAppConfig):
         MetadataType = self.get_model('MetadataType')
 
         Document.add_to_class(
-            'metadata_value_of', DocumentMetadataHelper.constructor
+            name='metadata_value_of',
+            value=DocumentMetadataHelper.constructor
         )
 
         ModelAttribute(

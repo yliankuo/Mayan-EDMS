@@ -66,8 +66,8 @@ class TagsApp(MayanAppConfig):
         Tag = self.get_model('Tag')
 
         Document.add_to_class(
-            'attached_tags',
-            lambda document: DocumentTag.objects.filter(documents=document)
+            name='attached_tags',
+            value=lambda document: DocumentTag.objects.filter(documents=document)
         )
 
         ModelEventType.register(

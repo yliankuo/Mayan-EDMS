@@ -95,15 +95,17 @@ class DocumentParsingApp(MayanAppConfig):
             model_name='DocumentVersionParseError'
         )
 
-        Document.add_to_class('submit_for_parsing', document_parsing_submit)
         Document.add_to_class(
-            'content', document_property_content
+            name='submit_for_parsing', value=document_parsing_submit
+        )
+        Document.add_to_class(
+            name='content', value=document_property_content
         )
         DocumentVersion.add_to_class(
-            'content', get_document_content
+            name='content', value=get_document_content
         )
         DocumentVersion.add_to_class(
-            'submit_for_parsing', document_version_parsing_submit
+            name='submit_for_parsing', value=document_version_parsing_submit
         )
 
         ModelAttribute(
