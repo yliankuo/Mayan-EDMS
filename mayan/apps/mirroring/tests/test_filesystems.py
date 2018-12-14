@@ -151,7 +151,7 @@ class IndexFilesystemTestCase(DocumentIndexingTestMixin, DocumentTestMixin, Base
         self.assertEqual(
             list(
                 index_filesystem.readdir(
-                    '/{}'.format(TEST_NODE_EXPRESSION), ''
+                    '/', ''
                 )
             )[2:], []
         )

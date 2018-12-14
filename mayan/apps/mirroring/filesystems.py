@@ -37,7 +37,7 @@ class IndexFilesystem(Operations):
         return queryset.annotate(
             clean_value=Trim(
                 Func(
-                    F('value'), Value('\r\n'), Value(' '), function='replace'
+                    F('value'), Value('\n'), Value(' '), function='replace'
                 ),
             )
         )
