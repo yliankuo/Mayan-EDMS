@@ -8,7 +8,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_multi_item, menu_object
+    MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_tools
 )
 from mayan.apps.document_indexing.handlers import handler_index_document
 from mayan.apps.documents.search import document_page_search, document_search
@@ -29,7 +29,7 @@ from .handlers import (
 from .links import (
     link_document_driver_list, link_document_file_metadata_list,
     link_document_submit, link_document_submit_multiple,
-    link_document_type_file_metadata_settings
+    link_document_type_file_metadata_settings, link_document_type_submit
 )
 from .permissions import (
     permission_document_type_file_metadata_setup,
@@ -102,6 +102,7 @@ class FileMetadataApp(MayanAppConfig):
         ModelPermission.register(
             model=DocumentType, permissions=(
                 permission_document_type_file_metadata_setup,
+                permission_file_metadata_submit
             )
         )
         ModelPermission.register_inheritance(
@@ -170,7 +171,9 @@ class FileMetadataApp(MayanAppConfig):
         menu_multi_item.bind_links(
             links=(link_document_submit_multiple,), sources=(Document,)
         )
-
+        menu_tools.bind_links(
+            links=(link_document_type_submit,),
+        )
         post_save.connect(
             dispatch_uid='file_metadata_handler_initialize_new_document_type_settings',
             receiver=handler_initialize_new_document_type_settings,

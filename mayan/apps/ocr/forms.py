@@ -7,7 +7,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 from mayan.apps.common.widgets import TextAreaDiv
-from mayan.apps.documents.models import DocumentType
 
 from .models import DocumentPageOCRContent
 
@@ -80,9 +79,3 @@ class DocumentOCRContentForm(forms.Form):
                 )
 
         self.fields['contents'].initial = mark_safe(''.join(content))
-
-
-class DocumentTypeSelectForm(forms.Form):
-    document_type = forms.ModelChoiceField(
-        queryset=DocumentType.objects.all(), label=('Document type')
-    )

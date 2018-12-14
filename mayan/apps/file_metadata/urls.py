@@ -4,7 +4,7 @@ from django.conf.urls import url
 
 from .views import (
     DocumentDriverListView, DocumentSubmitView, DocumentTypeSettingsEditView,
-    DocumentVersionDriverEntryFileMetadataListView
+    DocumentTypeSubmitView, DocumentVersionDriverEntryFileMetadataListView
 )
 
 urlpatterns = [
@@ -24,6 +24,10 @@ urlpatterns = [
         r'^document_types/(?P<pk>\d+)/ocr/settings/$',
         DocumentTypeSettingsEditView.as_view(),
         name='document_type_settings'
+    ),
+    url(
+        r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
+        name='document_type_submit'
     ),
     url(
         r'^document_version_driver/(?P<pk>\d+)/attributes/$',

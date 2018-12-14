@@ -121,7 +121,7 @@ class OCRApp(MayanAppConfig):
         )
         ModelPermission.register(
             model=DocumentType, permissions=(
-                permission_document_type_ocr_setup,
+                permission_document_type_ocr_setup, permission_ocr_document
             )
         )
         ModelPermission.register_inheritance(

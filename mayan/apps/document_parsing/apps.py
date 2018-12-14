@@ -126,6 +126,7 @@ class DocumentParsingApp(MayanAppConfig):
         ModelPermission.register(
             model=DocumentType, permissions=(
                 permission_document_type_parsing_setup,
+                permission_parse_document
             )
         )
         ModelPermission.register_inheritance(

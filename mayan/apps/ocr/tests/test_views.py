@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
 from ..permissions import (
-    permission_ocr_content_view, permission_ocr_document,
-    permission_document_type_ocr_setup
+    permission_document_type_ocr_setup, permission_ocr_content_view,
+    permission_ocr_document,
 )
 
 TEST_DOCUMENT_CONTENT = 'Mayan EDMS Documentation'
@@ -129,6 +129,16 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
             response=response, content=self.document.ocr_content
         )
 
+
+class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
+    # PyOCR's leak descriptor in get_available_languages and image_to_string
+    # Disable descriptor leak test until fixed in upstream
+    _skip_file_descriptor_test = True
+
+    def setUp(self):
+        super(DocumentTypeViewsTestCase, self).setUp()
+        self.login_user()
+
     def _request_document_type_ocr_settings_view(self):
         return self.get(
             viewname='ocr:document_type_ocr_settings',
@@ -147,3 +157,27 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
         response = self._request_document_type_ocr_settings_view()
 
         self.assertEqual(response.status_code, 200)
+
+    def _request_document_type_submit_view(self):
+        return self.post(
+            viewname='ocr:document_type_submit', data={
+                'document_type': self.document_type.pk,
+            }
+        )
+
+    def test_document_type_submit_view_no_permission(self):
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            TEST_DOCUMENT_CONTENT not in self.document.ocr_content
+        )
+
+    def test_document_type_submit_view_with_access(self):
+        self.grant_access(
+            obj=self.document_type, permission=permission_ocr_document,
+        )
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            TEST_DOCUMENT_CONTENT in self.document.ocr_content
+        )

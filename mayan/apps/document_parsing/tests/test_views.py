@@ -7,7 +7,8 @@ from mayan.apps.documents.tests import (
 )
 
 from ..permissions import (
-    permission_content_view, permission_document_type_parsing_setup
+    permission_content_view, permission_document_type_parsing_setup,
+    permission_parse_document
 )
 from ..utils import get_document_content
 
@@ -92,12 +93,23 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
             ),
         )
 
-    def test_document_type_parsing_settings_view_no_permission(self):
-        response = self.get(
+
+class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
+    # Ensure we use a PDF file
+    test_document_filename = TEST_HYBRID_DOCUMENT
+
+    def setUp(self):
+        super(DocumentTypeViewsTestCase, self).setUp()
+        self.login_user()
+
+    def _request_document_type_parsing_settings_view(self):
+        return self.get(
             viewname='document_parsing:document_type_parsing_settings',
             args=(self.document.document_type.pk,)
         )
 
+    def test_document_type_parsing_settings_view_no_permission(self):
+        response = self._request_document_type_parsing_settings_view()
         self.assertEqual(response.status_code, 403)
 
     def test_document_type_parsing_settings_view_with_access(self):
@@ -105,9 +117,30 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
             permission=permission_document_type_parsing_setup,
             obj=self.document.document_type
         )
-        response = self.get(
-            viewname='document_parsing:document_type_parsing_settings',
-            args=(self.document.document_type.pk,)
-        )
+        response = self._request_document_type_parsing_settings_view()
 
         self.assertEqual(response.status_code, 200)
+
+    def _request_document_type_submit_view(self):
+        return self.post(
+            viewname='document_parsing:document_type_submit', data={
+                'document_type': self.document_type.pk,
+            }
+        )
+
+    def test_document_type_submit_view_no_permission(self):
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            TEST_DOCUMENT_CONTENT not in self.document.content
+        )
+
+    def test_document_type_submit_view_with_access(self):
+        self.grant_access(
+            obj=self.document_type, permission=permission_parse_document,
+        )
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            TEST_DOCUMENT_CONTENT in self.document.content
+        )

@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -7,9 +9,10 @@ from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.views import (
-    MultipleObjectConfirmActionView, SingleObjectEditView,
+    FormView, MultipleObjectConfirmActionView, SingleObjectEditView,
     SingleObjectListView
 )
+from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
 from mayan.apps.documents.models import Document, DocumentType
 
 from .icons import icon_file_metadata
@@ -123,3 +126,38 @@ class DocumentTypeSettingsEditView(SingleObjectEditView):
 
     def get_object(self, queryset=None):
         return self.get_document_type().file_metadata_settings
+
+
+class DocumentTypeSubmitView(FormView):
+    extra_context = {
+        'title': _(
+            'Submit all documents of a type for file metadata processing.'
+        )
+    }
+    form_class = DocumentTypeFilteredSelectForm
+    post_action_redirect = reverse_lazy('common:tools_list')
+
+    def get_form_extra_kwargs(self):
+        return {
+            'allow_multiple': True,
+            'permission': permission_file_metadata_submit,
+            'user': self.request.user
+        }
+
+    def form_valid(self, form):
+        count = 0
+        for document_type in form.cleaned_data['document_type']:
+            for document in document_type.documents.all():
+                document.submit_for_file_metadata_processing()
+                count += 1
+
+        messages.success(
+            self.request, _(
+                '%(count)d documents added to the file metadata processing '
+                'queue.'
+            ) % {
+                'count': count,
+            }
+        )
+
+        return HttpResponseRedirect(self.get_success_url())

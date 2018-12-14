@@ -30,7 +30,7 @@ from ..events import event_document_download, event_document_view
 from ..forms import (
     DocumentDownloadForm, DocumentForm, DocumentPageNumberForm,
     DocumentPreviewForm, DocumentPrintForm, DocumentPropertiesForm,
-    DocumentTypeSelectForm
+    DocumentTypeFilteredSelectForm
 )
 from ..icons import (
     icon_document_list, icon_document_list_deleted,
@@ -173,7 +173,7 @@ class DeletedDocumentListView(DocumentListView):
 
 
 class DocumentDocumentTypeEditView(MultipleObjectFormActionView):
-    form_class = DocumentTypeSelectForm
+    form_class = DocumentTypeFilteredSelectForm
     model = Document
     object_permission = permission_document_properties_edit
     success_message = _(

@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
@@ -11,11 +11,10 @@ from mayan.apps.common.generics import (
     FormView, MultipleObjectConfirmActionView, SingleObjectDetailView,
     SingleObjectDownloadView, SingleObjectEditView, SingleObjectListView
 )
+from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
 from mayan.apps.documents.models import Document, DocumentPage, DocumentType
 
-from .forms import (
-    DocumentContentForm, DocumentPageContentForm, DocumentTypeSelectForm
-)
+from .forms import DocumentContentForm, DocumentPageContentForm
 from .models import DocumentVersionParseError
 from .permissions import (
     permission_content_view, permission_document_type_parsing_setup,
@@ -159,36 +158,35 @@ class DocumentTypeSettingsEditView(SingleObjectEditView):
 
 
 class DocumentTypeSubmitView(FormView):
-    form_class = DocumentTypeSelectForm
     extra_context = {
         'title': _('Submit all documents of a type for parsing')
     }
+    form_class = DocumentTypeFilteredSelectForm
+    post_action_redirect = reverse_lazy('common:tools_list')
+
+    def get_form_extra_kwargs(self):
+        return {
+            'allow_multiple': True,
+            'permission': permission_parse_document,
+            'user': self.request.user
+        }
 
     def form_valid(self, form):
         count = 0
-        for document in form.cleaned_data['document_type'].documents.all():
-            document.submit_for_parsing()
-            count += 1
+        for document_type in form.cleaned_data['document_type']:
+            for document in document_type.documents.all():
+                document.submit_for_parsing()
+                count += 1
 
         messages.success(
             self.request, _(
-                '%(count)d documents of type "%(document_type)s" added to the '
-                'parsing queue.'
+                '%(count)d documents added to the parsing queue.'
             ) % {
                 'count': count,
-                'document_type': form.cleaned_data['document_type']
             }
         )
 
         return HttpResponseRedirect(self.get_success_url())
-
-    def get_form_extra_kwargs(self):
-        return {
-            'user': self.request.user
-        }
-
-    def get_post_action_redirect(self):
-        return reverse('common:tools_list')
 
 
 class ParseErrorListView(SingleObjectListView):

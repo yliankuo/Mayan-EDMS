@@ -130,8 +130,32 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
     def test_document_type_settings_view_with_access(self):
         self.grant_access(
             permission=permission_document_type_file_metadata_setup,
-            obj=self.document.document_type
+            obj=self.document_type
         )
         response = self._request_document_type_settings_view()
 
         self.assertEqual(response.status_code, 200)
+
+    def _request_document_type_submit_view(self):
+        return self.post(
+            viewname='file_metadata:document_type_submit', data={
+                'document_type': self.document_type.pk,
+            }
+        )
+
+    def test_document_type_submit_view_no_permission(self):
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.document.latest_version.file_metadata_drivers.count(), 0
+        )
+
+    def test_document_type_submit_view_with_access(self):
+        self.grant_access(
+            obj=self.document_type, permission=permission_file_metadata_submit,
+        )
+        response = self._request_document_type_submit_view()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            self.document.latest_version.file_metadata_drivers.count(), 1
+        )

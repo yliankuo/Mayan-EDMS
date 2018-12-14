@@ -35,3 +35,9 @@ link_document_type_file_metadata_settings = Link(
     text=_('Setup file metadata'),
     view='file_metadata:document_type_settings',
 )
+link_document_type_submit = Link(
+    icon_class=icon_file_metadata,
+    permissions=(permission_file_metadata_submit,),
+    text=_('File metadata processing per type'),
+    view='file_metadata:document_type_submit'
+)
