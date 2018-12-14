@@ -7,6 +7,7 @@ import tempfile
 import types
 
 from django.conf import settings
+from django.db.models.constants import LOOKUP_SEP
 from django.urls import resolve as django_resolve
 from django.urls.base import get_script_prefix
 from django.utils.datastructures import MultiValueDict
@@ -129,27 +130,34 @@ def resolve(path, urlconf=None):
     return django_resolve(path=path, urlconf=urlconf)
 
 
-def return_attrib(obj, attrib, arguments=None):
+def resolve_attribute(obj, attrib, arguments=None):
     if isinstance(attrib, types.FunctionType):
         return attrib(obj)
-    elif isinstance(
-        obj, dict_type
-    ) or isinstance(obj, dictionary_type):
+    elif isinstance(obj, dict_type) or isinstance(obj, dictionary_type):
         return obj[attrib]
     else:
-        result = reduce_function(getattr, attrib.split('.'), obj)
-        if isinstance(result, types.MethodType):
-            if arguments:
-                return result(**arguments)
+        try:
+            result = reduce_function(getattr, attrib.split('.'), obj)
+            if isinstance(result, types.MethodType):
+                if arguments:
+                    return result(**arguments)
+                else:
+                    return result()
             else:
-                return result()
-        else:
-            return result
+                return result
+        except AttributeError:
+            if LOOKUP_SEP in attrib:
+                attrib = attrib.replace(LOOKUP_SEP, '.')
+                return resolve_attribute(
+                    obj=obj, attrib=attrib, arguments=arguments
+                )
+            else:
+                raise
 
 
 def return_related(instance, related_field):
     """
-    This functions works in a similar method to return_attrib but is
+    This functions works in a similar method to resolve_attribute but is
     meant for related models. Support multiple levels of relationship
     using double underscore.
     """

@@ -8,14 +8,15 @@ from furl import furl
 from django.apps import apps
 from django.conf import settings
 from django.contrib.admin.utils import label_for_field
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import FieldDoesNotExist, PermissionDenied
+from django.db.models.constants import LOOKUP_SEP
 from django.shortcuts import resolve_url
 from django.template import VariableDoesNotExist, Variable
 from django.template.defaulttags import URLNode
 from django.urls import Resolver404, resolve
 from django.utils.encoding import force_str, force_text
 
-from mayan.apps.common.utils import return_attrib
+from mayan.apps.common.utils import resolve_attribute
 from mayan.apps.permissions import Permission
 
 logger = logging.getLogger(__name__)
@@ -470,6 +471,26 @@ class SourceColumn(object):
     _registry = {}
 
     @staticmethod
+    def get_attribute_recursive(attribute, model):
+        """
+        Walk over the double underscore (__) separated path to the last
+        field. Returns the field name and the corresponding model class.
+        Used to introspect the label or short_description of a model's
+        attribute.
+        """
+        last_model = model
+        for part in attribute.split(LOOKUP_SEP):
+            last_model = model
+            try:
+                field = model._meta.get_field(part)
+            except FieldDoesNotExist:
+                break;
+            else:
+                model = field.related_model or field.model
+
+        return part, last_model
+
+    @staticmethod
     def sort(columns):
         return sorted(columns, key=lambda x: x.order)
 
@@ -507,11 +528,13 @@ class SourceColumn(object):
 
     @property
     def label(self):
-        # TODO: Add support for related fields (dotted or double underscore attributes)
         if not self._label:
             if self.attribute:
+                name, model = SourceColumn.get_attribute_recursive(
+                    attribute=self.attribute, model=self.source._meta.model
+                )
                 self._label = label_for_field(
-                    name=self.attribute, model=self.source._meta.model
+                    name=name, model=model
                 )
             else:
                 self._label = 'Function'
@@ -520,7 +543,7 @@ class SourceColumn(object):
 
     def resolve(self, context):
         if self.attribute:
-            result = return_attrib(context['object'], self.attribute)
+            result = resolve_attribute(context['object'], self.attribute)
         elif self.func:
             result = self.func(context=context)
 

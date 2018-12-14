@@ -175,6 +175,8 @@
 - Upgraded from Celery 3.1.26 to 4.1.1. The following settings have been 
   renamed: CELERY_ALWAYS_EAGER to CELERY_TASK_ALWAYS_EAGER, 
   BROKER_URL to CELERY_BROKER_URL.
+- Internal change. Add support to the SourceColumn class to resolve
+  related fields using the double underscore as separator.
 
 3.1.9 (2018-11-01)
 ==================

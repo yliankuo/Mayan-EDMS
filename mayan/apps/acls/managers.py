@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.utils import return_attrib, return_related
+from mayan.apps.common.utils import resolve_attribute, return_related
 from mayan.apps.permissions import Permission
 from mayan.apps.permissions.models import StoredPermission
 
@@ -46,7 +46,7 @@ class AccessControlListManager(models.Manager):
                 stored_permissions = (permissions.stored_permission,)
 
             if related:
-                obj = return_attrib(obj, related)
+                obj = resolve_attribute(obj, related)
 
             try:
                 parent_accessor = ModelPermission.get_inheritance(
@@ -199,7 +199,7 @@ class AccessControlListManager(models.Manager):
             return StoredPermission.objects.none()
         else:
             try:
-                parent_object = return_attrib(
+                parent_object = resolve_attribute(
                     obj=instance, attrib=parent_accessor
                 )
             except AttributeError:

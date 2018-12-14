@@ -10,7 +10,7 @@ import mayan
 
 from ..classes import Collection, Dashboard
 from ..literals import MESSAGE_SQLITE_WARNING
-from ..utils import check_for_sqlite, return_attrib
+from ..utils import check_for_sqlite, resolve_attribute
 
 register = Library()
 
@@ -30,7 +30,7 @@ def get_collections():
 def get_encoded_parameter(item, parameters_dict):
     result = {}
     for attrib_name, attrib in parameters_dict.items():
-        result[attrib_name] = return_attrib(item, attrib)
+        result[attrib_name] = resolve_attribute(item, attrib)
     return dumps(result)
 
 
@@ -41,7 +41,7 @@ def get_type(value):
 
 @register.filter
 def object_property(value, arg):
-    return return_attrib(value, arg)
+    return resolve_attribute(value, arg)
 
 
 @register.simple_tag

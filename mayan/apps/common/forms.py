@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .classes import Package
 from .models import UserLocaleProfile
-from .utils import return_attrib
+from .utils import resolve_attribute
 from .widgets import DisableableSelectWidget, PlainWidget, TextAreaDiv
 
 
@@ -43,7 +43,7 @@ class DetailForm(forms.ModelForm):
         super(DetailForm, self).__init__(*args, **kwargs)
 
         for extra_field in self.extra_fields:
-            result = return_attrib(self.instance, extra_field['field'])
+            result = resolve_attribute(self.instance, extra_field['field'])
             label = 'label' in extra_field and extra_field['label'] or None
             # TODO: Add others result types <=> Field types
             if isinstance(result, models.query.QuerySet):
@@ -53,7 +53,7 @@ class DetailForm(forms.ModelForm):
             else:
                 self.fields[extra_field['field']] = forms.CharField(
                     label=extra_field['label'],
-                    initial=return_attrib(
+                    initial=resolve_attribute(
                         self.instance,
                         extra_field['field'], None
                     ),
