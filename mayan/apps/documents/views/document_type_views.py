@@ -26,48 +26,14 @@ from ..permissions import (
 
 from .document_views import DocumentListView
 
+__all__ = (
+    'DocumentTypeCreateView', 'DocumentTypeDeleteView',
+    'DocumentTypeDocumentListView', 'DocumentTypeEditView',
+    'DocumentTypeListView', 'DocumentTypeFilenameCreateView',
+    'DocumentTypeFilenameDeleteView', 'DocumentTypeFilenameEditView',
+    'DocumentTypeFilenameListView'
+)
 logger = logging.getLogger(__name__)
-
-
-class DocumentTypeDocumentListView(DocumentListView):
-    def get_document_type(self):
-        return get_object_or_404(DocumentType, pk=self.kwargs['pk'])
-
-    def get_document_queryset(self):
-        return self.get_document_type().documents.all()
-
-    def get_extra_context(self):
-        context = super(DocumentTypeDocumentListView, self).get_extra_context()
-        context.update(
-            {
-                'object': self.get_document_type(),
-                'title': _('Documents of type: %s') % self.get_document_type()
-            }
-        )
-        return context
-
-
-class DocumentTypeListView(SingleObjectListView):
-    model = DocumentType
-    object_permission = permission_document_type_view
-
-    def get_extra_context(self):
-        return {
-            'hide_link': True,
-            'no_results_icon': icon_document_type_setup,
-            'no_results_main_link': link_document_type_create.resolve(
-                context=RequestContext(request=self.request)
-            ),
-            'no_results_text': _(
-                'Document types are the most basic units of configuration. '
-                'Everything in the system will depend on them. '
-                'Define a document type for each type of physical '
-                'document you intend to upload. Example document types: '
-                'invoice, receipt, manual, prescription, balance sheet.'
-            ),
-            'no_results_title': _('No document types available'),
-            'title': _('Document types'),
-        }
 
 
 class DocumentTypeCreateView(SingleObjectCreateView):
@@ -103,6 +69,24 @@ class DocumentTypeDeleteView(SingleObjectDeleteView):
         }
 
 
+class DocumentTypeDocumentListView(DocumentListView):
+    def get_document_type(self):
+        return get_object_or_404(DocumentType, pk=self.kwargs['pk'])
+
+    def get_document_queryset(self):
+        return self.get_document_type().documents.all()
+
+    def get_extra_context(self):
+        context = super(DocumentTypeDocumentListView, self).get_extra_context()
+        context.update(
+            {
+                'object': self.get_document_type(),
+                'title': _('Documents of type: %s') % self.get_document_type()
+            }
+        )
+        return context
+
+
 class DocumentTypeEditView(SingleObjectEditView):
     fields = (
         'label', 'trash_time_period', 'trash_time_unit', 'delete_time_period',
@@ -121,6 +105,29 @@ class DocumentTypeEditView(SingleObjectEditView):
     def get_save_extra_data(self):
         return {
             '_user': self.request.user,
+        }
+
+
+class DocumentTypeListView(SingleObjectListView):
+    model = DocumentType
+    object_permission = permission_document_type_view
+
+    def get_extra_context(self):
+        return {
+            'hide_link': True,
+            'no_results_icon': icon_document_type_setup,
+            'no_results_main_link': link_document_type_create.resolve(
+                context=RequestContext(request=self.request)
+            ),
+            'no_results_text': _(
+                'Document types are the most basic units of configuration. '
+                'Everything in the system will depend on them. '
+                'Define a document type for each type of physical '
+                'document you intend to upload. Example document types: '
+                'invoice, receipt, manual, prescription, balance sheet.'
+            ),
+            'no_results_title': _('No document types available'),
+            'title': _('Document types'),
         }
 
 
@@ -153,6 +160,31 @@ class DocumentTypeFilenameCreateView(SingleObjectCreateView):
         return {'document_type': self.get_document_type()}
 
 
+class DocumentTypeFilenameDeleteView(SingleObjectDeleteView):
+    model = DocumentTypeFilename
+    object_permission = permission_document_type_edit
+
+    def get_extra_context(self):
+        return {
+            'document_type': self.get_object().document_type,
+            'filename': self.get_object(),
+            'navigation_object_list': ('document_type', 'filename',),
+            'title': _(
+                'Delete the quick label: %(label)s, from document type '
+                '"%(document_type)s"?'
+            ) % {
+                'document_type': self.get_object().document_type,
+                'label': self.get_object()
+            },
+        }
+
+    def get_post_action_redirect(self):
+        return reverse(
+            'documents:document_type_filename_list',
+            args=(self.get_object().document_type.pk,)
+        )
+
+
 class DocumentTypeFilenameEditView(SingleObjectEditView):
     fields = ('enabled', 'filename',)
     model = DocumentTypeFilename
@@ -171,31 +203,6 @@ class DocumentTypeFilenameEditView(SingleObjectEditView):
             ) % {
                 'document_type': document_type_filename.document_type,
                 'filename': document_type_filename
-            },
-        }
-
-    def get_post_action_redirect(self):
-        return reverse(
-            'documents:document_type_filename_list',
-            args=(self.get_object().document_type.pk,)
-        )
-
-
-class DocumentTypeFilenameDeleteView(SingleObjectDeleteView):
-    model = DocumentTypeFilename
-    object_permission = permission_document_type_edit
-
-    def get_extra_context(self):
-        return {
-            'document_type': self.get_object().document_type,
-            'filename': self.get_object(),
-            'navigation_object_list': ('document_type', 'filename',),
-            'title': _(
-                'Delete the quick label: %(label)s, from document type '
-                '"%(document_type)s"?'
-            ) % {
-                'document_type': self.get_object().document_type,
-                'label': self.get_object()
             },
         }
 

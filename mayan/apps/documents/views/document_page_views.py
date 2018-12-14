@@ -24,7 +24,47 @@ from ..settings import (
     setting_zoom_percent_step
 )
 
+__all__ = (
+    'DocumentPageListView', 'DocumentPageNavigationFirst',
+    'DocumentPageNavigationLast', 'DocumentPageNavigationNext',
+    'DocumentPageNavigationPrevious', 'DocumentPageRotateLeftView',
+    'DocumentPageRotateRightView', 'DocumentPageView',
+    'DocumentPageViewResetView', 'DocumentPageZoomInView',
+    'DocumentPageZoomOutView',
+)
 logger = logging.getLogger(__name__)
+
+
+class DocumentPageInteractiveTransformation(RedirectView):
+    def dispatch(self, request, *args, **kwargs):
+        object = self.get_object()
+
+        AccessControlList.objects.check_access(
+            permissions=permission_document_view, user=request.user,
+            obj=object
+        )
+
+        return super(DocumentPageInteractiveTransformation, self).dispatch(
+            request, *args, **kwargs
+        )
+
+    def get_object(self):
+        return get_object_or_404(DocumentPage, pk=self.kwargs['pk'])
+
+    def get_redirect_url(self, *args, **kwargs):
+        url = reverse(
+            'documents:document_page_view', args=(self.kwargs['pk'],)
+        )
+
+        query_dict = {
+            'rotation': int(
+                self.request.GET.get('rotation', DEFAULT_ROTATION)
+            ), 'zoom': int(self.request.GET.get('zoom', DEFAULT_ZOOM_LEVEL))
+        }
+
+        self.transformation_function(query_dict)
+
+        return '{}?{}'.format(url, urlencode(query_dict))
 
 
 class DocumentPageListView(SingleObjectListView):
@@ -157,6 +197,20 @@ class DocumentPageNavigationPrevious(DocumentPageNavigationBase):
             return document_page
 
 
+class DocumentPageRotateLeftView(DocumentPageInteractiveTransformation):
+    def transformation_function(self, query_dict):
+        query_dict['rotation'] = (
+            query_dict['rotation'] - setting_rotation_step.value
+        ) % 360
+
+
+class DocumentPageRotateRightView(DocumentPageInteractiveTransformation):
+    def transformation_function(self, query_dict):
+        query_dict['rotation'] = (
+            query_dict['rotation'] + setting_rotation_step.value
+        ) % 360
+
+
 class DocumentPageView(SimpleView):
     template_name = 'appearance/generic_form.html'
 
@@ -204,38 +258,6 @@ class DocumentPageViewResetView(RedirectView):
     pattern_name = 'documents:document_page_view'
 
 
-class DocumentPageInteractiveTransformation(RedirectView):
-    def dispatch(self, request, *args, **kwargs):
-        object = self.get_object()
-
-        AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=object
-        )
-
-        return super(DocumentPageInteractiveTransformation, self).dispatch(
-            request, *args, **kwargs
-        )
-
-    def get_object(self):
-        return get_object_or_404(DocumentPage, pk=self.kwargs['pk'])
-
-    def get_redirect_url(self, *args, **kwargs):
-        url = reverse(
-            'documents:document_page_view', args=(self.kwargs['pk'],)
-        )
-
-        query_dict = {
-            'rotation': int(
-                self.request.GET.get('rotation', DEFAULT_ROTATION)
-            ), 'zoom': int(self.request.GET.get('zoom', DEFAULT_ZOOM_LEVEL))
-        }
-
-        self.transformation_function(query_dict)
-
-        return '{}?{}'.format(url, urlencode(query_dict))
-
-
 class DocumentPageZoomInView(DocumentPageInteractiveTransformation):
     def transformation_function(self, query_dict):
         zoom = query_dict['zoom'] + setting_zoom_percent_step.value
@@ -254,17 +276,3 @@ class DocumentPageZoomOutView(DocumentPageInteractiveTransformation):
             zoom = setting_zoom_min_level.value
 
         query_dict['zoom'] = zoom
-
-
-class DocumentPageRotateLeftView(DocumentPageInteractiveTransformation):
-    def transformation_function(self, query_dict):
-        query_dict['rotation'] = (
-            query_dict['rotation'] - setting_rotation_step.value
-        ) % 360
-
-
-class DocumentPageRotateRightView(DocumentPageInteractiveTransformation):
-    def transformation_function(self, query_dict):
-        query_dict['rotation'] = (
-            query_dict['rotation'] + setting_rotation_step.value
-        ) % 360
