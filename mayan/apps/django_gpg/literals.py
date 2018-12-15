@@ -13,6 +13,7 @@ DEFAULT_SETTING_GPG_BACKEND = 'mayan.apps.django_gpg.classes.PythonGNUPGBackend'
 
 ERROR_MSG_BAD_PASSPHRASE = 'BAD_PASSPHRASE'
 ERROR_MSG_MISSING_PASSPHRASE = 'MISSING_PASSPHRASE'
+ERROR_MSG_NO_TERMINAL = 'Sorry, no terminal at all requested - can\'t get input'
 
 KEY_TYPES = {
     'pub': _('Public'),
