@@ -25,5 +25,5 @@ class DocumentAutoParsingTestCase(GenericDocumentTestCase):
         self._create_document_type()
         self.document = self.upload_document()
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in self.document.content
+            TEST_DOCUMENT_CONTENT in self.document.get_content()
         )

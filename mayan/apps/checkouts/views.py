@@ -86,19 +86,19 @@ class CheckoutListView(DocumentListView):
                     {
                         'name': _('User'),
                         'attribute': encapsulate(
-                            lambda document: document.checkout_info().user.get_full_name() or document.checkout_info().user
+                            lambda document: document.get_checkout_info().user.get_full_name() or document.get_checkout_info().user
                         )
                     },
                     {
                         'name': _('Checkout time and date'),
                         'attribute': encapsulate(
-                            lambda document: document.checkout_info().checkout_datetime
+                            lambda document: document.get_checkout_info().checkout_datetime
                         )
                     },
                     {
                         'name': _('Checkout expiration'),
                         'attribute': encapsulate(
-                            lambda document: document.checkout_info().expiration_datetime
+                            lambda document: document.get_checkout_info().expiration_datetime
                         )
                     },
                 ),
@@ -140,7 +140,7 @@ class DocumentCheckinView(ConfirmView):
             'object': document,
         }
 
-        if document.checkout_info().user != self.request.user:
+        if document.get_checkout_info().user != self.request.user:
             context['title'] = _(
                 'You didn\'t originally checked out this document. '
                 'Forcefully check in the document: %s?'
@@ -159,7 +159,7 @@ class DocumentCheckinView(ConfirmView):
     def view_action(self):
         document = self.get_object()
 
-        if document.checkout_info().user == self.request.user:
+        if document.get_checkout_info().user == self.request.user:
             AccessControlList.objects.check_access(
                 permissions=permission_document_checkin,
                 user=self.request.user, obj=document

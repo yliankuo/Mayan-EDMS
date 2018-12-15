@@ -12,7 +12,7 @@ class ErrorLogEntryManager(models.Manager):
             app_label='common', model_name='ErrorLogEntry'
         )
         model.add_to_class(
-            name='error_logs', value=GenericRelation(ErrorLogEntry)
+            name='error_logs', value=GenericRelation(to=ErrorLogEntry)
         )
 
 

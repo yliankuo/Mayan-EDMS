@@ -62,27 +62,6 @@ class DocumentCheckoutManager(models.Manager):
             )
         )
 
-    def document_checkout_info(self, document):
-        try:
-            return self.model.objects.get(document=document)
-        except self.model.DoesNotExist:
-            raise DocumentNotCheckedOut
-
-    def document_checkout_state(self, document):
-        if self.is_document_checked_out(document):
-            return STATE_CHECKED_OUT
-        else:
-            return STATE_CHECKED_IN
-
-    def expired_check_outs(self):
-        expired_list = Document.objects.filter(
-            pk__in=self.model.objects.filter(
-                expiration_datetime__lte=now()
-            ).values_list('document__pk', flat=True)
-        )
-        logger.debug('expired_list: %s', expired_list)
-        return expired_list
-
     def get_by_natural_key(self, document_natural_key):
         Document = apps.get_model(
             app_label='documents', model_name='Document'
@@ -93,6 +72,27 @@ class DocumentCheckoutManager(models.Manager):
             raise self.model.DoesNotExist
 
         return self.get(document__pk=document.pk)
+
+    def get_document_checkout_info(self, document):
+        try:
+            return self.model.objects.get(document=document)
+        except self.model.DoesNotExist:
+            raise DocumentNotCheckedOut
+
+    def get_document_checkout_state(self, document):
+        if self.is_document_checked_out(document):
+            return STATE_CHECKED_OUT
+        else:
+            return STATE_CHECKED_IN
+
+    def get_expired_check_outs(self):
+        expired_list = Document.objects.filter(
+            pk__in=self.model.objects.filter(
+                expiration_datetime__lte=now()
+            ).values_list('document__pk', flat=True)
+        )
+        logger.debug('expired_list: %s', expired_list)
+        return expired_list
 
     def is_document_checked_out(self, document):
         if self.model.objects.filter(document=document):

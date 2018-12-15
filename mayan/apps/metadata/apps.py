@@ -27,7 +27,6 @@ from mayan.apps.events.permissions import permission_events_view
 from mayan.celery import app
 from mayan.apps.navigation import SourceColumn
 
-from .classes import DocumentMetadataHelper
 from .events import (
     event_document_metadata_added, event_document_metadata_edited,
     event_document_metadata_removed, event_metadata_type_edited,
@@ -46,13 +45,13 @@ from .links import (
     link_setup_metadata_type_delete, link_setup_metadata_type_document_types,
     link_setup_metadata_type_edit, link_setup_metadata_type_list,
 )
+from .methods import method_get_metadata
 from .permissions import (
     permission_metadata_document_add, permission_metadata_document_edit,
     permission_metadata_document_remove, permission_metadata_document_view,
     permission_metadata_type_delete, permission_metadata_type_edit,
     permission_metadata_type_view
 )
-
 from .queues import *  # NOQA
 from .search import metadata_type_search  # NOQA
 from .widgets import get_metadata_string
@@ -90,23 +89,18 @@ class MetadataApp(MayanAppConfig):
         MetadataType = self.get_model('MetadataType')
 
         Document.add_to_class(
-            name='metadata_value_of',
-            value=DocumentMetadataHelper.constructor
+            name='get_metadata', value=method_get_metadata
         )
 
-        ModelAttribute(
-            Document, 'metadata_value_of',
-            description=_(
-                'Return the value of a specific document metadata'
-            ),
-        )
+        ModelAttribute(model=Document, name='get_metadata')
 
         ModelField(
-            Document, 'metadata__metadata_type__name',
-            label=_('Metadata type name')
+            label=_('Metadata type name'), model=Document,
+            name='metadata__metadata_type__name'
         )
         ModelField(
-            Document, 'metadata__value', label=_('Metadata type value'),
+            label=_('Metadata type value'), model=Document,
+            name='metadata__value',
         )
 
         ModelEventType.register(

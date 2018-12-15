@@ -19,7 +19,7 @@ from .permissions import (
     permission_ocr_content_view, permission_ocr_document,
     permission_document_type_ocr_setup
 )
-from .utils import get_document_ocr_content
+from .utils import get_document_content_iterator
 
 
 class DocumentOCRContentView(SingleObjectDetailView):
@@ -49,7 +49,7 @@ class DocumentOCRDownloadView(SingleObjectDownloadView):
 
     def get_file(self):
         file_object = DocumentOCRDownloadView.TextIteratorIO(
-            iterator=get_document_ocr_content(document=self.get_object())
+            iterator=get_document_content_iterator(document=self.get_object())
         )
         return DocumentOCRDownloadView.VirtualFile(
             file=file_object, name='{}-OCR'.format(self.get_object())

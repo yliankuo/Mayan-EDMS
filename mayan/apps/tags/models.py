@@ -14,6 +14,7 @@ from mayan.apps.documents.permissions import permission_document_view
 from .events import (
     event_tag_attach, event_tag_created, event_tag_edited, event_tag_remove
 )
+from .managers import DocumentTagManager
 from .widgets import widget_single_tag
 
 
@@ -95,6 +96,8 @@ class Tag(models.Model):
 
 
 class DocumentTag(Tag):
+    objects = DocumentTagManager()
+
     class Meta:
         proxy = True
         verbose_name = _('Document tag')

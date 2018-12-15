@@ -8,23 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class ModelPermission(object):
-    _registry = {}
-    _proxies = {}
     _inheritances = {}
-
-    @classmethod
-    def register(cls, model, permissions):
-        from django.contrib.contenttypes.fields import GenericRelation
-
-        cls._registry.setdefault(model, [])
-        for permission in permissions:
-            cls._registry[model].append(permission)
-
-        AccessControlList = apps.get_model(
-            app_label='acls', model_name='AccessControlList'
-        )
-
-        model.add_to_class(name='acls', value=GenericRelation(AccessControlList))
+    _proxies = {}
+    _registry = {}
 
     @classmethod
     def get_classes(cls, as_content_type=False):
@@ -72,13 +58,29 @@ class ModelPermission(object):
         return StoredPermission.objects.filter(pk__in=pks)
 
     @classmethod
-    def register_proxy(cls, source, model):
-        cls._proxies[model] = source
+    def get_inheritance(cls, model):
+        return cls._inheritances[model]
+
+    @classmethod
+    def register(cls, model, permissions):
+        from django.contrib.contenttypes.fields import GenericRelation
+
+        cls._registry.setdefault(model, [])
+        for permission in permissions:
+            cls._registry[model].append(permission)
+
+        AccessControlList = apps.get_model(
+            app_label='acls', model_name='AccessControlList'
+        )
+
+        model.add_to_class(
+            name='acls', value=GenericRelation(to=AccessControlList)
+        )
 
     @classmethod
     def register_inheritance(cls, model, related):
         cls._inheritances[model] = related
 
     @classmethod
-    def get_inheritance(cls, model):
-        return cls._inheritances[model]
+    def register_proxy(cls, source, model):
+        cls._proxies[model] = source

@@ -1,4 +1,4 @@
-3.2 (2018-XX-XX)
+4.0 (2019-XX-XX)
 ================
 - Documents: Add a server side template for invalid documents.
   The new template can be accessed via the templates API.
@@ -177,6 +177,16 @@
   BROKER_URL to CELERY_BROKER_URL.
 - Internal change. Add support to the SourceColumn class to resolve
   related fields using the double underscore as separator.
+- Refactored the model accesors to behave like methods instead of
+  properties. This means all accessors will be prepended with the
+  string "get_" and will include a set of parenthesis.
+- The ModeAttribute class has been improved to use the method's
+  short_description. Support for a new method .help_text attribute
+  has been added.
+- Add accessors have been moved to their own module, named
+  "methods.py".
+- The PropertyHelper class has been removed as the accessors
+  no longer need it.
 
 3.1.9 (2018-11-01)
 ==================

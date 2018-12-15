@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from django.utils.translation import ugettext_lazy as _
+
 from .events import event_file_metadata_document_version_submit
 from .tasks import task_process_document_version
 
@@ -32,6 +34,14 @@ def method_get_document_file_metadata(self, dotted_name):
         )
 
 
+method_get_document_file_metadata.short_description=_(
+    'get_file_metadata(< file metadata dotted path >)'
+)
+method_get_document_file_metadata.help_text = _(
+    'Return the specified document file metadata entry.'
+)
+
+
 def method_get_document_version_file_metadata(self, dotted_name):
     driver_internal_name, key = dotted_name.split('.')
 
@@ -46,3 +56,8 @@ def method_get_document_version_file_metadata(self, dotted_name):
             return document_driver.entries.get(key=key).value
         except document_driver.entries.model.DoesNotExist:
             return
+
+
+method_get_document_version_file_metadata.help_text = _(
+    'Return the specified document version file metadata entry.'
+)

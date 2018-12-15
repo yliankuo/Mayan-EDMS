@@ -10,7 +10,7 @@ from ..permissions import (
     permission_content_view, permission_document_type_parsing_setup,
     permission_parse_document
 )
-from ..utils import get_document_content
+from ..utils import get_document_content_iterator
 
 from .literals import TEST_DOCUMENT_CONTENT
 
@@ -89,7 +89,7 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
 
         self.assert_download_response(
             response=response, content=(
-                ''.join(get_document_content(document=self.document))
+                ''.join(get_document_content_iterator(document=self.document))
             ),
         )
 
@@ -132,7 +132,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
         response = self._request_document_type_submit_view()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT not in self.document.content
+            TEST_DOCUMENT_CONTENT not in self.document.get_content()
         )
 
     def test_document_type_submit_view_with_access(self):
@@ -142,5 +142,5 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
         response = self._request_document_type_submit_view()
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in self.document.content
+            TEST_DOCUMENT_CONTENT in self.document.get_content()
         )

@@ -10,6 +10,7 @@ from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_tools
 )
+from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.document_indexing.handlers import handler_index_document
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.signals import post_version_upload
@@ -31,16 +32,16 @@ from .links import (
     link_document_submit, link_document_submit_multiple,
     link_document_type_file_metadata_settings, link_document_type_submit
 )
+from .methods import (
+    method_document_submit, method_document_version_submit,
+    method_get_document_file_metadata,
+    method_get_document_version_file_metadata
+)
 from .permissions import (
     permission_document_type_file_metadata_setup,
     permission_file_metadata_submit, permission_file_metadata_view
 )
 from .signals import post_document_version_file_metadata_processing
-from .utils import (
-    method_document_submit, method_document_version_submit,
-    method_get_document_file_metadata,
-    method_get_document_version_file_metadata
-)
 
 
 class FileMetadataApp(MayanAppConfig):
@@ -79,19 +80,30 @@ class FileMetadataApp(MayanAppConfig):
             value=method_get_document_file_metadata
         )
         DocumentVersion.add_to_class(
-            name='submit_for_file_metadata_processing',
-            value=method_document_version_submit
-        )
-        DocumentVersion.add_to_class(
             name='get_file_metadata',
             value=method_get_document_version_file_metadata
         )
+        DocumentVersion.add_to_class(
+            name='submit_for_file_metadata_processing',
+            value=method_document_version_submit
+        )
+
+        ModelAttribute(model=Document, name='get_file_metadata')
 
         ModelEventType.register(
             model=Document, event_types=(
                 event_file_metadata_document_version_finish,
                 event_file_metadata_document_version_submit
             )
+        )
+
+        ModelField(
+            label=_('File metadata key'), model=Document,
+            name='versions__file_metadata_drivers__entries__key',
+        )
+        ModelField(
+            label=_('File metadata key'), model=Document,
+            name='versions__file_metadata_drivers__entries__value',
         )
 
         ModelPermission.register(

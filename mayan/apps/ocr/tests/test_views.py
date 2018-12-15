@@ -82,7 +82,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
         )
         self._request_document_submit_view()
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in self.document.ocr_content
+            TEST_DOCUMENT_CONTENT in self.document.get_ocr_content()
         )
 
     def _request_multiple_document_submit_view(self):
@@ -95,7 +95,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def test_multiple_document_submit_view_no_permission(self):
         self._request_multiple_document_submit_view()
-        self.assertEqual(self.document.ocr_content, '')
+        self.assertEqual(self.document.get_ocr_content(), '')
 
     def test_multiple_document_submit_view_with_access(self):
         self.grant_access(
@@ -103,7 +103,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
         )
         self._request_multiple_document_submit_view()
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in self.document.ocr_content
+            TEST_DOCUMENT_CONTENT in self.document.get_ocr_content()
         )
 
     def _request_document_ocr_download_view(self):
@@ -126,7 +126,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assert_download_response(
-            response=response, content=self.document.ocr_content
+            response=response, content=self.document.get_ocr_content()
         )
 
 
@@ -169,7 +169,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
         response = self._request_document_type_submit_view()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT not in self.document.ocr_content
+            TEST_DOCUMENT_CONTENT not in self.document.get_ocr_content()
         )
 
     def test_document_type_submit_view_with_access(self):
@@ -179,5 +179,5 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
         response = self._request_document_type_submit_view()
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
-            TEST_DOCUMENT_CONTENT in self.document.ocr_content
+            TEST_DOCUMENT_CONTENT in self.document.get_ocr_content()
         )

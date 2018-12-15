@@ -89,7 +89,7 @@ class TagAttachActionView(MultipleObjectFormActionView):
             return super(TagAttachActionView, self).get_post_action_redirect()
 
     def object_action(self, form, instance):
-        attached_tags = instance.attached_tags()
+        attached_tags = instance.get_tags()
 
         for tag in form.cleaned_data['tags']:
             AccessControlList.objects.check_access(
@@ -269,7 +269,7 @@ class DocumentTagListView(TagListView):
         return context
 
     def get_tag_queryset(self):
-        return self.document.attached_tags().all()
+        return self.document.get_tags().all()
 
 
 class TagRemoveActionView(MultipleObjectFormActionView):
@@ -331,7 +331,7 @@ class TagRemoveActionView(MultipleObjectFormActionView):
             return super(TagRemoveActionView, self).get_post_action_redirect()
 
     def object_action(self, form, instance):
-        attached_tags = instance.attached_tags()
+        attached_tags = instance.get_tags()
 
         for tag in form.cleaned_data['tags']:
             AccessControlList.objects.check_access(

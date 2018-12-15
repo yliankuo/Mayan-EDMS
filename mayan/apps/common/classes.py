@@ -226,13 +226,27 @@ class ModelAttribute(object):
     def __str__(self):
         return self.get_display()
 
-    def get_display(self, show_name=False):
+    def get_label(self):
+        if self.label:
+            return self.label
+        else:
+            return getattr(
+                getattr(self.model, self.name), 'short_description', self.name
+            )
+
+    def get_description(self):
         if self.description:
+            return self.description
+        else:
+            return getattr(getattr(self.model, self.name), 'help_text', None)
+
+    def get_display(self, show_name=False):
+        if self.get_description():
             return '{} - {}'.format(
-                self.name if show_name else self.label, self.description
+                self.name if show_name else self.get_label(), self.get_description()
             )
         else:
-            return force_text(self.name if show_name else self.label)
+            return force_text(self.name if show_name else self.get_label())
 
 
 class ModelField(ModelAttribute):
@@ -342,31 +356,6 @@ class Package(object):
         self.label = label
         self.license_text = license_text
         self.__class__._registry.append(self)
-
-
-class PropertyHelper(object):
-    """
-    Makes adding fields using __class__.add_to_class easier.
-    Each subclass must implement the `constructor` and the `get_result`
-    method.
-    """
-    @staticmethod
-    @property
-    def constructor(source_object):
-        return PropertyHelper(source_object)
-
-    def __init__(self, instance):
-        self.instance = instance
-
-    def __getattr__(self, name):
-        return self.get_result(name=name)
-
-    def get_result(self, name):
-        """
-        The method that produces the actual result. Must be implemented
-        by each subclass.
-        """
-        raise NotImplementedError
 
 
 class Template(object):

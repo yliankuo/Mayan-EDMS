@@ -19,10 +19,11 @@ from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
-from .classes import DocumentStateHelper, WorkflowAction
+from .classes import WorkflowAction
 from .handlers import (
     handler_index_document, handler_trigger_transition, launch_workflow
 )
+from .methods import method_get_workflow
 from .links import (
     link_document_workflow_instance_list, link_setup_workflow_create,
     link_setup_workflow_delete, link_setup_workflow_document_types,
@@ -84,28 +85,14 @@ class DocumentStatesApp(MayanAppConfig):
         )
 
         Document.add_to_class(
-            name='workflow', value=DocumentStateHelper.constructor
+            name='get_workflow', value=method_get_workflow
         )
 
         ErrorLogEntry.objects.register(model=WorkflowStateAction)
 
         WorkflowAction.initialize()
 
-        ModelAttribute(
-            model=Document,
-            name='workflow.< workflow internal name >.get_current_state()',
-            label=_('Current state of a workflow'), description=_(
-                'Return the current state of the selected workflow'
-            )
-        )
-        ModelAttribute(
-            model=Document,
-            name='workflow.< workflow internal name >.get_current_state().completion',
-            label=_('Current state of a workflow'), description=_(
-                'Return the completion value of the current state of the '
-                'selected workflow'
-            )
-        )
+        ModelAttribute(model=Document, name='get_workflow')
 
         ModelPermission.register(
             model=Document, permissions=(permission_workflow_view,)

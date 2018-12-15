@@ -11,7 +11,7 @@ from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_object, menu_main,
     menu_multi_item, menu_sidebar
 )
-from mayan.apps.common.classes import ModelField
+from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.events import ModelEventType
 from mayan.apps.events.links import (
@@ -32,6 +32,7 @@ from .links import (
     link_tag_multiple_delete, link_tag_tagged_item_list
 )
 from .menus import menu_tags
+from .methods import method_get_tags
 from .permissions import (
     permission_tag_attach, permission_tag_delete, permission_tag_edit,
     permission_tag_remove, permission_tag_view
@@ -65,10 +66,9 @@ class TagsApp(MayanAppConfig):
         DocumentTag = self.get_model('DocumentTag')
         Tag = self.get_model('Tag')
 
-        Document.add_to_class(
-            name='attached_tags',
-            value=lambda document: DocumentTag.objects.filter(documents=document)
-        )
+        Document.add_to_class(name='get_tags', value=method_get_tags)
+
+        ModelAttribute(model=Document, name='get_tags')
 
         ModelEventType.register(
             model=Tag, event_types=(

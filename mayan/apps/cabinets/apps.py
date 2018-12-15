@@ -22,6 +22,7 @@ from .links import (
     link_document_cabinet_remove, link_multiple_document_cabinet_remove
 )
 from .menus import menu_cabinets
+from .methods import method_get_document_cabinets
 from .permissions import (
     permission_cabinet_add_document, permission_cabinet_delete,
     permission_cabinet_edit, permission_cabinet_remove_document,
@@ -53,8 +54,7 @@ class CabinetsApp(MayanAppConfig):
         # Add explicit order_by as DocumentCabinet ordering Meta option has no
         # effect.
         Document.add_to_class(
-            name='document_cabinets',
-            value=lambda document: DocumentCabinet.objects.filter(documents=document).order_by('parent__label', 'label')
+            name='get_document_cabinets', value=method_get_document_cabinets
         )
 
         ModelPermission.register(

@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
 
-from datetime import timedelta
 import logging
 
 from kombu import Exchange, Queue
 
 from django.apps import apps
 from django.db.models.signals import post_save
-from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
@@ -16,14 +14,12 @@ from mayan.apps.common import (
     menu_tools
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
-from mayan.apps.common.settings import settings_db_sync_task_delay
 from mayan.apps.documents.search import document_search, document_page_search
 from mayan.apps.documents.signals import post_version_upload
 from mayan.apps.documents.widgets import document_link
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
-from .events import event_ocr_document_version_submit
 from .handlers import (
     handler_index_document, handler_initialize_new_ocr_settings,
     handler_ocr_document_version,
@@ -35,35 +31,18 @@ from .links import (
     link_document_type_ocr_settings, link_document_type_submit,
     link_entry_list
 )
+from .methods import (
+    method_document_ocr_submit, method_document_version_ocr_submit,
+    method_get_document_ocr_content, method_get_document_version_ocr_content
+)
 from .permissions import (
     permission_document_type_ocr_setup, permission_ocr_document,
     permission_ocr_content_view
 )
 from .queues import *  # NOQA
 from .signals import post_document_version_ocr
-from .utils import document_property_ocr_content
 
 logger = logging.getLogger(__name__)
-
-
-def document_ocr_submit(self):
-    latest_version = self.latest_version
-    # Don't error out if document has no version
-    if latest_version:
-        latest_version.submit_for_ocr()
-
-
-def document_version_ocr_submit(self):
-    from .tasks import task_do_ocr
-
-    event_ocr_document_version_submit.commit(
-        action_object=self.document, target=self
-    )
-
-    task_do_ocr.apply_async(
-        eta=now() + timedelta(seconds=settings_db_sync_task_delay.value),
-        kwargs={'document_version_pk': self.pk},
-    )
 
 
 class OCRApp(MayanAppConfig):
@@ -96,22 +75,24 @@ class OCRApp(MayanAppConfig):
         DocumentVersionOCRError = self.get_model('DocumentVersionOCRError')
 
         Document.add_to_class(
-            name='submit_for_ocr', value=document_ocr_submit)
+            name='get_ocr_content',
+            value=method_get_document_ocr_content
+        )
         Document.add_to_class(
-            name='ocr_content', value=document_property_ocr_content
+            name='submit_for_ocr', value=method_document_ocr_submit
         )
         DocumentVersion.add_to_class(
-            name='submit_for_ocr', value=document_version_ocr_submit
+            name='get_ocr_content',
+            value=method_get_document_version_ocr_content
+        )
+        DocumentVersion.add_to_class(
+            name='submit_for_ocr', value=method_document_version_ocr_submit
         )
 
-        ModelAttribute(
-            model=Document, name='ocr_content', description=_(
-                'The OCR content of the document.'
-            )
-        )
+        ModelAttribute(model=Document, name='get_ocr_content')
 
         ModelField(
-            Document, name='versions__pages__ocr_content__content'
+            model=Document, name='versions__pages__ocr_content__content'
         )
 
         ModelPermission.register(

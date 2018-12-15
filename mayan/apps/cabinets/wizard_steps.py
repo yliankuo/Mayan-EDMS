@@ -26,14 +26,6 @@ class WizardStepCabinets(WizardStep):
         return Cabinet.objects.exists()
 
     @classmethod
-    def get_form_kwargs(self, wizard):
-        return {
-            'help_text': _('Cabinets to which the document will be added.'),
-            'permission': permission_cabinet_add_document,
-            'user': wizard.request.user
-        }
-
-    @classmethod
     def done(cls, wizard):
         result = {}
         cleaned_data = wizard.get_cleaned_data_for_step(cls.name)
@@ -43,6 +35,14 @@ class WizardStepCabinets(WizardStep):
             ]
 
         return result
+
+    @classmethod
+    def get_form_kwargs(self, wizard):
+        return {
+            'help_text': _('Cabinets to which the document will be added.'),
+            'permission': permission_cabinet_add_document,
+            'user': wizard.request.user
+        }
 
     @classmethod
     def step_post_upload_process(cls, document, querystring=None):

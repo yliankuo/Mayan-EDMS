@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
@@ -20,7 +21,7 @@ from .permissions import (
     permission_content_view, permission_document_type_parsing_setup,
     permission_parse_document
 )
-from .utils import get_document_content
+from .utils import get_document_content_iterator
 
 
 class DocumentContentView(SingleObjectDetailView):
@@ -50,7 +51,7 @@ class DocumentContentDownloadView(SingleObjectDownloadView):
 
     def get_file(self):
         file_object = DocumentContentDownloadView.TextIteratorIO(
-            iterator=get_document_content(document=self.get_object())
+            iterator=get_document_content_iterator(document=self.get_object())
         )
         return DocumentContentDownloadView.VirtualFile(
             file=file_object, name='{}-content'.format(self.get_object())

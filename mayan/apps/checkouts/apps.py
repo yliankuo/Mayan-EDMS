@@ -27,6 +27,10 @@ from .links import (
     link_checkout_list
 )
 from .literals import CHECK_EXPIRED_CHECK_OUTS_INTERVAL
+from .methods import (
+    method_check_in, method_get_checkout_info, method_get_checkout_state,
+    method_is_checked_out
+)
 from .permissions import (
     permission_document_checkin, permission_document_checkin_override,
     permission_document_checkout, permission_document_checkout_detail_view
@@ -54,29 +58,15 @@ class CheckoutsApp(MayanAppConfig):
             app_label='documents', model_name='DocumentVersion'
         )
 
-        DocumentCheckout = self.get_model('DocumentCheckout')
-
+        Document.add_to_class(name='check_in', value=method_check_in)
         Document.add_to_class(
-            name='check_in',
-            value=lambda document, user=None: DocumentCheckout.objects.check_in_document(document, user)
+            name='get_checkout_info', value=method_get_checkout_info
         )
         Document.add_to_class(
-            name='checkout_info',
-            value=lambda document: DocumentCheckout.objects.document_checkout_info(
-                document
-            )
+            name='get_checkout_state', value=method_get_checkout_state
         )
         Document.add_to_class(
-            name='checkout_state',
-            value=lambda document: DocumentCheckout.objects.document_checkout_state(
-                document
-            )
-        )
-        Document.add_to_class(
-            name='is_checked_out',
-            value=lambda document: DocumentCheckout.objects.is_document_checked_out(
-                document
-            )
+            name='is_checked_out', value=method_is_checked_out
         )
 
         ModelEventType.register(

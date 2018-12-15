@@ -7,20 +7,8 @@ from django.apps import apps
 from django.utils import six
 from django.utils.encoding import force_text
 
-from mayan.apps.common.classes import PropertyHelper
-
 __all__ = ('WorkflowAction',)
 logger = logging.getLogger(__name__)
-
-
-class DocumentStateHelper(PropertyHelper):
-    @staticmethod
-    @property
-    def constructor(*args, **kwargs):
-        return DocumentStateHelper(*args, **kwargs)
-
-    def get_result(self, name):
-        return self.instance.workflows.get(workflow__internal_name=name)
 
 
 class WorkflowActionMetaclass(type):

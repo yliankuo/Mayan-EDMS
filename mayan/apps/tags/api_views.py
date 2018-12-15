@@ -117,7 +117,7 @@ class APIDocumentTagListView(generics.ListCreateAPIView):
             obj=document
         )
 
-        return document.attached_tags().all()
+        return document.get_tags().all()
 
     def get_serializer(self, *args, **kwargs):
         if not self.request:
@@ -171,7 +171,7 @@ class APIDocumentTagView(generics.RetrieveDestroyAPIView):
         return document
 
     def get_queryset(self):
-        return self.get_document().attached_tags().all()
+        return self.get_document().get_tags().all()
 
     def get_serializer(self, *args, **kwargs):
         if not self.request:
