@@ -86,16 +86,14 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             document_type=document_type_2
         )
 
-        self.assertContains(
-            response=response, text='Select a valid choice', status_code=200
-        )
+        self.assertEqual(response.status_code, 302)
 
         self.assertEqual(
             Document.objects.get(pk=self.document.pk).document_type,
             self.document_type
         )
 
-    def test_document_document_type_change_view_with_permissions(self):
+    def test_document_document_type_change_view_with_access(self):
         self.assertEqual(
             self.document.document_type, self.document_type
         )
@@ -144,15 +142,13 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             document_type=document_type_2
         )
 
-        self.assertContains(
-            response=response, text='Select a valid choice.', status_code=200
-        )
+        self.assertEqual(response.status_code, 302)
 
         self.assertEqual(
             Document.objects.first().document_type, self.document_type
         )
 
-    def test_document_multiple_document_type_change_view_with_permission(self):
+    def test_document_multiple_document_type_change_view_with_access(self):
         self.assertEqual(
             Document.objects.first().document_type, self.document_type
         )

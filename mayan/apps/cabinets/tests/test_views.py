@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
 from ..models import Cabinet
@@ -10,19 +11,17 @@ from ..permissions import (
 )
 
 from .literals import TEST_CABINET_EDITED_LABEL, TEST_CABINET_LABEL
+from .mixins import CabinetTestMixin
 
 
-class CabinetViewTestCase(GenericDocumentViewTestCase):
+class CabinetViewTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
     def setUp(self):
         super(CabinetViewTestCase, self).setUp()
         self.login_user()
 
-    def _create_cabinet(self):
-        self.cabinet = Cabinet.objects.create(label=TEST_CABINET_LABEL)
-
     def _request_create_cabinet(self, label):
         return self.post(
-            'cabinets:cabinet_create', data={
+            viewname='cabinets:cabinet_create', data={
                 'label': TEST_CABINET_LABEL
             }
         )
@@ -53,7 +52,9 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(Cabinet.objects.first().pk, self.cabinet.pk)
 
     def _request_delete_cabinet(self):
-        return self.post('cabinets:cabinet_delete', args=(self.cabinet.pk,))
+        return self.post(
+            viewname='cabinets:cabinet_delete', args=(self.cabinet.pk,)
+        )
 
     def test_cabinet_delete_view_no_permission(self):
         self._create_cabinet()
@@ -73,7 +74,7 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
 
     def _request_edit_cabinet(self):
         return self.post(
-            'cabinets:cabinet_edit', args=(self.cabinet.pk,), data={
+            viewname='cabinets:cabinet_edit', args=(self.cabinet.pk,), data={
                 'label': TEST_CABINET_EDITED_LABEL
             }
         )
@@ -97,11 +98,36 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.label, TEST_CABINET_EDITED_LABEL)
 
+    def _request_cabinet_list(self):
+        return self.get(viewname='cabinets:cabinet_list')
+
+    def test_cabinet_list_view_no_permission(self):
+        self._create_cabinet()
+        response = self._request_cabinet_list()
+        self.assertNotContains(
+            response, text=self.cabinet.label, status_code=200
+        )
+
+    def test_cabinet_list_view_with_access(self):
+        self._create_cabinet()
+        self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
+        response = self._request_cabinet_list()
+
+        self.assertContains(
+            response, text=self.cabinet.label, status_code=200
+        )
+
+
+class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
+    def setUp(self):
+        super(DocumentViewsTestCase, self).setUp()
+        self.login_user()
+
     def _add_document_to_cabinet(self):
         return self.post(
-            'cabinets:cabinet_add_document', args=(self.document.pk,), data={
-                'cabinets': self.cabinet.pk
-            }
+            viewname='cabinets:cabinet_add_document', args=(
+                self.document.pk,
+            ), data={'cabinets': self.cabinet.pk}
         )
 
     def test_cabinet_add_document_view_no_permission(self):
@@ -140,7 +166,7 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
 
     def _request_add_multiple_documents_to_cabinet(self):
         return self.post(
-            'cabinets:cabinet_add_multiple_documents', data={
+            viewname='cabinets:cabinet_add_multiple_documents', data={
                 'id_list': (self.document.pk,), 'cabinets': self.cabinet.pk
             }
         )
@@ -179,8 +205,8 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
 
     def _request_remove_document_from_cabinet(self):
         return self.post(
-            'cabinets:document_cabinet_remove', args=(self.document.pk,),
-            data={
+            viewname='cabinets:document_cabinet_remove',
+            args=(self.document.pk,), data={
                 'cabinets': (self.cabinet.pk,),
             }
         )
@@ -217,21 +243,55 @@ class CabinetViewTestCase(GenericDocumentViewTestCase):
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.documents.count(), 0)
 
-    def _request_cabinet_list(self):
-        return self.get('cabinets:cabinet_list')
-
-    def test_cabinet_list_view_no_permission(self):
-        self._create_cabinet()
-        response = self._request_cabinet_list()
-        self.assertNotContains(
-            response, text=self.cabinet.label, status_code=200
+    def _request_document_cabinet_list(self):
+        return self.get(
+            viewname='cabinets:document_cabinet_list', args=(self.document.pk,)
         )
 
-    def test_cabinet_list_view_with_access(self):
+    def test_document_cabinet_list_view_no_permission(self):
         self._create_cabinet()
-        self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
-        response = self._request_cabinet_list()
+        self.cabinet.documents.add(self.document)
+        response = self._request_document_cabinet_list()
+        self.assertNotContains(
+            response=response, text=self.document.label, status_code=403
+        )
+        self.assertNotContains(
+            response=response, text=self.cabinet.label, status_code=403
+        )
 
+    def test_document_cabinet_list_view_with_cabinet_access(self):
+        self._create_cabinet()
+        self.cabinet.documents.add(self.document)
+        self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
+        response = self._request_document_cabinet_list()
+        self.assertNotContains(
+            response=response, text=self.document.label, status_code=403
+        )
+        self.assertNotContains(
+            response=response, text=self.cabinet.label, status_code=403
+        )
+
+    def test_document_cabinet_list_view_with_document_access(self):
+        self._create_cabinet()
+        self.cabinet.documents.add(self.document)
+        self.grant_access(obj=self.document, permission=permission_document_view)
+        response = self._request_document_cabinet_list()
         self.assertContains(
-            response, text=self.cabinet.label, status_code=200
+            response=response, text=self.document.label, status_code=200
+        )
+        self.assertNotContains(
+            response=response, text=self.cabinet.label, status_code=200
+        )
+
+    def test_document_cabinet_list_view_with_full_access(self):
+        self._create_cabinet()
+        self.cabinet.documents.add(self.document)
+        self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
+        self.grant_access(obj=self.document, permission=permission_document_view)
+        response = self._request_document_cabinet_list()
+        self.assertContains(
+            response=response, text=self.document.label, status_code=200
+        )
+        self.assertContains(
+            response=response, text=self.cabinet.label, status_code=200
         )

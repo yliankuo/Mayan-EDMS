@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
-from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -56,7 +56,10 @@ class DocumentCheckout(models.Model):
         verbose_name_plural = _('Document checkouts')
 
     def __str__(self):
-        return force_text(self.document)
+        return '{}: {} - {} by {}'.format(
+            self.document, self.checkout_datetime, self.expiration_datetime,
+            self.user
+        )
 
     def clean(self):
         if self.expiration_datetime < now():

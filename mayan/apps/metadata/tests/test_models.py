@@ -1,18 +1,21 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.core.exceptions import ValidationError
 
 from mayan.apps.common.tests import BaseTestCase
 from mayan.apps.documents.models import DocumentType
-from mayan.apps.documents.tests import DocumentTestMixin, TEST_DOCUMENT_TYPE_2_LABEL
+from mayan.apps.documents.tests import (
+    DocumentTestMixin, TEST_DOCUMENT_TYPE_2_LABEL
+)
 
 from ..models import DocumentMetadata
 
 from .literals import (
     TEST_DEFAULT_VALUE, TEST_LOOKUP_TEMPLATE, TEST_INCORRECT_LOOKUP_VALUE,
     TEST_CORRECT_LOOKUP_VALUE, TEST_DATE_VALIDATOR, TEST_DATE_PARSER,
-    TEST_INVALID_DATE, TEST_VALID_DATE, TEST_PARSED_VALID_DATE
+    TEST_INVALID_DATE, TEST_METADATA_TYPE_NAME, TEST_NON_ASCII_LOOKUP,
+    TEST_NON_ASCII_LOOKUP_VALUE, TEST_NON_UNICODE_LOOKUP_TEMPLATE,
+    TEST_NON_UNICODE_LOOKUP_VALUE, TEST_VALID_DATE, TEST_PARSED_VALID_DATE
 )
 from .mixins import MetadataTypeTestMixin
 
@@ -30,7 +33,9 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         document_metadata.full_clean()
         document_metadata.save()
 
-        self.assertEqual(self.document.metadata_value_of.test, None)
+        self.assertEqual(
+            self.document.get_metadata(TEST_METADATA_TYPE_NAME).value, None
+        )
 
     def test_default(self):
         self.metadata_type.default = TEST_DEFAULT_VALUE
@@ -44,7 +49,8 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         document_metadata.save()
 
         self.assertEqual(
-            self.document.metadata_value_of.test, TEST_DEFAULT_VALUE
+            self.document.get_metadata(TEST_METADATA_TYPE_NAME).value,
+            TEST_DEFAULT_VALUE
         )
 
     def test_lookup_with_incorrect_value(self):
@@ -74,7 +80,8 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         document_metadata.save()
 
         self.assertEqual(
-            self.document.metadata_value_of.test, TEST_CORRECT_LOOKUP_VALUE
+            self.document.get_metadata(TEST_METADATA_TYPE_NAME).value,
+            TEST_CORRECT_LOOKUP_VALUE
         )
 
     def test_empty_optional_lookup(self):
@@ -110,7 +117,10 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         document_metadata.full_clean()
         document_metadata.save()
 
-        self.assertEqual(self.document.metadata_value_of.test, TEST_VALID_DATE)
+        self.assertEqual(
+            self.document.get_metadata(TEST_METADATA_TYPE_NAME).value,
+            TEST_VALID_DATE
+        )
 
     def test_parsing(self):
         self.metadata_type.parser = TEST_DATE_PARSER
@@ -131,7 +141,8 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         document_metadata.save()
 
         self.assertEqual(
-            self.document.metadata_value_of.test, TEST_PARSED_VALID_DATE
+            self.document.get_metadata(TEST_METADATA_TYPE_NAME).value,
+            TEST_PARSED_VALID_DATE
         )
 
     def test_required_metadata(self):
@@ -161,15 +172,19 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
 
     def test_unicode_lookup(self):
         # Should NOT return a ValidationError, otherwise test fails
-        self.metadata_type.lookup = '测试1,测试2,test1,test2'
+        self.metadata_type.lookup = TEST_NON_ASCII_LOOKUP
         self.metadata_type.save()
-        self.metadata_type.validate_value(document_type=None, value='测试1')
+        self.metadata_type.validate_value(
+            document_type=None, value=TEST_NON_ASCII_LOOKUP_VALUE
+        )
 
     def test_non_unicode_lookup(self):
         # Should NOT return a ValidationError, otherwise test fails
-        self.metadata_type.lookup = 'test1,test2'
+        self.metadata_type.lookup = TEST_NON_UNICODE_LOOKUP_TEMPLATE
         self.metadata_type.save()
-        self.metadata_type.validate_value(document_type=None, value='test1')
+        self.metadata_type.validate_value(
+            document_type=None, value=TEST_NON_UNICODE_LOOKUP_VALUE
+        )
 
     def test_add_new_metadata_type_on_document_type_change(self):
         """

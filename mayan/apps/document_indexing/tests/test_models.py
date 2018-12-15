@@ -12,13 +12,13 @@ from mayan.apps.documents.tests.literals import (
 )
 from mayan.apps.metadata.models import DocumentTypeMetadataType, MetadataType
 
-from ..models import Index, IndexInstanceNode, IndexTemplateNode
+from ..models import Index, IndexInstanceNode
 
 from .literals import (
     TEST_INDEX_TEMPLATE_DOCUMENT_DESCRIPTION_EXPRESSION,
     TEST_INDEX_TEMPLATE_DOCUMENT_LABEL_EXPRESSION,
     TEST_INDEX_TEMPLATE_METADATA_EXPRESSION, TEST_METADATA_TYPE_LABEL,
-    TEST_METADATA_TYPE_NAME
+    TEST_METADATA_TYPE_NAME, TEST_METADATA_VALUE
 )
 from .mixins import DocumentIndexingTestMixin
 
@@ -248,14 +248,16 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
 
     def test_rebuild_all_indexes(self):
         # Add metadata type and connect to document type
-        metadata_type = MetadataType.objects.create(name='test', label='test')
+        metadata_type = MetadataType.objects.create(
+            name=TEST_METADATA_TYPE_NAME, label=TEST_METADATA_TYPE_LABEL
+        )
         DocumentTypeMetadataType.objects.create(
             document_type=self.document_type, metadata_type=metadata_type
         )
 
         # Add document metadata value
         self.document.metadata.create(
-            metadata_type=metadata_type, value='0001'
+            metadata_type=metadata_type, value=TEST_METADATA_VALUE
         )
 
         self._create_index()
@@ -263,13 +265,8 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         # Create simple index template
         root = self.index.template_root
         self.index.node_templates.create(
-            parent=root, expression='{{ document.metadata_value_of.test }}',
+            parent=root, expression=TEST_INDEX_TEMPLATE_METADATA_EXPRESSION,
             link_documents=True
-        )
-        self.assertEqual(
-            list(
-                IndexTemplateNode.objects.values_list('expression', flat=True)
-            ), ['', '{{ document.metadata_value_of.test }}']
         )
 
         # There should be no index instances
@@ -279,7 +276,9 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         Index.objects.rebuild()
 
         # Check that document is in instance node
-        instance_node = IndexInstanceNode.objects.get(value='0001')
+        instance_node = IndexInstanceNode.objects.get(
+            value=TEST_METADATA_VALUE
+        )
         self.assertQuerysetEqual(
             instance_node.documents.all(), [repr(self.document)]
         )

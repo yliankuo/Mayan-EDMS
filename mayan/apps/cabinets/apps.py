@@ -11,6 +11,7 @@ from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_main, menu_multi_item, menu_object,
     menu_sidebar
 )
+from mayan.apps.common.classes import ModelAttribute
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.navigation import SourceColumn
 
@@ -54,8 +55,10 @@ class CabinetsApp(MayanAppConfig):
         # Add explicit order_by as DocumentCabinet ordering Meta option has no
         # effect.
         Document.add_to_class(
-            name='get_document_cabinets', value=method_get_document_cabinets
+            name='get_cabinets', value=method_get_document_cabinets
         )
+
+        ModelAttribute(model=Document, name='get_cabinets')
 
         ModelPermission.register(
             model=Document, permissions=(

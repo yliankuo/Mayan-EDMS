@@ -51,7 +51,6 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
             document=self.document, expiration_datetime=expiration_datetime,
             user=self.user, block_new_version=True
         )
-
         self.assertTrue(self.document.is_checked_out())
 
         self.grant_access(

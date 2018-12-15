@@ -34,7 +34,7 @@ class DocumentCheckoutManager(models.Manager):
             raise DocumentNotCheckedOut
         else:
             if user:
-                if self.document_checkout_info(document).user != user:
+                if self.get_document_checkout_info(document).user != user:
                     event_document_forceful_check_in.commit(
                         actor=user, target=document
                     )
@@ -46,7 +46,7 @@ class DocumentCheckoutManager(models.Manager):
             document_checkout.delete()
 
     def check_in_expired_check_outs(self):
-        for document in self.expired_check_outs():
+        for document in self.get_expired_check_outs():
             document.check_in()
 
     def checkout_document(self, document, expiration_datetime, user, block_new_version=True):

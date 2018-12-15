@@ -34,7 +34,7 @@ def method_get_document_file_metadata(self, dotted_name):
         )
 
 
-method_get_document_file_metadata.short_description=_(
+method_get_document_file_metadata.short_description = _(
     'get_file_metadata(< file metadata dotted path >)'
 )
 method_get_document_file_metadata.help_text = _(

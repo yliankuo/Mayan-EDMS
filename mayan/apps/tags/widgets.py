@@ -38,7 +38,7 @@ def widget_document_tags(document, user):
     result = ['<div class="tag-container">']
 
     tags = AccessControlList.objects.filter_by_access(
-        permission_tag_view, user, queryset=document.attached_tags().all()
+        permission_tag_view, user, queryset=document.get_tags().all()
     )
 
     for tag in tags:

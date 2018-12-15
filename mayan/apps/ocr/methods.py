@@ -34,7 +34,7 @@ def method_get_document_ocr_content(self):
     latest_version = self.latest_version
     # Don't error out if document has no version
     if latest_version:
-        latest_version.get_ocr_content()
+        return latest_version.get_ocr_content()
 
 
 method_get_document_ocr_content.short_description = _(
