@@ -27,7 +27,7 @@ class LinkClassTestCase(GenericViewTestCase):
         self.add_test_view(test_object=self.group)
 
         self.namespace = PermissionNamespace(
-            TEST_PERMISSION_NAMESPACE_NAME, TEST_PERMISSION_NAMESPACE_TEXT
+            label=TEST_PERMISSION_NAMESPACE_TEXT, name=TEST_PERMISSION_NAMESPACE_NAME
         )
 
         self.permission = self.namespace.add_permission(
@@ -159,7 +159,7 @@ class MenuClassTestCase(GenericViewTestCase):
         self.add_test_view(test_object=self.group)
 
         self.namespace = PermissionNamespace(
-            TEST_PERMISSION_NAMESPACE_NAME, TEST_PERMISSION_NAMESPACE_TEXT
+            label=TEST_PERMISSION_NAMESPACE_TEXT, name=TEST_PERMISSION_NAMESPACE_NAME
         )
 
         self.permission = self.namespace.add_permission(

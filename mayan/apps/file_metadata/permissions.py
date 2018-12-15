@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.permissions import PermissionNamespace
 
-namespace = PermissionNamespace('file_metadata', _('File metadata'))
+namespace = PermissionNamespace(label=_('File metadata'), name='file_metadata')
 
 permission_document_type_file_metadata_setup = namespace.add_permission(
     name='file_metadata_document_type_setup',

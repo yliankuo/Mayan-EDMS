@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.permissions import PermissionNamespace
 
-namespace = PermissionNamespace('cabinets', _('Cabinets'))
+namespace = PermissionNamespace(label=_('Cabinets'), name='cabinets')
 
 # Translators: this refers to the permission that will allow users to add
 # documents to cabinets.

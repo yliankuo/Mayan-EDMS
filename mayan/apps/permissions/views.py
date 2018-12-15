@@ -139,7 +139,7 @@ class SetupRolePermissionsView(AssignRemoveView):
                 (force_text(permission.pk), permission) for permission in permissions
             ]
             results.append(
-                (PermissionNamespace.get(namespace), permission_options)
+                (PermissionNamespace.get(name=namespace), permission_options)
             )
 
         return results

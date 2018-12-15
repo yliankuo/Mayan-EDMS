@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.permissions import PermissionNamespace
 
-namespace = PermissionNamespace('user_management', _('User management'))
+namespace = PermissionNamespace(label=_('User management'), name='user_management')
 
 permission_group_create = namespace.add_permission(
     name='group_create', label=_('Create new groups')

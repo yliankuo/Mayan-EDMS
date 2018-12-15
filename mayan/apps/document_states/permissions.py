@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.permissions import PermissionNamespace
 
-namespace = PermissionNamespace('document_states', _('Document workflows'))
+namespace = PermissionNamespace(label=_('Document workflows'), name='document_states')
 
 permission_workflow_create = namespace.add_permission(
     name='workflow_create', label=_('Create workflows')

@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.permissions import PermissionNamespace
 
-namespace = PermissionNamespace('smart_settings', _('Smart settings'))
+namespace = PermissionNamespace(label=_('Smart settings'), name='smart_settings')
 
 permission_settings_edit = namespace.add_permission(
     name='permission_settings_edit', label=_('Edit settings')

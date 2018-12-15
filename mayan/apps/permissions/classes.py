@@ -32,9 +32,9 @@ class PermissionNamespace(object):
                 '"purgepermissions" and try again.'
             )
 
-    def __init__(self, name, label):
-        self.name = name
+    def __init__(self, label, name):
         self.label = label
+        self.name = name
         self.permissions = []
         self.__class__._registry[name] = self
 
@@ -83,9 +83,9 @@ class Permission(object):
             if permissions.stored_permission.requester_has_this(requester):
                 return True
 
-        logger.debug('User "%s" does not have permissions "%s"',
-                     requester,
-                     permissions)
+        logger.debug(
+            'User "%s" does not have permissions "%s"', requester, permissions
+        )
         raise PermissionDenied(_('Insufficient permissions.'))
 
     @classmethod
