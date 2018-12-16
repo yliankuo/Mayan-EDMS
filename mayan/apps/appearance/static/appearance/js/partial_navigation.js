@@ -160,10 +160,19 @@ class PartialNavigation {
          */
 
         if (djangoDEBUG) {
+            var errorMessage = null;
+
+            if (jqXHR.status != 0) {
+                errorMessage = jqXHR.responseText || jqXHR.statusText;
+            } else {
+                errorMessage = 'Server communication error.';
+            }
+
             $('#ajax-content').html(
                 ' \
                     <h4>Server Error</h4> \
-                    <pre class="pre-server-error"><code>' +  jqXHR.responseText || jqXHR.statusText +'</code> \
+                    <p>Status code: ' + jqXHR.status + '</p> \
+                    <pre class="pre-server-error"><code>' +  errorMessage +'</code> \
                     </pre> \
                 '
             );
