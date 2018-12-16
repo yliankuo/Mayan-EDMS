@@ -13,6 +13,8 @@ from django.conf import settings
 from django.utils.functional import Promise
 from django.utils.encoding import force_text, python_2_unicode_compatible
 
+from .utils import read_configuration_file
+
 logger = logging.getLogger(__name__)
 
 
@@ -173,7 +175,13 @@ class Setting(object):
                     )
                 )
         else:
-            self.raw_value = getattr(settings, self.global_name, self.default)
+            self.raw_value = read_configuration_file(
+                path=settings.CONFIGURATION_FILEPATH
+            ).get(
+                self.global_name, getattr(
+                    settings, self.global_name, self.default
+                )
+            )
 
         self.yaml = Setting.serialize_value(self.raw_value)
         self.loaded = True

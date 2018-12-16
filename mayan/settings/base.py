@@ -16,12 +16,14 @@ import sys
 
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.smart_settings.literals import DJANGO_SETTINGS_LIST
+from mayan.apps.smart_settings.utils import (
+    get_environment_variables, read_configuration_file, yaml_loads
+)
+
 from .literals import (
     CONFIGURATION_FILENAME, CONFIGURATION_LAST_GOOD_FILENAME,
-    DEFAULT_SECRET_KEY, DJANGO_SETTINGS_LIST, SECRET_KEY_FILENAME, SYSTEM_DIR
-)
-from .utils import (
-    get_environment_variables, read_configuration_file, yaml_loads
+    DEFAULT_SECRET_KEY, SECRET_KEY_FILENAME, SYSTEM_DIR
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -327,9 +329,15 @@ DATABASES = {
     }
 }
 
-CONFIGURATION_FILEPATH = os.path.join(MEDIA_ROOT, CONFIGURATION_FILENAME)
-CONFIGURATION_LAST_GOOD_FILEPATH = os.path.join(
-    MEDIA_ROOT, CONFIGURATION_LAST_GOOD_FILENAME
+CONFIGURATION_FILEPATH = os.environ.get(
+    'MAYAN_CONFIGURATION_FILEPATH', os.path.join(
+        MEDIA_ROOT, CONFIGURATION_FILENAME
+    )
+)
+CONFIGURATION_LAST_GOOD_FILEPATH = os.environ.get(
+    'MAYAN_CONFIGURATION_LAST_GOOD_FILEPATH', os.path.join(
+        MEDIA_ROOT, CONFIGURATION_LAST_GOOD_FILENAME
+    )
 )
 
 if 'revertsettings' not in sys.argv:
