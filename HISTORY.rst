@@ -195,6 +195,10 @@
 - Moved the navigation templates from the appearance app to the
   navigation app.
 - Moved the dashboard and dashboard widgets to their own app.
+- Converted the calculate form title template into a template tag.
+  The result of the template tag is applied as the title property
+  of the H3 HTML tag allowing users to view the full title on 
+  mouse hover if it was truncated.
 
 3.1.9 (2018-11-01)
 ==================
