@@ -190,6 +190,10 @@
 - Raise the NeedPassphrase exception when GPG has no terminal
   available.
 - Unified styling of signal handlers functions. 
+- Moved the authentication templates from the appearance app to
+  the authenticaton app.
+- Moved the navigation templates from the appearance app to the
+  navigation app.
 
 3.1.9 (2018-11-01)
 ==================
