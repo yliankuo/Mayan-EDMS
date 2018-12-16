@@ -238,7 +238,7 @@ class DocumentDuplicatesListView(DocumentListView):
         ).dispatch(request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
     def get_extra_context(self):
         context = super(DocumentDuplicatesListView, self).get_extra_context()
@@ -327,7 +327,7 @@ class DocumentRestoreView(ConfirmView):
 
     def object_action(self, instance):
         source_document = get_object_or_404(
-            Document.passthrough, pk=instance.pk
+            klass=Document.passthrough, pk=instance.pk
         )
 
         AccessControlList.objects.check_access(
@@ -338,7 +338,7 @@ class DocumentRestoreView(ConfirmView):
         instance.restore()
 
     def view_action(self):
-        instance = get_object_or_404(DeletedDocument, pk=self.kwargs['pk'])
+        instance = get_object_or_404(klass=DeletedDocument, pk=self.kwargs['pk'])
 
         self.object_action(instance=instance)
 
@@ -366,7 +366,7 @@ class DocumentTrashView(ConfirmView):
         }
 
     def get_object(self):
-        return get_object_or_404(Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
     def get_post_action_redirect(self):
         return reverse('documents:document_list_recent_access')
@@ -752,7 +752,7 @@ class DocumentTransformationsCloneView(FormView):
         return context
 
     def get_object(self):
-        instance = get_object_or_404(Document, pk=self.kwargs['pk'])
+        instance = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_transformation_edit,
@@ -825,7 +825,7 @@ class DocumentPrint(FormView):
         return context
 
     def get_object(self):
-        return get_object_or_404(Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
     def get_template_names(self):
         if self.page_group or self.page_range:

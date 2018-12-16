@@ -160,7 +160,7 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
         else:
             permission_required = permission_document_edit
 
-        document = get_object_or_404(Document.passthrough, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document.passthrough, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permission_required, self.request.user, document
@@ -169,7 +169,7 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
 
     def get_document_version(self):
         return get_object_or_404(
-            self.get_document().versions.all(), pk=self.kwargs['version_pk']
+            klass=self.get_document().versions.all(), pk=self.kwargs['version_pk']
         )
 
     def get_queryset(self):
@@ -256,7 +256,7 @@ class APIDocumentPageView(generics.RetrieveUpdateAPIView):
         else:
             permission_required = permission_document_edit
 
-        document = get_object_or_404(Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permission_required, self.request.user, document
@@ -265,7 +265,7 @@ class APIDocumentPageView(generics.RetrieveUpdateAPIView):
 
     def get_document_version(self):
         return get_object_or_404(
-            self.get_document().versions.all(), pk=self.kwargs['version_pk']
+            klass=self.get_document().versions.all(), pk=self.kwargs['version_pk']
         )
 
     def get_queryset(self):
@@ -335,7 +335,7 @@ class APIDocumentTypeDocumentListView(generics.ListAPIView):
     serializer_class = DocumentSerializer
 
     def get_queryset(self):
-        document_type = get_object_or_404(DocumentType, pk=self.kwargs['pk'])
+        document_type = get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
         AccessControlList.objects.check_access(
             permissions=permission_document_type_view, user=self.request.user,
             obj=document_type
@@ -351,7 +351,7 @@ class APIDocumentVersionDownloadView(DownloadMixin, generics.RetrieveAPIView):
     lookup_url_kwarg = 'version_pk'
 
     def get_document(self):
-        document = get_object_or_404(Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permissions=(permission_document_download,), user=self.request.user,
@@ -445,7 +445,7 @@ class APIDocumentVersionPageListView(generics.ListAPIView):
     serializer_class = DocumentPageSerializer
 
     def get_document(self):
-        document = get_object_or_404(Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permission_document_view, self.request.user, document
@@ -454,7 +454,7 @@ class APIDocumentVersionPageListView(generics.ListAPIView):
 
     def get_document_version(self):
         return get_object_or_404(
-            self.get_document().versions.all(), pk=self.kwargs['version_pk']
+            klass=self.get_document().versions.all(), pk=self.kwargs['version_pk']
         )
 
     def get_queryset(self):
@@ -493,10 +493,10 @@ class APIDocumentVersionsListView(generics.ListCreateAPIView):
             return NewDocumentVersionSerializer
 
     def get_queryset(self):
-        return get_object_or_404(Document, pk=self.kwargs['pk']).versions.all()
+        return get_object_or_404(klass=Document, pk=self.kwargs['pk']).versions.all()
 
     def perform_create(self, serializer):
-        document = get_object_or_404(Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permissions=(permission_document_new_version,),
@@ -522,7 +522,7 @@ class APIDocumentVersionView(generics.RetrieveUpdateDestroyAPIView):
         else:
             permission_required = permission_document_edit
 
-        document = get_object_or_404(Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
         AccessControlList.objects.check_access(
             permission_required, self.request.user, document

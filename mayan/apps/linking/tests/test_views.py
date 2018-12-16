@@ -129,11 +129,11 @@ class SmartLinkDocumentsViewTestCase(GenericDocumentViewTestCase):
             'linking:smart_link_instances_for_document',
             args=(self.document.pk,)
         )
-        # Text must appear 2 times, only for the windows title and template
+        # Text must appear 3 times, 2 for the window titles and template
         # heading. The two smart links are not shown.
 
         self.assertContains(
-            response, text=self.document.label, count=2, status_code=200
+            response, text=self.document.label, count=3, status_code=200
         )
 
     def test_document_smart_link_list_view_with_permission(self):
@@ -152,9 +152,9 @@ class SmartLinkDocumentsViewTestCase(GenericDocumentViewTestCase):
             args=(self.document.pk,)
         )
 
-        # Text must appear 4 times: 2 for the windows title and template
+        # Text must appear 5 times: 3 for the window titles and template
         # heading, plus 2 for the test.
 
         self.assertContains(
-            response, text=self.document.label, count=4, status_code=200
+            response, text=self.document.label, count=5, status_code=200
         )

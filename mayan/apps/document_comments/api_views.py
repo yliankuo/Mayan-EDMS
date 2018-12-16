@@ -25,7 +25,7 @@ class APICommentListView(generics.ListCreateAPIView):
         else:
             permission_required = permission_comment_create
 
-        document = get_object_or_404(Document, pk=self.kwargs['document_pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -78,7 +78,7 @@ class APICommentView(generics.RetrieveDestroyAPIView):
         else:
             permission_required = permission_comment_delete
 
-        document = get_object_or_404(Document, pk=self.kwargs['document_pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,

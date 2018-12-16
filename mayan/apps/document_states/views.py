@@ -58,7 +58,7 @@ class DocumentWorkflowInstanceListView(SingleObjectListView):
         ).dispatch(request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
 
     def get_extra_context(self):
         return {
@@ -107,7 +107,7 @@ class WorkflowInstanceDetailView(SingleObjectListView):
         return self.get_workflow_instance().log_entries.order_by('-datetime')
 
     def get_workflow_instance(self):
-        return get_object_or_404(WorkflowInstance, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowInstance, pk=self.kwargs['pk'])
 
 
 class WorkflowInstanceTransitionView(FormView):
@@ -147,7 +147,7 @@ class WorkflowInstanceTransitionView(FormView):
         return self.get_workflow_instance().get_absolute_url()
 
     def get_workflow_instance(self):
-        return get_object_or_404(WorkflowInstance, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowInstance, pk=self.kwargs['pk'])
 
 
 # Setup
@@ -220,7 +220,7 @@ class SetupWorkflowDocumentTypesView(AssignRemoveView):
         }
 
     def get_object(self):
-        return get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
 
     def left_list(self):
         return AssignRemoveView.generate_choices(
@@ -281,7 +281,7 @@ class SetupWorkflowStateActionCreateView(SingleObjectDynamicFormCreateView):
         }
 
     def get_object(self):
-        return get_object_or_404(WorkflowState, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowState, pk=self.kwargs['pk'])
 
     def get_post_action_redirect(self):
         return reverse(
@@ -382,7 +382,7 @@ class SetupWorkflowStateActionListView(SingleObjectListView):
         return self.get_workflow_state().actions.all()
 
     def get_workflow_state(self):
-        return get_object_or_404(WorkflowState, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowState, pk=self.kwargs['pk'])
 
 
 class SetupWorkflowStateActionSelectionView(FormView):
@@ -409,7 +409,7 @@ class SetupWorkflowStateActionSelectionView(FormView):
         }
 
     def get_object(self):
-        return get_object_or_404(WorkflowState, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowState, pk=self.kwargs['pk'])
 
 
 # Workflow states
@@ -438,7 +438,7 @@ class SetupWorkflowStateCreateView(SingleObjectCreateView):
         )
 
     def get_workflow(self):
-        workflow = get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
         AccessControlList.objects.check_access(
             permissions=(permission_workflow_edit,), obj=workflow,
             user=self.request.user
@@ -467,7 +467,7 @@ class SetupWorkflowStateDeleteView(SingleObjectDeleteView):
         )
 
     def get_workflow(self):
-        workflow = get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
         AccessControlList.objects.check_access(
             permissions=(permission_workflow_edit,), obj=workflow,
             user=self.request.user
@@ -530,7 +530,7 @@ class SetupWorkflowStateListView(SingleObjectListView):
         return self.get_workflow().states.all()
 
     def get_workflow(self):
-        return get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
 
 
 # Transitions
@@ -567,7 +567,7 @@ class SetupWorkflowTransitionCreateView(SingleObjectCreateView):
         )
 
     def get_workflow(self):
-        workflow = get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
         AccessControlList.objects.check_access(
             permissions=(permission_workflow_edit,), obj=workflow,
             user=self.request.user
@@ -648,7 +648,7 @@ class SetupWorkflowTransitionListView(SingleObjectListView):
         return self.get_workflow().transitions.all()
 
     def get_workflow(self):
-        return get_object_or_404(Workflow, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
 
 
 # Other
@@ -682,7 +682,7 @@ class WorkflowListView(SingleObjectListView):
 class WorkflowDocumentListView(DocumentListView):
     def dispatch(self, request, *args, **kwargs):
         self.workflow = get_object_or_404(
-            WorkflowRuntimeProxy, pk=self.kwargs['pk']
+            klass=WorkflowRuntimeProxy, pk=self.kwargs['pk']
         )
 
         AccessControlList.objects.check_access(
@@ -743,7 +743,7 @@ class WorkflowStateDocumentListView(DocumentListView):
 
     def get_workflow_state(self):
         workflow_state = get_object_or_404(
-            WorkflowStateRuntimeProxy, pk=self.kwargs['pk']
+            klass=WorkflowStateRuntimeProxy, pk=self.kwargs['pk']
         )
 
         AccessControlList.objects.check_access(
@@ -790,7 +790,7 @@ class WorkflowStateListView(SingleObjectListView):
         )
 
     def get_workflow(self):
-        return get_object_or_404(WorkflowRuntimeProxy, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowRuntimeProxy, pk=self.kwargs['pk'])
 
 
 class SetupWorkflowTransitionTriggerEventListView(FormView):
@@ -831,7 +831,7 @@ class SetupWorkflowTransitionTriggerEventListView(FormView):
         ).form_valid(form=form)
 
     def get_object(self):
-        return get_object_or_404(WorkflowTransition, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=WorkflowTransition, pk=self.kwargs['pk'])
 
     def get_extra_context(self):
         return {

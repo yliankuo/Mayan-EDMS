@@ -20,12 +20,12 @@ class APIObjectACLListView(generics.ListCreateAPIView):
     """
     def get_content_object(self):
         content_type = get_object_or_404(
-            ContentType, app_label=self.kwargs['app_label'],
+            klass=ContentType, app_label=self.kwargs['app_label'],
             model=self.kwargs['model']
         )
 
         content_object = get_object_or_404(
-            content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_pk']
         )
 
         if self.request.method == 'GET':
@@ -84,12 +84,12 @@ class APIObjectACLView(generics.RetrieveDestroyAPIView):
             permission_required = permission_acl_edit
 
         content_type = get_object_or_404(
-            ContentType, app_label=self.kwargs['app_label'],
+            klass=ContentType, app_label=self.kwargs['app_label'],
             model=self.kwargs['model']
         )
 
         content_object = get_object_or_404(
-            content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_pk']
         )
 
         AccessControlList.objects.check_access(
@@ -110,17 +110,17 @@ class APIObjectACLPermissionListView(generics.ListCreateAPIView):
     """
     def get_acl(self):
         return get_object_or_404(
-            self.get_content_object().acls, pk=self.kwargs['pk']
+            klass=self.get_content_object().acls, pk=self.kwargs['pk']
         )
 
     def get_content_object(self):
         content_type = get_object_or_404(
-            ContentType, app_label=self.kwargs['app_label'],
+            klass=ContentType, app_label=self.kwargs['app_label'],
             model=self.kwargs['model']
         )
 
         content_object = get_object_or_404(
-            content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_pk']
         )
 
         AccessControlList.objects.check_access(
@@ -167,17 +167,17 @@ class APIObjectACLPermissionView(generics.RetrieveDestroyAPIView):
 
     def get_acl(self):
         return get_object_or_404(
-            self.get_content_object().acls, pk=self.kwargs['pk']
+            klass=self.get_content_object().acls, pk=self.kwargs['pk']
         )
 
     def get_content_object(self):
         content_type = get_object_or_404(
-            ContentType, app_label=self.kwargs['app_label'],
+            klass=ContentType, app_label=self.kwargs['app_label'],
             model=self.kwargs['model']
         )
 
         content_object = get_object_or_404(
-            content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_pk']
         )
 
         AccessControlList.objects.check_access(
