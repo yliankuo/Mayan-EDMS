@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'mayan.apps.autoadmin',
     'mayan.apps.common',
     'mayan.apps.converter',
+    'mayan.apps.dashboards',
     'mayan.apps.django_gpg',
     'mayan.apps.dynamic_search',
     'mayan.apps.events',

@@ -18,7 +18,6 @@ from mayan.apps.common import (
     menu_tools
 )
 from mayan.apps.common.classes import ModelField, Template
-from mayan.apps.common.dashboards import dashboard_main
 from mayan.apps.common.signals import post_initial_setup
 from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.converter.links import link_transformation_list
@@ -26,6 +25,7 @@ from mayan.apps.converter.permissions import (
     permission_transformation_create, permission_transformation_delete,
     permission_transformation_edit, permission_transformation_view
 )
+from mayan.apps.dashboards.dashboards import dashboard_main
 from mayan.apps.events import ModelEventType
 from mayan.apps.events.links import (
     link_events_for_object, link_object_event_types_user_subcriptions_list

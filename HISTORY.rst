@@ -194,6 +194,7 @@
   the authenticaton app.
 - Moved the navigation templates from the appearance app to the
   navigation app.
+- Moved the dashboard and dashboard widgets to their own app.
 
 3.1.9 (2018-11-01)
 ==================
