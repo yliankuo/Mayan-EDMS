@@ -15,7 +15,9 @@ from mayan.apps.common import (
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
-from .handlers import unverify_key_signatures, verify_key_signatures
+from .handlers import (
+    handler_unverify_key_signatures, handler_verify_key_signatures
+)
 from .links import (
     link_all_document_version_signature_verify, link_document_signature_list,
     link_document_version_signature_delete,
@@ -156,12 +158,10 @@ class DocumentSignaturesApp(MayanAppConfig):
         )
 
         post_delete.connect(
-            unverify_key_signatures,
-            dispatch_uid='unverify_key_signatures',
-            sender=Key
+            dispatch_uid='document_signatures_handler_unverify_key_signatures',
+            receiver=handler_unverify_key_signatures, sender=Key
         )
         post_save.connect(
-            verify_key_signatures,
-            dispatch_uid='verify_key_signatures',
-            sender=Key
+            dispatch_uid='document_signatures_handler_verify_key_signatures',
+            receiver=handler_verify_key_signatures, sender=Key
         )

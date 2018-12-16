@@ -17,8 +17,8 @@ from mayan.celery import app
 
 from .classes import StagingFile
 from .handlers import (
-    copy_transformations_to_version, create_default_document_source,
-    initialize_periodic_tasks
+    handler_copy_transformations_to_version,
+    handler_create_default_document_source, handler_initialize_periodic_tasks
 )
 from .links import (
     link_document_create_multiple, link_setup_source_check_now,
@@ -172,14 +172,14 @@ class SourcesApp(MayanAppConfig):
         )
 
         post_upgrade.connect(
-            initialize_periodic_tasks,
-            dispatch_uid='initialize_periodic_tasks'
+            dispatch_uid='sources_handler_initialize_periodic_tasks',
+            receiver=handler_initialize_periodic_tasks
         )
         post_initial_setup.connect(
-            create_default_document_source,
-            dispatch_uid='create_default_document_source'
+            dispatch_uid='sources_handler_create_default_document_source',
+            receiver=handler_create_default_document_source
         )
         post_version_upload.connect(
-            copy_transformations_to_version,
-            dispatch_uid='copy_transformations_to_version'
+            dispatch_uid='sources_handler_copy_transformations_to_version',
+            receiver=handler_copy_transformations_to_version
         )

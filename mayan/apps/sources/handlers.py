@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from .literals import SOURCE_UNCOMPRESS_CHOICE_ASK
 
 
-def create_default_document_source(sender, **kwargs):
+def handler_create_default_document_source(sender, **kwargs):
     WebFormSource = apps.get_model(
         app_label='sources', model_name='WebFormSource'
     )
@@ -17,7 +17,7 @@ def create_default_document_source(sender, **kwargs):
         )
 
 
-def copy_transformations_to_version(sender, **kwargs):
+def handler_copy_transformations_to_version(sender, **kwargs):
     Transformation = apps.get_model(
         app_label='converter', model_name='Transformation'
     )
@@ -31,7 +31,7 @@ def copy_transformations_to_version(sender, **kwargs):
     )
 
 
-def initialize_periodic_tasks(sender, **kwargs):
+def handler_initialize_periodic_tasks(sender, **kwargs):
     POP3Email = apps.get_model(app_label='sources', model_name='POP3Email')
     IMAPEmail = apps.get_model(app_label='sources', model_name='IMAPEmail')
     WatchFolderSource = apps.get_model(

@@ -33,9 +33,9 @@ from .events import (
     event_metadata_type_relationship
 )
 from .handlers import (
-    handler_index_document, post_document_type_metadata_type_add,
-    post_document_type_metadata_type_delete,
-    post_document_type_change_metadata
+    handler_post_document_type_metadata_type_add,
+    handler_post_document_type_metadata_type_delete,
+    handler_post_document_type_change_metadata, handler_index_document,
 )
 from .links import (
     link_metadata_add, link_metadata_edit, link_metadata_multiple_add,
@@ -242,31 +242,31 @@ class MetadataApp(MayanAppConfig):
         )
 
         post_delete.connect(
-            post_document_type_metadata_type_delete,
-            dispatch_uid='metadata_post_document_type_metadata_type_delete',
+            dispatch_uid='metadata_handler_post_document_type_metadata_type_delete',
+            receiver=handler_post_document_type_metadata_type_delete,
             sender=DocumentTypeMetadataType
         )
         post_document_type_change.connect(
-            post_document_type_change_metadata,
-            dispatch_uid='metadata_post_document_type_change_metadata',
+            dispatch_uid='metadata_handler_post_document_type_change_metadata',
+            receiver=handler_post_document_type_change_metadata,
             sender=Document
         )
         post_save.connect(
-            post_document_type_metadata_type_add,
-            dispatch_uid='metadata_post_document_type_metadata_type_add',
+            dispatch_uid='metadata_handler_post_document_type_metadata_type_add',
+            receiver=handler_post_document_type_metadata_type_add,
             sender=DocumentTypeMetadataType
         )
 
         # Index updating
 
         post_delete.connect(
-            handler_index_document,
             dispatch_uid='metadata_handler_index_document_delete',
+            receiver=handler_index_document,
             sender=DocumentMetadata
         )
         post_save.connect(
-            handler_index_document,
             dispatch_uid='metadata_handler_index_document_save',
+            receiver=handler_index_document,
             sender=DocumentMetadata
         )
 

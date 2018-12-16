@@ -21,7 +21,7 @@ from .events import (
     event_document_auto_check_in, event_document_check_in,
     event_document_check_out, event_document_forceful_check_in
 )
-from .handlers import check_new_version_creation
+from .handlers import handler_check_new_version_creation
 from .links import (
     link_checkin_document, link_checkout_document, link_checkout_info,
     link_checkout_list
@@ -126,7 +126,7 @@ class CheckoutsApp(MayanAppConfig):
         )
 
         pre_save.connect(
-            check_new_version_creation,
-            dispatch_uid='check_new_version_creation',
+            dispatch_uid='checkouts_handler_check_new_version_creation',
+            receiver=handler_check_new_version_creation,
             sender=DocumentVersion
         )

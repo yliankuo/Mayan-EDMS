@@ -19,8 +19,9 @@ from mayan.celery import app
 
 from .classes import Template
 from .handlers import (
-    handler_pre_initial_setup, handler_pre_upgrade, user_locale_profile_create,
-    user_locale_profile_session_config
+    handler_pre_initial_setup, handler_pre_upgrade,
+    handler_user_locale_profile_create,
+    handler_user_locale_profile_session_config
 )
 from .licenses import *  # NOQA
 from .links import (
@@ -146,22 +147,22 @@ class CommonApp(MayanAppConfig):
         )
 
         post_save.connect(
-            user_locale_profile_create,
-            dispatch_uid='user_locale_profile_create',
+            dispatch_uid='common_handler_user_locale_profile_create',
+            receiver=handler_user_locale_profile_create,
             sender=settings.AUTH_USER_MODEL
         )
         pre_initial_setup.connect(
-            handler_pre_initial_setup,
-            dispatch_uid='common_handler_pre_initial_setup'
+            dispatch_uid='common_handler_pre_initial_setup',
+            receiver=handler_pre_initial_setup
         )
         pre_upgrade.connect(
-            handler_pre_upgrade,
             dispatch_uid='common_handler_pre_upgrade',
+            receiver=handler_pre_upgrade
         )
 
         user_logged_in.connect(
-            user_locale_profile_session_config,
-            dispatch_uid='user_locale_profile_session_config'
+            dispatch_uid='common_handler_user_locale_profile_session_config',
+            receiver=handler_user_locale_profile_session_config
         )
         self.setup_auto_logging()
 

@@ -189,6 +189,7 @@
   no longer need it.
 - Raise the NeedPassphrase exception when GPG has no terminal
   available.
+- Unified styling of signal handlers functions. 
 
 3.1.9 (2018-11-01)
 ==================

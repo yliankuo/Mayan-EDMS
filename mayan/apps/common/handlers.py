@@ -15,7 +15,16 @@ def handler_pre_upgrade(sender, **kwargs):
     management.call_command('purgeperiodictasks', interactive=False)
 
 
-def user_locale_profile_session_config(sender, request, user, **kwargs):
+def handler_user_locale_profile_create(sender, instance, created, **kwargs):
+    UserLocaleProfile = apps.get_model(
+        app_label='common', model_name='UserLocaleProfile'
+    )
+
+    if created:
+        UserLocaleProfile.objects.create(user=instance)
+
+
+def handler_user_locale_profile_session_config(sender, request, user, **kwargs):
     UserLocaleProfile = apps.get_model(
         app_label='common', model_name='UserLocaleProfile'
     )
@@ -44,12 +53,3 @@ def user_locale_profile_session_config(sender, request, user, **kwargs):
             request.set_cookie(
                 settings.TIMEZONE_COOKIE_NAME, user_locale_profile.timezone
             )
-
-
-def user_locale_profile_create(sender, instance, created, **kwargs):
-    UserLocaleProfile = apps.get_model(
-        app_label='common', model_name='UserLocaleProfile'
-    )
-
-    if created:
-        UserLocaleProfile.objects.create(user=instance)

@@ -11,7 +11,7 @@ from .tasks import task_add_required_metadata_type, task_remove_metadata_type
 logger = logging.getLogger(__name__)
 
 
-def post_document_type_metadata_type_add(sender, instance, created, **kwargs):
+def handler_post_document_type_metadata_type_add(sender, instance, created, **kwargs):
     logger.debug('instance: %s', instance)
 
     if created and instance.required:
@@ -23,7 +23,7 @@ def post_document_type_metadata_type_add(sender, instance, created, **kwargs):
         )
 
 
-def post_document_type_metadata_type_delete(sender, instance, **kwargs):
+def handler_post_document_type_metadata_type_delete(sender, instance, **kwargs):
     logger.debug('instance: %s', instance)
     task_remove_metadata_type.apply_async(
         kwargs={
@@ -33,7 +33,7 @@ def post_document_type_metadata_type_delete(sender, instance, **kwargs):
     )
 
 
-def post_document_type_change_metadata(sender, instance, **kwargs):
+def handler_post_document_type_change_metadata(sender, instance, **kwargs):
     logger.debug('received post_document_type_change')
     logger.debug('instance: %s', instance)
 

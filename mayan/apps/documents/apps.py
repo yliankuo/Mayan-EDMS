@@ -48,7 +48,7 @@ from .events import (
     event_document_version_revert, event_document_view
 )
 from .handlers import (
-    create_default_document_type, handler_create_document_cache,
+    handler_create_default_document_type, handler_create_document_cache,
     handler_remove_empty_duplicates_lists, handler_scan_duplicates_for
 )
 from .links import (
@@ -589,21 +589,21 @@ class DocumentsApp(MayanAppConfig):
         )
 
         post_delete.connect(
-            dispatch_uid='handler_remove_empty_duplicates_lists',
+            dispatch_uid='documents_handler_remove_empty_duplicates_lists',
             receiver=handler_remove_empty_duplicates_lists,
             sender=Document,
         )
         post_initial_setup.connect(
-            create_default_document_type,
-            dispatch_uid='create_default_document_type'
+            dispatch_uid='documents_handler_create_default_document_type',
+            receiver=handler_create_default_document_type,
         )
         post_migrate.connect(
             dispatch_uid='documents_handler_create_document_cache',
             receiver=handler_create_document_cache,
         )
         post_version_upload.connect(
-            handler_scan_duplicates_for,
-            dispatch_uid='handler_scan_duplicates_for',
+            dispatch_uid='documents_handler_scan_duplicates_for',
+            receiver=handler_scan_duplicates_for,
         )
 
         registry.register(DeletedDocument)

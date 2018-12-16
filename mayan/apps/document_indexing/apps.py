@@ -23,7 +23,7 @@ from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
 from .handlers import (
-    create_default_document_index, handler_delete_empty,
+    handler_create_default_document_index, handler_delete_empty,
     handler_index_document, handler_post_save_index_document,
     handler_remove_document
 )
@@ -224,8 +224,8 @@ class DocumentIndexingApp(MayanAppConfig):
             sender=Document
         )
         post_initial_document_type.connect(
-            dispatch_uid='document_indexing_create_default_document_index',
-            receiver=create_default_document_index,
+            dispatch_uid='document_indexing_handler_create_default_document_index',
+            receiver=handler_create_default_document_index,
             sender=DocumentType
         )
         post_save.connect(
