@@ -100,6 +100,7 @@ class MailDocumentView(MultipleObjectFormActionView):
                 'sender': self.request.user.email,
                 'subject': form.cleaned_data['subject'],
                 'user_mailer_id': form.cleaned_data['user_mailer'].pk,
+                'user_id': self.request.user.pk,
             }
         )
 
