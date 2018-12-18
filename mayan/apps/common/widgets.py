@@ -9,6 +9,15 @@ from .icons import icon_fail as default_icon_fail
 from .icons import icon_ok as default_icon_ok
 
 
+class ButtonWidget(forms.widgets.Widget):
+    template_name = 'common/forms/widgets/button_widget.html'
+
+    def format_value(self, value):
+        if value == '' or value is None:
+            return None
+        return value
+
+
 class DisableableSelectWidget(forms.SelectMultiple):
     allow_multiple_selected = True
 
