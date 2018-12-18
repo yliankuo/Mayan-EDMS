@@ -199,6 +199,9 @@
   The result of the template tag is applied as the title property
   of the H3 HTML tag allowing users to view the full title on 
   mouse hover if it was truncated.
+- Updated the source test behavior to allow testing a source
+  even when the source is disabled and to not deleted downloaded
+  content during a test.
 
 3.1.9 (2018-11-01)
 ==================
