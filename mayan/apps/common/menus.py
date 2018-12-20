@@ -9,7 +9,7 @@ from .icons import icon_menu_about, icon_menu_user
 __all__ = (
     'menu_about', 'menu_facet', 'menu_list_facet', 'menu_main', 'menu_object',
     'menu_multi_item', 'menu_secondary', 'menu_setup', 'menu_sidebar',
-    'menu_tools', 'menu_user'
+    'menu_tools', 'menu_topbar', 'menu_user'
 )
 
 menu_about = Menu(
@@ -24,6 +24,7 @@ menu_secondary = Menu(name='secondary menu')
 menu_setup = Menu(name='setup menu')
 menu_sidebar = Menu(name='sidebar menu')
 menu_tools = Menu(name='tools menu')
+menu_topbar = Menu(name='menu topbar')
 menu_user = Menu(
     icon_class=icon_menu_user, name='user menu', label=_('User')
 )

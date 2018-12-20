@@ -202,6 +202,11 @@
 - Updated the source test behavior to allow testing a source
   even when the source is disabled and to not deleted downloaded
   content during a test.
+- Update the user interface to add new sidebar main menu for a
+  more common left side menu navigation style. The main app
+  navigation links will be displayed here. The notification,
+  user and system tools are now displayed at the top navigation
+  bar.
 
 3.1.9 (2018-11-01)
 ==================

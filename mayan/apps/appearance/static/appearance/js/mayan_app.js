@@ -4,18 +4,13 @@ class MayanApp {
     constructor (parameters) {
         var self = this;
 
-        parameters = parameters || {}
+        parameters = parameters || {
+            ajaxMenusOptions: []
+        }
 
         this.ajaxSpinnerSeletor = '#ajax-spinner';
         this.ajaxExecuting = false;
-        this.ajaxMenusOptions = [
-            {
-                app: this,
-                interval: 5000,
-                menuSelector: '#main-menu',
-                url: apiTemplateMainMenuURL,
-            }
-        ];
+        this.ajaxMenusOptions = parameters.ajaxMenusOptions;
         this.ajaxMenuHashes = {};
         this.window = $(window);
     }
@@ -214,6 +209,8 @@ class MayanApp {
     }
 
     initialize () {
+        var self = this;
+
         this.setupAJAXPeriodicWorkers();
         this.setupAJAXSpinner();
         this.setupAutoSubmit();
@@ -223,6 +220,7 @@ class MayanApp {
         this.setupNavbarCollapse();
         this.setupNewWindowAnchor();
         $.each(this.ajaxMenusOptions, function(index, value) {
+            value.app = self;
             app.doRefreshAJAXMenu(value);
         });
         partialNavigation.initialize();

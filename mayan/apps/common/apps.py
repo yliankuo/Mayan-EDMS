@@ -31,7 +31,9 @@ from .links import (
     link_setup, link_tools, separator_user_label, text_user_label
 )
 from .literals import DELETE_STALE_UPLOADS_INTERVAL, MESSAGE_SQLITE_WARNING
-from .menus import menu_about, menu_main, menu_secondary, menu_user
+from .menus import (
+    menu_about, menu_secondary, menu_topbar, menu_user
+)
 from .queues import *  # NOQA - Force queues registration
 from .settings import (
     setting_auto_logging, setting_production_error_log_path,
@@ -90,7 +92,10 @@ class CommonApp(MayanAppConfig):
             warnings.warn(force_text(MESSAGE_SQLITE_WARNING))
 
         Template(
-            name='main_menu', template_name='appearance/main_menu.html'
+            name='menu_main', template_name='appearance/menu_main.html'
+        )
+        Template(
+            name='menu_sidebar', template_name='appearance/menu_sidebar.html'
         )
 
         app.conf.beat_schedule.update(
@@ -139,7 +144,7 @@ class CommonApp(MayanAppConfig):
             )
         )
 
-        menu_main.bind_links(links=(menu_about, menu_user,), position=99)
+        menu_topbar.bind_links(links=(menu_about, menu_user,), position=99)
         menu_secondary.bind_links(
             links=(link_object_error_list_clear,), sources=(
                 'common:object_error_list',

@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.common import (
-    MayanAppConfig, menu_list_facet, menu_main, menu_object, menu_secondary,
-    menu_tools, menu_user
+    MayanAppConfig, menu_list_facet, menu_object, menu_secondary,
+    menu_tools, menu_topbar, menu_user
 )
 from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
@@ -86,9 +86,6 @@ class EventsApp(MayanAppConfig):
         menu_list_facet.bind_links(
             links=(link_user_events,), sources=(User,)
         )
-        menu_main.bind_links(
-            links=(link_user_notifications_list,), position=99
-        )
         menu_object.bind_links(
             links=(link_notification_mark_read,), sources=(Notification,)
         )
@@ -97,6 +94,9 @@ class EventsApp(MayanAppConfig):
             sources=('events:user_notifications_list',)
         )
         menu_tools.bind_links(links=(link_events_list,))
+        menu_topbar.bind_links(
+            links=(link_user_notifications_list,), position=1
+        )
         menu_user.bind_links(
             links=(
                 link_event_types_subscriptions_list, link_current_user_events
