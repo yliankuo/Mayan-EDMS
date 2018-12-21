@@ -207,6 +207,9 @@
   navigation links will be displayed here. The notification,
   user and system tools are now displayed at the top navigation
   bar.
+- Added support for selecting a document from the UI by just
+  clicking on the title of the body of the card, not just on
+  the checkbox next to the title.
 
 3.1.9 (2018-11-01)
 ==================
