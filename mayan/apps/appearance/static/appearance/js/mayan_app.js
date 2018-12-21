@@ -353,6 +353,15 @@ class MayanApp {
     setupPanelSelection () {
         var app = this;
 
+        $('body').on('change', '.check-all-slave', function (event) {
+            var checked = $(event.target).prop('checked');
+            if (checked) {
+                $(this).closest('.panel-item').addClass('panel-highlighted');
+            } else {
+                $(this).closest('.panel-item').removeClass('panel-highlighted');
+            }
+        });
+
         $('body').on('click', '.panel-item', function (event) {
             var $this = $(this);
             var targetSrc = $(event.target).prop('src');

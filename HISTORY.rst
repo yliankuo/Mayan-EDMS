@@ -210,6 +210,7 @@
 - Added support for selecting a document from the UI by just
   clicking on the title of the body of the card, not just on
   the checkbox next to the title.
+- Event handler to highlight panels when selected.
 
 3.1.9 (2018-11-01)
 ==================
