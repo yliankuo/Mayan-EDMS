@@ -537,9 +537,11 @@ class SourceColumn(object):
         self.is_identifier = is_identifier
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
+        self.label = None
 
-    @property
-    def label(self):
+        self._calculate_label()
+
+    def _calculate_label(self):
         if not self._label:
             if self.attribute:
                 name, model = SourceColumn.get_attribute_recursive(
@@ -551,7 +553,7 @@ class SourceColumn(object):
             else:
                 self._label = 'Function'
 
-        return self._label
+        self.label = self._label
 
     def resolve(self, context):
         if self.attribute:
