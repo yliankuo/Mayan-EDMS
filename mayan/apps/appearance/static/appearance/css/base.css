@@ -335,7 +335,7 @@ hr {
 }
 
 body {
-  padding-top: 40px;
+  margin-top: 60px;
 }
 
 .sub-header {
@@ -385,15 +385,15 @@ body {
  */
 
 .main {
-  padding: 20px;
+    margin-top: 10px;
 }
+
 @media (min-width: 768px) {
     .main {
         padding-right: 0px;
         padding-left: 0px;
         margin-left: 210px;
     }
-
 }
 .main .page-header {
   margin-top: 0;
