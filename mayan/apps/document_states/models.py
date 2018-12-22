@@ -13,6 +13,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, models
 from django.db.models import F, Max, Q
+from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.module_loading import import_string
@@ -112,6 +113,8 @@ class Workflow(models.Model):
             return self.states.get(initial=True)
         except self.states.model.DoesNotExist:
             return None
+
+    get_initial_state.short_description = _('Initial state')
 
     def launch_for(self, document):
         try:
@@ -408,6 +411,10 @@ class WorkflowInstance(models.Model):
             'workflow_instance': self,
         }
 
+    def get_current_completion(self):
+        return self.get_current_state().completion
+    get_current_completion.short_description = _('Completion')
+
     def get_current_state(self):
         """
         Actual State - The current state of the workflow. If there are
@@ -419,6 +426,8 @@ class WorkflowInstance(models.Model):
             return self.get_last_transition().destination_state
         except AttributeError:
             return self.workflow.get_initial_state()
+
+    get_current_state.short_description = _('Current state')
 
     def get_last_log_entry(self):
         try:
@@ -435,6 +444,28 @@ class WorkflowInstance(models.Model):
             return self.get_last_log_entry().transition
         except AttributeError:
             return None
+
+    get_last_transition.short_description = _('Last transition')
+
+    def get_last_transition_datetime(self, formatted=False):
+        entry = self.get_last_log_entry()
+        if not entry:
+            return _('None')
+        else:
+            if formatted:
+                return entry.get_rendered_datetime()
+            else:
+                return entry.datetime
+
+    get_last_transition_datetime.short_description = _('Date and time')
+
+    def get_last_transition_user(self):
+        try:
+            return self.get_last_log_entry().user
+        except AttributeError:
+            return _('None')
+
+    get_last_transition_user.short_description = _('User')
 
     def get_transition_choices(self, _user=None):
         current_state = self.get_current_state()
@@ -508,6 +539,13 @@ class WorkflowInstanceLogEntry(models.Model):
     def clean(self):
         if self.transition not in self.workflow_instance.get_transition_choices(_user=self.user):
             raise ValidationError(_('Not a valid transition choice.'))
+
+    def get_rendered_datetime(self):
+        return Template('{{ instance.datetime }}').render(
+            context=Context({'instance': self})
+        )
+
+    get_rendered_datetime.short_description = _('Date and time')
 
     def save(self, *args, **kwargs):
         result = super(WorkflowInstanceLogEntry, self).save(*args, **kwargs)

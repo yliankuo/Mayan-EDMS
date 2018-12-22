@@ -101,38 +101,35 @@ class TagsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentTag, attribute='label'
+            attribute='label', source=DocumentTag,
         )
         SourceColumn(
-            source=DocumentTag, attribute='get_preview_widget'
+            attribute='get_preview_widget', source=DocumentTag
         )
 
         SourceColumn(
-            source=Document, label=_('Tags'),
             func=lambda context: widget_document_tags(
                 document=context['object'], user=context['request'].user
-            )
+            ), label=_('Tags'), source=Document
         )
 
         SourceColumn(
-            source=DocumentPageSearchResult, label=_('Tags'),
             func=lambda context: widget_document_tags(
                 document=context['object'].document,
                 user=context['request'].user
-            )
+            ), label=_('Tags'), source=DocumentPageSearchResult
         )
 
         SourceColumn(
-            source=Tag, attribute='label'
+            attribute='label', is_identifier=True, source=Tag
         )
         SourceColumn(
-            source=Tag, attribute='get_preview_widget'
+            attribute='get_preview_widget', source=Tag
         )
         SourceColumn(
-            source=Tag, label=_('Documents'),
             func=lambda context: context['object'].get_document_count(
                 user=context['request'].user
-            )
+            ), label=_('Documents'), source=Tag
         )
 
         document_page_search.add_model_field(

@@ -46,7 +46,10 @@ def widget_document_tags(document, user):
 
     result.append('</div>')
 
-    return mark_safe(''.join(result))
+    if tags:
+        return mark_safe(''.join(result))
+    else:
+        return ''
 
 
 def widget_single_tag(tag):

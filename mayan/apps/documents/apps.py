@@ -237,107 +237,94 @@ class DocumentsApp(MayanAppConfig):
 
         # Document
         SourceColumn(
-            source=Document, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            )
+            ), label=_('Thumbnail'), source=Document
         )
         SourceColumn(
-            source=Document, attribute='document_type'
+            attribute='document_type', label=_('Type'), source=Document
         )
         SourceColumn(
-            source=Document, label=_('Pages'),
-            func=lambda context: widget_document_page_number(
-                document=context['object']
-            )
+            func=widget_document_page_number, label=_('Pages'), source=Document
         )
 
         # DocumentPage
         SourceColumn(
-            source=DocumentPage, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            )
+            ), label=_('Thumbnail'), source=DocumentPage
         )
 
         SourceColumn(
-            source=DocumentPageSearchResult, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            )
+            ), label=_('Thumbnail'), source=DocumentPageSearchResult
         )
 
         SourceColumn(
-            source=DocumentPageSearchResult, label=_('Type'),
-            attribute='document_version.document.document_type'
+            attribute='document_version.document.document_type',
+            label=_('Type'), source=DocumentPageSearchResult
         )
 
         # DocumentType
         SourceColumn(
-            source=DocumentType, label=_('Documents'),
             func=lambda context: context['object'].get_document_count(
                 user=context['request'].user
-            )
+            ), label=_('Documents'), source=DocumentType
         )
 
         SourceColumn(
-            source=DocumentTypeFilename, label=_('Enabled'),
             func=lambda context: TwoStateWidget(
                 state=context['object'].enabled
-            ).render()
+            ).render(), label=_('Enabled'), source=DocumentTypeFilename
         )
 
         # DeletedDocument
         SourceColumn(
-            source=DeletedDocument, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            )
+            ), label=_('Thumbnail'), source=DeletedDocument
         )
 
         SourceColumn(
-            source=DeletedDocument, attribute='document_type'
+            attribute='document_type', source=DeletedDocument
         )
         SourceColumn(
-            source=DeletedDocument, attribute='deleted_date_time'
+            attribute='deleted_date_time', source=DeletedDocument
         )
 
         # DocumentVersion
         SourceColumn(
-            source=DocumentVersion, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            )
+            ), label=_('Thumbnail'), source=DocumentVersion
         )
         SourceColumn(
-            source=DocumentVersion, attribute='timestamp'
+            attribute='timestamp', source=DocumentVersion
         )
         SourceColumn(
-            source=DocumentVersion, label=_('Pages'),
-            func=lambda context: widget_document_version_page_number(
-                document_version=context['object']
-            )
+            func=widget_document_version_page_number, label=_('Pages'),
+            source=DocumentVersion
         )
         SourceColumn(
-            source=DocumentVersion, attribute='mimetype'
+            attribute='mimetype', source=DocumentVersion
         )
         SourceColumn(
-            source=DocumentVersion, attribute='encoding'
+            attribute='encoding', source=DocumentVersion
         )
         SourceColumn(
-            source=DocumentVersion, attribute='comment'
+            attribute='comment', source=DocumentVersion
         )
 
         # DuplicatedDocument
         SourceColumn(
-            source=DuplicatedDocument, label=_('Thumbnail'),
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object'].document
-            )
+            ), label=_('Thumbnail'), source=DuplicatedDocument
         )
         SourceColumn(
-            source=DuplicatedDocument, label=_('Duplicates'),
-            func=lambda context: context['object'].documents.count()
+            func=lambda context: context['object'].documents.count(),
+            label=_('Duplicates'), source=DuplicatedDocument
         )
 
         app.conf.beat_schedule.update(

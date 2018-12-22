@@ -133,58 +133,44 @@ class DocumentStatesApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=Workflow, label=_('Label'), attribute='label'
+            attribute='label', is_identifier=True, source=Workflow
         )
         SourceColumn(
-            source=Workflow, label=_('Internal name'),
-            attribute='internal_name'
+            attribute='internal_name', source=Workflow
         )
         SourceColumn(
-            source=Workflow, label=_('Initial state'),
-            func=lambda context: context['object'].get_initial_state() or _('None')
+            attribute='get_initial_state', source=Workflow,
         )
 
         SourceColumn(
-            source=WorkflowInstance, label=_('Current state'),
-            attribute='get_current_state'
+            attribute='get_current_state', source=WorkflowInstance
         )
         SourceColumn(
-            source=WorkflowInstance, label=_('User'),
-            func=lambda context: getattr(
-                context['object'].get_last_log_entry(), 'user', _('None')
-            )
+            attribute='get_last_transition_user', source=WorkflowInstance
         )
         SourceColumn(
-            source=WorkflowInstance, label=_('Last transition'),
-            attribute='get_last_transition'
+            attribute='get_last_transition', source=WorkflowInstance
         )
         SourceColumn(
-            source=WorkflowInstance, label=_('Date and time'),
-            func=lambda context: getattr(
-                context['object'].get_last_log_entry(), 'datetime', _('None')
-            )
+            attribute='get_last_transition_datetime', kwargs={
+                'formatted': True
+            }, source=WorkflowInstance
         )
         SourceColumn(
-            source=WorkflowInstance, label=_('Completion'),
-            func=lambda context: getattr(
-                context['object'].get_current_state(), 'completion', _('None')
-            )
+            attribute='get_current_completion', source=WorkflowInstance
         )
 
         SourceColumn(
-            source=WorkflowInstanceLogEntry, label=_('Date and time'),
-            attribute='datetime'
+            attribute='get_rendered_datetime', source=WorkflowInstanceLogEntry
         )
         SourceColumn(
-            source=WorkflowInstanceLogEntry, label=_('User'), attribute='user'
+            attribute='user', source=WorkflowInstanceLogEntry
         )
         SourceColumn(
-            source=WorkflowInstanceLogEntry, label=_('Transition'),
-            attribute='transition'
+            attribute='transition', source=WorkflowInstanceLogEntry
         )
         SourceColumn(
-            source=WorkflowInstanceLogEntry, label=_('Comment'),
-            attribute='comment'
+            attribute='comment', source=WorkflowInstanceLogEntry
         )
 
         SourceColumn(

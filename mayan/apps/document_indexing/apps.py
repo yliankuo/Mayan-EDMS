@@ -84,81 +84,75 @@ class DocumentIndexingApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(source=Index, label=_('Label'), attribute='label')
-        SourceColumn(source=Index, label=_('Slug'), attribute='slug')
+        SourceColumn(attribute='label', is_identifier=True, source=Index)
+        SourceColumn(attribute='slug', source=Index)
         SourceColumn(
-            source=Index, label=_('Enabled'),
             func=lambda context: TwoStateWidget(
                 state=context['object'].enabled
-            ).render()
+            ).render(), label=_('Enabled'), source=Index
         )
 
         SourceColumn(
-            source=IndexInstance, label=_('Total levels'),
             func=lambda context: context[
                 'object'
-            ].instance_root.get_descendants_count()
+            ].instance_root.get_descendants_count(), label=_('Total levels'),
+            source=IndexInstance,
         )
         SourceColumn(
-            source=IndexInstance, label=_('Total documents'),
             func=lambda context: context[
                 'object'
             ].instance_root.get_descendants_document_count(
                 user=context['request'].user
-            )
+            ), label=_('Total documents'), source=IndexInstance
         )
 
         SourceColumn(
-            source=IndexTemplateNode, label=_('Level'),
-            func=lambda context: node_level(context['object'])
+            func=lambda context: node_level(context['object']),
+            label=_('Level'), source=IndexTemplateNode
         )
         SourceColumn(
-            source=IndexTemplateNode, label=_('Enabled'),
             func=lambda context: TwoStateWidget(
                 state=context['object'].enabled
-            ).render()
+            ).render(), label=_('Enabled'), source=IndexTemplateNode
         )
         SourceColumn(
-            source=IndexTemplateNode, label=_('Has document links?'),
             func=lambda context: TwoStateWidget(
                 state=context['object'].link_documents
-            ).render()
+            ).render(), label=_('Has document links?'),
+            source=IndexTemplateNode,
         )
 
         SourceColumn(
-            source=IndexInstanceNode, label=_('Level'),
-            func=lambda context: index_instance_item_link(context['object'])
+            func=lambda context: index_instance_item_link(context['object']),
+            label=_('Level'), source=IndexInstanceNode
         )
         SourceColumn(
-            source=IndexInstanceNode, label=_('Levels'),
-            func=lambda context: context['object'].get_descendants_count()
+            func=lambda context: context['object'].get_descendants_count(),
+            label=_('Levels'), source=IndexInstanceNode
         )
         SourceColumn(
-            source=IndexInstanceNode, label=_('Documents'),
             func=lambda context: context[
                 'object'
             ].get_descendants_document_count(
                 user=context['request'].user
-            )
+            ), label=_('Documents'), source=IndexInstanceNode
         )
 
         SourceColumn(
-            source=DocumentIndexInstanceNode, label=_('Level'),
             func=lambda context: get_instance_link(
                 index_instance_node=context['object'],
-            )
+            ), label=_('Level'), source=DocumentIndexInstanceNode
         )
         SourceColumn(
-            source=DocumentIndexInstanceNode, label=_('Levels'),
-            func=lambda context: context['object'].get_descendants_count()
+            func=lambda context: context['object'].get_descendants_count(),
+            label=_('Levels'), source=DocumentIndexInstanceNode
         )
         SourceColumn(
-            source=DocumentIndexInstanceNode, label=_('Documents'),
             func=lambda context: context[
                 'object'
             ].get_descendants_document_count(
                 user=context['request'].user
-            )
+            ), label=_('Documents'), source=DocumentIndexInstanceNode
         )
 
         app.conf.task_queues.append(
