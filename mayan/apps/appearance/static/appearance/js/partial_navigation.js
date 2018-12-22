@@ -170,8 +170,7 @@ class PartialNavigation {
 
             $('#ajax-content').html(
                 ' \
-                    <h4>Server Error</h4> \
-                    <p>Status code: ' + jqXHR.status + '</p> \
+                    <div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-triangle"></i> Server Error, status code: ' + jqXHR.status + '</div> \
                     <pre class="pre-server-error"><code>' +  errorMessage +'</code> \
                     </pre> \
                 '
