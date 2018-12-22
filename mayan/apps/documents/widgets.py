@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django import forms
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
 
 from .settings import (
     setting_display_height, setting_display_width, setting_preview_height,
@@ -75,11 +74,3 @@ def document_link(document):
     return mark_safe('<a href="%s">%s</a>' % (
         document.get_absolute_url(), document)
     )
-
-
-def widget_document_page_number(context):
-    return context['object'].pages.count()
-
-
-def widget_document_version_page_number(context):
-    return context['object'].pages.count()

@@ -57,28 +57,22 @@ class LinkingApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=ResolvedSmartLink, label=_('Label'),
             func=lambda context: context['object'].get_label_for(
                 document=context['document']
-            )
+            ), label=_('Label'), source=ResolvedSmartLink
         )
 
         SourceColumn(
-            source=SmartLink, label=_('Dynamic label'),
-            attribute='dynamic_label'
+            attribute='label', is_identifier=True, source=SmartLink
         )
+        SourceColumn(attribute='dynamic_label', source=SmartLink)
         SourceColumn(
-            source=SmartLink, label=_('Enabled'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render()
+            attribute='enabled', source=SmartLink, widget=TwoStateWidget
         )
 
         SourceColumn(
-            source=SmartLinkCondition, label=_('Enabled'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render()
+            attribute='enabled', source=SmartLinkCondition,
+            widget=TwoStateWidget
         )
 
         menu_facet.bind_links(

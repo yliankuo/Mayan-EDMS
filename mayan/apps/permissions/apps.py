@@ -11,6 +11,7 @@ from mayan.apps.common import (
     menu_secondary, menu_setup
 )
 from mayan.apps.common.signals import perform_upgrade
+from mayan.apps.navigation import SourceColumn
 
 from .handlers import handler_purge_permissions
 from .links import (
@@ -47,6 +48,8 @@ class PermissionsApp(MayanAppConfig):
                 permission_role_view
             )
         )
+
+        SourceColumn(attribute='label', is_identifier=True, source=Role)
 
         menu_list_facet.bind_links(
             links=(

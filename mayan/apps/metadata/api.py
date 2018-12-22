@@ -35,15 +35,41 @@ def decode_metadata_from_querystring(querystring=None):
     return metadata_list
 
 
-def save_metadata_list(metadata_list, document, create=False, _user=None):
+def metadata_repr(metadata_list):
     """
-    Take a list of metadata dictionaries and associate them to a
-    document
+    Return a printable representation of a metadata list
     """
-    for item in metadata_list:
-        save_metadata(
-            metadata_dict=item, document=document, create=create, _user=_user
-        )
+    return ', '.join(metadata_repr_as_list(metadata_list))
+
+
+def metadata_repr_as_list(metadata_list):
+    """
+    Turn a list of metadata into a list of printable representations
+    """
+    output = []
+    for metadata_dict in metadata_list:
+        try:
+            output.append('%s - %s' % (MetadataType.objects.get(
+                pk=metadata_dict['id']), metadata_dict.get('value', '')))
+        except Exception:
+            pass
+
+    return output
+
+
+def set_bulk_metadata(document, metadata_dictionary):
+    document_type = document.document_type
+    document_type_metadata_types = [
+        document_type_metadata_type.metadata_type for document_type_metadata_type in document_type.metadata.all()
+    ]
+
+    for metadata_type_name, value in metadata_dictionary.items():
+        metadata_type = MetadataType.objects.get(name=metadata_type_name)
+
+        if metadata_type in document_type_metadata_types:
+            DocumentMetadata.objects.get_or_create(
+                document=document, metadata_type=metadata_type, value=value
+            )
 
 
 def save_metadata(metadata_dict, document, create=False, _user=None):
@@ -84,38 +110,12 @@ def save_metadata(metadata_dict, document, create=False, _user=None):
         document_metadata.save(_user=_user)
 
 
-def metadata_repr(metadata_list):
+def save_metadata_list(metadata_list, document, create=False, _user=None):
     """
-    Return a printable representation of a metadata list
+    Take a list of metadata dictionaries and associate them to a
+    document
     """
-    return ', '.join(metadata_repr_as_list(metadata_list))
-
-
-def metadata_repr_as_list(metadata_list):
-    """
-    Turn a list of metadata into a list of printable representations
-    """
-    output = []
-    for metadata_dict in metadata_list:
-        try:
-            output.append('%s - %s' % (MetadataType.objects.get(
-                pk=metadata_dict['id']), metadata_dict.get('value', '')))
-        except Exception:
-            pass
-
-    return output
-
-
-def set_bulk_metadata(document, metadata_dictionary):
-    document_type = document.document_type
-    document_type_metadata_types = [
-        document_type_metadata_type.metadata_type for document_type_metadata_type in document_type.metadata.all()
-    ]
-
-    for metadata_type_name, value in metadata_dictionary.items():
-        metadata_type = MetadataType.objects.get(name=metadata_type_name)
-
-        if metadata_type in document_type_metadata_types:
-            DocumentMetadata.objects.get_or_create(
-                document=document, metadata_type=metadata_type, value=value
-            )
+    for item in metadata_list:
+        save_metadata(
+            metadata_dict=item, document=document, create=create, _user=_user
+        )

@@ -6,6 +6,8 @@ import shutil
 
 import gnupg
 
+from django.utils.translation import ugettext_lazy as _
+
 from mayan.apps.common.utils import mkdtemp
 
 
@@ -149,6 +151,7 @@ class KeyStub(object):
     @property
     def key_id(self):
         return self.fingerprint[-8:]
+    key_id.fget.short_description = _('Key ID')
 
 
 class SignatureVerification(object):

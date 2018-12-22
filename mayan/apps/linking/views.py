@@ -139,7 +139,7 @@ class SmartLinkListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_smart_link_setup,
             'no_results_main_link': link_smart_link_create.resolve(
                 context=RequestContext(request=self.request)

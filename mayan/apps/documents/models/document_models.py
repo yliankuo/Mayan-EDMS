@@ -7,11 +7,14 @@ from django.apps import apps
 from django.conf import settings
 from django.core.files import File
 from django.db import models
+from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
+
+from mayan.apps.acls.models import AccessControlList
 
 from ..events import (
     event_document_create, event_document_properties_edit,
@@ -21,6 +24,7 @@ from ..managers import (
     DocumentManager, DuplicatedDocumentManager, FavoriteDocumentManager,
     PassthroughManager, RecentDocumentManager, TrashCanManager
 )
+from ..permissions import permission_document_view
 from ..settings import setting_language
 from ..signals import post_document_type_change
 
@@ -77,7 +81,6 @@ class Document(models.Model):
             'Whether or not this document is in the trash.'
         ), editable=False, verbose_name=_('In trash?')
     )
-    # TODO: set editable to False
     deleted_date_time = models.DateTimeField(
         blank=True, editable=True, help_text=_(
             'The server date and time when the document was moved to the '
@@ -138,6 +141,24 @@ class Document(models.Model):
         latest_version = self.latest_version
         if latest_version:
             return latest_version.get_api_image_url(*args, **kwargs)
+
+    def get_duplicates(self):
+        try:
+            return DuplicatedDocument.objects.get(document=self).documents.all()
+        except DuplicatedDocument.DoesNotExist:
+            return Document.objects.none()
+
+    def get_page_count(self):
+        return self.pages.count()
+    get_page_count.short_description = _('Pages')
+
+    def get_rendered_deleted_date_time(self):
+        return Template('{{ instance.deleted_date_time }}').render(
+            context=Context({'instance': self})
+        )
+    get_rendered_deleted_date_time.short_description = _(
+        'Date and time trashed'
+    )
 
     def invalidate_cache(self):
         for document_version in self.versions.all():
@@ -283,6 +304,20 @@ class DuplicatedDocument(models.Model):
 
     def __str__(self):
         return force_text(self.document)
+
+
+class DuplicatedDocumentProxy(Document):
+    class Meta:
+        proxy = True
+        verbose_name = _('Duplicated document')
+        verbose_name_plural = _('Duplicated documents')
+
+    def get_duplicate_count(self, user):
+        queryset = AccessControlList.objects.filter_by_access(
+            permission=permission_document_view, user=user,
+            queryset=self.get_duplicates()
+        )
+        return queryset.count()
 
 
 @python_2_unicode_compatible

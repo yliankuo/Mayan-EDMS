@@ -85,6 +85,7 @@ class Key(models.Model):
         Short form key ID (using the first 8 characters).
         """
         return self.fingerprint[-8:]
+    key_id.fget.short_description = _('Key ID')
 
     def save(self, *args, **kwargs):
         import_results, key_info = gpg_backend.import_and_list_keys(

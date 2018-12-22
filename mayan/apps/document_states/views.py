@@ -62,7 +62,7 @@ class DocumentWorkflowInstanceListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_workflow_list,
             'no_results_text': _(
                 'Assign workflows to the document type of this document '
@@ -96,6 +96,13 @@ class WorkflowInstanceDetailView(SingleObjectListView):
         return {
             'hide_object': True,
             'navigation_object_list': ('object', 'workflow_instance'),
+            'no_results_text': _(
+                'This view will show the states changed as a workflow '
+                'instance is transitioned.'
+            ),
+            'no_results_title': _(
+                'There are no details for this workflow instance'
+            ),
             'object': self.get_workflow_instance().document,
             'title': _('Detail of workflow: %(workflow)s') % {
                 'workflow': self.get_workflow_instance()
@@ -509,7 +516,7 @@ class SetupWorkflowStateListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_workflow_state,
             'no_results_main_link': link_setup_workflow_state_create.resolve(
                 context=RequestContext(
@@ -624,7 +631,7 @@ class SetupWorkflowTransitionListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_workflow_transition,
             'no_results_main_link': link_setup_workflow_transition_create.resolve(
                 context=RequestContext(

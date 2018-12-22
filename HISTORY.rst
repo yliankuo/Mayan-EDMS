@@ -211,6 +211,9 @@
   clicking on the title of the body of the card, not just on
   the checkbox next to the title.
 - Event handler to highlight panels when selected.
+- Improve duplicated document display.
+- Filter document duplicted count by access.
+
 
 3.1.9 (2018-11-01)
 ==================

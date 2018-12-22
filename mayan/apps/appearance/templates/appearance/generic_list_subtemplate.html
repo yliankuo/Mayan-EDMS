@@ -98,7 +98,7 @@
                                 {% endif %}
                                  {% if not hide_columns %}
                                     {% for column in object|get_source_columns %}
-                                        <td>{% source_column_resolve column=column %}{{ column_result }}</td>
+                                        <td>{% source_column_resolve column=column as column_value %}{{ column_value }}</td>{# Use explicit 'as column_value ' to force date rendering #}
                                     {% endfor %}
                                 {% endif %}
                                 {% for column in extra_columns %}

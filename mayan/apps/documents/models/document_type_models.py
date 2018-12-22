@@ -87,10 +87,11 @@ class DocumentType(models.Model):
 
     def get_document_count(self, user):
         queryset = AccessControlList.objects.filter_by_access(
-            permission_document_view, user, queryset=self.documents
+            permission=permission_document_view, user=user,
+            queryset=self.documents
         )
-
         return queryset.count()
+    get_document_count.short_description = _('Documents')
 
     def natural_key(self):
         return (self.label,)

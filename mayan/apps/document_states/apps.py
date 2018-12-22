@@ -135,16 +135,14 @@ class DocumentStatesApp(MayanAppConfig):
         SourceColumn(
             attribute='label', is_identifier=True, source=Workflow
         )
-        SourceColumn(
-            attribute='internal_name', source=Workflow
-        )
-        SourceColumn(
-            attribute='get_initial_state', source=Workflow,
-        )
+        SourceColumn(attribute='internal_name', source=Workflow)
+        SourceColumn(attribute='get_initial_state', source=Workflow)
 
         SourceColumn(
-            attribute='get_current_state', source=WorkflowInstance
+            attribute='workflow', is_identifier=True,
+            source=WorkflowInstance
         )
+        SourceColumn(attribute='get_current_state', source=WorkflowInstance)
         SourceColumn(
             attribute='get_last_transition_user', source=WorkflowInstance
         )
@@ -163,57 +161,40 @@ class DocumentStatesApp(MayanAppConfig):
         SourceColumn(
             attribute='get_rendered_datetime', source=WorkflowInstanceLogEntry
         )
-        SourceColumn(
-            attribute='user', source=WorkflowInstanceLogEntry
-        )
-        SourceColumn(
-            attribute='transition', source=WorkflowInstanceLogEntry
-        )
-        SourceColumn(
-            attribute='comment', source=WorkflowInstanceLogEntry
-        )
+        SourceColumn(attribute='user', source=WorkflowInstanceLogEntry)
+        SourceColumn(attribute='transition', source=WorkflowInstanceLogEntry)
+        SourceColumn(attribute='comment', source=WorkflowInstanceLogEntry)
 
         SourceColumn(
-            source=WorkflowState, label=_('Is initial state?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].initial
-            ).render()
+            attribute='label', is_identifier=True, source=WorkflowState
         )
         SourceColumn(
-            source=WorkflowState, label=_('Completion'), attribute='completion'
+            attribute='initial', source=WorkflowState, widget=TwoStateWidget
         )
+        SourceColumn(attribute='completion', source=WorkflowState)
 
         SourceColumn(
-            source=WorkflowStateAction, label=_('Label'), attribute='label'
+            attribute='label', is_identifier=True, source=WorkflowStateAction
         )
         SourceColumn(
-            source=WorkflowStateAction, label=_('Enabled?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render()
+            attribute='enabled', source=WorkflowStateAction,
+            widget=TwoStateWidget
         )
         SourceColumn(
-            source=WorkflowStateAction, label=_('When?'),
-            attribute='get_when_display'
+            attribute='get_when_display', label=_('When?'),
+            source=WorkflowStateAction
         )
-        SourceColumn(
-            source=WorkflowStateAction, label=_('Action type'),
-            attribute='get_class_label'
-        )
+        SourceColumn(attribute='get_class_label', source=WorkflowStateAction)
 
         SourceColumn(
-            source=WorkflowTransition, label=_('Origin state'),
-            attribute='origin_state'
+            attribute='label', is_identifier=True, source=WorkflowTransition
         )
+        SourceColumn(attribute='origin_state', source=WorkflowTransition)
+        SourceColumn(attribute='destination_state', source=WorkflowTransition)
         SourceColumn(
-            source=WorkflowTransition, label=_('Destination state'),
-            attribute='destination_state'
-        )
-        SourceColumn(
-            source=WorkflowTransition, label=_('Triggers'),
             func=lambda context: widget_transition_events(
                 transition=context['object']
-            )
+            ), label=_('Triggers'), source=WorkflowTransition
         )
 
         app.conf.task_queues.extend(

@@ -53,30 +53,16 @@ class MailerApp(MayanAppConfig):
 
         MailerBackend.initialize()
 
+        SourceColumn(attribute='datetime', source=LogEntry)
+        SourceColumn(attribute='message', source=LogEntry)
+        SourceColumn(attribute='label', is_identifier=True, source=UserMailer)
         SourceColumn(
-            source=LogEntry, label=_('Date and time'), attribute='datetime'
+            attribute='default', source=UserMailer, widget=TwoStateWidget
         )
         SourceColumn(
-            source=LogEntry, label=_('Message'), attribute='message'
+            attribute='enabled', source=UserMailer, widget=TwoStateWidget
         )
-        SourceColumn(
-            source=UserMailer, label=_('Label'), attribute='label'
-        )
-        SourceColumn(
-            source=UserMailer, label=_('Default?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].default
-            ).render()
-        )
-        SourceColumn(
-            source=UserMailer, label=_('Enabled?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render()
-        )
-        SourceColumn(
-            source=UserMailer, label=_('Label'), attribute='backend_label'
-        )
+        SourceColumn(attribute='backend_label', source=UserMailer)
 
         ModelPermission.register(
             model=Document, permissions=(

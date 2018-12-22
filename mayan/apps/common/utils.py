@@ -4,7 +4,6 @@ import logging
 import os
 import shutil
 import tempfile
-import types
 
 from django.conf import settings
 from django.db.models.constants import LOOKUP_SEP
@@ -18,7 +17,6 @@ from django.utils.six.moves import xmlrpc_client
 from django.utils.translation import ugettext_lazy as _
 
 import mayan
-from mayan.apps.common.compat import dict_type, dictionary_type
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
 from .literals import DJANGO_SQLITE_BACKEND, MAYAN_PYPI_NAME, PYPI_URL
@@ -155,9 +153,9 @@ def resolve_attribute(obj, attribute, kwargs=None):
             except AttributeError:
                 # Try as a related model field
                 if LOOKUP_SEP in attribute:
-                    attrib = attribute.replace(LOOKUP_SEP, '.')
+                    attribute_replaced = attribute.replace(LOOKUP_SEP, '.')
                     return resolve_attribute(
-                        obj=obj, attribute=attribute, kwargs=kwargs
+                        obj=obj, attribute=attribute_replaced, kwargs=kwargs
                     )
                 else:
                     raise

@@ -318,6 +318,7 @@ class WorkflowStateAction(models.Model):
 
     def get_class_label(self):
         return self.get_class().label
+    get_class_label.short_description = _('Action type')
 
     def loads(self):
         return json.loads(self.action_data)

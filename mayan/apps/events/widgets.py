@@ -5,15 +5,18 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.common.utils import resolve_attribute
+
 from .classes import EventType
 
 
-def event_object_link(entry, attribute='target'):
+def widget_event_object_link(context, attribute='target'):
+    entry = context['object']
     label = ''
     url = '#'
     obj_type = ''
 
-    obj = getattr(entry, attribute)
+    obj = resolve_attribute(obj=entry, attribute=attribute)
 
     if obj:
         obj_type = '{}: '.format(obj._meta.verbose_name)
@@ -28,7 +31,12 @@ def event_object_link(entry, attribute='target'):
     )
 
 
-def event_type_link(entry):
+def widget_event_type_link(context, attribute=None):
+    entry = context['object']
+
+    if attribute:
+        entry = getattr(entry, attribute)
+
     return mark_safe(
         '<a href="%(url)s">%(label)s</a>' % {
             'url': reverse('events:events_by_verb', kwargs={'verb': entry.verb}),
@@ -37,7 +45,12 @@ def event_type_link(entry):
     )
 
 
-def event_user_link(entry):
+def widget_event_user_link(context, attribute=None):
+    entry = context['object']
+
+    if attribute:
+        entry = getattr(entry, attribute)
+
     if entry.actor == entry.target:
         return _('System')
     else:

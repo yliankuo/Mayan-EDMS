@@ -44,22 +44,24 @@ class DjangoGPGApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(source=Key, label=_('Key ID'), attribute='key_id')
-        SourceColumn(source=Key, label=_('User ID'), attribute='user_id')
+        SourceColumn(attribute='key_id', is_identifier=True, source=Key)
+        SourceColumn(attribute='user_id', source=Key)
 
-        SourceColumn(source=KeyStub, label=_('Key ID'), attribute='key_id')
-        SourceColumn(source=KeyStub, label=_('Type'), attribute='key_type')
         SourceColumn(
-            source=KeyStub, label=_('Creation date'), attribute='date'
+            attribute='key_id.fget', is_identifier=True, source=KeyStub
+        )
+        SourceColumn(attribute='key_type', label=_('Type'), source=KeyStub)
+        SourceColumn(
+            attribute='date', label=_('Creation date'), source=KeyStub
         )
         SourceColumn(
-            source=KeyStub, label=_('Expiration date'),
-            func=lambda context: context['object'].expires or _('No expiration')
+            attribute='expires', empty_value=_('No expiration'),
+            label=_('Expiration date'), source=KeyStub
         )
-        SourceColumn(source=KeyStub, label=_('Length'), attribute='length')
+        SourceColumn(attribute='length', label=_('Length'), source=KeyStub)
         SourceColumn(
-            source=KeyStub, label=_('User ID'),
-            func=lambda context: ', '.join(context['object'].user_id)
+            func=lambda context: ', '.join(context['object'].user_id),
+            label=_('User ID'), source=KeyStub
         )
 
         menu_object.bind_links(links=(link_key_detail,), sources=(Key,))

@@ -110,16 +110,16 @@ class OCRApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentVersionOCRError, label=_('Document'),
-            func=lambda context: document_link(context['object'].document_version.document)
+            func=lambda context: document_link(
+                context['object'].document_version.document
+            ), label=_('Document'), source=DocumentVersionOCRError
         )
         SourceColumn(
-            source=DocumentVersionOCRError, label=_('Added'),
-            attribute='datetime_submitted'
+            attribute='datetime_submitted', label=_('Date and time'),
+            source=DocumentVersionOCRError
         )
         SourceColumn(
-            source=DocumentVersionOCRError, label=_('Result'),
-            attribute='result'
+            attribute='result', source=DocumentVersionOCRError
         )
 
         app.conf.task_queues.append(

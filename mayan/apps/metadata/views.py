@@ -402,7 +402,7 @@ class DocumentMetadataListView(SingleObjectListView):
     def get_extra_context(self):
         document = self.get_document()
         return {
-            'hide_link': True,
+            'hide_object': True,
             'object': document,
             'no_results_icon': icon_metadata,
             'no_results_main_link': link_metadata_add.resolve(
@@ -618,13 +618,7 @@ class MetadataTypeListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'extra_columns': (
-                {
-                    'name': _('Internal name'),
-                    'attribute': 'name',
-                },
-            ),
-            'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_metadata,
             'no_results_main_link': link_setup_metadata_type_create.resolve(
                 context=RequestContext(request=self.request)

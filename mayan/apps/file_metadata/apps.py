@@ -121,16 +121,17 @@ class FileMetadataApp(MayanAppConfig):
             model=DocumentTypeSettings, related='document_type',
         )
 
-        SourceColumn(source=FileMetadataEntry, attribute='key')
-        SourceColumn(source=FileMetadataEntry, attribute='value')
+        SourceColumn(attribute='key', source=FileMetadataEntry)
+        SourceColumn(attribute='value', source=FileMetadataEntry)
         SourceColumn(
-            source=DocumentVersionDriverEntry, attribute='driver'
+            attribute='driver', source=DocumentVersionDriverEntry
         )
         SourceColumn(
-            source=DocumentVersionDriverEntry, attribute='driver__internal_name'
+            attribute='driver__internal_name',
+            source=DocumentVersionDriverEntry
         )
         SourceColumn(
-            source=DocumentVersionDriverEntry, attribute='get_attribute_count'
+            attribute='get_attribute_count', source=DocumentVersionDriverEntry
         )
 
         app.conf.task_queues.append(

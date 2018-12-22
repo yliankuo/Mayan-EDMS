@@ -15,9 +15,12 @@ from django.template import VariableDoesNotExist, Variable
 from django.template.defaulttags import URLNode
 from django.urls import Resolver404, resolve
 from django.utils.encoding import force_str, force_text
+from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.common.utils import resolve_attribute
 from mayan.apps.permissions import Permission
+
+from .exceptions import NavigationError
 
 logger = logging.getLogger(__name__)
 
@@ -527,10 +530,11 @@ class SourceColumn(object):
             else:
                 return result
 
-    def __init__(self, source, label=None, attribute=None, func=None, kwargs=None, order=None, is_identifier=False):
+    def __init__(self, source, attribute=None, empty_value=None, func=None, is_identifier=False, kwargs=None, label=None, order=None, widget=None):
         self.source = source
         self._label = label
         self.attribute = attribute
+        self.empty_value = empty_value
         self.func = func
         self.kwargs = kwargs or {}
         self.order = order or 0
@@ -538,20 +542,29 @@ class SourceColumn(object):
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
         self.label = None
+        self.widget = widget
+        if not attribute and not func:
+            raise NavigationError(
+                'Must provide either an attribute or a function'
+            )
 
         self._calculate_label()
 
     def _calculate_label(self):
         if not self._label:
             if self.attribute:
-                name, model = SourceColumn.get_attribute_recursive(
-                    attribute=self.attribute, model=self.source._meta.model
-                )
-                self._label = label_for_field(
-                    name=name, model=model
-                )
+                try:
+                    attribute = resolve_attribute(obj=self.source, attribute=self.attribute)
+                    self._label = getattr(attribute, 'short_description')
+                except AttributeError:
+                    name, model = SourceColumn.get_attribute_recursive(
+                        attribute=self.attribute, model=self.source._meta.model
+                    )
+                    self._label = label_for_field(
+                        name=name, model=model
+                    )
             else:
-                self._label = 'Function'
+                self._label = getattr(self.func, 'short_description', _('Unnamed function'))
 
         self.label = self._label
 
@@ -564,7 +577,17 @@ class SourceColumn(object):
         elif self.func:
             result = self.func(context=context, **self.kwargs)
 
-        return result
+        if self.widget:
+            widget_instance = self.widget()
+            return widget_instance.render(name='asd', value=result)
+
+        if not result:
+            if self.empty_value:
+                return self.empty_value
+            else:
+                return result
+        else:
+            return result
 
 
 class Text(Link):

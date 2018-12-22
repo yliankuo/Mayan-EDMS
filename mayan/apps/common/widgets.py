@@ -89,18 +89,17 @@ class TextAreaDiv(forms.widgets.Widget):
 
 
 class TwoStateWidget(object):
-    def __init__(self, state, center=False, icon_ok=None, icon_fail=None):
-        self.state = state
+    def __init__(self, center=False, icon_ok=None, icon_fail=None):
         self.icon_ok = icon_ok or default_icon_ok
         self.icon_fail = icon_fail or default_icon_fail
         self.center = center
 
-    def render(self):
+    def render(self, name=None, value=None):
         center_class = ''
         if self.center:
             center_class = 'text-center'
 
-        if self.state:
+        if value:
             return mark_safe(
                 '<div class="{} text-success">{}</div>'.format(
                     center_class, self.icon_ok.render()

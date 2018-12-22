@@ -23,6 +23,10 @@ from pure_pagination.mixins import PaginationMixin
 
 from .forms import ChoiceForm
 from .icons import icon_assign_remove_add, icon_assign_remove_remove
+from .literals import (
+    TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST, TEXT_LIST_AS_ITEMS,
+    TEXT_LIST_AS_ITEMS_PARAMETER
+)
 from .mixins import (
     DeleteExtraDataMixin, DynamicFormViewMixin, ExtraContextMixin,
     FormExtraKwargsMixin, MultipleObjectMixin, ObjectActionMixin,
@@ -500,14 +504,17 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
 
     def get_context_data(self, **kwargs):
         context = super(SingleObjectListView, self).get_context_data(**kwargs)
-        if context.get('list_as_items'):
-            default_mode = 'items'
+
+        if context.get(TEXT_LIST_AS_ITEMS):
+            default_mode = TEXT_CHOICE_ITEMS
         else:
-            default_mode = 'list'
+            default_mode = TEXT_CHOICE_LIST
 
-        list_mode = self.request.GET.get('_list_mode', default_mode)
+        list_mode = self.request.GET.get(
+            TEXT_LIST_AS_ITEMS_PARAMETER, default_mode
+        )
 
-        context.update({'list_as_items': list_mode=='items'})
+        context.update({TEXT_LIST_AS_ITEMS: list_mode == TEXT_CHOICE_ITEMS})
         return context
 
     def get_paginate_by(self, queryset):

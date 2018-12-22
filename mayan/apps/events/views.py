@@ -13,7 +13,6 @@ from actstream.models import Action, any_stream
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import FormView, SimpleView
-from mayan.apps.common.utils import encapsulate
 from mayan.apps.common.views import SingleObjectListView
 
 from .classes import EventType, ModelEventType
@@ -26,7 +25,6 @@ from .icons import (
 from .links import link_event_types_subscriptions_list
 from .models import StoredEventType
 from .permissions import permission_events_view
-from .widgets import event_object_link
 
 
 class EventListView(SingleObjectListView):
@@ -34,14 +32,6 @@ class EventListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'extra_columns': (
-                {
-                    'name': _('Target'),
-                    'attribute': encapsulate(
-                        lambda entry: event_object_link(entry)
-                    )
-                },
-            ),
             'hide_object': True,
             'title': _('Events'),
         }
@@ -270,14 +260,6 @@ class UserEventListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'extra_columns': (
-                {
-                    'name': _('Target'),
-                    'attribute': encapsulate(
-                        lambda entry: event_object_link(entry)
-                    )
-                },
-            ),
             'hide_object': True,
             'no_results_icon': icon_events_user_list,
             'no_results_text': _(
@@ -308,14 +290,6 @@ class CurrentUserEventListView(UserEventListView):
 class VerbEventListView(SingleObjectListView):
     def get_extra_context(self):
         return {
-            'extra_columns': (
-                {
-                    'name': _('Target'),
-                    'attribute': encapsulate(
-                        lambda entry: event_object_link(entry)
-                    )
-                },
-            ),
             'hide_object': True,
             'title': _(
                 'Events of type: %s'

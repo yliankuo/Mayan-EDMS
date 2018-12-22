@@ -37,4 +37,3 @@ class ClassesTestCase(BaseTestCase):
         setting_value = setting_paginate_by.value
         os.environ.pop('MAYAN_{}'.format(TEST_SETTING_NAME))
         self.assertEqual(setting_value, TEST_SETTING_VALUE)
-

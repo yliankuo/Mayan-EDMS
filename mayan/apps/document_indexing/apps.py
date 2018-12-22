@@ -87,9 +87,7 @@ class DocumentIndexingApp(MayanAppConfig):
         SourceColumn(attribute='label', is_identifier=True, source=Index)
         SourceColumn(attribute='slug', source=Index)
         SourceColumn(
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render(), label=_('Enabled'), source=Index
+            attribute='enabled', source=Index, widget=TwoStateWidget
         )
 
         SourceColumn(
@@ -111,15 +109,12 @@ class DocumentIndexingApp(MayanAppConfig):
             label=_('Level'), source=IndexTemplateNode
         )
         SourceColumn(
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render(), label=_('Enabled'), source=IndexTemplateNode
+            attribute='enabled', source=IndexTemplateNode,
+            widget=TwoStateWidget
         )
         SourceColumn(
-            func=lambda context: TwoStateWidget(
-                state=context['object'].link_documents
-            ).render(), label=_('Has document links?'),
-            source=IndexTemplateNode,
+            attribute='link_documents', source=IndexTemplateNode,
+            widget=TwoStateWidget
         )
 
         SourceColumn(

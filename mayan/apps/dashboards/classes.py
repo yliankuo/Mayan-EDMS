@@ -1,12 +1,6 @@
 from __future__ import unicode_literals
 
-from django.apps import apps
-from django.db import models
 from django.template import loader
-from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.encoding import force_text, python_2_unicode_compatible
-from django.utils.translation import ugettext
 
 
 class Dashboard(object):

@@ -128,10 +128,10 @@ class DuplicatedDocumentManager(models.Manager):
         self.filter(documents=None).delete()
 
     def get_duplicated_documents(self):
-        Document = apps.get_model(
-            app_label='documents', model_name='Document'
+        DuplicatedDocumentProxy = apps.get_model(
+            app_label='documents', model_name='DuplicatedDocumentProxy'
         )
-        return Document.objects.filter(
+        return DuplicatedDocumentProxy.objects.filter(
             pk__in=self.filter(documents__isnull=False).values_list(
                 'document_id', flat=True
             )

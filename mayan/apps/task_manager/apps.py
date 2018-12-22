@@ -33,16 +33,12 @@ class TaskManagerApp(MayanAppConfig):
             source=CeleryQueue, label=_('Name'), attribute='name'
         )
         SourceColumn(
-            source=CeleryQueue, label=_('Default queue?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].is_default_queue
-            ).render()
+            attribute='is_default_queue', label=_('Default queue?'),
+            source=CeleryQueue, widget=TwoStateWidget
         )
         SourceColumn(
-            source=CeleryQueue, label=_('Is transient?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].is_transient
-            ).render()
+            attribute='is_transient', label=_('Is transient?'),
+            source=CeleryQueue, widget=TwoStateWidget
         )
         SourceColumn(
             source=Task, label=_('Type'), attribute='task_type'
@@ -54,12 +50,12 @@ class TaskManagerApp(MayanAppConfig):
             source=Task, label=_('Host'),
             func=lambda context: context['object'].kwargs['hostname']
         )
-        SourceColumn(
-            source=Task, label=_('Acknowledged'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].kwargs['acknowledged']
-            ).render()
-        )
+        #SourceColumn(
+        #    source=Task, label=_('Acknowledged'),
+        #    func=lambda context: TwoStateWidget(
+        #        state=context['object'].kwargs['acknowledged']
+        #    ).render()
+        #)
         SourceColumn(
             source=Task, label=_('Arguments'),
             func=lambda context: context['object'].kwargs['args']

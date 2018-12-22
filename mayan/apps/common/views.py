@@ -28,7 +28,7 @@ from .generics import (  # NOQA
     SingleObjectDownloadView, SingleObjectDynamicFormCreateView,
     SingleObjectDynamicFormEditView, SingleObjectEditView, SingleObjectListView
 )
-from .icons import icon_setup
+from .icons import icon_object_error_list, icon_setup
 from .menus import menu_setup, menu_tools
 from .permissions_runtime import permission_error_log_view
 from .settings import setting_home_view
@@ -211,6 +211,15 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
                 {'name': _('Result'), 'attribute': 'result'},
             ),
             'hide_object': True,
+            'no_results_icon': icon_object_error_list,
+            'no_results_text': _(
+                'Errors during the operation of some objects are recorded '
+                'in this view. Some objects automatically clear their '
+                'errors on subsequent successful operation.'
+            ),
+            'no_results_title': _(
+                'There are no errors for this object'
+            ),
             'object': self.get_object(),
             'title': _('Error log entries for: %s' % self.get_object()),
         }

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class LogEntry(models.Model):
     datetime = models.DateTimeField(
-        auto_now_add=True, editable=False, verbose_name=_('Date time')
+        auto_now_add=True, editable=False, verbose_name=_('Date and time')
     )
     message = models.TextField(
         blank=True, editable=False, verbose_name=_('Message')
@@ -76,6 +76,7 @@ class UserMailer(models.Model):
         property.
         """
         return self.get_backend().label
+    backend_label.short_description = _('Backend label')
 
     def dumps(self, data):
         """

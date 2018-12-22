@@ -11,6 +11,12 @@ MESSAGE_SQLITE_WARNING = _(
     'for development and testing, not for production.'
 )
 PYPI_URL = 'https://pypi.python.org/pypi'
+
+TEXT_LIST_AS_ITEMS_PARAMETER = '_list_mode'
+TEXT_LIST_AS_ITEMS = 'list_as_items'
+TEXT_CHOICE_ITEMS = 'items'
+TEXT_CHOICE_LIST = 'list'
+
 TIME_DELTA_UNIT_DAYS = 'days'
 TIME_DELTA_UNIT_HOURS = 'hours'
 TIME_DELTA_UNIT_MINUTES = 'minutes'

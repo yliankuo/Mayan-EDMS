@@ -32,10 +32,6 @@ def get_kwargs_factory(variable_name):
     return get_kwargs
 
 
-def get_notification_count(context):
-    return context['request'].user.notifications.filter(read=False).count()
-
-
 link_current_user_events = Link(
     icon_class=icon_events_user_list, text=_('My events'),
     view='events:current_user_events'

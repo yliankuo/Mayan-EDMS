@@ -101,7 +101,7 @@ class TagsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='label', source=DocumentTag,
+            attribute='label', is_identifier=True, source=DocumentTag,
         )
         SourceColumn(
             attribute='get_preview_widget', source=DocumentTag

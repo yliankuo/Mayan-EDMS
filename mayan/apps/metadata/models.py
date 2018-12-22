@@ -265,6 +265,7 @@ class DocumentMetadata(models.Model):
         return self.metadata_type.get_required_for(
             document_type=self.document.document_type
         )
+    is_required.fget.short_description = _('Required')
 
     def save(self, *args, **kwargs):
         if self.metadata_type.pk not in self.document.document_type.metadata.values_list('metadata_type', flat=True):

@@ -12,6 +12,7 @@ from mayan.apps.acls.permissions import (
 from mayan.apps.common import (
     MayanAppConfig, menu_list_facet, menu_object, menu_secondary, menu_setup
 )
+from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
 
 from .links import (
@@ -45,16 +46,18 @@ class MOTDApp(MayanAppConfig):
                 permission_message_view
             )
         )
+
         SourceColumn(
-            source=Message, label=_('Enabled'), attribute='enabled'
+            attribute='label', is_identifier=True, source=Message
         )
         SourceColumn(
-            source=Message, label=_('Start date time'),
-            func=lambda context: context['object'].start_datetime or _('None')
+            attribute='enabled', source=Message, widget=TwoStateWidget
         )
         SourceColumn(
-            source=Message, label=_('End date time'),
-            func=lambda context: context['object'].end_datetime or _('None')
+            attribute='start_datetime', empty_value=_('None'), source=Message
+        )
+        SourceColumn(
+            attribute='end_datetime', empty_value=_('None'), source=Message
         )
 
         menu_list_facet.bind_links(

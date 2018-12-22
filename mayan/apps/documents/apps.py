@@ -104,10 +104,7 @@ from .queues import *  # NOQA
 from .search import document_page_search, document_search  # NOQA
 from .signals import post_version_upload
 from .statistics import *  # NOQA
-from .widgets import (
-    DocumentPageThumbnailWidget, widget_document_page_number,
-    widget_document_version_page_number
-)
+from .widgets import DocumentPageThumbnailWidget
 
 
 class DocumentsApp(MayanAppConfig):
@@ -129,7 +126,7 @@ class DocumentsApp(MayanAppConfig):
         DocumentType = self.get_model('DocumentType')
         DocumentTypeFilename = self.get_model('DocumentTypeFilename')
         DocumentVersion = self.get_model('DocumentVersion')
-        DuplicatedDocument = self.get_model('DuplicatedDocument')
+        DuplicatedDocumentProxy = self.get_model('DuplicatedDocumentProxy')
 
         DynamicSerializerField.add_serializer(
             klass=Document,
@@ -244,9 +241,7 @@ class DocumentsApp(MayanAppConfig):
         SourceColumn(
             attribute='document_type', label=_('Type'), source=Document
         )
-        SourceColumn(
-            func=widget_document_page_number, label=_('Pages'), source=Document
-        )
+        SourceColumn(attribute='get_page_count', source=Document)
 
         # DocumentPage
         SourceColumn(
@@ -274,9 +269,8 @@ class DocumentsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            func=lambda context: TwoStateWidget(
-                state=context['object'].enabled
-            ).render(), label=_('Enabled'), source=DocumentTypeFilename
+            attribute='enabled', source=DocumentTypeFilename,
+            widget=TwoStateWidget
         )
 
         # DeletedDocument
@@ -290,41 +284,34 @@ class DocumentsApp(MayanAppConfig):
             attribute='document_type', source=DeletedDocument
         )
         SourceColumn(
-            attribute='deleted_date_time', source=DeletedDocument
+            attribute='get_rendered_deleted_date_time', source=DeletedDocument
         )
 
         # DocumentVersion
+        SourceColumn(
+            attribute='get_rendered_timestamp', is_identifier=True,
+            source=DocumentVersion
+        )
         SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             ), label=_('Thumbnail'), source=DocumentVersion
         )
-        SourceColumn(
-            attribute='timestamp', source=DocumentVersion
-        )
-        SourceColumn(
-            func=widget_document_version_page_number, label=_('Pages'),
-            source=DocumentVersion
-        )
-        SourceColumn(
-            attribute='mimetype', source=DocumentVersion
-        )
-        SourceColumn(
-            attribute='encoding', source=DocumentVersion
-        )
-        SourceColumn(
-            attribute='comment', source=DocumentVersion
-        )
+        SourceColumn(attribute='get_page_count', source=DocumentVersion)
+        SourceColumn(attribute='mimetype', source=DocumentVersion)
+        SourceColumn(attribute='encoding', source=DocumentVersion)
+        SourceColumn(attribute='comment', source=DocumentVersion)
 
         # DuplicatedDocument
         SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
-                instance=context['object'].document
-            ), label=_('Thumbnail'), source=DuplicatedDocument
+                instance=context['object']
+            ), label=_('Thumbnail'), source=DuplicatedDocumentProxy
         )
         SourceColumn(
-            func=lambda context: context['object'].documents.count(),
-            label=_('Duplicates'), source=DuplicatedDocument
+            func=lambda context: context['object'].get_duplicate_count(
+                user=context['request'].user,
+            ), label=_('Duplicates'), source=DuplicatedDocumentProxy
         )
 
         app.conf.beat_schedule.update(

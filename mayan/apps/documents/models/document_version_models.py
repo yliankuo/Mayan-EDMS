@@ -181,6 +181,10 @@ class DocumentVersion(models.Model):
                 )
                 raise
 
+    def get_page_count(self):
+        return self.pages.count()
+    get_page_count.short_description = _('Pages')
+
     def get_rendered_string(self, preserve_extension=False):
         if preserve_extension:
             filename, extension = os.path.splitext(self.document.label)
@@ -196,6 +200,7 @@ class DocumentVersion(models.Model):
         return Template('{{ instance.timestamp }}').render(
             context=Context({'instance': self})
         )
+    get_rendered_timestamp.short_description = _('Date and time')
 
     def natural_key(self):
         return (self.checksum, self.document.natural_key())

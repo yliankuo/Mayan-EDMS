@@ -31,20 +31,7 @@ from .permissions import (
     permission_user_view
 )
 from .search import *  # NOQA
-
-
-def get_groups():
-    Group = apps.get_model(app_label='auth', model_name='Group')
-    return ','.join([group.name for group in Group.objects.all()])
-
-
-def get_users():
-    return ','.join(
-        [
-            user.get_full_name() or user.username
-            for user in get_user_model().objects.all()
-        ]
-    )
+from .utils import get_groups, get_users
 
 
 class UserManagementApp(MayanAppConfig):
@@ -89,27 +76,27 @@ class UserManagementApp(MayanAppConfig):
                 permission_user_view
             )
         )
+
+        SourceColumn(attribute='name', is_identifier=True, source=Group)
         SourceColumn(
-            source=Group, label=_('Users'), attribute='user_set.count'
+            attribute='user_set.count', label=_('Users'), source=Group
         )
 
+        SourceColumn(attribute='username', is_identifier=True, source=User)
         SourceColumn(
-            source=User, label=_('Full name'), attribute='get_full_name'
+            attribute='get_full_name', label=_('Full name'), source=User
+        )
+        SourceColumn(attribute='email', label=_('Email'), source=User)
+        SourceColumn(
+            attribute='is_active', label=_('Active'), source=User,
+            widget=TwoStateWidget
         )
         SourceColumn(
-            source=User, label=_('Email'), attribute='email'
+            attribute='has_usable_password', source=User, widget=TwoStateWidget
         )
         SourceColumn(
-            source=User, label=_('Active'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].is_active
-            ).render()
-        )
-        SourceColumn(
-            source=User, label=_('Has usable password?'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].has_usable_password()
-            ).render()
+            attribute='has_usable_password', label=_('Has usable password?'),
+            source=User, widget=TwoStateWidget
         )
 
         menu_list_facet.bind_links(

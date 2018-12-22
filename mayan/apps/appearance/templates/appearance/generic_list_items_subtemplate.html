@@ -76,7 +76,7 @@
                                                             {{ object }}
                                                         {% endif %}
                                                     {% else %}
-                                                        {% source_column_resolve column=object|get_source_columns:"only_identifier" %}
+                                                        {% source_column_resolve column=object|get_source_columns:"only_identifier" as column_value %}{{ column_value }}
                                                     {% endif %}
                                                 </span>
                                             </label>

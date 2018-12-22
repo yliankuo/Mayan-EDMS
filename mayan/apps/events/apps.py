@@ -18,7 +18,9 @@ from .links import (
     link_notification_mark_read_all, link_user_events,
     link_user_notifications_list
 )
-from .widgets import event_object_link, event_type_link, event_user_link
+from .widgets import (
+    widget_event_object_link, widget_event_type_link, widget_event_user_link
+)
 
 
 class EventsApp(MayanAppConfig):
@@ -37,21 +39,22 @@ class EventsApp(MayanAppConfig):
         User = get_user_model()
 
         SourceColumn(
-            source=Action, label=_('Timestamp'), attribute='timestamp'
+            attribute='timestamp', is_identifier=True,
+            label=_('Date and time'), source=Action
         )
         SourceColumn(
-            source=Action, label=_('Actor'),
-            func=lambda context: event_user_link(context['object'])
+            func=widget_event_user_link, label=_('Actor'), source=Action
         )
         SourceColumn(
-            source=Action, label=_('Event'),
-            func=lambda context: event_type_link(context['object'])
+            func=widget_event_type_link, label=_('Event'), source=Action
         )
         SourceColumn(
-            source=Action, label=_('Action object'),
-            func=lambda context: event_object_link(
-                entry=context['object'], attribute='action_object'
-            )
+            func=widget_event_object_link, kwargs={
+                'attribute': 'action_object'
+            }, label=_('Action object'), source=Action
+        )
+        SourceColumn(
+            func=widget_event_object_link, label=_('Target'), source=Action
         )
 
         SourceColumn(
@@ -62,25 +65,27 @@ class EventsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=Notification, label=_('Timestamp'),
-            attribute='action.timestamp'
+            attribute='action.timestamp', is_identifier=True,
+            label=_('Date and time'), source=Notification
+
         )
         SourceColumn(
-            source=Notification, label=_('Actor'), attribute='action.actor'
+            func=widget_event_user_link, kwargs={'attribute': 'action'},
+            label=_('Actor'), source=Notification
         )
         SourceColumn(
-            source=Notification, label=_('Event'),
-            func=lambda context: event_type_link(context['object'].action)
+            func=widget_event_type_link, kwargs={'attribute': 'action'},
+            label=_('Event'), source=Notification
+        )
+
+        SourceColumn(
+            func=widget_event_object_link, kwargs={
+                'attribute': 'action.target'
+            }, label=_('Target'), source=Notification
         )
         SourceColumn(
-            source=Notification, label=_('Target'),
-            func=lambda context: event_object_link(context['object'].action)
-        )
-        SourceColumn(
-            source=Notification, label=_('Seen'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].read
-            ).render()
+            attribute='read', label=_('Seen'), source=Notification,
+            widget=TwoStateWidget
         )
 
         menu_list_facet.bind_links(

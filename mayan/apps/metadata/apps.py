@@ -54,7 +54,7 @@ from .permissions import (
 )
 from .queues import *  # NOQA
 from .search import metadata_type_search  # NOQA
-from .widgets import get_metadata_string
+from .widgets import widget_get_metadata_string
 
 logger = logging.getLogger(__name__)
 
@@ -144,27 +144,27 @@ class MetadataApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=Document, label=_('Metadata'),
-            func=lambda context: get_metadata_string(context['object'])
+            func=widget_get_metadata_string, source=Document
         )
 
         SourceColumn(
-            source=DocumentPageSearchResult, label=_('Metadata'),
-            func=lambda context: get_metadata_string(
-                context['object'].document
-            )
+            func=widget_get_metadata_string, kwargs={'attribute': 'document'},
+            source=DocumentPageSearchResult,
         )
 
         SourceColumn(
-            source=DocumentMetadata, label=_('Value'),
-            attribute='value'
+            attribute='metadata_type', is_identifier=True,
+            source=DocumentMetadata
+        )
+        SourceColumn(attribute='value', source=DocumentMetadata)
+        SourceColumn(
+            attribute='is_required', source=DocumentMetadata,
+            widget=TwoStateWidget
         )
         SourceColumn(
-            source=DocumentMetadata, label=_('Required'),
-            func=lambda context: TwoStateWidget(
-                state=context['object'].is_required
-            ).render()
+            attribute='label', is_identifier=True, source=MetadataType
         )
+        SourceColumn(attribute='name', source=MetadataType)
 
         app.conf.task_queues.append(
             Queue('metadata', Exchange('metadata'), routing_key='metadata'),

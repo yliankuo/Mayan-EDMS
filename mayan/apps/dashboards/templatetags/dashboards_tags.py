@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.template import Context, Library
+from django.template import Library
 
 from ..classes import Dashboard
 
