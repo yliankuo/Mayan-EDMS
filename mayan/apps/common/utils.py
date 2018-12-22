@@ -130,29 +130,37 @@ def resolve(path, urlconf=None):
     return django_resolve(path=path, urlconf=urlconf)
 
 
-def resolve_attribute(obj, attrib, arguments=None):
-    if isinstance(attrib, types.FunctionType):
-        return attrib(obj)
-    elif isinstance(obj, dict_type) or isinstance(obj, dictionary_type):
-        return obj[attrib]
-    else:
+def resolve_attribute(obj, attribute, kwargs=None):
+    if not kwargs:
+        kwargs = {}
+
+    # Try as a callable
+    try:
+        return attribute(obj, **kwargs)
+    except TypeError:
+        # Try as a dictionary
         try:
-            result = reduce_function(getattr, attrib.split('.'), obj)
-            if isinstance(result, types.MethodType):
-                if arguments:
-                    return result(**arguments)
+            return obj[attribute]
+        except TypeError:
+            try:
+                # If there are dots in the attribute name, traverse them
+                # to the final attribute
+                result = reduce_function(getattr, attribute.split('.'), obj)
+                try:
+                    # Try it as a method
+                    return result(**kwargs)
+                except TypeError:
+                    # Try it as a property
+                    return result
+            except AttributeError:
+                # Try as a related model field
+                if LOOKUP_SEP in attribute:
+                    attrib = attribute.replace(LOOKUP_SEP, '.')
+                    return resolve_attribute(
+                        obj=obj, attribute=attribute, kwargs=kwargs
+                    )
                 else:
-                    return result()
-            else:
-                return result
-        except AttributeError:
-            if LOOKUP_SEP in attrib:
-                attrib = attrib.replace(LOOKUP_SEP, '.')
-                return resolve_attribute(
-                    obj=obj, attrib=attrib, arguments=arguments
-                )
-            else:
-                raise
+                    raise
 
 
 def return_related(instance, related_field):

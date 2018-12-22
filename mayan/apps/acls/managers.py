@@ -46,7 +46,7 @@ class AccessControlListManager(models.Manager):
                 stored_permissions = (permissions.stored_permission,)
 
             if related:
-                obj = resolve_attribute(obj, related)
+                obj = resolve_attribute(obj=obj, attribute=related)
 
             try:
                 parent_accessor = ModelPermission.get_inheritance(
@@ -200,7 +200,7 @@ class AccessControlListManager(models.Manager):
         else:
             try:
                 parent_object = resolve_attribute(
-                    obj=instance, attrib=parent_accessor
+                    obj=instance, attribute=parent_accessor
                 )
             except AttributeError:
                 # Parent accessor is not an attribute, try it as a related

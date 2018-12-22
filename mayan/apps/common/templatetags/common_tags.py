@@ -32,8 +32,8 @@ def get_collections():
 @register.filter
 def get_encoded_parameter(item, parameters_dict):
     result = {}
-    for attrib_name, attrib in parameters_dict.items():
-        result[attrib_name] = resolve_attribute(item, attrib)
+    for key, value in parameters_dict.items():
+        result[key] = resolve_attribute(obj=item, attribute=value)
     return dumps(result)
 
 
@@ -44,7 +44,7 @@ def get_type(value):
 
 @register.filter
 def object_property(value, arg):
-    return resolve_attribute(value, arg)
+    return resolve_attribute(obj=value, attribute=arg)
 
 
 @register.simple_tag

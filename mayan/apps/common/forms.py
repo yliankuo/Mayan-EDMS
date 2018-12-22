@@ -43,7 +43,7 @@ class DetailForm(forms.ModelForm):
         super(DetailForm, self).__init__(*args, **kwargs)
 
         for extra_field in self.extra_fields:
-            result = resolve_attribute(self.instance, extra_field['field'])
+            result = resolve_attribute(obj=self.instance, attribute=extra_field['field'])
             label = 'label' in extra_field and extra_field['label'] or None
             # TODO: Add others result types <=> Field types
             if isinstance(result, models.query.QuerySet):
@@ -54,8 +54,8 @@ class DetailForm(forms.ModelForm):
                 self.fields[extra_field['field']] = forms.CharField(
                     label=extra_field['label'],
                     initial=resolve_attribute(
-                        self.instance,
-                        extra_field['field'], None
+                        obj=self.instance,
+                        attribute=extra_field['field']
                     ),
                     widget=extra_field.get('widget', PlainWidget)
                 )
