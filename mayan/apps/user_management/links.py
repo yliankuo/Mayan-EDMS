@@ -14,6 +14,12 @@ from .permissions import (
     permission_user_edit, permission_user_view
 )
 
+
+def condition_is_not_superuser(context):
+    user = context['resolved_object']
+    return not user.is_superuser and not user.is_staff
+
+
 link_group_create = Link(
     icon_class=icon_group_create, permissions=(permission_group_create,),
     text=_('Create new group'), view='user_management:group_create'
@@ -52,9 +58,9 @@ link_user_edit = Link(
     view='user_management:user_edit',
 )
 link_user_groups = Link(
-    args='object.id', icon_class=icon_group,
-    permissions=(permission_user_edit,), text=_('Groups'),
-    view='user_management:user_groups',
+    args='object.id', condition=condition_is_not_superuser,
+    icon_class=icon_group, permissions=(permission_user_edit,),
+    text=_('Groups'), view='user_management:user_groups',
 )
 link_user_list = Link(
     permissions=(permission_user_view,), text=_('Users'),
