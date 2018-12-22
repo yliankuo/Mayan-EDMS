@@ -26,12 +26,18 @@
 
             <div class="well center-block">
                 <div class="clearfix">
+
+                    {% if object_list %}
+                        {% if not hide_multi_item_actions %}
+                            {% get_multi_item_links_form object_list %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% include 'appearance/list_toolbar.html' %}
+
                     <div class="pull-right">
                         <form action="{% url 'common:multi_object_action_view' %}" class="form-multi-object-action" method="get">
                             {% if object_list %}
-                                {% if not hide_multi_item_actions %}
-                                    {% get_multi_item_links_form object_list %}
-                                {% endif %}
                                 {% if multi_item_actions %}
                                     <fieldset style="margin-top: -10px; margin-bottom: 10px;">
                                         {{ multi_item_form }}
@@ -42,13 +48,17 @@
                     </div>
                 </div>
 
+                {% if object_list %}
+                    <hr style="border-bottom: 1px solid lightgrey;">
+                {% endif %}
+
                 <div class="table-responsive">
                     <table class="table table-condensed table-striped">
-                        <tbody>
+                        <thead>
                             {% if not hide_header %}
                                 <tr>
                                     {% if multi_item_actions %}
-                                        <th class="first"><input class="checkbox check-all" type="checkbox" /></th>
+                                        <th class="first"></th>
                                     {% endif %}
 
                                     {% if not hide_object %}
@@ -70,6 +80,8 @@
                                     {% endif %}
                                 </tr>
                             {% endif %}
+                        </thead>
+                        <tbody>
                             {% for object in object_list %}
                                 <tr>
                                 {% if multi_item_actions %}
@@ -82,13 +94,7 @@
                                     </td>
                                 {% endif %}
                                 {% if not hide_object %}
-                                    {% if main_object %}
-                                        {% with object|object_property:main_object as object %}
-                                            <td>{% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}</td>
-                                        {% endwith %}
-                                    {% else %}
-                                        <td>{% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}</td>
-                                    {% endif %}
+                                    <td>{% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}</td>
                                 {% endif %}
                                  {% if not hide_columns %}
                                     {% for column in object|get_source_columns %}

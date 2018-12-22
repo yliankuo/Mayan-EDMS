@@ -498,6 +498,18 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
 
         return result
 
+    def get_context_data(self, **kwargs):
+        context = super(SingleObjectListView, self).get_context_data(**kwargs)
+        if context.get('list_as_items'):
+            default_mode = 'items'
+        else:
+            default_mode = 'list'
+
+        list_mode = self.request.GET.get('_list_mode', default_mode)
+
+        context.update({'list_as_items': list_mode=='items'})
+        return context
+
     def get_paginate_by(self, queryset):
         return setting_paginate_by.value
 

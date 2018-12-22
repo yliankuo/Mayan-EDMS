@@ -301,8 +301,22 @@ class MayanApp {
         app.lastChecked = null;
 
         $('body').on('click', '.check-all', function (event) {
+            var $this = $(this);
             var checked = $(event.target).prop('checked');
             var $checkBoxes = $('.check-all-slave');
+
+            if (checked === undefined) {
+                checked = $this.data('checked');
+                checked = !checked;
+                $this.data('checked', checked);
+                console.log($this.data('icon-checked'));
+
+                if (checked) {
+                    $this.find('[data-fa-i2svg]').addClass($this.data('icon-checked')).removeClass($this.data('icon-unchecked'));
+                } else {
+                    $this.find('[data-fa-i2svg]').addClass($this.data('icon-unchecked')).removeClass($this.data('icon-checked'));
+                }
+            }
 
             $checkBoxes.prop('checked', checked);
             $checkBoxes.trigger('change');
@@ -353,6 +367,7 @@ class MayanApp {
     setupPanelSelection () {
         var app = this;
 
+        // Setup panel highlighting on check
         $('body').on('change', '.check-all-slave', function (event) {
             var checked = $(event.target).prop('checked');
             if (checked) {
@@ -366,9 +381,10 @@ class MayanApp {
             var $this = $(this);
             var targetSrc = $(event.target).prop('src');
             var targetHref = $(event.target).prop('href');
+            var targetIsButton = event.target.tagName === 'BUTTON';
             var lastChecked = null;
 
-            if ((targetSrc === undefined) && (targetHref === undefined)) {
+            if ((targetSrc === undefined) && (targetHref === undefined) && (targetIsButton === false)) {
                 var $checkbox = $this.find('.check-all-slave');
                 var checked = $checkbox.prop('checked');
 

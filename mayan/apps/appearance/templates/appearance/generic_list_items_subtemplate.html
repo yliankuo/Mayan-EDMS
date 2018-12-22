@@ -11,7 +11,6 @@
                 {% include 'appearance/no_results.html' %}
             </div>
         {% else %}
-
             <h4>
                 {% if page_obj %}
                     {% if page_obj.paginator.num_pages != 1 %}
@@ -24,17 +23,23 @@
                 {% endif %}
             </h4>
             <hr>
+
             <div class="well center-block">
                 <div class="clearfix">
+
+                    {% if object_list %}
+                        {% if not hide_multi_item_actions %}
+                            {% get_multi_item_links_form object_list %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% include 'appearance/list_toolbar.html' %}
+
                     <div class="pull-right">
                         <form action="{% url 'common:multi_object_action_view' %}" class="form-multi-object-action" method="get">
                             {% if object_list %}
-                                {% if not hide_multi_item_actions %}
-                                    {% get_multi_item_links_form object_list %}
-                                {% endif %}
                                 {% if multi_item_actions %}
                                     <fieldset style="margin-top: -10px;">
-                                        <input class="check-all" type="checkbox"/>&nbsp;
                                         {{ multi_item_form }}
                                     </fieldset>
                                 {% endif %}
@@ -65,15 +70,14 @@
 
                                                 <span style="color: white; word-break: break-all; overflow-wrap: break-word;">
                                                     {% if not hide_object %}
-                                                        {% if main_object %}
-                                                            {% with object|object_property:main_object as object %}
-                                                                {% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}
-                                                            {% endwith %}
+                                                        {% if not hide_link %}
+                                                            <a href="{{ object.get_absolute_url }}">{{ object }}</a>
                                                         {% else %}
-                                                            {% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}
+                                                            {{ object }}
                                                         {% endif %}
+                                                    {% else %}
+                                                        {% source_column_resolve column=object|get_source_columns:"only_identifier" %}
                                                     {% endif %}
-
                                                 </span>
                                             </label>
                                         </div>
@@ -81,10 +85,9 @@
 
                                 </div>
                                 <div class="panel-body">
-
                                     {% if not hide_columns %}
-                                        {% for column in object|get_source_columns %}
-                                            <div class="text-center" style="">{% source_column_resolve column=column %}{{ column_result }}</div>
+                                        {% for column in object|get_source_columns:"exclude_identifier" %}
+                                            <div class="text-center" style="">{% source_column_resolve column=column as column_value %}{% if column_value != '' %}{{ column.label }}: {{ column_value }}{% endif %}</div>
                                         {% endfor %}
                                     {% endif %}
 

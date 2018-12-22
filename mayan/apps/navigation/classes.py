@@ -495,34 +495,46 @@ class SourceColumn(object):
         return sorted(columns, key=lambda x: x.order)
 
     @classmethod
-    def get_for_source(cls, source):
+    def get_for_source(cls, source, exclude_identifier=False, only_identifier=False):
         try:
-            return SourceColumn.sort(columns=cls._registry[source])
+            result = SourceColumn.sort(columns=cls._registry[source])
         except KeyError:
             try:
                 # Try it as a queryset
-                return SourceColumn.sort(columns=cls._registry[source.model])
+                result = SourceColumn.sort(columns=cls._registry[source.model])
             except AttributeError:
                 try:
                     # It seems to be an instance, try its class
-                    return SourceColumn.sort(columns=cls._registry[source.__class__])
+                    result = SourceColumn.sort(columns=cls._registry[source.__class__])
                 except KeyError:
                     try:
                         # Special case for queryset items produced from
                         # .defer() or .only() optimizations
-                        return SourceColumn.sort(columns=cls._registry[list(source._meta.parents.items())[0][0]])
+                        result = SourceColumn.sort(columns=cls._registry[list(source._meta.parents.items())[0][0]])
                     except (AttributeError, KeyError, IndexError):
-                        return ()
+                        result = ()
         except TypeError:
             # unhashable type: list
-            return ()
+            result = ()
 
-    def __init__(self, source, label=None, attribute=None, func=None, order=None):
+        if exclude_identifier:
+            return [item for item in result if not item.is_identifier]
+        else:
+            if only_identifier:
+                for item in result:
+                    if item.is_identifier:
+                        return item
+            else:
+                return result
+
+    def __init__(self, source, label=None, attribute=None, func=None, kwargs=None, order=None, is_identifier=False):
         self.source = source
         self._label = label
         self.attribute = attribute
         self.func = func
+        self.kwargs = kwargs or {}
         self.order = order or 0
+        self.is_identifier = is_identifier
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
 
@@ -543,9 +555,12 @@ class SourceColumn(object):
 
     def resolve(self, context):
         if self.attribute:
-            result = resolve_attribute(context['object'], self.attribute)
+            result = resolve_attribute(
+                obj=context['object'], attribute=self.attribute,
+                kwargs=self.kwargs
+            )
         elif self.func:
-            result = self.func(context=context)
+            result = self.func(context=context, **self.kwargs)
 
         return result
 
