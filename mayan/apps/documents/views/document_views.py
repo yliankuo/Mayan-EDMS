@@ -60,7 +60,6 @@ logger = logging.getLogger(__name__)
 
 class DocumentListView(SingleObjectListView):
     object_permission = permission_document_view
-    queryset_slice = None
 
     def get_context_data(self, **kwargs):
         try:
@@ -97,11 +96,7 @@ class DocumentListView(SingleObjectListView):
         }
 
     def get_object_list(self):
-        queryset = self.get_document_queryset().filter(is_stub=False)
-        if self.queryset_slice:
-            return queryset.__getitem__(slice(*self.queryset_slice))
-        else:
-            return queryset
+        return self.get_document_queryset()
 
 
 class DeletedDocumentDeleteView(ConfirmView):
@@ -958,15 +953,19 @@ class RecentAccessDocumentListView(DocumentListView):
 
 
 class RecentAddedDocumentListView(DocumentListView):
-    queryset_slice = (0, setting_recent_added_count.value)
-
     def get_document_queryset(self):
-        return Document.objects.order_by('-date_added')
+        ids = Document.objects.order_by('-date_added')[
+            :setting_recent_added_count.value
+        ].values_list('pk', flat=True)
+        return Document.objects.filter(pk__in=ids).order_by('-date_added')
 
     def get_extra_context(self):
         context = super(RecentAddedDocumentListView, self).get_extra_context()
         context.update(
             {
+                'extra_columns': (
+                    {'name': _('Added'), 'attribute': 'date_added'},
+                ),
                 'no_results_icon': icon_document_list_recent_added,
                 'no_results_text': _(
                     'This view will list the latest documents uploaded '
