@@ -12,6 +12,7 @@ import mayan
 from mayan.apps.appearance.settings import setting_max_title_length
 
 from ..classes import Collection
+from ..icons import icon_list_mode_items, icon_list_mode_list
 from ..literals import MESSAGE_SQLITE_WARNING
 from ..utils import check_for_sqlite, resolve_attribute
 
@@ -24,9 +25,57 @@ def check_sqlite():
         return MESSAGE_SQLITE_WARNING
 
 
+@register.simple_tag(takes_context=True)
+def common_calculate_title(context):
+    if context.get('title'):
+        return truncatechars(
+            value=context.get('title'), arg=setting_max_title_length.value
+        )
+    else:
+        if context.get('delete_view'):
+            return _('Confirm delete')
+        else:
+            if context.get('form'):
+                if context.get('object'):
+                    return _('Edit %s') % context.get('object')
+                else:
+                    return _('Confirm')
+            else:
+                if context.get('read_only'):
+                    return _('Details for: %s') % context.get('object')
+                else:
+                    if context.get('object'):
+                        return _('Edit: %s') % context.get('object')
+                    else:
+                        return _('Create')
+
+
 @register.simple_tag
 def get_collections():
     return Collection.get_all()
+
+
+@register.simple_tag(takes_context=True)
+def get_list_mode_icon(context):
+    if context.get('list_as_items', False):
+        return icon_list_mode_list
+    else:
+        return icon_list_mode_items
+
+
+@register.simple_tag(takes_context=True)
+def get_list_mode_querystring(context):
+    # We do this to get an mutable copy we can modify
+    querystring = context.request.GET.copy()
+
+    list_as_items = context.get('list_as_items', False)
+
+    if list_as_items:
+        querystring['_list_mode'] = 'list'
+    else:
+        querystring['_list_mode'] = 'items'
+
+    return '?{}'.format(querystring.urlencode())
 
 
 @register.filter
@@ -53,28 +102,3 @@ def render_subtemplate(context, template_name, template_context):
     new_context = Context(context.flatten())
     new_context.update(Context(template_context))
     return get_template(template_name).render(new_context.flatten())
-
-
-@register.simple_tag(takes_context=True)
-def common_calculate_title(context):
-    if context.get('title'):
-        return truncatechars(
-            value=context.get('title'), arg=setting_max_title_length.value
-        )
-    else:
-        if context.get('delete_view'):
-            return _('Confirm delete')
-        else:
-            if context.get('form'):
-                if context.get('object'):
-                    return _('Edit %s') % context.get('object')
-                else:
-                    return _('Confirm')
-            else:
-                if context.get('read_only'):
-                    return _('Details for: %s') % context.get('object')
-                else:
-                    if context.get('object'):
-                        return _('Edit: %s') % context.get('object')
-                    else:
-                        return _('Create')

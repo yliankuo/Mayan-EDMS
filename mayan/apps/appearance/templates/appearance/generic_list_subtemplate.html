@@ -66,8 +66,19 @@
                                     {% endif %}
 
                                     {% if not hide_columns %}
-                                        {% for column in object_list|get_source_columns %}
-                                            <th>{{ column.label }}</th>
+                                        {% get_source_columns source=object_list as source_columns %}
+                                        {% for column in source_columns %}
+                                            <th>
+                                                {% if column.is_sortable %}
+                                                    <a href="{% get_sort_field_querystring column=column %}">{{ column.label }}
+                                                    {% if column.attribute == sort_field %}
+                                                        {% if icon_sort %}{{ icon_sort.render }}{% endif %}
+                                                    {% endif %}
+                                                    </a>
+                                                {% else %}
+                                                    {{ column.label }}
+                                                {% endif %}
+                                            </th>
                                         {% endfor %}
                                     {% endif %}
 
@@ -91,9 +102,22 @@
                                 {% endif %}
                                 {% if not hide_object %}
                                     <td>{% if not hide_link %}<a href="{{ object.get_absolute_url }}">{{ object }}</a>{% else %}{{ object }}{% endif %}</td>
+                                {% else %}
+                                        {% get_source_columns source=object only_identifier=True as source_column %}
+                                        {% source_column_resolve column=source_column as column_value %}
+                                        {% if column_value %}
+                                            <td>
+                                                {% if source_column.is_absolute_url %}
+                                                    <a href="{{ object.get_absolute_url }}">{{ column_value }}</a>
+                                                {% else %}
+                                                    {{ column_value }}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
                                 {% endif %}
                                  {% if not hide_columns %}
-                                    {% for column in object|get_source_columns %}
+                                    {% get_source_columns source=object exclude_identifier=True as source_columns %}
+                                    {% for column in source_columns %}
                                         <td>{% source_column_resolve column=column as column_value %}{{ column_value }}</td>{# Use explicit 'as column_value ' to force date rendering #}
                                     {% endfor %}
                                 {% endif %}

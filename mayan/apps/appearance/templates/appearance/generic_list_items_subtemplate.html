@@ -72,7 +72,13 @@
                                                             {{ object }}
                                                         {% endif %}
                                                     {% else %}
-                                                        {% source_column_resolve column=object|get_source_columns:"only_identifier" as column_value %}{{ column_value }}
+                                                        {% get_source_columns source=object only_identifier=True as source_column %}
+                                                        {% source_column_resolve column=source_column as column_value %}
+                                                        {% if source_column.is_absolute_url %}
+                                                            <a href="{{ object.get_absolute_url }}">{{ column_value }}</a>
+                                                        {% else %}
+                                                            {{ column_value }}
+                                                        {% endif %}
                                                     {% endif %}
                                                 </span>
                                             </label>
@@ -82,7 +88,8 @@
                                 </div>
                                 <div class="panel-body">
                                     {% if not hide_columns %}
-                                        {% for column in object|get_source_columns:"exclude_identifier" %}
+                                        {% get_source_columns source=object exclude_identifier=True as source_columns %}
+                                        {% for column in source_columns %}
                                             <div class="text-center" style="">{% source_column_resolve column=column as column_value %}{% if column_value != '' %}{{ column.label }}: {{ column_value }}{% endif %}</div>
                                         {% endfor %}
                                     {% endif %}

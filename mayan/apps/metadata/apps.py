@@ -154,17 +154,20 @@ class MetadataApp(MayanAppConfig):
 
         SourceColumn(
             attribute='metadata_type', is_identifier=True,
-            source=DocumentMetadata
+            is_sortable=True, source=DocumentMetadata
         )
-        SourceColumn(attribute='value', source=DocumentMetadata)
+        SourceColumn(
+            attribute='value', is_sortable=True, source=DocumentMetadata
+        )
         SourceColumn(
             attribute='is_required', source=DocumentMetadata,
             widget=TwoStateWidget
         )
         SourceColumn(
-            attribute='label', is_identifier=True, source=MetadataType
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=MetadataType
         )
-        SourceColumn(attribute='name', source=MetadataType)
+        SourceColumn(attribute='name', is_sortable=True, source=MetadataType)
 
         app.conf.task_queues.append(
             Queue('metadata', Exchange('metadata'), routing_key='metadata'),

@@ -40,7 +40,7 @@ class EventsApp(MayanAppConfig):
 
         SourceColumn(
             attribute='timestamp', is_identifier=True,
-            label=_('Date and time'), source=Action
+            is_sortable=True, label=_('Date and time'), source=Action
         )
         SourceColumn(
             func=widget_event_user_link, label=_('Actor'), source=Action
@@ -65,9 +65,8 @@ class EventsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='action.timestamp', is_identifier=True,
-            label=_('Date and time'), source=Notification
-
+            attribute='action__timestamp', is_identifier=True,
+            is_sortable=True, label=_('Date and time'), source=Notification
         )
         SourceColumn(
             func=widget_event_user_link, kwargs={'attribute': 'action'},
@@ -77,15 +76,14 @@ class EventsApp(MayanAppConfig):
             func=widget_event_type_link, kwargs={'attribute': 'action'},
             label=_('Event'), source=Notification
         )
-
         SourceColumn(
             func=widget_event_object_link, kwargs={
                 'attribute': 'action.target'
             }, label=_('Target'), source=Notification
         )
         SourceColumn(
-            attribute='read', label=_('Seen'), source=Notification,
-            widget=TwoStateWidget
+            attribute='read', is_sortable=True, label=_('Seen'),
+            source=Notification, widget=TwoStateWidget
         )
 
         menu_list_facet.bind_links(

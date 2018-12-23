@@ -43,7 +43,7 @@ from .widgets import widget_document_tags
 
 class TagsApp(MayanAppConfig):
     app_namespace = 'tags'
-    app_urls = 'tags'
+    app_url = 'tags'
     has_rest_api = True
     has_tests = True
     name = 'mayan.apps.tags'
@@ -101,7 +101,8 @@ class TagsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='label', is_identifier=True, source=DocumentTag,
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=DocumentTag,
         )
         SourceColumn(
             attribute='get_preview_widget', source=DocumentTag
@@ -121,7 +122,8 @@ class TagsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='label', is_identifier=True, source=Tag
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=Tag
         )
         SourceColumn(
             attribute='get_preview_widget', source=Tag

@@ -4,7 +4,6 @@ from django.template import Library
 
 from ..classes import Link, Menu, SourceColumn
 from ..forms import MultiItemForm
-from ..literals import TEXT_EXCLUDE_IDENTIFIER, TEXT_ONLY_IDENTIFIER
 
 register = Library()
 
@@ -48,16 +47,13 @@ def get_multi_item_links_form(context, object_list):
     return ''
 
 
-@register.filter
-def get_source_columns(source, args=None):
-    exclude_identifier = False
-    only_identifier = False
+@register.simple_tag(takes_context=True)
+def get_sort_field_querystring(context, column):
+    return column.get_sort_field_querystring(context=context)
 
-    if args == TEXT_EXCLUDE_IDENTIFIER:
-        exclude_identifier = True
-    elif args == TEXT_ONLY_IDENTIFIER:
-        only_identifier = True
 
+@register.simple_tag(takes_context=True)
+def get_source_columns(context, source, exclude_identifier=False, only_identifier=False):
     try:
         # Is it a query set?
         source = source.model
@@ -77,7 +73,7 @@ def get_source_columns(source, args=None):
             pass
 
     return SourceColumn.get_for_source(
-        source=source, exclude_identifier=exclude_identifier,
+        context=context, source=source, exclude_identifier=exclude_identifier,
         only_identifier=only_identifier
     )
 

@@ -84,6 +84,7 @@ class DocumentListView(SingleObjectListView):
     def get_extra_context(self):
         return {
             'hide_links': True,
+            'hide_object': True,
             'list_as_items': True,
             'no_results_icon': icon_document_list,
             'no_results_text': _(
@@ -963,9 +964,6 @@ class RecentAddedDocumentListView(DocumentListView):
         context = super(RecentAddedDocumentListView, self).get_extra_context()
         context.update(
             {
-                'extra_columns': (
-                    {'name': _('Added'), 'attribute': 'date_added'},
-                ),
                 'no_results_icon': icon_document_list_recent_added,
                 'no_results_text': _(
                     'This view will list the latest documents uploaded '

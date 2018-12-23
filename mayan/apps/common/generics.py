@@ -22,10 +22,15 @@ from django_downloadview import (
 from pure_pagination.mixins import PaginationMixin
 
 from .forms import ChoiceForm
-from .icons import icon_assign_remove_add, icon_assign_remove_remove
+from .icons import (
+    icon_assign_remove_add, icon_assign_remove_remove, icon_sort_down,
+    icon_sort_up
+)
 from .literals import (
-    TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST, TEXT_LIST_AS_ITEMS,
-    TEXT_LIST_AS_ITEMS_PARAMETER
+    TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST, TEXT_LIST_AS_ITEMS_VARIABLE_NAME,
+    TEXT_LIST_AS_ITEMS_PARAMETER, TEXT_SORT_FIELD_PARAMETER,
+    TEXT_SORT_FIELD_VARIABLE_NAME, TEXT_SORT_ORDER_CHOICE_ASCENDING,
+    TEXT_SORT_ORDER_PARAMETER, TEXT_SORT_ORDER_VARIABLE_NAME
 )
 from .mixins import (
     DeleteExtraDataMixin, DynamicFormViewMixin, ExtraContextMixin,
@@ -505,7 +510,7 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
     def get_context_data(self, **kwargs):
         context = super(SingleObjectListView, self).get_context_data(**kwargs)
 
-        if context.get(TEXT_LIST_AS_ITEMS):
+        if context.get(TEXT_LIST_AS_ITEMS_VARIABLE_NAME):
             default_mode = TEXT_CHOICE_ITEMS
         else:
             default_mode = TEXT_CHOICE_LIST
@@ -514,15 +519,52 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
             TEXT_LIST_AS_ITEMS_PARAMETER, default_mode
         )
 
-        context.update({TEXT_LIST_AS_ITEMS: list_mode == TEXT_CHOICE_ITEMS})
+        print '@@ list_mode', list_mode
+
+        context.update(
+            {
+                TEXT_LIST_AS_ITEMS_VARIABLE_NAME: list_mode == TEXT_CHOICE_ITEMS,
+                TEXT_SORT_FIELD_VARIABLE_NAME: self.get_sort_field(),
+                TEXT_SORT_ORDER_VARIABLE_NAME: self.get_sort_order(),
+                'icon_sort': self.get_sort_icon(),
+            }
+        )
         return context
+
+    def get_sort_field(self):
+        return self.request.GET.get(TEXT_SORT_FIELD_PARAMETER)
+
+    def get_sort_icon(self):
+        sort_order = self.get_sort_order()
+        if not sort_order:
+            return
+        elif sort_order == TEXT_SORT_ORDER_CHOICE_ASCENDING:
+            return icon_sort_down
+        else:
+            return icon_sort_up
+
+    def get_sort_order(self):
+        return self.request.GET.get(TEXT_SORT_ORDER_PARAMETER)
 
     def get_paginate_by(self, queryset):
         return setting_paginate_by.value
 
     def get_queryset(self):
+        self.field_name = self.get_sort_field()
+        if self.get_sort_order() == TEXT_SORT_ORDER_CHOICE_ASCENDING:
+            sort_order = ''
+        else:
+            sort_order = '-'
+
         try:
-            return super(SingleObjectListView, self).get_queryset()
+            queryset = super(SingleObjectListView, self).get_queryset()
         except ImproperlyConfigured:
             self.queryset = self.get_object_list()
-            return super(SingleObjectListView, self).get_queryset()
+            queryset = super(SingleObjectListView, self).get_queryset()
+
+        if self.field_name:
+            queryset = queryset.order_by(
+                '{}{}'.format(sort_order, self.field_name)
+            )
+
+        return queryset

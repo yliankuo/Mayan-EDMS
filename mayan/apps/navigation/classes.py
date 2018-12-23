@@ -17,17 +17,23 @@ from django.urls import Resolver404, resolve
 from django.utils.encoding import force_str, force_text
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.common.literals import (
+    TEXT_SORT_FIELD_PARAMETER, TEXT_SORT_FIELD_VARIABLE_NAME,
+    TEXT_SORT_ORDER_CHOICE_ASCENDING, TEXT_SORT_ORDER_CHOICE_DESCENDING,
+    TEXT_SORT_ORDER_PARAMETER, TEXT_SORT_ORDER_VARIABLE_NAME
+)
 from mayan.apps.common.utils import resolve_attribute
 from mayan.apps.permissions import Permission
 
 from .exceptions import NavigationError
+from .utils import get_current_view_name
 
 logger = logging.getLogger(__name__)
 
 
 class ResolvedLink(object):
-    def __init__(self, link, current_view):
-        self.current_view = current_view
+    def __init__(self, link, current_view_name):
+        self.current_view_name = current_view_name
         self.disabled = False
         self.link = link
         self.url = '#'
@@ -36,7 +42,7 @@ class ResolvedLink(object):
 
     @property
     def active(self):
-        return self.link.view == self.current_view
+        return self.link.view == self.current_view_name
 
     @property
     def description(self):
@@ -177,15 +183,8 @@ class Menu(object):
                 logger.warning('No request variable, aborting menu resolution')
                 return ()
 
-        current_path = request.META['PATH_INFO']
-
-        # Get sources: view name, view objects
-        try:
-            current_view = resolve(current_path).view_name
-        except Resolver404:
-            # Can't figure out which view corresponds to this URL.
-            # Most likely it is an invalid URL.
-            logger.warning('Can\'t figure out which view corresponds to this URL: %s; aborting menu resolution.', current_path)
+        current_view_name = get_current_view_name(request=request)
+        if not current_view_name:
             return ()
 
         resolved_navigation_object_list = self.get_resolved_navigation_object_list(
@@ -230,10 +229,10 @@ class Menu(object):
 
         resolved_links = []
         # View links
-        for link in self.bound_links.get(current_view, []):
+        for link in self.bound_links.get(current_view_name, []):
             resolved_link = link.resolve(context=context)
             if resolved_link:
-                if resolved_link.link not in self.unbound_links.get(current_view, ()):
+                if resolved_link.link not in self.unbound_links.get(current_view_name, ()):
                     resolved_links.append(resolved_link)
 
         if resolved_links:
@@ -349,7 +348,7 @@ class Link(object):
             request = Variable('request').resolve(context)
 
         current_path = request.META['PATH_INFO']
-        current_view = resolve(current_path).view_name
+        current_view_name = resolve(current_path).view_name
 
         # ACL is tested agains the resolved_object or just {{ object }} if not
         if not resolved_object:
@@ -384,7 +383,9 @@ class Link(object):
             if not self.condition(context):
                 return None
 
-        resolved_link = ResolvedLink(current_view=current_view, link=self)
+        resolved_link = ResolvedLink(
+            current_view_name=current_view_name, link=self
+        )
 
         if self.view:
             view_name = Variable('"{}"'.format(self.view))
@@ -465,7 +466,7 @@ class Separator(Link):
         self.view = None
 
     def resolve(self, *args, **kwargs):
-        result = ResolvedLink(current_view=None, link=self)
+        result = ResolvedLink(current_view_name=None, link=self)
         result.separator = True
         return result
 
@@ -498,7 +499,7 @@ class SourceColumn(object):
         return sorted(columns, key=lambda x: x.order)
 
     @classmethod
-    def get_for_source(cls, source, exclude_identifier=False, only_identifier=False):
+    def get_for_source(cls, context, source, exclude_identifier=False, only_identifier=False):
         try:
             result = SourceColumn.sort(columns=cls._registry[source])
         except KeyError:
@@ -521,16 +522,26 @@ class SourceColumn(object):
             result = ()
 
         if exclude_identifier:
-            return [item for item in result if not item.is_identifier]
+            result = [item for item in result if not item.is_identifier]
         else:
             if only_identifier:
                 for item in result:
                     if item.is_identifier:
                         return item
-            else:
-                return result
+                return None
 
-    def __init__(self, source, attribute=None, empty_value=None, func=None, is_identifier=False, kwargs=None, label=None, order=None, widget=None):
+        final_result = []
+        current_view_name = get_current_view_name(request=context.request)
+        for item in result:
+            if item.views:
+                if current_view_name in item.views:
+                    final_result.append(item)
+            else:
+                final_result.append(item)
+
+        return final_result
+
+    def __init__(self, source, attribute=None, empty_value=None, func=None, is_absolute_url=False, is_identifier=False, is_sortable=False, kwargs=None, label=None, order=None, views=None, widget=None):
         self.source = source
         self._label = label
         self.attribute = attribute
@@ -538,10 +549,13 @@ class SourceColumn(object):
         self.func = func
         self.kwargs = kwargs or {}
         self.order = order or 0
+        self.is_absolute_url = is_absolute_url
         self.is_identifier = is_identifier
+        self.is_sortable = is_sortable
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
         self.label = None
+        self.views = views or []
         self.widget = widget
         if not attribute and not func:
             raise NavigationError(
@@ -554,7 +568,9 @@ class SourceColumn(object):
         if not self._label:
             if self.attribute:
                 try:
-                    attribute = resolve_attribute(obj=self.source, attribute=self.attribute)
+                    attribute = resolve_attribute(
+                        obj=self.source, attribute=self.attribute
+                    )
                     self._label = getattr(attribute, 'short_description')
                 except AttributeError:
                     name, model = SourceColumn.get_attribute_recursive(
@@ -564,11 +580,39 @@ class SourceColumn(object):
                         name=name, model=model
                     )
             else:
-                self._label = getattr(self.func, 'short_description', _('Unnamed function'))
+                self._label = getattr(
+                    self.func, 'short_description', _('Unnamed function')
+                )
 
         self.label = self._label
 
+    def get_sort_field_querystring(self, context):
+        # We do this to get an mutable copy we can modify
+        querystring = context.request.GET.copy()
+
+        previous_sort_field = context.get(TEXT_SORT_FIELD_VARIABLE_NAME, None)
+        previous_sort_order = context.get(
+            TEXT_SORT_ORDER_VARIABLE_NAME, TEXT_SORT_ORDER_CHOICE_DESCENDING
+        )
+
+        if previous_sort_field != self.attribute:
+            sort_order = TEXT_SORT_ORDER_CHOICE_ASCENDING
+        else:
+            if previous_sort_order == TEXT_SORT_ORDER_CHOICE_DESCENDING:
+                sort_order = TEXT_SORT_ORDER_CHOICE_ASCENDING
+            else:
+                sort_order = TEXT_SORT_ORDER_CHOICE_DESCENDING
+
+        querystring[TEXT_SORT_FIELD_PARAMETER] = self.attribute
+        querystring[TEXT_SORT_ORDER_PARAMETER] = sort_order
+
+        return '?{}'.format(querystring.urlencode())
+
     def resolve(self, context):
+        if self.views:
+            if get_current_view_name(request=context.request) not in self.views:
+                return
+
         if self.attribute:
             result = resolve_attribute(
                 obj=context['object'], attribute=self.attribute,
@@ -579,7 +623,7 @@ class SourceColumn(object):
 
         if self.widget:
             widget_instance = self.widget()
-            return widget_instance.render(name='asd', value=result)
+            return widget_instance.render(name=self.attribute, value=result)
 
         if not result:
             if self.empty_value:
@@ -600,7 +644,7 @@ class Text(Link):
         self.view = None
 
     def resolve(self, *args, **kwargs):
-        result = ResolvedLink(current_view=None, link=self)
+        result = ResolvedLink(current_view_name=None, link=self)
         result.context = kwargs.get('context')
         result.text_span = True
         return result

@@ -234,14 +234,24 @@ class DocumentsApp(MayanAppConfig):
 
         # Document
         SourceColumn(
+            attribute='label', is_absolute_url=True, is_identifier=True,
+            is_sortable=True, source=Document
+        )
+        SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             ), label=_('Thumbnail'), source=Document
         )
         SourceColumn(
-            attribute='document_type', label=_('Type'), source=Document
+            attribute='document_type', is_sortable=True, label=_('Type'),
+            source=Document
         )
         SourceColumn(attribute='get_page_count', source=Document)
+        SourceColumn(
+            attribute='date_added', is_sortable=True, source=Document, views=(
+                'documents:document_list_recent_added',
+            )
+        )
 
         # DocumentPage
         SourceColumn(
@@ -263,17 +273,29 @@ class DocumentsApp(MayanAppConfig):
 
         # DocumentType
         SourceColumn(
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=DocumentType
+        )
+        SourceColumn(
             func=lambda context: context['object'].get_document_count(
                 user=context['request'].user
             ), label=_('Documents'), source=DocumentType
         )
 
         SourceColumn(
-            attribute='enabled', source=DocumentTypeFilename,
+            attribute='filename', is_identifier=True, is_sortable=True,
+            source=DocumentTypeFilename
+        )
+        SourceColumn(
+            attribute='enabled', is_sortable=True, source=DocumentTypeFilename,
             widget=TwoStateWidget
         )
 
         # DeletedDocument
+        SourceColumn(
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=DeletedDocument
+        )
         SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
@@ -281,7 +303,7 @@ class DocumentsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='document_type', source=DeletedDocument
+            attribute='document_type', is_sortable=True, source=DeletedDocument
         )
         SourceColumn(
             attribute='get_rendered_deleted_date_time', source=DeletedDocument
@@ -298,9 +320,15 @@ class DocumentsApp(MayanAppConfig):
             ), label=_('Thumbnail'), source=DocumentVersion
         )
         SourceColumn(attribute='get_page_count', source=DocumentVersion)
-        SourceColumn(attribute='mimetype', source=DocumentVersion)
-        SourceColumn(attribute='encoding', source=DocumentVersion)
-        SourceColumn(attribute='comment', source=DocumentVersion)
+        SourceColumn(
+            attribute='mimetype', is_sortable=True, source=DocumentVersion
+        )
+        SourceColumn(
+            attribute='encoding', is_sortable=True, source=DocumentVersion
+        )
+        SourceColumn(
+            attribute='comment', is_sortable=True, source=DocumentVersion
+        )
 
         # DuplicatedDocument
         SourceColumn(
