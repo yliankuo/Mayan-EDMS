@@ -30,14 +30,6 @@ def get_collections():
 
 
 @register.filter
-def get_encoded_parameter(item, parameters_dict):
-    result = {}
-    for key, value in parameters_dict.items():
-        result[key] = resolve_attribute(obj=item, attribute=value)
-    return dumps(result)
-
-
-@register.filter
 def get_type(value):
     return force_text(type(value))
 

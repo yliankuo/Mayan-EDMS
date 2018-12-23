@@ -86,11 +86,7 @@
                                 <tr>
                                 {% if multi_item_actions %}
                                     <td>
-                                    {% if multi_select_item_properties %}
-                                        <input type="checkbox" class="form-multi-object-action-checkbox check-all-slave checkbox" name="properties_{{ object|get_encoded_parameter:multi_select_item_properties }}" value="" />
-                                    {% else %}
-                                        <input type="checkbox" class="form-multi-object-action-checkbox check-all-slave checkbox" name="pk_{{ object.pk }}" value="" />
-                                    {% endif %}
+                                        <input class="form-multi-object-action-checkbox check-all-slave checkbox" name="pk_{{ object.pk }}" type="checkbox" value="" />
                                     </td>
                                 {% endif %}
                                 {% if not hide_object %}
