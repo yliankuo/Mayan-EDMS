@@ -256,26 +256,7 @@ class ObjectEventTypeSubscriptionListView(FormView):
         return ModelEventType.get_for_instance(instance=self.get_object())
 
 
-class UserEventListView(ObjectEventListView):
-    def get_extra_context(self):
-        context = super(UserEventListView, self).get_extra_context()
-        context.update(
-            {
-                'no_results_text': _(
-                    'Events are actions that have been performed to this '
-                    'user account or by this user account.'
-                ),
-                'no_results_title': _('There are no events for this user'),
-                'object': self.get_object(),
-                'title': _(
-                    'Events for user: %s'
-                ) % self.get_object(),
-            }
-        )
-        return context
-
-
-class CurrentUserEventListView(UserEventListView):
+class CurrentUserEventListView(ObjectEventListView):
     def get_object(self):
         return self.request.user
 

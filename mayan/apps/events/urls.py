@@ -11,7 +11,7 @@ from .views import (
     CurrentUserEventListView, EventListView, EventTypeSubscriptionListView,
     NotificationListView, NotificationMarkRead, NotificationMarkReadAll,
     ObjectEventListView, ObjectEventTypeSubscriptionListView,
-    UserEventListView, VerbEventListView
+    VerbEventListView
 )
 
 urlpatterns = [
@@ -40,10 +40,6 @@ urlpatterns = [
     url(
         r'^user/$', CurrentUserEventListView.as_view(),
         name='current_user_events'
-    ),
-    url(
-        r'^user/(?P<pk>\d+)/$', UserEventListView.as_view(),
-        name='user_events'
     ),
     url(
         r'^user/event_types/subscriptions/$',

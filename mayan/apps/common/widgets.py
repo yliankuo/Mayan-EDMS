@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.template import Context, Template
 from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -62,6 +63,32 @@ class EmailInput(forms.widgets.Input):
                           autocapitalize='off',
                           spellcheck='false'))
         return super(EmailInput, self).render(name, value, attrs=attrs)
+
+
+class ObjectLinkWidget(object):
+    template_string = '<a href="{{ url }}">{{ object_type }}{{ label }}</a>'
+
+    def __init__(self):
+        self.template = Template(template_string=self.template_string)
+
+    def render(self, name=None, value=None):
+        label = ''
+        object_type = ''
+        url = None
+
+        if value:
+            label = force_text(value)
+            object_type = '{}: '.format(value._meta.verbose_name)
+            try:
+                url = value.get_absolute_url()
+            except AttributeError:
+                url = None
+
+        return self.template.render(
+            context=Context(
+                {'label': label, 'object_type': object_type, 'url': url or '#'}
+            )
+        )
 
 
 class PlainWidget(forms.widgets.Widget):

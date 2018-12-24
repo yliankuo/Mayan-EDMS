@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from django.apps import apps
+from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
@@ -10,25 +12,36 @@ from mayan.apps.common.utils import resolve_attribute
 from .classes import EventType
 
 
-def widget_event_object_link(context, attribute='target'):
+def widget_event_actor_link(context, attribute=None):
     entry = context['object']
-    label = ''
-    url = '#'
-    obj_type = ''
 
-    obj = resolve_attribute(obj=entry, attribute=attribute)
-
-    if obj:
-        obj_type = '{}: '.format(obj._meta.verbose_name)
-        if hasattr(obj, 'get_absolute_url'):
-            url = obj.get_absolute_url()
-        label = force_text(obj)
-
-    return mark_safe(
-        '<a href="%(url)s">%(obj_type)s%(label)s</a>' % {
-            'url': url, 'label': label, 'obj_type': obj_type
-        }
+    ContentType = apps.get_model(
+        app_label='contenttypes', model_name='ContentType'
     )
+
+    if attribute:
+        entry = getattr(entry, attribute)
+
+    if entry.actor == entry.target:
+        label = _('System')
+        url = None
+    else:
+        label = entry.actor
+        content_type = ContentType.objects.get_for_model(model=entry.actor)
+
+        url = reverse(
+            viewname='events:events_for_object', kwargs={
+                'app_label': content_type.app_label, 'model': content_type.model,
+                'object_id': entry.actor.pk
+            }
+        )
+
+    if url:
+        return Template(
+            template_string='<a href="{{ url }}">{{ label }}</a>'
+        ).render(context=Context({'label': entry.actor, 'url': url}))
+    else:
+        return label
 
 
 def widget_event_type_link(context, attribute=None):
@@ -43,20 +56,3 @@ def widget_event_type_link(context, attribute=None):
             'label': EventType.get(name=entry.verb)
         }
     )
-
-
-def widget_event_user_link(context, attribute=None):
-    entry = context['object']
-
-    if attribute:
-        entry = getattr(entry, attribute)
-
-    if entry.actor == entry.target:
-        return _('System')
-    else:
-        return mark_safe(
-            '<a href="%(url)s">%(label)s</a>' % {
-                'url': reverse('events:user_events', kwargs={'pk': entry.actor.pk}),
-                'label': entry.actor
-            }
-        )
