@@ -16,7 +16,6 @@ from mayan.apps.common import (
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_search, document_page_search
 from mayan.apps.documents.signals import post_version_upload
-from mayan.apps.documents.widgets import document_link
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
@@ -110,13 +109,12 @@ class OCRApp(MayanAppConfig):
         )
 
         SourceColumn(
-            func=lambda context: document_link(
-                context['object'].document_version.document
-            ), label=_('Document'), source=DocumentVersionOCRError
+            attribute='document_version__document', is_absolute_url=True,
+            is_identifier=True, is_sortable=True, source=DocumentVersionOCRError
         )
         SourceColumn(
-            attribute='datetime_submitted', label=_('Date and time'),
-            source=DocumentVersionOCRError
+            attribute='datetime_submitted', is_sortable=True,
+            label=_('Date and time'), source=DocumentVersionOCRError
         )
         SourceColumn(
             attribute='result', source=DocumentVersionOCRError

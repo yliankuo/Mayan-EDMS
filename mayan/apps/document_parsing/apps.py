@@ -16,7 +16,6 @@ from mayan.apps.common import (
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.signals import post_version_upload
-from mayan.apps.documents.widgets import document_link
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
@@ -112,16 +111,17 @@ class DocumentParsingApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=DocumentVersionParseError, label=_('Document'),
-            func=lambda context: document_link(context['object'].document_version.document)
+            attribute='document_version__document', is_absolute_url=True,
+            is_identifier=True, is_sortable=True,
+            source=DocumentVersionParseError
         )
         SourceColumn(
-            source=DocumentVersionParseError, label=_('Added'),
-            attribute='datetime_submitted'
+            attribute='datetime_submitted', is_sortable=True,
+            label=_('Date and time'), source=DocumentVersionParseError
         )
         SourceColumn(
-            source=DocumentVersionParseError, label=_('Result'),
-            attribute='result'
+            attribute='result', label=_('Result'),
+            source=DocumentVersionParseError
         )
 
         app.conf.task_queues.append(

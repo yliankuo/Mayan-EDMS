@@ -68,9 +68,3 @@ class DocumentPageThumbnailWidget(object):
                 'size_thumbnail_height': setting_thumbnail_height.value,
             }
         )
-
-
-def document_link(document):
-    return mark_safe('<a href="%s">%s</a>' % (
-        document.get_absolute_url(), document)
-    )
