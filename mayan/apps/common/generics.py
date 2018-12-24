@@ -51,8 +51,16 @@ __all__ = (
 
 class AssignRemoveView(ExtraContextMixin, ViewPermissionCheckMixin, ObjectPermissionCheckMixin, TemplateView):
     decode_content_type = False
-    right_list_help_text = None
-    left_list_help_text = None
+    left_list_help_text = _(
+        'Select entries to be added. Hold Control to select multiple '
+        'entries. Once the selection is complete, click the button below '
+        'or double click the list to activate the action.'
+    )
+    right_list_help_text = _(
+        'Select entries to be removed. Hold Control to select multiple '
+        'entries. Once the selection is complete, click the button below '
+        'or double click the list to activate the action.'
+    )
     grouped = False
     left_list_title = None
     right_list_title = None
@@ -100,7 +108,8 @@ class AssignRemoveView(ExtraContextMixin, ViewPermissionCheckMixin, ObjectPermis
 
     def get(self, request, *args, **kwargs):
         self.unselected_list = ChoiceForm(
-            prefix=self.LEFT_LIST_NAME, choices=self.left_list()
+            prefix=self.LEFT_LIST_NAME, choices=self.left_list(),
+            help_text=self.get_left_list_help_text()
         )
         self.selected_list = ChoiceForm(
             prefix=self.RIGHT_LIST_NAME, choices=self.right_list(),
@@ -158,33 +167,36 @@ class AssignRemoveView(ExtraContextMixin, ViewPermissionCheckMixin, ObjectPermis
 
     def get_context_data(self, **kwargs):
         data = super(AssignRemoveView, self).get_context_data(**kwargs)
-        data.update({
-            'subtemplates_list': [
-                {
-                    'name': 'appearance/generic_form_subtemplate.html',
-                    'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
-                    'context': {
-                        'form': self.unselected_list,
-                        'title': self.left_list_title or ' ',
-                        'submit_label': _('Add'),
-                        'submit_icon_class': icon_assign_remove_add,
-                        'hide_labels': True,
-                    }
-                },
-                {
-                    'name': 'appearance/generic_form_subtemplate.html',
-                    'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
-                    'context': {
-                        'form': self.selected_list,
-                        'title': self.right_list_title or ' ',
-                        'submit_label': _('Remove'),
-                        'submit_icon_class': icon_assign_remove_remove,
-                        'hide_labels': True,
-                    }
-                },
-
-            ],
-        })
+        data.update(
+            {
+                'subtemplates_list': [
+                    {
+                        'name': 'appearance/generic_form_subtemplate.html',
+                        'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
+                        'context': {
+                            'form': self.unselected_list,
+                            'form_css_classes': 'form-hotkey-double-click',
+                            'title': self.left_list_title or ' ',
+                            'submit_label': _('Add'),
+                            'submit_icon_class': icon_assign_remove_add,
+                            'hide_labels': True,
+                        }
+                    },
+                    {
+                        'name': 'appearance/generic_form_subtemplate.html',
+                        'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
+                        'context': {
+                            'form': self.selected_list,
+                            'form_css_classes': 'form-hotkey-double-click',
+                            'title': self.right_list_title or ' ',
+                            'submit_label': _('Remove'),
+                            'submit_icon_class': icon_assign_remove_remove,
+                            'hide_labels': True,
+                        }
+                    },
+                ],
+            }
+        )
         return data
 
 
