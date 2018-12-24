@@ -17,6 +17,18 @@ class APIContentTypeList(generics.ListAPIView):
     queryset = ContentType.objects.order_by('app_label', 'model')
 
 
+class APITemplateListView(generics.ListAPIView):
+    """
+    Returns a list of partial templates.
+    get: Returns a list of partial templates.
+    """
+    serializer_class = TemplateSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Template.all(rendered=True, request=self.request)
+
+
 class APITemplateView(generics.RetrieveAPIView):
     """
     Returns the selected partial template details.
@@ -26,4 +38,6 @@ class APITemplateView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        return Template.get(self.kwargs['name']).render(request=self.request)
+        return Template.get(name=self.kwargs['name']).render(
+            request=self.request
+        )

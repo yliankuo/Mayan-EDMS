@@ -272,6 +272,17 @@ class Template(object):
     _registry = {}
 
     @classmethod
+    def all(cls, rendered=False, request=None):
+        if not rendered:
+            return cls._registry.values()
+        else:
+            result = []
+            for template in cls._registry.values():
+                result.append(template.render(request=request))
+            return result
+
+
+    @classmethod
     def get(cls, name):
         return cls._registry[name]
 

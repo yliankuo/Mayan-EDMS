@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 from django.views.i18n import javascript_catalog, set_language
 
-from .api_views import APIContentTypeList, APITemplateView
+from .api_views import (
+    APIContentTypeList, APITemplateListView, APITemplateView
+)
 from .views import (
     AboutView, CheckVersionView, CurrentUserLocaleProfileDetailsView,
     CurrentUserLocaleProfileEditView, FaviconRedirectView, HomeView,
@@ -67,6 +69,10 @@ api_urls = [
     url(
         r'^content_types/$', APIContentTypeList.as_view(),
         name='content-type-list'
+    ),
+    url(
+        r'^templates/$', APITemplateListView.as_view(),
+        name='template-list'
     ),
     url(
         r'^templates/(?P<name>[-\w]+)/$', APITemplateView.as_view(),
