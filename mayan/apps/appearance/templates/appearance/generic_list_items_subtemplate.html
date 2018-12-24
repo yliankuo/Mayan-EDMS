@@ -75,7 +75,7 @@
                                                         {% get_source_columns source=object only_identifier=True as source_column %}
                                                         {% source_column_resolve column=source_column as column_value %}
                                                         {% if source_column.is_absolute_url %}
-                                                            <a href="{{ object.get_absolute_url }}">{{ column_value }}</a>
+                                                            <a href="{{ column_value.get_absolute_url }}">{{ column_value }}</a>
                                                         {% else %}
                                                             {{ column_value }}
                                                         {% endif %}
