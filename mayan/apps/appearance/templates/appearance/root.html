@@ -33,12 +33,12 @@
         {% if appearance_type == 'plain' %}
             {% block content_plain %}{% endblock %}
         {% else %}
-            <div id="menu-main">
-                {% include 'appearance/menu_main.html' %}
+            <div id="menu-topbar">
+                {% include 'appearance/menu_topbar.html' %}
             </div>
             <div class="container-fluid">
-                <div class="sidebar" id="menu-sidebar">
-                    {% include 'appearance/menu_sidebar.html' %}
+                <div class="sidebar" id="menu-main">
+                    {% include 'appearance/menu_main.html' %}
                 </div>
                 <div class="main">
                     <div class="row">
@@ -115,15 +115,15 @@
                     {
                         callback: MayanApp.setupNavbarState,
                         interval: 5000,
-                        menuSelector: '#menu-sidebar',
+                        menuSelector: '#menu-main',
                         name: 'menu_main',
-                        url: '{% url "rest_api:template-detail" "menu_sidebar" %}'
+                        url: '{% url "rest_api:template-detail" "menu_main" %}'
                     },
                     {
                         interval: 5000,
-                        menuSelector: '#menu-main',
-                        name: 'menu_sidebar',
-                        url: '{% url "rest_api:template-detail" "menu_main" %}'
+                        menuSelector: '#menu-topbar',
+                        name: 'menu_topbar',
+                        url: '{% url "rest_api:template-detail" "menu_topbar" %}'
                     },
                 ]
             });

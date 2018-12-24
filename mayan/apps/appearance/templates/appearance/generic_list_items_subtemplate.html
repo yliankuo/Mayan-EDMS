@@ -99,7 +99,7 @@
                                     {% endfor %}
 
                                     {% if not hide_links %}
-                                        {% get_menus_links 'object list facet,object menu' source=object as links %}
+                                        {% get_menus_links names='list facet,object' source=object as links %}
 
                                         <div class="dropdown text-center">
                                             <button aria-expanded="false" aria-haspopup="true" class="btn btn-default btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">

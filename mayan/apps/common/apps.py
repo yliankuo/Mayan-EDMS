@@ -94,7 +94,7 @@ class CommonApp(MayanAppConfig):
             name='menu_main', template_name='appearance/menu_main.html'
         )
         Template(
-            name='menu_sidebar', template_name='appearance/menu_sidebar.html'
+            name='menu_topbar', template_name='appearance/menu_topbar.html'
         )
 
         app.conf.beat_schedule.update(
