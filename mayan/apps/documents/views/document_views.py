@@ -93,6 +93,7 @@ class DocumentListView(SingleObjectListView):
                 'permission for any document or document type.'
             ),
             'no_results_title': _('No documents available'),
+            'table_cell_container_classes': 'td-container-thumbnail',
             'title': _('All documents'),
         }
 

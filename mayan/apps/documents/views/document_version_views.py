@@ -45,6 +45,7 @@ class DocumentVersionListView(SingleObjectListView):
             'hide_object': True,
             'list_as_items': True,
             'object': self.get_document(),
+            'table_cell_container_classes': 'td-container-thumbnail',
             'title': _('Versions of document: %s') % self.get_document(),
         }
 
