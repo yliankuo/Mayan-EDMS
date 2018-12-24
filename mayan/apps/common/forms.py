@@ -31,7 +31,9 @@ class ChoiceForm(forms.Form):
         self.fields['selection'].help_text = help_text
         self.fields['selection'].widget.disabled_choices = disabled_choices
         self.fields['selection'].widget.attrs.update(
-            {'size': 14, 'class': 'choice_form'}
+            {
+                'class': 'full-height', 'data-height-difference': '450'
+            }
         )
 
     selection = forms.MultipleChoiceField(widget=DisableableSelectWidget())
