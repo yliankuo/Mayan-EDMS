@@ -99,16 +99,31 @@
                                     {% endfor %}
 
                                     {% if not hide_links %}
-                                        <p class="text-center">
-                                            {% get_menu_links 'object menu' source=object as resolved_links %}
-                                            {% for object_navigation_links in resolved_links %}
-                                                {% with 'true' as as_dropdown %}
-                                                    {% include 'navigation/generic_navigation.html' %}
-                                                {% endwith %}
-                                            {% endfor %}
-                                        </p>
-                                    {% endif %}
+                                        {% get_menus_links 'object list facet,object menu' source=object as links %}
 
+                                        <div class="dropdown text-center">
+                                            <button aria-expanded="false" aria-haspopup="true" class="btn btn-default btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                                                {% trans 'Actions' %}
+                                                <span class="caret"></span>
+                                                <span class="sr-only">{% trans 'Toggle Dropdown' %}</span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                {% for object_navigation_links in links %}
+                                                    {% with 'true' as as_li %}
+                                                    {% with 'true' as hide_active_anchor %}
+                                                    {% with 'btn-sm' as link_classes %}
+                                                        {% include 'navigation/generic_navigation.html' %}
+                                                    {% endwith %}
+                                                    {% endwith %}
+                                                    {% endwith %}
+
+                                                    {% if not forloop.last and object_navigation_links %}
+                                                        <li class="divider"></li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
