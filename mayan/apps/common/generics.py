@@ -519,8 +519,6 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
             TEXT_LIST_AS_ITEMS_PARAMETER, default_mode
         )
 
-        print '@@ list_mode', list_mode
-
         context.update(
             {
                 TEXT_LIST_AS_ITEMS_VARIABLE_NAME: list_mode == TEXT_CHOICE_ITEMS,

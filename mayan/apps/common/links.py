@@ -100,5 +100,6 @@ link_support = Link(
 link_tools = Link(
     icon_class=icon_tools, text=_('Tools'), view='common:tools_list'
 )
+separator_system = Separator()
 separator_user_label = Separator()
 text_user_label = Text(text=get_user_label_text)
