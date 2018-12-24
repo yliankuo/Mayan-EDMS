@@ -16,3 +16,10 @@ def get_users():
             for user in get_user_model().objects.all()
         ]
     )
+
+
+def get_user_label_text(context):
+    if not context['request'].user.is_authenticated:
+        return _('Anonymous')
+    else:
+        return context['request'].user.get_full_name() or context['request'].user

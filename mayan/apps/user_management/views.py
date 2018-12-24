@@ -15,10 +15,12 @@ from django.utils.translation import ungettext, ugettext_lazy as _
 from mayan.apps.common.views import (
     AssignRemoveView, MultipleObjectConfirmActionView,
     MultipleObjectFormActionView, SingleObjectCreateView,
-    SingleObjectDeleteView, SingleObjectEditView, SingleObjectListView
+    SingleObjectDeleteView, SingleObjectDetailView, SingleObjectEditView,
+    SingleObjectListView
 )
 
-from .forms import UserForm
+from .events import event_user_created, event_user_edited
+from .forms import UserForm, UserForm_view
 from .icons import icon_group_setup, icon_user_setup
 from .links import link_group_create, link_user_create
 from .permissions import (
@@ -26,6 +28,31 @@ from .permissions import (
     permission_group_view, permission_user_create, permission_user_delete,
     permission_user_edit, permission_user_view
 )
+
+
+class CurrentUserDetailsView(SingleObjectDetailView):
+    fields = (
+        'username', 'first_name', 'last_name', 'email', 'last_login',
+        'date_joined', 'groups'
+    )
+
+    def get_object(self):
+        return self.request.user
+
+    def get_extra_context(self, **kwargs):
+        return {
+            'object': None,
+            'title': _('Current user details'),
+        }
+
+
+class CurrentUserEditView(SingleObjectEditView):
+    extra_context = {'object': None, 'title': _('Edit current user details')}
+    form_class = UserForm
+    post_action_redirect = reverse_lazy('user_management:current_user_details')
+
+    def get_object(self):
+        return self.request.user
 
 
 class GroupCreateView(SingleObjectCreateView):
@@ -141,6 +168,11 @@ class UserCreateView(SingleObjectCreateView):
         user = form.save(commit=False)
         user.set_unusable_password()
         user.save()
+
+        event_user_created.commit(
+            actor=self.request.user, target=user
+        )
+
         messages.success(
             self.request, _('User "%s" created successfully.') % user
         )
@@ -205,6 +237,23 @@ class UserDeleteView(MultipleObjectConfirmActionView):
             )
 
 
+class UserDetailsView(SingleObjectDetailView):
+    fields = (
+        'username', 'first_name', 'last_name', 'email', 'last_login',
+        'date_joined', 'groups',
+    )
+    object_permission = permission_user_view
+    queryset = get_user_model().objects.filter(
+        is_superuser=False, is_staff=False
+    )
+
+    def get_extra_context(self, **kwargs):
+        return {
+            'object': self.get_object(),
+            'title': _('Details of user: %s') % self.get_object()
+        }
+
+
 class UserEditView(SingleObjectEditView):
     fields = ('username', 'first_name', 'last_name', 'email', 'is_active',)
     object_permission = permission_user_edit
@@ -212,6 +261,12 @@ class UserEditView(SingleObjectEditView):
     queryset = get_user_model().objects.filter(
         is_superuser=False, is_staff=False
     )
+
+    def form_valid(self, form):
+        event_user_edited.commit(
+            actor=self.request.user, target=self.get_object()
+        )
+        return super(UserEditView, self).form_valid(form=form)
 
     def get_extra_context(self):
         return {

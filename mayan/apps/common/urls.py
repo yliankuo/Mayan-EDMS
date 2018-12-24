@@ -5,10 +5,9 @@ from django.views.i18n import javascript_catalog, set_language
 
 from .api_views import APIContentTypeList, APITemplateView
 from .views import (
-    AboutView, CheckVersionView, CurrentUserDetailsView, CurrentUserEditView,
-    CurrentUserLocaleProfileDetailsView, CurrentUserLocaleProfileEditView,
-    FaviconRedirectView, HomeView, LicenseView,
-    ObjectErrorLogEntryListClearView, ObjectErrorLogEntryListView,
+    AboutView, CheckVersionView, CurrentUserLocaleProfileDetailsView,
+    CurrentUserLocaleProfileEditView, FaviconRedirectView, HomeView,
+    LicenseView, ObjectErrorLogEntryListClearView, ObjectErrorLogEntryListView,
     PackagesLicensesView, RootView, SetupListView, ToolsListView,
     multi_object_action_view
 )
@@ -32,14 +31,6 @@ urlpatterns = [
     ),
     url(r'^setup/$', SetupListView.as_view(), name='setup_list'),
     url(r'^tools/$', ToolsListView.as_view(), name='tools_list'),
-    url(
-        r'^user/$', CurrentUserDetailsView.as_view(),
-        name='current_user_details'
-    ),
-    url(
-        r'^user/edit/$', CurrentUserEditView.as_view(),
-        name='current_user_edit'
-    ),
     url(
         r'^user/locale/$', CurrentUserLocaleProfileDetailsView.as_view(),
         name='current_user_locale_profile_details'

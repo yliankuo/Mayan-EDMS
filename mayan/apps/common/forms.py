@@ -159,24 +159,3 @@ class PackagesLicensesForm(FileDisplayForm):
         self.fields['text'].initial = '\n\n'.join(
             ['{}\n{}'.format(package.label, package.license_text) for package in Package.get_all()]
         )
-
-
-class UserForm(forms.ModelForm):
-    """
-    Form used to edit an user's mininal fields by the user himself
-    """
-    class Meta:
-        fields = ('username', 'first_name', 'last_name', 'email')
-        model = get_user_model()
-
-
-class UserForm_view(DetailForm):
-    """
-    Form used to display an user's public details
-    """
-    class Meta:
-        fields = (
-            'username', 'first_name', 'last_name', 'email', 'last_login',
-            'date_joined', 'groups'
-        )
-        model = get_user_model()

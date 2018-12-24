@@ -9,22 +9,31 @@ from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
 from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
 from mayan.apps.common import (
-    menu_list_facet, menu_multi_item, menu_object, menu_secondary, menu_setup
+    menu_list_facet, menu_multi_item, menu_object, menu_secondary, menu_setup,
+    menu_user
 )
 from mayan.apps.common.apps import MayanAppConfig
 from mayan.apps.common.widgets import TwoStateWidget
+from mayan.apps.events import ModelEventType
+from mayan.apps.events.links import (
+    link_events_for_object, link_object_event_types_user_subcriptions_list
+)
 from mayan.apps.metadata import MetadataLookup
 from mayan.apps.navigation import SourceColumn
 from mayan.apps.rest_api.fields import DynamicSerializerField
 
+from .events import event_user_edited
 from .handlers import handler_initialize_new_user_options
 from .links import (
-    link_group_create, link_group_delete, link_group_edit, link_group_list,
-    link_group_members, link_group_setup, link_user_create, link_user_delete,
-    link_user_edit, link_user_groups, link_user_list,
-    link_user_multiple_delete, link_user_multiple_set_password,
-    link_user_set_options, link_user_set_password, link_user_setup
+    link_current_user_details, link_current_user_edit, link_group_create,
+    link_group_delete, link_group_edit, link_group_list, link_group_members,
+    link_group_setup, link_user_create, link_user_delete, link_user_edit,
+    link_user_groups, link_user_list, link_user_multiple_delete,
+    link_user_multiple_set_password, link_user_set_options,
+    link_user_set_password, link_user_setup, text_user_label,
+    separator_user_label
 )
+from .methods import method_get_absolute_url
 from .permissions import (
     permission_group_delete, permission_group_edit,
     permission_group_view, permission_user_delete, permission_user_edit,
@@ -62,6 +71,11 @@ class UserManagementApp(MayanAppConfig):
             description=_('All the users.'), name='users',
             value=get_users
         )
+
+        ModelEventType.register(
+            model=User, event_types=(event_user_edited,)
+        )
+
         ModelPermission.register(
             model=Group, permissions=(
                 permission_acl_edit, permission_acl_view,
@@ -82,7 +96,10 @@ class UserManagementApp(MayanAppConfig):
             attribute='user_set.count', label=_('Users'), source=Group
         )
 
-        SourceColumn(attribute='username', is_identifier=True, source=User)
+        SourceColumn(
+            attribute='username', is_absolute_url=True, is_identifier=True,
+            label=_('Username'), source=User
+        )
         SourceColumn(
             attribute='get_full_name', label=_('Full name'), source=User
         )
@@ -99,16 +116,25 @@ class UserManagementApp(MayanAppConfig):
             source=User, widget=TwoStateWidget
         )
 
+        User.add_to_class(
+            name='get_absolute_url', value=method_get_absolute_url
+        )
+
         menu_list_facet.bind_links(
             links=(
                 link_acl_list, link_group_members,
             ), sources=(Group,)
         )
+
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_user_groups
-            ), sources=(User,)
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_user_groups,
+            ),
+            sources=(User,)
         )
+
         menu_multi_item.bind_links(
             links=(link_user_multiple_set_password, link_user_multiple_delete),
             sources=('user_management:user_list',)
@@ -142,6 +168,12 @@ class UserManagementApp(MayanAppConfig):
             )
         )
         menu_setup.bind_links(links=(link_user_setup, link_group_setup))
+        menu_user.bind_links(
+            links=(
+                text_user_label, separator_user_label,
+                link_current_user_details, link_current_user_edit,
+            ), position=0
+        )
 
         post_save.connect(
             dispatch_uid='user_management_handler_initialize_new_user_options',
