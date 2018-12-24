@@ -1,21 +1,45 @@
 'use strict';
 
 class MayanApp {
-    constructor (parameters) {
+    constructor (options) {
         var self = this;
 
-        parameters = parameters || {
+        options = options || {
             ajaxMenusOptions: []
         }
 
         this.ajaxSpinnerSeletor = '#ajax-spinner';
         this.ajaxExecuting = false;
-        this.ajaxMenusOptions = parameters.ajaxMenusOptions;
+        this.ajaxMenusOptions = options.ajaxMenusOptions;
         this.ajaxMenuHashes = {};
         this.window = $(window);
     }
 
     // Class methods and variables
+
+    static MultiObjectFormProcess ($form, options) {
+        /*
+         * ajaxForm callback to add the external item checkboxes to the
+         * submitted form
+         */
+
+        if ($form.hasClass('form-multi-object-action')) {
+            // Turn form data into an object
+            var formArray = $form.serializeArray().reduce(function (obj, item) {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+
+            // Add all checked checkboxes to the form data
+            $('.form-multi-object-action-checkbox:checked').each(function() {
+                var $this = $(this);
+                formArray[$this.attr('name')] = $this.attr('value');
+            });
+
+            // Set the form data as the data to send
+            options.data = formArray;
+        }
+    }
 
     static mayanNotificationBadge (options, data) {
         // Callback to add the notifications count inside a badge markup
@@ -40,28 +64,14 @@ class MayanApp {
         }
     }
 
-    static MultiObjectFormProcess ($form, options) {
-        /*
-         * ajaxForm callback to add the external item checkboxes to the
-         * submitted form
-         */
-
-        if ($form.hasClass('form-multi-object-action')) {
-            // Turn form data into an object
-            var formArray = $form.serializeArray().reduce(function (obj, item) {
-                obj[item.name] = item.value;
-                return obj;
-            }, {});
-
-            // Add all checked checkboxes to the form data
-            $('.form-multi-object-action-checkbox:checked').each(function() {
-                var $this = $(this);
-                formArray[$this.attr('name')] = $this.attr('value');
-            });
-
-            // Set the form data as the data to send
-            options.data = formArray;
-        }
+    static setupNavbarState () {
+        var uri = new URI(window.location.hash);
+        var uriFragment = uri.fragment();
+        $('#accordion-sidebar > .panel-default > .collapse > .panel-body > ul > li > a').each(function (index, value) {
+            if (value.pathname === uriFragment) {
+                $(this).parents('.collapse').collapse('show');
+            }
+        });
     }
 
     static tagSelectionTemplate (tag, container) {
@@ -95,7 +105,7 @@ class MayanApp {
             },
             success: function(data) {
                 if (options.callback) {
-                    // Conver the callback string to an actual function
+                    // Convert the callback string to an actual function
                     var callbackFunction = window;
 
                     $.each(options.callback.split('.'), function (index, value) {
@@ -127,10 +137,10 @@ class MayanApp {
 
                 if ((menuHash === undefined) || (menuHash !== data.hex_hash)) {
                     $(options.menuSelector).html(data.html);
+                    options.app.ajaxMenuHashes[data.name] = data.hex_hash;
                     if (options.callback !== undefined) {
                         options.callback();
                     }
-                    options.app.ajaxMenuHashes[data.name] = data.hex_hash;
                 }
             },
             url: options.url,
