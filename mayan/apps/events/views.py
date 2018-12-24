@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -20,7 +19,7 @@ from .forms import (
     EventTypeUserRelationshipFormSet, ObjectEventTypeUserRelationshipFormSet
 )
 from .icons import (
-    icon_events_list, icon_events_user_list, icon_user_notifications_list
+    icon_events_list, icon_user_notifications_list
 )
 from .links import link_event_types_subscriptions_list
 from .models import StoredEventType
@@ -144,45 +143,43 @@ class NotificationMarkReadAll(SimpleView):
 class ObjectEventListView(EventListView):
     view_permissions = None
 
-    def dispatch(self, request, *args, **kwargs):
-        self.object_content_type = get_object_or_404(
+    def _get_object(self):
+        content_type = get_object_or_404(
             klass=ContentType, app_label=self.kwargs['app_label'],
             model=self.kwargs['model']
         )
 
-        try:
-            self.content_object = self.object_content_type.get_object_for_this_type(
-                pk=self.kwargs['object_id']
-            )
-        except self.object_content_type.model_class().DoesNotExist:
-            raise Http404
-
-        AccessControlList.objects.check_access(
-            permissions=permission_events_view, user=request.user,
-            obj=self.content_object
+        return get_object_or_404(
+            klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
-
-        return super(
-            ObjectEventListView, self
-        ).dispatch(request, *args, **kwargs)
 
     def get_extra_context(self):
         context = super(ObjectEventListView, self).get_extra_context()
-        context.update({
-            'hide_object': True,
-            'no_results_icon': icon_events_list,
-            'no_results_text': _(
-                'Events are actions that have been performed to this object '
-                'or using this object.'
-            ),
-            'no_results_title': _('There are no events for this object'),
-            'object': self.content_object,
-            'title': _('Events for: %s') % self.content_object,
-        })
+        context.update(
+            {
+                'hide_object': True,
+                'no_results_icon': icon_events_list,
+                'no_results_text': _(
+                    'Events are actions that have been performed to this '
+                    'object or using this object.'
+                ),
+                'no_results_title': _('There are no events for this object'),
+                'object': self.get_object(),
+                'title': _('Events for: %s') % self.get_object(),
+            }
+        )
         return context
 
+    def get_object(self):
+        obj = self._get_object()
+        AccessControlList.objects.check_access(
+            permissions=permission_events_view, user=self.request.user,
+            obj=obj
+        )
+        return obj
+
     def get_object_list(self):
-        return any_stream(self.content_object)
+        return any_stream(self.get_object())
 
 
 class ObjectEventTypeSubscriptionListView(FormView):
@@ -190,7 +187,9 @@ class ObjectEventTypeSubscriptionListView(FormView):
 
     def dispatch(self, *args, **kwargs):
         EventType.refresh()
-        return super(ObjectEventTypeSubscriptionListView, self).dispatch(*args, **kwargs)
+        return super(ObjectEventTypeSubscriptionListView, self).dispatch(
+            *args, **kwargs
+        )
 
     def form_valid(self, form):
         try:
@@ -203,7 +202,9 @@ class ObjectEventTypeSubscriptionListView(FormView):
             )
         else:
             messages.success(
-                self.request, _('Object event subscriptions updated successfully')
+                self.request, _(
+                    'Object event subscriptions updated successfully.'
+                )
             )
 
         return super(
@@ -255,35 +256,27 @@ class ObjectEventTypeSubscriptionListView(FormView):
         return ModelEventType.get_for_instance(instance=self.get_object())
 
 
-class UserEventListView(SingleObjectListView):
-    view_permission = permission_events_view
-
+class UserEventListView(ObjectEventListView):
     def get_extra_context(self):
-        return {
-            'hide_object': True,
-            'no_results_icon': icon_events_user_list,
-            'no_results_text': _(
-                'Events are actions that have been performed to this '
-                'user account or by this user account.'
-            ),
-            'no_results_title': _('There are no events for this user'),
-            'object': self.get_user(),
-            'title': _(
-                'Events for user: %s'
-            ) % self.get_user(),
-        }
-
-    def get_object_list(self):
-        return Action.objects.actor(obj=self.get_user())
-
-    def get_user(self):
-        return get_object_or_404(klass=get_user_model(), pk=self.kwargs['pk'])
+        context = super(UserEventListView, self).get_extra_context()
+        context.update(
+            {
+                'no_results_text': _(
+                    'Events are actions that have been performed to this '
+                    'user account or by this user account.'
+                ),
+                'no_results_title': _('There are no events for this user'),
+                'object': self.get_object(),
+                'title': _(
+                    'Events for user: %s'
+                ) % self.get_object(),
+            }
+        )
+        return context
 
 
 class CurrentUserEventListView(UserEventListView):
-    view_permission = None
-
-    def get_user(self):
+    def get_object(self):
         return self.request.user
 
 

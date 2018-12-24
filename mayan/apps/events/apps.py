@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
 
 from django.apps import apps
-from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.common import (
-    MayanAppConfig, menu_list_facet, menu_object, menu_secondary,
-    menu_tools, menu_topbar, menu_user
+    MayanAppConfig, menu_object, menu_secondary, menu_tools, menu_topbar,
+    menu_user
 )
 from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
@@ -15,8 +14,7 @@ from .licenses import *  # NOQA
 from .links import (
     link_current_user_events, link_event_types_subscriptions_list,
     link_events_list, link_notification_mark_read,
-    link_notification_mark_read_all, link_user_events,
-    link_user_notifications_list
+    link_notification_mark_read_all, link_user_notifications_list
 )
 from .widgets import (
     widget_event_object_link, widget_event_type_link, widget_event_user_link
@@ -36,7 +34,6 @@ class EventsApp(MayanAppConfig):
         Action = apps.get_model(app_label='actstream', model_name='Action')
         Notification = self.get_model(model_name='Notification')
         StoredEventType = self.get_model(model_name='StoredEventType')
-        User = get_user_model()
 
         SourceColumn(
             attribute='timestamp', is_identifier=True,
@@ -86,9 +83,6 @@ class EventsApp(MayanAppConfig):
             source=Notification, widget=TwoStateWidget
         )
 
-        menu_list_facet.bind_links(
-            links=(link_user_events,), sources=(User,)
-        )
         menu_object.bind_links(
             links=(link_notification_mark_read,), sources=(Notification,)
         )
