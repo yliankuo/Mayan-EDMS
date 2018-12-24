@@ -14,7 +14,6 @@ from django.utils.http import urlencode as django_urlencode
 from django.utils.http import urlquote as django_urlquote
 from django.utils.six.moves import reduce as reduce_function
 from django.utils.six.moves import xmlrpc_client
-from django.utils.translation import ugettext_lazy as _
 
 import mayan
 

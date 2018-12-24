@@ -20,7 +20,7 @@ from mayan.apps.common.views import (
 )
 
 from .events import event_user_created, event_user_edited
-from .forms import UserForm, UserForm_view
+from .forms import UserForm
 from .icons import icon_group_setup, icon_user_setup
 from .links import link_group_create, link_user_create
 from .permissions import (

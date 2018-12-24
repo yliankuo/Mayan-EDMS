@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 
 from .settings import (
     setting_display_height, setting_display_width, setting_preview_height,

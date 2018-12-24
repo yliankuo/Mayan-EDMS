@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from json import dumps
-
 from django.template import Context, Library
 from django.template.defaultfilters import truncatechars
 from django.template.loader import get_template

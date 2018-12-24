@@ -4,7 +4,6 @@ import os
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _

@@ -98,5 +98,5 @@ class EventsApp(MayanAppConfig):
         menu_user.bind_links(
             links=(
                 link_event_types_subscriptions_list, link_current_user_events
-            ),  position=50
+            ), position=50
         )

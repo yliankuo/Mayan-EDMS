@@ -13,7 +13,7 @@ from django.db.models.constants import LOOKUP_SEP
 from django.shortcuts import resolve_url
 from django.template import VariableDoesNotExist, Variable
 from django.template.defaulttags import URLNode
-from django.urls import Resolver404, resolve
+from django.urls import resolve
 from django.utils.encoding import force_str, force_text
 from django.utils.translation import ugettext_lazy as _
 

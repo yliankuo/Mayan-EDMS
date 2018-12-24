@@ -4,7 +4,7 @@ from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.navigation import Link
-from mayan.apps.navigation.classes import Separator, Text
+from mayan.apps.navigation.classes import Separator
 
 from .icons import (
     icon_about, icon_check_version, icon_current_user_locale_profile_details,

@@ -3,11 +3,8 @@ from __future__ import unicode_literals
 from django.apps import apps
 from django.template import Context, Template
 from django.urls import reverse
-from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-
-from mayan.apps.common.utils import resolve_attribute
 
 from .classes import EventType
 
