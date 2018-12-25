@@ -17,27 +17,15 @@ class MayanApp {
 
     // Class methods and variables
 
-    static MultiObjectFormProcess ($form, options) {
-        /*
-         * ajaxForm callback to add the external item checkboxes to the
-         * submitted form
-         */
+    static countChecked() {
+        var checkCount = $('.check-all-slave:checked').length;
 
-        if ($form.hasClass('form-multi-object-action')) {
-            // Turn form data into an object
-            var formArray = $form.serializeArray().reduce(function (obj, item) {
-                obj[item.name] = item.value;
-                return obj;
-            }, {});
-
-            // Add all checked checkboxes to the form data
-            $('.form-multi-object-action-checkbox:checked').each(function() {
-                var $this = $(this);
-                formArray[$this.attr('name')] = $this.attr('value');
-            });
-
-            // Set the form data as the data to send
-            options.data = formArray;
+        if (checkCount) {
+            $('#multi-item-title').hide();
+            $('#multi-item-actions').show();
+        } else {
+            $('#multi-item-title').show();
+            $('#multi-item-actions').hide();
         }
     }
 
@@ -62,6 +50,24 @@ class MayanApp {
                 );
             }
         }
+    }
+
+    static setupMultiItemActions () {
+        $('body').on('change', '.check-all-slave', function () {
+            MayanApp.countChecked();
+        });
+
+        $('body').on('click', '.btn-multi-item-action', function (event) {
+            var id_list = [];
+            $('.check-all-slave:checked').each(function (index, value) {
+                //Split the name (ie:"pk_200") and extract only the ID
+                id_list.push(value.name.split('_')[1]);
+            });
+            event.preventDefault();
+            partialNavigation.setLocation(
+                $(this).attr('href') + '?id_list=' + id_list.join(',')
+            );
+        });
     }
 
     static setupNavbarState () {
@@ -223,10 +229,10 @@ class MayanApp {
 
         this.setupAJAXPeriodicWorkers();
         this.setupAJAXSpinner();
-        this.setupAutoSubmit();
         this.setupFormHotkeys();
         this.setupFullHeightResizing();
         this.setupItemsSelector();
+        MayanApp.setupMultiItemActions();
         this.setupNavbarCollapse();
         this.setupNewWindowAnchor();
         $.each(this.ajaxMenusOptions, function(index, value) {
@@ -273,14 +279,6 @@ class MayanApp {
         });
     }
 
-    setupAutoSubmit () {
-        $('body').on('change', '.select-auto-submit', function () {
-            if ($(this).val()) {
-                $(this.form).trigger('submit');
-            }
-        });
-    }
-
     setupFormHotkeys () {
         $('body').on('keypress', '.form-hotkey-enter', function (e) {
             if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
@@ -319,7 +317,6 @@ class MayanApp {
                 checked = $this.data('checked');
                 checked = !checked;
                 $this.data('checked', checked);
-                console.log($this.data('icon-checked'));
 
                 if (checked) {
                     $this.find('[data-fa-i2svg]').addClass($this.data('icon-checked')).removeClass($this.data('icon-unchecked'));

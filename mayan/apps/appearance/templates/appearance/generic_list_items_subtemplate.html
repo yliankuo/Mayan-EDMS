@@ -25,32 +25,17 @@
             <hr>
 
             <div class="well center-block">
-                <div class="clearfix">
-
-                    {% if object_list %}
-                        {% if not hide_multi_item_actions %}
-                            {% get_multi_item_links_form object_list %}
-                        {% endif %}
+                {% if object_list %}
+                    {% if not hide_multi_item_actions %}
+                        {% get_menu_links name='multi item' sort_results=True source=object_list.0 as links_multi_item %}
                     {% endif %}
+                {% endif %}
 
+                <div class="clearfix">
                     {% include 'appearance/list_toolbar.html' %}
-
-                    <div class="pull-right">
-                        <form action="{% url 'common:multi_object_action_view' %}" class="form-multi-object-action" method="get">
-                            {% if object_list %}
-                                {% if multi_item_actions %}
-                                    <fieldset style="margin-top: -10px;">
-                                        {{ multi_item_form }}
-                                    </fieldset>
-                                {% endif %}
-                            {% endif %}
-                        </form>
-                    </div>
                 </div>
 
-                {% if object_list %}
-                    <hr style="border-bottom: 1px solid lightgrey;">
-                {% endif %}
+                <hr style="border-bottom: 1px solid lightgrey;">
 
                 <div class="row row-items">
                     {% for object in object_list %}
@@ -60,7 +45,7 @@
                                     <div class="form-group">
                                         <div class="checkbox">
                                             <label for="id_indexes_0">
-                                                {% if multi_item_actions %}
+                                                {% if links_multi_item %}
                                                     <input class="form-multi-object-action-checkbox check-all-slave checkbox" name="pk_{{ object.pk }}" type="checkbox" />
                                                 {% endif %}
 
