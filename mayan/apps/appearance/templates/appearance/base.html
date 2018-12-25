@@ -37,55 +37,53 @@
             </div>
         </div>
 
-        {% get_menus_links names='object,sidebar,secondary' sort_results=True as links %}
-        {% get_menus_links names='facet,list facet' sort_results=True as form_navigation_links %}
+        {% get_menus_links names='facet,list facet' sort_results=True as links_facet %}
+
+        <style>
+
+        </style>
+
 
         <div class="row">
-            {% if links or form_navigation_links %}
-                <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
-            {% else %}
-                <div class="col-xs-12">
-            {% endif %}
+            <div class="col-xs-12 {% if links_facet %}has-sidebar{% endif %}" id="viewport">
                 {% include 'appearance/calculate_form_title.html' %}
+
+                {# action menu #}
+                {% get_menus_links names='object,sidebar,secondary' sort_results=True as links_actions %}
+                {% if links_actions %}
+                    <div class="pull-right btn-group" id="menu-actions">
+                        <button aria-expanded="true" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" type="button">
+                            {% trans 'Actions' %}
+                            <span class="caret"></span>
+                            <span class="sr-only">{% trans 'Toggle Dropdown' %}</span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            {% for object_navigation_links in links_actions %}
+                                {% with 'true' as as_li %}
+                                {% with 'true' as hide_active_anchor %}
+                                {% with 'btn-sm' as link_classes %}
+                                    {% include 'navigation/generic_navigation.html' %}
+                                {% endwith %}
+                                {% endwith %}
+                                {% endwith %}
+
+                                {% if not forloop.last and object_navigation_links %}
+                                    <li class="divider"></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="clearfix"></div>
+                {% endif %}
+
                 {% block content %}{% endblock %}
                 {% block footer %}{% endblock %}
             </div>
 
-            {% if links or form_navigation_links %}
-                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-            {% endif %}
-
-            {% if links %}
-                <div class="pull-right btn-group" style="margin-bottom: 10px;">
-                    <button aria-expanded="true" type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
-                        {% trans 'Actions' %}
-                        <span class="caret"></span>
-                        <span class="sr-only">{% trans 'Toggle Dropdown' %}</span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        {% for object_navigation_links in links %}
-                            {% with 'true' as as_li %}
-                            {% with 'true' as hide_active_anchor %}
-                            {% with 'btn-sm' as link_classes %}
-                                {% include 'navigation/generic_navigation.html' %}
-                            {% endwith %}
-                            {% endwith %}
-                            {% endwith %}
-
-                            {% if not forloop.last and object_navigation_links %}
-                                <li class="divider"></li>
-                            {% endif %}
-
-                        {% endfor %}
-                    </ul>
-                </div>
-                 <div class="clearfix visible-xs-block visible-sm-block visible-md-block visible-lg-block"></div>
-            {% endif %}
-
-            {% if form_navigation_links %}
-                <div class="pull-right list-group">
-                    {% if form_navigation_links %}
-                        {% for object_navigation_links in form_navigation_links %}
+            {% if links_facet %}
+                <div id="sidebar">
+                    <div class="pull-right list-group">
+                        {% for object_navigation_links in links_facet %}
                             {% with 'true' as hide_active_anchor %}
                             {% with 'active' as link_class_active %}
                             {% with 'list-group-item btn-sm' as link_classes %}
@@ -94,11 +92,7 @@
                             {% endwith %}
                             {% endwith %}
                         {% endfor %}
-                    {% endif %}
-                </div>
-            {% endif %}
-
-            {% if links or form_navigation_links %}
+                    </div>
                 </div>
             {% endif %}
         </div>

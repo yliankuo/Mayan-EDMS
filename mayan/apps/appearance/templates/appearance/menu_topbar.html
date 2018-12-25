@@ -7,7 +7,7 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <button aria-expanded="false" aria-controls="navbar" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" type="button">
                 <span class="sr-only">{% trans 'Toggle navigation' %}</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -15,6 +15,8 @@
             </button>
             <a class="navbar-brand" href="{% url home_view %}">{% smart_setting 'COMMON_PROJECT_TITLE' %}</a>
         </div>
+
+
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 {% get_menu_links name='topbar' as menu_links %}
