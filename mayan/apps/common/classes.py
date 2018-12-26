@@ -281,7 +281,6 @@ class Template(object):
                 result.append(template.render(request=request))
             return result
 
-
     @classmethod
     def get(cls, name):
         return cls._registry[name]

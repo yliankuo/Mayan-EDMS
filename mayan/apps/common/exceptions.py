@@ -42,11 +42,3 @@ class UnknownLatestVersion(BaseCommonException):
     """
     It is not possible to determine what is the latest upstream version.
     """
-
-
-class NPMException(BaseCommonException):
-    """Base exception for the NPM registry client"""
-
-
-class NPMPackgeIntegrityError(NPMException):
-    """Hash mismatch exception"""

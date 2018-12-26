@@ -19,8 +19,6 @@ class Command(management.BaseCommand):
                 )
             )
 
-        management.call_command('installjavascript', interactive=False)
-
         try:
             perform_upgrade.send(sender=self)
         except Exception as exception:
