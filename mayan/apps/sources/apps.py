@@ -9,6 +9,7 @@ from mayan.apps.common import (
     menu_setup, menu_sidebar
 )
 from mayan.apps.common.signals import post_initial_setup, post_upgrade
+from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.converter.links import link_transformation_list
 from mayan.apps.documents.menus import menu_documents
 from mayan.apps.documents.signals import post_version_upload
@@ -65,11 +66,21 @@ class SourcesApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=StagingFile,
-            label=_('Created'),
-            func=lambda context: context['object'].get_date_time_created()
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=Source
+        )
+        SourceColumn(
+            attribute='class_fullname', label=_('Type'), source=Source
+        )
+        SourceColumn(
+            attribute='enabled', is_sortable=True, source=Source,
+            widget=TwoStateWidget
         )
 
+        SourceColumn(
+            attribute='get_date_time_created', label=_('Created'),
+            source=StagingFile
+        )
         html_widget = StagingFileThumbnailWidget()
         SourceColumn(
             source=StagingFile,
@@ -80,14 +91,11 @@ class SourcesApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=SourceLog,
-            label=_('Date time'),
-            func=lambda context: context['object'].datetime
+            attribute='datetime', is_identifier=True, label=_('Date and time'),
+            source=SourceLog
         )
         SourceColumn(
-            source=SourceLog,
-            label=_('Message'),
-            func=lambda context: context['object'].message
+            attribute='message', label=_('Text'), source=SourceLog
         )
 
         app.conf.task_queues.extend(
