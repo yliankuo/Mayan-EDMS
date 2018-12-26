@@ -113,7 +113,6 @@ class CabinetDetailView(DocumentListView):
                 'jstree_data': '\n'.join(
                     jstree_data(node=cabinet.get_root(), selected_node=cabinet)
                 ),
-                'list_as_items': True,
                 'no_results_icon': icon_cabinet,
                 'no_results_main_link': link_cabinet_child_add.resolve(
                     context=RequestContext(
