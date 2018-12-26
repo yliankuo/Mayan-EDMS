@@ -15,8 +15,8 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.checkouts.models import NewVersionBlock
 from mayan.apps.common import menu_facet
+from mayan.apps.common.mixins import ListModeMixin
 from mayan.apps.common.models import SharedUploadedFile
-from mayan.apps.common.utils import encapsulate
 from mayan.apps.common.views import (
     ConfirmView, MultiFormView, SingleObjectCreateView, SingleObjectDeleteView,
     SingleObjectEditView, SingleObjectListView
@@ -33,7 +33,9 @@ from .exceptions import SourceException
 from .forms import (
     NewDocumentForm, NewVersionForm, WebFormUploadForm, WebFormUploadFormHTML5
 )
-from .icons import icon_log, icon_setup_sources, icon_upload_view_link
+from .icons import (
+    icon_log, icon_setup_sources, icon_staging_folder, icon_upload_view_link
+)
 from .links import (
     link_setup_source_create_imap_email, link_setup_source_create_pop3_email,
     link_setup_source_create_sane_scanner,
@@ -78,7 +80,7 @@ class SourceLogListView(SingleObjectListView):
         )
 
 
-class UploadBaseView(MultiFormView):
+class UploadBaseView(ListModeMixin, MultiFormView):
     template_name = 'appearance/generic_form.html'
     prefixes = {'source_form': 'source', 'document_form': 'document'}
 
@@ -152,10 +154,14 @@ class UploadBaseView(MultiFormView):
                         }
                     },
                     {
-                        'name': 'appearance/generic_list_subtemplate.html',
+                        'name': 'appearance/generic_list.html',
                         'context': {
                             'hide_link': True,
+                            'no_results_icon': icon_staging_folder,
+                            'no_results_title': _('No files in staging folder'),
                             'object_list': staging_filelist,
+                            'request': self.request,
+                            'table_cell_container_classes': 'td-container-thumbnail',
                             'title': _('Files in staging path'),
                         }
                     },
@@ -191,7 +197,6 @@ class UploadBaseView(MultiFormView):
 
 
 class UploadInteractiveView(UploadBaseView):
-
     def dispatch(self, request, *args, **kwargs):
         self.subtemplates_list = []
 
@@ -589,19 +594,8 @@ class SetupSourceListView(SingleObjectListView):
 
     def get_extra_context(self):
         return {
-            'extra_columns': (
-                {
-                    'name': _('Type'),
-                    'attribute': encapsulate(lambda entry: entry.class_fullname())
-                },
-                {
-                    'name': _('Enabled'),
-                    'attribute': encapsulate(
-                        lambda entry: TwoStateWidget(state=entry.enabled).render()
-                    )
-                },
-            ),
             'hide_link': True,
+            'hide_object': True,
             'no_results_icon': icon_setup_sources,
             'no_results_secondary_links': [
                 link_setup_source_create_webform.resolve(
