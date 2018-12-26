@@ -80,14 +80,7 @@ class DocumentUploadTestCase(GenericDocumentViewTestCase):
             obj=self.document_type, permission=permission_document_create
         )
 
-        with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-            response = self.post(
-                viewname='sources:upload_interactive', args=(self.source.pk,),
-                data={
-                    'source-file': file_object,
-                    'document_type_id': self.document_type.pk,
-                }, follow=True
-            )
+        response = self._request_upload_wizard_view()
 
         self.assertTrue(b'queued' in response.content)
         self.assertEqual(Document.objects.count(), 1)
@@ -254,9 +247,9 @@ class StagingFolderViewTestCase(GenericViewTestCase):
         self.assertEqual(len(list(self.staging_folder.get_files())), 0)
 
 
-class SourcesTestCase(GenericDocumentViewTestCase):
+class SourcesViewsTestCase(GenericViewTestCase):
     def setUp(self):
-        super(SourcesTestCase, self).setUp()
+        super(SourcesViewsTestCase, self).setUp()
         self.login_user()
 
     def _create_web_source(self):

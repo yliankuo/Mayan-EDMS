@@ -19,9 +19,8 @@ from mayan.apps.documents.tests import (
 from mayan.apps.metadata.models import MetadataType
 
 from ..literals import SOURCE_UNCOMPRESS_CHOICE_Y
-from ..models import (
-    EmailBaseModel, POP3Email, WatchFolderSource, WebFormSource
-)
+from ..models import POP3Email, WatchFolderSource, WebFormSource
+from ..models.email_sources import EmailBaseModel
 
 from .literals import (
     TEST_EMAIL_ATTACHMENT_AND_INLINE, TEST_EMAIL_BASE64_FILENAME,
