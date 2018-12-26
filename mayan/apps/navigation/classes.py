@@ -501,25 +501,31 @@ class SourceColumn(object):
     @classmethod
     def get_for_source(cls, context, source, exclude_identifier=False, only_identifier=False):
         try:
-            result = SourceColumn.sort(columns=cls._registry[source])
+            result = cls._registry[source]
         except KeyError:
             try:
-                # Try it as a queryset
-                result = SourceColumn.sort(columns=cls._registry[source.model])
-            except AttributeError:
+                # Might be an instance, try its class
+                result = cls._registry[source.__class__]
+            except KeyError:
                 try:
-                    # It seems to be an instance, try its class
-                    result = SourceColumn.sort(columns=cls._registry[source.__class__])
-                except KeyError:
+                    # Might be an inherited class insance, try its source class
+                    result = cls._registry[source.source_ptr.__class__]
+                except (KeyError, AttributeError):
                     try:
-                        # Special case for queryset items produced from
-                        # .defer() or .only() optimizations
-                        result = SourceColumn.sort(columns=cls._registry[list(source._meta.parents.items())[0][0]])
-                    except (AttributeError, KeyError, IndexError):
-                        result = ()
+                        # Try it as a queryset
+                        result = cls._registry[source.model]
+                    except AttributeError:
+                        try:
+                            # Special case for queryset items produced from
+                            # .defer() or .only() optimizations
+                            result = cls._registry[list(source._meta.parents.items())[0][0]]
+                        except (AttributeError, KeyError, IndexError):
+                            result = ()
         except TypeError:
             # unhashable type: list
             result = ()
+
+        result = SourceColumn.sort(columns=result)
 
         if exclude_identifier:
             result = [item for item in result if not item.is_identifier]
@@ -531,7 +537,23 @@ class SourceColumn(object):
                 return None
 
         final_result = []
-        current_view_name = get_current_view_name(request=context.request)
+
+        try:
+            request = context.request
+        except AttributeError:
+            # Simple request extraction failed. Might not be a view context.
+            # Try alternate method.
+            try:
+                request = Variable('request').resolve(context)
+            except VariableDoesNotExist:
+                # There is no request variable, most probable a 500 in a test
+                # view. Don't return any resolved request.
+                logger.warning(
+                    'No request variable, aborting request resolution'
+                )
+                return result
+
+        current_view_name = get_current_view_name(request=request)
         for item in result:
             if item.views:
                 if current_view_name in item.views:

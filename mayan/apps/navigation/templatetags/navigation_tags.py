@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
+import logging
+
 from django.template import Library
 
 from ..classes import Link, Menu, SourceColumn
 
+logger = logging.getLogger(__name__)
 register = Library()
 
 

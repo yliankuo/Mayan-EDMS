@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.template import Context, Library
+from django.template import Context, Library, VariableDoesNotExist, Variable
 from django.template.defaultfilters import truncatechars
 from django.template.loader import get_template
 from django.utils.encoding import force_text
@@ -63,8 +63,21 @@ def get_list_mode_icon(context):
 
 @register.simple_tag(takes_context=True)
 def get_list_mode_querystring(context):
+    try:
+        request = context.request
+    except AttributeError:
+        # Simple request extraction failed. Might not be a view context.
+        # Try alternate method.
+        try:
+            request = Variable('request').resolve(context)
+        except VariableDoesNotExist:
+            # There is no request variable, most probable a 500 in a test
+            # view. Don't return any resolved request.
+            logger.warning('No request variable, aborting request resolution')
+            return ''
+
     # We do this to get an mutable copy we can modify
-    querystring = context.request.GET.copy()
+    querystring = request.GET.copy()
 
     list_as_items = context.get('list_as_items', False)
 
