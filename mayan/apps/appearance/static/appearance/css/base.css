@@ -477,8 +477,12 @@ body {
 }
 
 .panel-highlighted {
-    border: 2px solid #18bc9c;
-    box-shadow: 10px 10px 20px #000000;
+    border: 3px solid #18bc9c;
+}
+
+.panel-item:hover {
+    box-shadow: 0px 0px 10px #000000;
+
 }
 
 .td-container-thumbnail {
