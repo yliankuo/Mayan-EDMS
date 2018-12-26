@@ -34,8 +34,8 @@ from .literals import (
 )
 from .mixins import (
     DeleteExtraDataMixin, DynamicFormViewMixin, ExtraContextMixin,
-    FormExtraKwargsMixin, MultipleObjectMixin, ObjectActionMixin,
-    ObjectListPermissionFilterMixin, ObjectNameMixin,
+    FormExtraKwargsMixin, ListModeMixin, MultipleObjectMixin,
+    ObjectActionMixin, ObjectListPermissionFilterMixin, ObjectNameMixin,
     ObjectPermissionCheckMixin, RedirectionMixin, ViewPermissionCheckMixin
 )
 from .settings import setting_paginate_by
@@ -503,7 +503,7 @@ class SingleObjectDynamicFormEditView(DynamicFormViewMixin, SingleObjectEditView
     pass
 
 
-class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectListPermissionFilterMixin, ExtraContextMixin, RedirectionMixin, ListView):
+class SingleObjectListView(ListModeMixin, PaginationMixin, ViewPermissionCheckMixin, ObjectListPermissionFilterMixin, ExtraContextMixin, RedirectionMixin, ListView):
     template_name = 'appearance/generic_list.html'
 
     def __init__(self, *args, **kwargs):
@@ -522,18 +522,8 @@ class SingleObjectListView(PaginationMixin, ViewPermissionCheckMixin, ObjectList
     def get_context_data(self, **kwargs):
         context = super(SingleObjectListView, self).get_context_data(**kwargs)
 
-        if context.get(TEXT_LIST_AS_ITEMS_VARIABLE_NAME):
-            default_mode = TEXT_CHOICE_ITEMS
-        else:
-            default_mode = TEXT_CHOICE_LIST
-
-        list_mode = self.request.GET.get(
-            TEXT_LIST_AS_ITEMS_PARAMETER, default_mode
-        )
-
         context.update(
             {
-                TEXT_LIST_AS_ITEMS_VARIABLE_NAME: list_mode == TEXT_CHOICE_ITEMS,
                 TEXT_SORT_FIELD_VARIABLE_NAME: self.get_sort_field(),
                 TEXT_SORT_ORDER_VARIABLE_NAME: self.get_sort_order(),
                 'icon_sort': self.get_sort_icon(),

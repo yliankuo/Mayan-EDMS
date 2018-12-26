@@ -14,11 +14,15 @@ from mayan.apps.permissions import Permission
 
 from .exceptions import ActionError
 from .forms import DynamicForm
+from .literals import (
+    TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST, TEXT_LIST_AS_ITEMS_PARAMETER,
+    TEXT_LIST_AS_ITEMS_VARIABLE_NAME
+)
 
 __all__ = (
     'DeleteExtraDataMixin', 'DynamicFormViewMixin', 'ExtraContextMixin',
-    'FormExtraKwargsMixin', 'MultipleObjectMixin', 'ObjectActionMixin',
-    'ObjectListPermissionFilterMixin', 'ObjectNameMixin',
+    'FormExtraKwargsMixin', 'ListModeMixin', 'MultipleObjectMixin',
+    'ObjectActionMixin', 'ObjectListPermissionFilterMixin', 'ObjectNameMixin',
     'ObjectPermissionCheckMixin', 'RedirectionMixin',
     'ViewPermissionCheckMixin'
 )
@@ -73,6 +77,27 @@ class FormExtraKwargsMixin(object):
         result = super(FormExtraKwargsMixin, self).get_form_kwargs()
         result.update(self.get_form_extra_kwargs())
         return result
+
+
+class ListModeMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(ListModeMixin, self).get_context_data(**kwargs)
+
+        if context.get(TEXT_LIST_AS_ITEMS_VARIABLE_NAME):
+            default_mode = TEXT_CHOICE_ITEMS
+        else:
+            default_mode = TEXT_CHOICE_LIST
+
+        list_mode = self.request.GET.get(
+            TEXT_LIST_AS_ITEMS_PARAMETER, default_mode
+        )
+
+        context.update(
+            {
+                TEXT_LIST_AS_ITEMS_VARIABLE_NAME: list_mode == TEXT_CHOICE_ITEMS
+            }
+        )
+        return context
 
 
 class MultipleInstanceActionMixin(object):
