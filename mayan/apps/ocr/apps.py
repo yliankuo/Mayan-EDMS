@@ -10,8 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_secondary,
-    menu_tools
+    MayanAppConfig, menu_facet, menu_list_facet, menu_multi_item, menu_object,
+    menu_secondary, menu_tools
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_search, document_page_search
@@ -26,7 +26,7 @@ from .handlers import (
 from .links import (
     link_document_page_ocr_content, link_document_ocr_content,
     link_document_ocr_download, link_document_ocr_errors_list,
-    link_document_submit, link_document_submit_multiple,
+    link_document_submit, link_document_multiple_submit,
     link_document_type_ocr_settings, link_document_type_submit,
     link_entry_list
 )
@@ -143,29 +143,23 @@ class OCRApp(MayanAppConfig):
         menu_facet.bind_links(
             links=(link_document_ocr_content,), sources=(Document,)
         )
-        menu_facet.bind_links(
+        menu_list_facet.bind_links(
             links=(link_document_page_ocr_content,), sources=(DocumentPage,)
         )
         menu_multi_item.bind_links(
-            links=(link_document_submit_multiple,), sources=(Document,)
-        )
-        menu_object.bind_links(
-            links=(link_document_submit,), sources=(Document,)
-        )
-        menu_object.bind_links(
-            links=(link_document_page_ocr_content,), sources=(DocumentPage,)
+            links=(link_document_multiple_submit,), sources=(Document,)
         )
         menu_object.bind_links(
             links=(link_document_type_ocr_settings,), sources=(DocumentType,)
         )
         menu_secondary.bind_links(
             links=(
-                link_document_ocr_content, link_document_ocr_errors_list,
-                link_document_ocr_download
+                link_document_submit, link_document_ocr_download,
+                link_document_ocr_errors_list
             ),
             sources=(
-                'ocr:document_content', 'ocr:document_ocr_error_list',
-                'ocr:document_ocr_download',
+                'ocr:document_content', 'ocr:document_error_list',
+                'ocr:document_download',
             )
         )
         menu_secondary.bind_links(

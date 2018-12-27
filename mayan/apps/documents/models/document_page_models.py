@@ -52,13 +52,7 @@ class DocumentPage(models.Model):
         verbose_name_plural = _('Document pages')
 
     def __str__(self):
-        return _(
-            'Page %(page_num)d out of %(total_pages)d of %(document)s'
-        ) % {
-            'document': force_text(self.document),
-            'page_num': self.page_number,
-            'total_pages': self.document_version.pages.count()
-        }
+        return self.get_label()
 
     @cached_property
     def cache_partition(self):
@@ -221,6 +215,16 @@ class DocumentPage(models.Model):
             converter.transform(transformation=transformation)
 
         return converter.get_page()
+
+    def get_label(self):
+        return _(
+            'Page %(page_num)d out of %(total_pages)d of %(document)s'
+        ) % {
+            'document': force_text(self.document),
+            'page_num': self.page_number,
+            'total_pages': self.document_version.pages.count()
+        }
+    get_label.short_description = _('Label')
 
     def invalidate_cache(self):
         self.cache_partition.purge()

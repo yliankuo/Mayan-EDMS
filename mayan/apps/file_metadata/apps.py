@@ -8,7 +8,8 @@ from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_tools
+    MayanAppConfig, menu_facet, menu_multi_item, menu_object, menu_secondary,
+    menu_tools
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.document_indexing.handlers import handler_index_document
@@ -29,7 +30,7 @@ from .handlers import (
 )
 from .links import (
     link_document_driver_list, link_document_file_metadata_list,
-    link_document_submit, link_document_submit_multiple,
+    link_document_submit, link_document_multiple_submit,
     link_document_type_file_metadata_settings, link_document_type_submit
 )
 from .methods import (
@@ -171,9 +172,6 @@ class FileMetadataApp(MayanAppConfig):
             links=(link_document_driver_list,), sources=(Document,)
         )
         menu_object.bind_links(
-            links=(link_document_submit,), sources=(Document,)
-        )
-        menu_object.bind_links(
             links=(link_document_type_file_metadata_settings,),
             sources=(DocumentType,)
         )
@@ -182,7 +180,13 @@ class FileMetadataApp(MayanAppConfig):
             sources=(DocumentVersionDriverEntry,)
         )
         menu_multi_item.bind_links(
-            links=(link_document_submit_multiple,), sources=(Document,)
+            links=(link_document_multiple_submit,), sources=(Document,)
+        )
+        menu_secondary.bind_links(
+            links=(link_document_submit,), sources=(
+                'file_metadata:document_driver_list',
+                'file_metadata:document_version_driver_file_metadata_list'
+            )
         )
         menu_tools.bind_links(
             links=(link_document_type_submit,),

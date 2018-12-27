@@ -15,38 +15,38 @@ from .views import (
 urlpatterns = [
     url(
         r'^documents/pages/(?P<pk>\d+)/content/$',
-        DocumentPageOCRContentView.as_view(), name='document_page_ocr_content'
+        DocumentPageOCRContentView.as_view(), name='document_page_content'
     ),
     url(
         r'^documents/(?P<pk>\d+)/content/$', DocumentOCRContentView.as_view(),
-        name='document_ocr_content'
+        name='document_content'
     ),
     url(
         r'^documents/(?P<pk>\d+)/submit/$', DocumentSubmitView.as_view(),
         name='document_submit'
     ),
     url(
-        r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
-        name='document_type_submit'
+        r'^documents/(?P<pk>\d+)/ocr/errors/$',
+        DocumentOCRErrorsListView.as_view(), name='document_error_list'
+    ),
+    url(
+        r'^documents/(?P<pk>\d+)/ocr/download/$',
+        DocumentOCRDownloadView.as_view(), name='document_download'
     ),
     url(
         r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit_multiple'
+        name='document_multiple_submit'
+    ),
+    url(
+        r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
+        name='document_type_submit'
     ),
     url(
         r'^document_types/(?P<pk>\d+)/ocr/settings/$',
         DocumentTypeSettingsEditView.as_view(),
         name='document_type_ocr_settings'
     ),
-    url(
-        r'^documents/(?P<pk>\d+)/ocr/errors/$',
-        DocumentOCRErrorsListView.as_view(), name='document_ocr_error_list'
-    ),
-    url(
-        r'^documents/(?P<pk>\d+)/ocr/download/$',
-        DocumentOCRDownloadView.as_view(), name='document_ocr_download'
-    ),
-    url(r'^all/$', EntryListView.as_view(), name='entry_list'),
+    url(r'^errors/$', EntryListView.as_view(), name='entry_list'),
 ]
 
 api_urls = [

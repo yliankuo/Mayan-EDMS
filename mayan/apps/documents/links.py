@@ -12,7 +12,8 @@ from .icons import (
     icon_document_list_deleted, icon_document_list_favorites,
     icon_document_list_recent_access, icon_document_list_recent_added,
     icon_document_delete, icon_document_download, icon_document_edit,
-    icon_document_favorites_add, icon_document_multiple_delete,
+    icon_document_favorites_add, icon_document_favorites_remove,
+    icon_document_multiple_delete,
     icon_document_multiepl_restore, icon_document_page_navigation_first,
     icon_document_page_navigation_last,
     icon_document_page_navigation_next, icon_document_page_navigation_previous,
@@ -116,7 +117,7 @@ link_document_favorites_add = Link(
     view='documents:document_add_to_favorites',
 )
 link_document_favorites_remove = Link(
-    args='resolved_object.id',
+    args='resolved_object.id', icon_class=icon_document_favorites_remove,
     permissions=(permission_document_view,), text=_('Remove from favorites'),
     view='documents:document_remove_from_favorites',
 )

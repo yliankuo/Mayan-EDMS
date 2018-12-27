@@ -18,7 +18,7 @@ urlpatterns = [
     ),
     url(
         r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit_multiple'
+        name='document_multiple_submit'
     ),
     url(
         r'^document_types/(?P<pk>\d+)/ocr/settings/$',

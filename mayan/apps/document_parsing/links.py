@@ -6,7 +6,8 @@ from mayan.apps.navigation import Link, get_cascade_condition
 
 from .icons import (
     icon_document_content, icon_document_content_download,
-    icon_document_parsing_errors_list, icon_document_type_parsing_settings,
+    icon_document_multiple_submit, icon_document_parsing_errors_list,
+    icon_document_submit, icon_document_type_parsing_settings,
     icon_document_type_submit, icon_link_error_list
 )
 from .permissions import (
@@ -34,12 +35,13 @@ link_document_content_download = Link(
     permissions=(permission_content_view,), text=_('Download content'),
     view='document_parsing:document_content_download'
 )
-link_document_submit_multiple = Link(
-    text=_('Submit for parsing'),
-    view='document_parsing:document_submit_multiple'
+link_document_multiple_submit = Link(
+    icon_class=icon_document_multiple_submit, text=_('Submit for parsing'),
+    view='document_parsing:document_multiple_submit'
 )
 link_document_submit = Link(
-    args='resolved_object.id', permissions=(permission_parse_document,),
+    args='resolved_object.id', icon_class=icon_document_submit,
+    permissions=(permission_parse_document,),
     text=_('Submit for parsing'), view='document_parsing:document_submit'
 )
 link_document_type_parsing_settings = Link(

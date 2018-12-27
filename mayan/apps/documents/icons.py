@@ -34,6 +34,10 @@ icon_document_favorites_add = Icon(
     driver_name='fontawesome-dual', primary_symbol='star',
     secondary_symbol='plus'
 )
+icon_document_favorites_remove = Icon(
+    driver_name='fontawesome-dual', primary_symbol='star',
+    secondary_symbol='minus'
+)
 icon_document_image_loading = Icon(
     driver_name='fontawesomecss', css_classes='far fa-clock fa-2x'
 )

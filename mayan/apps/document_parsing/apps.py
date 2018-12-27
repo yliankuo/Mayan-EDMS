@@ -26,7 +26,7 @@ from .handlers import (
 from .links import (
     link_document_content, link_document_content_download,
     link_document_page_content, link_document_parsing_errors_list,
-    link_document_submit, link_document_submit_multiple,
+    link_document_submit, link_document_multiple_submit,
     link_document_type_parsing_settings, link_document_type_submit,
     link_error_list
 )
@@ -151,10 +151,7 @@ class DocumentParsingApp(MayanAppConfig):
             links=(link_document_page_content,), sources=(DocumentPage,)
         )
         menu_multi_item.bind_links(
-            links=(link_document_submit_multiple,), sources=(Document,)
-        )
-        menu_object.bind_links(
-            links=(link_document_submit,), sources=(Document,)
+            links=(link_document_multiple_submit,), sources=(Document,)
         )
         menu_object.bind_links(
             links=(link_document_type_parsing_settings,), sources=(DocumentType,),
@@ -162,8 +159,8 @@ class DocumentParsingApp(MayanAppConfig):
         )
         menu_secondary.bind_links(
             links=(
-                link_document_content, link_document_parsing_errors_list,
-                link_document_content_download
+                link_document_parsing_errors_list,
+                link_document_content_download, link_document_submit
             ),
             sources=(
                 'document_parsing:document_content',

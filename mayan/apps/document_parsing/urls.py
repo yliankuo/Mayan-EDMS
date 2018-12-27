@@ -23,6 +23,19 @@ urlpatterns = [
         DocumentContentDownloadView.as_view(), name='document_content_download'
     ),
     url(
+        r'^documents/(?P<pk>\d+)/submit/$', DocumentSubmitView.as_view(),
+        name='document_submit'
+    ),
+    url(
+        r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
+        name='document_multiple_submit'
+    ),
+    url(
+        r'^documents/(?P<pk>\d+)/errors/$',
+        DocumentParsingErrorsListView.as_view(),
+        name='document_parsing_error_list'
+    ),
+    url(
         r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
         name='document_type_submit'
     ),
@@ -30,19 +43,6 @@ urlpatterns = [
         r'^document_types/(?P<pk>\d+)/parsing/settings/$',
         DocumentTypeSettingsEditView.as_view(),
         name='document_type_parsing_settings'
-    ),
-    url(
-        r'^documents/(?P<pk>\d+)/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit'
-    ),
-    url(
-        r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit_multiple'
-    ),
-    url(
-        r'^documents/(?P<pk>\d+)/errors/$',
-        DocumentParsingErrorsListView.as_view(),
-        name='document_parsing_error_list'
     ),
     url(r'^errors/all/$', ParseErrorListView.as_view(), name='error_list'),
 ]

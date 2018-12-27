@@ -257,6 +257,10 @@ class DocumentsApp(MayanAppConfig):
 
         # DocumentPage
         SourceColumn(
+            attribute='get_label', is_absolute_url=True, is_identifier=True,
+            source=DocumentPage
+        )
+        SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             ), label=_('Thumbnail'), source=DocumentPage
@@ -571,10 +575,10 @@ class DocumentsApp(MayanAppConfig):
                 link_document_page_navigation_first,
                 link_document_page_navigation_previous,
                 link_document_page_navigation_next,
-                link_document_page_navigation_last, link_transformation_list
+                link_document_page_navigation_last,
             ), sources=(DocumentPage,)
         )
-        menu_object.bind_links(
+        menu_list_facet.bind_links(
             links=(link_transformation_list,), sources=(DocumentPage,)
         )
 
