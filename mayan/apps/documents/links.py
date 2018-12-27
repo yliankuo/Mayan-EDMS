@@ -11,19 +11,25 @@ from .icons import (
     icon_clear_image_cache, icon_document_duplicates_list, icon_document_list,
     icon_document_list_deleted, icon_document_list_favorites,
     icon_document_list_recent_access, icon_document_list_recent_added,
-    icon_document_page_navigation_first, icon_document_page_navigation_last,
+    icon_document_delete, icon_document_download, icon_document_edit,
+    icon_document_favorites_add, icon_document_multiple_delete,
+    icon_document_multiepl_restore, icon_document_page_navigation_first,
+    icon_document_page_navigation_last,
     icon_document_page_navigation_next, icon_document_page_navigation_previous,
     icon_document_page_return, icon_document_page_rotate_left,
     icon_document_page_rotate_right, icon_document_page_view,
     icon_document_page_view_reset, icon_document_page_zoom_in,
     icon_document_page_zoom_out, icon_document_pages, icon_document_preview,
-    icon_document_properties, icon_document_type_create,
+    icon_document_print, icon_document_properties, icon_document_restore,
+    icon_document_trash, icon_document_type_create,
     icon_document_type_delete, icon_document_type_edit,
     icon_document_type_filename, icon_document_type_filename_create,
-    icon_document_type_setup, icon_document_version_download,
+    icon_document_type_list, icon_document_type_setup,
+    icon_document_version_download,
     icon_document_version_list, icon_document_version_return_document,
     icon_document_version_return_list, icon_document_version_view,
-    icon_duplicated_document_list, icon_duplicated_document_scan
+    icon_duplicated_document_list, icon_duplicated_document_scan,
+    icon_trash_can_empty
 )
 from .permissions import (
     permission_document_delete, permission_document_download,
@@ -100,11 +106,12 @@ link_document_clone_transformations = Link(
     view='documents:document_clone_transformations',
 )
 link_document_delete = Link(
-    args='resolved_object.id', permissions=(permission_document_delete,),
-    tags='dangerous', text=_('Delete'), view='documents:document_delete',
+    args='resolved_object.id', icon_class=icon_document_delete,
+    permissions=(permission_document_delete,), tags='dangerous',
+    text=_('Delete'), view='documents:document_delete',
 )
 link_document_favorites_add = Link(
-    args='resolved_object.id',
+    args='resolved_object.id', icon_class=icon_document_favorites_add,
     permissions=(permission_document_view,), text=_('Add to favorites'),
     view='documents:document_add_to_favorites',
 )
@@ -114,12 +121,12 @@ link_document_favorites_remove = Link(
     view='documents:document_remove_from_favorites',
 )
 link_document_trash = Link(
-    args='resolved_object.id', permissions=(permission_document_trash,),
-    tags='dangerous', text=_('Move to trash'),
-    view='documents:document_trash',
+    args='resolved_object.id', icon_class=icon_document_trash,
+    permissions=(permission_document_trash,), tags='dangerous',
+    text=_('Move to trash'), view='documents:document_trash',
 )
 link_document_edit = Link(
-    args='resolved_object.id',
+    args='resolved_object.id', icon_class=icon_document_edit,
     permissions=(permission_document_properties_edit,),
     text=_('Edit properties'), view='documents:document_edit',
 )
@@ -129,11 +136,13 @@ link_document_document_type_edit = Link(
     view='documents:document_document_type_edit',
 )
 link_document_download = Link(
-    args='resolved_object.id', permissions=(permission_document_download,),
-    text=_('Advanced download'), view='documents:document_download_form',
+    args='resolved_object.id', icon_class=icon_document_download,
+    permissions=(permission_document_download,), text=_('Advanced download'),
+    view='documents:document_download_form',
 )
 link_document_print = Link(
-    args='resolved_object.id', permissions=(permission_document_print,),
+    args='resolved_object.id', icon_class=icon_document_print,
+    permissions=(permission_document_print,),
     text=_('Print'), view='documents:document_print',
 )
 link_document_quick_download = Link(
@@ -146,6 +155,7 @@ link_document_update_page_count = Link(
     view='documents:document_update_page_count'
 )
 link_document_restore = Link(
+    icon_class=icon_document_restore,
     permissions=(permission_document_restore,), text=_('Restore'),
     view='documents:document_restore', args='object.pk'
 )
@@ -159,8 +169,8 @@ link_document_multiple_trash = Link(
     view='documents:document_multiple_trash'
 )
 link_document_multiple_delete = Link(
-    tags='dangerous', text=_('Delete'),
-    view='documents:document_multiple_delete'
+    icon_class=icon_document_multiple_delete, tags='dangerous',
+    text=_('Delete'), view='documents:document_multiple_delete'
 )
 link_document_multiple_favorites_add = Link(
     text=_('Add to favorites'),
@@ -182,7 +192,8 @@ link_document_multiple_update_page_count = Link(
     view='documents:document_multiple_update_page_count'
 )
 link_document_multiple_restore = Link(
-    text=_('Restore'), view='documents:document_multiple_restore'
+    icon_class=icon_document_multiepl_restore, text=_('Restore'),
+    view='documents:document_multiple_restore'
 )
 
 # Versions
@@ -242,8 +253,8 @@ link_clear_image_cache = Link(
     view='documents:document_clear_image_cache'
 )
 link_trash_can_empty = Link(
-    permissions=(permission_empty_trash,), text=_('Empty trash'),
-    view='documents:trash_can_empty'
+    icon_class=icon_trash_can_empty, permissions=(permission_empty_trash,),
+    text=_('Empty trash'), view='documents:trash_can_empty'
 )
 
 # Document pages
@@ -356,6 +367,7 @@ link_document_type_filename_list = Link(
     view='documents:document_type_filename_list',
 )
 link_document_type_list = Link(
+    icon_class=icon_document_type_list,
     permissions=(permission_document_type_view,), text=_('Document types'),
     view='documents:document_type_list'
 )

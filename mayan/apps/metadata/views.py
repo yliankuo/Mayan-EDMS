@@ -32,8 +32,8 @@ from .icons import (
     icon_document_metadata_remove, icon_metadata
 )
 from .links import (
-    link_metadata_add, link_metadata_multiple_add,
-    link_setup_metadata_type_create
+    link_document_metadata_add, link_document_multiple_metadata_add,
+    link_metadata_type_create
 )
 from .models import DocumentMetadata, MetadataType
 from .permissions import (
@@ -78,13 +78,17 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse('metadata:metadata_edit', args=(queryset.first().pk,)),
+                reverse(
+                    viewname='metadata:document_metadata_edit',
+                    args=(queryset.first().pk,)
+                )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
                 '%s?%s' % (
-                    reverse('metadata:metadata_multiple_edit'),
-                    urlencode(
+                    reverse(
+                        viewname='metadata:document_metadata_multiple_edit'
+                    ), urlencode(
                         {
                             'id_list': ','.join(
                                 map(
@@ -242,13 +246,17 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse('metadata:metadata_edit', args=(queryset.first().pk,)),
+                reverse(
+                    viewname='metadata:document_metadata_edit',
+                    args=(queryset.first().pk,)
+                )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
                 '%s?%s' % (
-                    reverse('metadata:metadata_multiple_edit'),
-                    urlencode(
+                    reverse(
+                        viewname='metadata:document_metadata_multiple_edit'
+                    ), urlencode(
                         {
                             'id_list': ','.join(
                                 map(
@@ -275,13 +283,13 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
         )
 
         if queryset.count() == 1:
-            no_results_main_link = link_metadata_add.resolve(
+            no_results_main_link = link_document_metadata_add.resolve(
                 context=RequestContext(
                     request=self.request, dict_={'object': queryset.first()}
                 )
             )
         else:
-            no_results_main_link = link_metadata_multiple_add.resolve(
+            no_results_main_link = link_document_multiple_metadata_add.resolve(
                 context=RequestContext(request=self.request)
             )
             no_results_main_link.url = '{}?id_list={}'.format(
@@ -405,7 +413,7 @@ class DocumentMetadataListView(SingleObjectListView):
             'hide_object': True,
             'object': document,
             'no_results_icon': icon_metadata,
-            'no_results_main_link': link_metadata_add.resolve(
+            'no_results_main_link': link_document_metadata_add.resolve(
                 context=RequestContext(
                     request=self.request, dict_={'object': document}
                 )
@@ -460,13 +468,17 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse('metadata:metadata_edit', args=(queryset.first().pk,)),
+                reverse(
+                    viewname='metadata:document_metadata_edit',
+                    args=(queryset.first().pk,)
+                )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
                 '%s?%s' % (
-                    reverse('metadata:metadata_multiple_edit'),
-                    urlencode(
+                    reverse(
+                        viewname='metadata:document_metadata_multiple_edit'
+                    ), urlencode(
                         {
                             'id_list': ','.join(
                                 map(
@@ -573,7 +585,9 @@ class MetadataTypeCreateView(SingleObjectCreateView):
     extra_context = {'title': _('Create metadata type')}
     form_class = MetadataTypeForm
     model = MetadataType
-    post_action_redirect = reverse_lazy('metadata:setup_metadata_type_list')
+    post_action_redirect = reverse_lazy(
+        viewname='metadata:metadata_type_list'
+    )
     view_permission = permission_metadata_type_create
 
     def get_save_extra_data(self):
@@ -585,7 +599,9 @@ class MetadataTypeCreateView(SingleObjectCreateView):
 class MetadataTypeDeleteView(SingleObjectDeleteView):
     model = MetadataType
     object_permission = permission_metadata_type_delete
-    post_action_redirect = reverse_lazy('metadata:setup_metadata_type_list')
+    post_action_redirect = reverse_lazy(
+        viewname='metadata:metadata_type_list'
+    )
 
     def get_extra_context(self):
         return {
@@ -599,7 +615,9 @@ class MetadataTypeEditView(SingleObjectEditView):
     form_class = MetadataTypeForm
     model = MetadataType
     object_permission = permission_metadata_type_edit
-    post_action_redirect = reverse_lazy('metadata:setup_metadata_type_list')
+    post_action_redirect = reverse_lazy(
+        viewname='metadata:metadata_type_list'
+    )
 
     def get_extra_context(self):
         return {
@@ -620,7 +638,7 @@ class MetadataTypeListView(SingleObjectListView):
         return {
             'hide_object': True,
             'no_results_icon': icon_metadata,
-            'no_results_main_link': link_setup_metadata_type_create.resolve(
+            'no_results_main_link': link_metadata_type_create.resolve(
                 context=RequestContext(request=self.request)
             ),
             'no_results_text': _(
@@ -667,7 +685,7 @@ class SetupDocumentTypeMetadataTypes(FormView):
         return {
             'form_display_mode_table': True,
             'no_results_icon': icon_metadata,
-            'no_results_main_link': link_setup_metadata_type_create.resolve(
+            'no_results_main_link': link_metadata_type_create.resolve(
                 context=RequestContext(request=self.request)
             ),
             'no_results_text': _(
@@ -745,4 +763,4 @@ class SetupMetadataTypesDocumentTypes(SetupDocumentTypeMetadataTypes):
         return initial
 
     def get_post_action_redirect(self):
-        return reverse('metadata:setup_metadata_type_list')
+        return reverse(viewname='metadata:metadata_type_list')

@@ -11,20 +11,20 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^(?P<pk>\d+)/send/link/$', MailDocumentLinkView.as_view(),
-        name='send_document_link'
+        r'^documents/(?P<pk>\d+)/send/link/$', MailDocumentLinkView.as_view(),
+        name='document_send_link'
     ),
     url(
-        r'^multiple/send/link/$', MailDocumentLinkView.as_view(),
-        name='send_multiple_document_link'
+        r'^documents/multiple/send/link/$', MailDocumentLinkView.as_view(),
+        name='document_multiple_send_link'
     ),
     url(
-        r'^(?P<pk>\d+)/send/document/$', MailDocumentView.as_view(),
-        name='send_document'
+        r'^documents/(?P<pk>\d+)/send/$', MailDocumentView.as_view(),
+        name='document_send'
     ),
     url(
-        r'^multiple/send/document/$', MailDocumentView.as_view(),
-        name='send_multiple_document'
+        r'^documents/multiple/send/document/$', MailDocumentView.as_view(),
+        name='document_multiple_send'
     ),
     url(
         r'^system_mailer/log/$', SystemMailerLogEntryListView.as_view(),

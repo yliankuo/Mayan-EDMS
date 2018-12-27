@@ -91,25 +91,32 @@ class UserManagementApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(attribute='name', is_identifier=True, source=Group)
+        SourceColumn(
+            attribute='name', is_identifier=True, is_sortable=True,
+            label=_('Name'), source=Group
+        )
         SourceColumn(
             attribute='user_set.count', label=_('Users'), source=Group
         )
 
         SourceColumn(
             attribute='username', is_absolute_url=True, is_identifier=True,
-            label=_('Username'), source=User
+            is_sortable=True, label=_('Username'), source=User
         )
         SourceColumn(
-            attribute='get_full_name', label=_('Full name'), source=User
-        )
-        SourceColumn(attribute='email', label=_('Email'), source=User)
-        SourceColumn(
-            attribute='is_active', label=_('Active'), source=User,
-            widget=TwoStateWidget
+            attribute='first_name', is_sortable=True, label=_('First name'),
+            source=User
         )
         SourceColumn(
-            attribute='has_usable_password', source=User, widget=TwoStateWidget
+            attribute='last_name', is_sortable=True, label=_('Last name'),
+            source=User
+        )
+        SourceColumn(
+            attribute='email', is_sortable=True, label=_('Email'), source=User
+        )
+        SourceColumn(
+            attribute='is_active', is_sortable=True, label=_('Active'),
+            source=User, widget=TwoStateWidget
         )
         SourceColumn(
             attribute='has_usable_password', label=_('Has usable password?'),

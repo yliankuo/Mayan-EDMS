@@ -7,8 +7,13 @@ from mayan.apps.documents.permissions import permission_document_type_edit
 from mayan.apps.navigation import Link
 
 from .icons import (
-    icon_document_metadata_add, icon_metadata_type, icon_metadata_view,
-    icon_metadata_type_create
+    icon_document_metadata_add, icon_document_metadata_edit,
+    icon_document_metadata_remove, icon_document_metadata_view,
+    icon_document_multiple_metadata_add, icon_document_multiple_metadata_edit,
+    icon_document_multiple_metadata_remove, icon_metadata_type_create,
+    icon_document_type_metadata_types, icon_metadata_type_document_types,
+    icon_metadata_type_delete, icon_metadata_type_edit,
+    icon_metadata_type_list,
 )
 from .permissions import (
     permission_metadata_document_add, permission_metadata_document_edit,
@@ -17,57 +22,68 @@ from .permissions import (
     permission_metadata_type_edit, permission_metadata_type_view
 )
 
-link_metadata_add = Link(
+link_document_metadata_add = Link(
     args='object.pk', icon_class=icon_document_metadata_add,
     permissions=(permission_metadata_document_add,), text=_('Add metadata'),
-    view='metadata:metadata_add',
+    view='metadata:document_metadata_add',
 )
-link_metadata_edit = Link(
-    args='object.pk', permissions=(permission_metadata_document_edit,),
-    text=_('Edit metadata'), view='metadata:metadata_edit'
+link_document_metadata_edit = Link(
+    args='object.pk', icon_class=icon_document_metadata_edit,
+    permissions=(permission_metadata_document_edit,), text=_('Edit metadata'),
+    view='metadata:document_metadata_edit'
 )
-link_metadata_multiple_add = Link(
-    text=_('Add metadata'), view='metadata:metadata_multiple_add'
+link_document_multiple_metadata_add = Link(
+    icon_class=icon_document_multiple_metadata_add, text=_('Add metadata'),
+    view='metadata:document_multiple_metadata_add'
 )
-link_metadata_multiple_edit = Link(
-    text=_('Edit metadata'), view='metadata:metadata_multiple_edit'
+link_document_multiple_metadata_edit = Link(
+    icon_class=icon_document_multiple_metadata_edit, text=_('Edit metadata'),
+    view='metadata:document_multiple_metadata_edit'
 )
-link_metadata_multiple_remove = Link(
-    text=_('Remove metadata'), view='metadata:metadata_multiple_remove'
+link_document_multiple_metadata_remove = Link(
+    icon_class=icon_document_multiple_metadata_remove,
+    text=_('Remove metadata'),
+    view='metadata:document_multiple_metadata_remove'
 )
-link_metadata_remove = Link(
-    args='object.pk', permissions=(permission_metadata_document_remove,),
-    text=_('Remove metadata'), view='metadata:metadata_remove',
+link_document_metadata_remove = Link(
+    args='object.pk', icon_class=icon_document_metadata_remove,
+    permissions=(permission_metadata_document_remove,),
+    text=_('Remove metadata'), view='metadata:document_metadata_remove',
 )
-link_metadata_view = Link(
-    args='resolved_object.pk', icon_class=icon_metadata_view,
+link_document_metadata_view = Link(
+    args='resolved_object.pk', icon_class=icon_document_metadata_view,
     permissions=(permission_metadata_document_view,), text=_('Metadata'),
-    view='metadata:metadata_view',
+    view='metadata:document_metadata_view',
 )
-link_setup_document_type_metadata_types = Link(
-    args='resolved_object.pk', icon_class=icon_metadata_type,
+link_document_type_metadata_types = Link(
+    args='resolved_object.pk', icon_class=icon_document_type_metadata_types,
     permissions=(permission_document_type_edit,), text=_('Metadata types'),
-    view='metadata:setup_document_type_metadata_types',
+    view='metadata:document_type_metadata_types',
 )
-link_setup_metadata_type_document_types = Link(
-    args='resolved_object.pk', icon_class=icon_document_type,
+link_metadata_type_document_types = Link(
+    args='resolved_object.pk', icon_class=icon_metadata_type_document_types,
     permissions=(permission_document_type_edit,), text=_('Document types'),
-    view='metadata:setup_metadata_type_document_types',
+    view='metadata:metadata_type_document_types',
 )
-link_setup_metadata_type_create = Link(
+link_metadata_type_create = Link(
     icon_class=icon_metadata_type_create,
     permissions=(permission_metadata_type_create,), text=_('Create new'),
-    view='metadata:setup_metadata_type_create'
+    view='metadata:metadata_type_create'
 )
-link_setup_metadata_type_delete = Link(
-    args='object.pk', permissions=(permission_metadata_type_delete,),
-    tags='dangerous', text=_('Delete'), view='metadata:setup_metadata_type_delete',
+link_metadata_type_delete = Link(
+    args='object.pk', icon_class=icon_metadata_type_delete,
+    permissions=(permission_metadata_type_delete,), tags='dangerous',
+    text=_('Delete'), view='metadata:metadata_type_delete',
 )
-link_setup_metadata_type_edit = Link(
-    args='object.pk', permissions=(permission_metadata_type_edit,),
-    text=_('Edit'), view='metadata:setup_metadata_type_edit'
+link_metadata_type_edit = Link(
+    args='object.pk', icon_class=icon_metadata_type_edit,
+    permissions=(permission_metadata_type_edit,), text=_('Edit'),
+    view='metadata:metadata_type_edit'
 )
-link_setup_metadata_type_list = Link(
-    icon_class=icon_metadata_view, permissions=(permission_metadata_type_view,),
-    text=_('Metadata types'), view='metadata:setup_metadata_type_list'
+link_metadata_type_list = Link(
+    icon_class=icon_metadata_type_list,
+    permissions=(permission_metadata_type_view,), text=_('Metadata types'),
+    view='metadata:metadata_type_list'
 )
+
+

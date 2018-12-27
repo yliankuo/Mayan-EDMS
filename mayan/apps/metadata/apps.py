@@ -38,12 +38,13 @@ from .handlers import (
     handler_post_document_type_change_metadata, handler_index_document,
 )
 from .links import (
-    link_metadata_add, link_metadata_edit, link_metadata_multiple_add,
-    link_metadata_multiple_edit, link_metadata_multiple_remove,
-    link_metadata_remove, link_metadata_view,
-    link_setup_document_type_metadata_types, link_setup_metadata_type_create,
-    link_setup_metadata_type_delete, link_setup_metadata_type_document_types,
-    link_setup_metadata_type_edit, link_setup_metadata_type_list,
+    link_document_metadata_add, link_document_metadata_edit,
+    link_document_multiple_metadata_add, link_document_multiple_metadata_edit,
+    link_document_multiple_metadata_remove, link_document_metadata_remove,
+    link_document_metadata_view, link_document_type_metadata_types,
+    link_metadata_type_create, link_metadata_type_delete,
+    link_metadata_type_document_types, link_metadata_type_edit,
+    link_metadata_type_list,
 )
 from .methods import method_get_metadata
 from .permissions import (
@@ -200,47 +201,51 @@ class MetadataApp(MayanAppConfig):
             label=_('Metadata value')
         )
 
-        menu_facet.bind_links(links=(link_metadata_view,), sources=(Document,))
+        menu_facet.bind_links(
+            links=(link_document_metadata_view,), sources=(Document,)
+        )
         menu_list_facet.bind_links(
-            links=(
-                link_setup_document_type_metadata_types,
-            ), sources=(DocumentType,)
+            links=(link_document_type_metadata_types,), sources=(
+                DocumentType,
+            )
         )
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_setup_metadata_type_document_types,
+                link_acl_list, link_metadata_type_document_types,
                 link_object_event_types_user_subcriptions_list,
                 link_events_for_object,
             ), sources=(MetadataType,)
         )
         menu_multi_item.bind_links(
             links=(
-                link_metadata_multiple_add, link_metadata_multiple_edit,
-                link_metadata_multiple_remove
+                link_document_multiple_metadata_add,
+                link_document_multiple_metadata_edit,
+                link_document_multiple_metadata_remove
             ), sources=(Document,)
         )
         menu_object.bind_links(
             links=(
-                link_setup_metadata_type_edit,
-                link_setup_metadata_type_delete,
+                link_metadata_type_edit, link_metadata_type_delete,
             ), sources=(MetadataType,)
         )
         menu_secondary.bind_links(
             links=(
-                link_setup_metadata_type_list,
-                link_setup_metadata_type_create
+                link_metadata_type_list, link_metadata_type_create
             ), sources=(
-                MetadataType, 'metadata:setup_metadata_type_list',
-                'metadata:setup_metadata_type_create'
+                MetadataType, 'metadata:metadata_type_list',
+                'metadata:metadata_type_create'
             )
         )
-        menu_setup.bind_links(links=(link_setup_metadata_type_list,))
+        menu_setup.bind_links(links=(link_metadata_type_list,))
         menu_sidebar.bind_links(
             links=(
-                link_metadata_add, link_metadata_edit, link_metadata_remove
+                link_document_metadata_add, link_document_metadata_edit,
+                link_document_metadata_remove
             ), sources=(
-                'metadata:metadata_add', 'metadata:metadata_edit',
-                'metadata:metadata_remove', 'metadata:metadata_view'
+                'metadata:document_metadata_add',
+                'metadata:document_metadata_edit',
+                'metadata:document_metadata_remove',
+                'metadata:document_metadata_view'
             )
         )
 

@@ -17,59 +17,59 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^(?P<pk>\d+)/edit/$', DocumentMetadataEditView.as_view(),
-        name='metadata_edit'
+        r'^documents/(?P<pk>\d+)/edit/$', DocumentMetadataEditView.as_view(),
+        name='document_metadata_edit'
     ),
     url(
-        r'^multiple/edit/$', DocumentMetadataEditView.as_view(),
-        name='metadata_multiple_edit'
+        r'^documents/multiple/edit/$', DocumentMetadataEditView.as_view(),
+        name='document_multiple_metadata_edit'
     ),
     url(
-        r'^(?P<pk>\d+)/view/$', DocumentMetadataListView.as_view(),
-        name='metadata_view'
+        r'^documents/(?P<pk>\d+)/view/$', DocumentMetadataListView.as_view(),
+        name='document_metadata_view'
     ),
     url(
-        r'^(?P<pk>\d+)/add/$', DocumentMetadataAddView.as_view(),
-        name='metadata_add'
+        r'^documents/(?P<pk>\d+)/add/$', DocumentMetadataAddView.as_view(),
+        name='document_metadata_add'
     ),
     url(
-        r'^multiple/add/$', DocumentMetadataAddView.as_view(),
-        name='metadata_multiple_add'
+        r'^documents/multiple/add/$', DocumentMetadataAddView.as_view(),
+        name='document_multiple_metadata_add'
     ),
     url(
-        r'^(?P<pk>\d+)/remove/$', DocumentMetadataRemoveView.as_view(),
-        name='metadata_remove'
+        r'^documents/(?P<pk>\d+)/remove/$', DocumentMetadataRemoveView.as_view(),
+        name='document_metadata_remove'
     ),
     url(
-        r'^multiple/remove/$', DocumentMetadataRemoveView.as_view(),
-        name='metadata_multiple_remove'
+        r'^documents/multiple/remove/$', DocumentMetadataRemoveView.as_view(),
+        name='document_multiple_metadata_remove'
     ),
 
     url(
-        r'^setup/type/list/$', MetadataTypeListView.as_view(),
-        name='setup_metadata_type_list'
+        r'^types/list/$', MetadataTypeListView.as_view(),
+        name='metadata_type_list'
     ),
     url(
-        r'^setup/type/create/$', MetadataTypeCreateView.as_view(),
-        name='setup_metadata_type_create'
+        r'^types/create/$', MetadataTypeCreateView.as_view(),
+        name='metadata_type_create'
     ),
     url(
-        r'^setup/type/(?P<pk>\d+)/edit/$', MetadataTypeEditView.as_view(),
-        name='setup_metadata_type_edit'
+        r'^types/(?P<pk>\d+)/edit/$', MetadataTypeEditView.as_view(),
+        name='metadata_type_edit'
     ),
     url(
-        r'^setup/type/(?P<pk>\d+)/delete/$',
-        MetadataTypeDeleteView.as_view(), name='setup_metadata_type_delete'
+        r'^types/(?P<pk>\d+)/delete/$',
+        MetadataTypeDeleteView.as_view(), name='metadata_type_delete'
     ),
     url(
-        r'^setup/document_types/(?P<pk>\d+)/metadata_types/$',
+        r'^document_types/(?P<pk>\d+)/metadata_types/$',
         SetupDocumentTypeMetadataTypes.as_view(),
-        name='setup_document_type_metadata_types'
+        name='document_type_metadata_types'
     ),
     url(
-        r'^setup/metadata_types/(?P<pk>\d+)/document_types/$',
+        r'^metadata_types/(?P<pk>\d+)/document_types/$',
         SetupMetadataTypesDocumentTypes.as_view(),
-        name='setup_metadata_type_document_types'
+        name='metadata_type_document_types'
     ),
 ]
 

@@ -20,8 +20,8 @@ from mayan.celery import app
 
 from .classes import MailerBackend
 from .links import (
-    link_send_document, link_send_document_link, link_send_multiple_document,
-    link_send_multiple_document_link, link_system_mailer_error_log,
+    link_document_send, link_document_send_link, link_document_multiple_send,
+    link_document_multiple_send_link, link_system_mailer_error_log,
     link_user_mailer_create, link_user_mailer_delete, link_user_mailer_edit,
     link_user_mailer_list, link_user_mailer_log_list, link_user_mailer_setup,
     link_user_mailer_test
@@ -98,13 +98,13 @@ class MailerApp(MayanAppConfig):
 
         menu_multi_item.bind_links(
             links=(
-                link_send_multiple_document, link_send_multiple_document_link
+                link_document_multiple_send, link_document_multiple_send_link
             ), sources=(Document,)
         )
 
         menu_object.bind_links(
             links=(
-                link_send_document_link, link_send_document
+                link_document_send_link, link_document_send
             ), sources=(Document,)
         )
 

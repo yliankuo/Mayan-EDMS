@@ -6,7 +6,10 @@ from mayan.apps.navigation import Link
 from mayan.apps.user_management.icons import icon_group
 from mayan.apps.user_management.permissions import permission_group_edit
 
-from .icons import icon_permission, icon_role_create, icon_role_list
+from .icons import (
+    icon_permission, icon_role_create, icon_role_delete, icon_role_edit,
+    icon_role_groups, icon_role_list, icon_role_permissions
+)
 from .permissions import (
     permission_permission_grant, permission_permission_revoke,
     permission_role_create, permission_role_delete, permission_role_edit,
@@ -31,11 +34,13 @@ link_role_create = Link(
     text=_('Create new role'), view='permissions:role_create'
 )
 link_role_delete = Link(
-    args='object.id', permissions=(permission_role_delete,), tags='dangerous',
-    text=_('Delete'), view='permissions:role_delete',
+    args='object.id', icon_class=icon_role_delete,
+    permissions=(permission_role_delete,), tags='dangerous', text=_('Delete'),
+    view='permissions:role_delete',
 )
 link_role_edit = Link(
-    args='object.id', permissions=(permission_role_edit,), text=_('Edit'),
+    args='object.id', icon_class=icon_role_edit,
+    permissions=(permission_role_edit,), text=_('Edit'),
     view='permissions:role_edit',
 )
 link_role_list = Link(
@@ -43,12 +48,12 @@ link_role_list = Link(
     text=_('Roles'), view='permissions:role_list'
 )
 link_role_groups = Link(
-    args='object.id', icon_class=icon_group,
+    args='object.id', icon_class=icon_role_groups,
     permissions=(permission_role_edit,), text=_('Groups'),
     view='permissions:role_groups',
 )
 link_role_permissions = Link(
-    args='object.id', icon_class=icon_permission,
+    args='object.id', icon_class=icon_role_permissions,
     permissions=(permission_permission_grant, permission_permission_revoke),
     text=_('Role permissions'), view='permissions:role_permissions',
 )
