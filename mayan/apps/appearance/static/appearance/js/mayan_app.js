@@ -70,13 +70,14 @@ class MayanApp {
         });
     }
 
-    static setupNavbarState () {
-        var uri = new URI(window.location.hash);
-        var uriFragment = uri.fragment();
-        $('#accordion-sidebar > .panel-default > .collapse > .panel-body > ul > li > a').each(function (index, value) {
-            if (value.pathname === uriFragment) {
-                $(this).parents('.collapse').collapse('show');
-            }
+    static setupNavBarState () {
+        $('body').on('click', '.a-main-menu-accordion-link', function (event) {
+            console.log('ad');
+            $('.a-main-menu-accordion-link').each(function (index, value) {
+                $(this).parent().removeClass('active');
+            });
+
+            $(this).parent().addClass('active');
         });
     }
 
@@ -94,6 +95,17 @@ class MayanApp {
             '<span class="label label-tag" style="background: ' + tag.element.dataset.color + ';"> ' + tag.text + '</span>'
         );
         return $tag;
+    }
+
+    static updateNavbarState () {
+        var uri = new URI(window.location.hash);
+        var uriFragment = uri.fragment();
+        $('.a-main-menu-accordion-link').each(function (index, value) {
+            if (value.pathname === uriFragment) {
+                $(this).closest('.collapse').addClass('in').parent().find('.collapsed').removeClass('collapsed').attr('aria-expanded', 'true');
+                $(this).parent().addClass('active');
+            }
+        });
     }
 
     // Instance methods
@@ -234,6 +246,7 @@ class MayanApp {
         this.setupItemsSelector();
         MayanApp.setupMultiItemActions();
         this.setupNavbarCollapse();
+        MayanApp.setupNavBarState();
         this.setupNewWindowAnchor();
         $.each(this.ajaxMenusOptions, function(index, value) {
             value.app = self;

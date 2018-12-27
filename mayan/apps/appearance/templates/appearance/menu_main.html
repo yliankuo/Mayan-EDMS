@@ -36,8 +36,12 @@
                                     {% get_menu_links name=link.name as menu_links %}
                                     {% for linkset in menu_links %}
                                         {% with '' as link_class_active %}
+                                        {% with 'a-main-menu-accordion-link' as link_classes %}
+                                        {% with 'true' as as_li %}
                                         {% with linkset as object_navigation_links %}
                                             {% include 'navigation/generic_navigation.html' %}
+                                        {% endwith %}
+                                        {% endwith %}
                                         {% endwith %}
                                         {% endwith %}
                                     {% endfor %}

@@ -444,6 +444,14 @@ body {
     background-color: #517394;
 }
 
+#accordion-sidebar > .panel > div > .panel-body > ul > li > a:hover {
+    background-color: #517394;
+}
+
+#accordion-sidebar > .panel > div > .panel-body > ul > li.active {
+   background: #1a242f;
+}
+
 #accordion-sidebar .panel-title {
     font-size: 15px;
 }
@@ -460,10 +468,6 @@ body {
 
 #accordion-sidebar .panel-body li {
     padding: 0px;
-}
-
-#accordion-sidebar .panel-body li:hover {
-    background-color: #517394;
 }
 
 #accordion-sidebar .panel-body a {
