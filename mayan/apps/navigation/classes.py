@@ -563,7 +563,7 @@ class SourceColumn(object):
 
         return final_result
 
-    def __init__(self, source, attribute=None, empty_value=None, func=None, is_absolute_url=False, is_identifier=False, is_sortable=False, kwargs=None, label=None, order=None, views=None, widget=None):
+    def __init__(self, source, attribute=None, empty_value=None, func=None, include_label=False, is_absolute_url=False, is_identifier=False, is_sortable=False, kwargs=None, label=None, order=None, views=None, widget=None):
         self.source = source
         self._label = label
         self.attribute = attribute
@@ -571,6 +571,7 @@ class SourceColumn(object):
         self.func = func
         self.kwargs = kwargs or {}
         self.order = order or 0
+        self.include_label = include_label
         self.is_absolute_url = is_absolute_url
         self.is_identifier = is_identifier
         self.is_sortable = is_sortable

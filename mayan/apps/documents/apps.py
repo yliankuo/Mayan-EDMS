@@ -246,7 +246,9 @@ class DocumentsApp(MayanAppConfig):
             attribute='document_type', is_sortable=True, label=_('Type'),
             source=Document
         )
-        SourceColumn(attribute='get_page_count', source=Document)
+        SourceColumn(
+            attribute='get_page_count', include_label=True, source=Document
+        )
         SourceColumn(
             attribute='date_added', is_sortable=True, source=Document, views=(
                 'documents:document_list_recent_added',
