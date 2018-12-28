@@ -9,3 +9,7 @@ from .settings import (
 storage_detachedsignature = import_string(
     dotted_path=setting_storage_backend.value
 )(**setting_storage_backend_arguments.value)
+
+
+def storage_detachedsignature_wrapper():
+    return

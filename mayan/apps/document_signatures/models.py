@@ -15,7 +15,7 @@ from mayan.apps.django_gpg.models import Key
 from mayan.apps.documents.models import DocumentVersion
 
 from .managers import EmbeddedSignatureManager
-from .storages import storage_detachedsignature
+from .storages import storage_detachedsignature_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class EmbeddedSignature(SignatureBaseModel):
 @python_2_unicode_compatible
 class DetachedSignature(SignatureBaseModel):
     signature_file = models.FileField(
-        blank=True, null=True, storage=storage_detachedsignature,
+        blank=True, null=True, storage=storage_detachedsignature_wrapper,
         upload_to=upload_to, verbose_name=_('Signature file')
     )
 
@@ -143,7 +143,7 @@ class DetachedSignature(SignatureBaseModel):
 
     def delete(self, *args, **kwargs):
         if self.signature_file.name:
-            self.signature_file.storage.delete(name=self.signature_file.name)
+            self.signature_file.storage().delete(name=self.signature_file.name)
         super(DetachedSignature, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):

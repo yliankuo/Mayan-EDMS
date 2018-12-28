@@ -7,3 +7,7 @@ from .settings import setting_shared_storage, setting_shared_storage_arguments
 storage_sharedupload = import_string(
     dotted_path=setting_shared_storage.value
 )(**setting_shared_storage_arguments.value)
+
+
+def storage_sharedupload_wrapper():
+    return storage_sharedupload

@@ -15,3 +15,7 @@ storage_documentversion = import_string(
 storage_documentimagecache = import_string(
     dotted_path=setting_documentimagecache_storage.value
 )(**setting_documentimagecache_storage_arguments.value)
+
+
+def storage_documentversion_wrapper():
+    return storage_documentversion
