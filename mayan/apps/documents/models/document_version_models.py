@@ -21,7 +21,7 @@ from ..literals import DOCUMENT_IMAGES_CACHE_NAME
 from ..managers import DocumentVersionManager
 from ..settings import setting_fix_orientation
 from ..signals import post_document_created, post_version_upload
-from ..storages import storage_documentversion_wrapper
+from ..storages import storage_documentversion
 from ..utils import document_hash_function, document_uuid_function
 
 from .document_models import Document
@@ -67,7 +67,7 @@ class DocumentVersion(models.Model):
 
     # File related fields
     file = models.FileField(
-        storage=storage_documentversion_wrapper, upload_to=document_uuid_function,
+        storage=storage_documentversion, upload_to=document_uuid_function,
         verbose_name=_('File')
     )
     mimetype = models.CharField(
@@ -137,7 +137,7 @@ class DocumentVersion(models.Model):
         be in the document storage. This is a diagnostic flag to help users
         detect if the storage has desynchronized (ie: Amazon's S3).
         """
-        return self.file.storage().exists(self.file.name)
+        return self.file.storage.exists(self.file.name)
 
     def fix_orientation(self):
         for page in self.pages.all():
@@ -329,7 +329,7 @@ class DocumentVersion(models.Model):
     @property
     def size(self):
         if self.exists():
-            return self.file.storage().size(self.file.name)
+            return self.file.storage.size(self.file.name)
         else:
             return None
 

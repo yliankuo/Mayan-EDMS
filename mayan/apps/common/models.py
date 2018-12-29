@@ -13,7 +13,7 @@ from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from .managers import ErrorLogEntryManager, UserLocaleProfileManager
-from .storages import storage_sharedupload_wrapper
+from .storages import storage_sharedupload
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class SharedUploadedFile(models.Model):
     that runs out of process.
     """
     file = models.FileField(
-        storage=storage_sharedupload_wrapper, upload_to=upload_to,
+        storage=storage_sharedupload, upload_to=upload_to,
         verbose_name=_('File')
     )
     filename = models.CharField(max_length=255, verbose_name=_('Filename'))

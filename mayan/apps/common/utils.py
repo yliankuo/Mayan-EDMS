@@ -12,6 +12,7 @@ from django.urls.base import get_script_prefix
 from django.utils.datastructures import MultiValueDict
 from django.utils.http import urlencode as django_urlencode
 from django.utils.http import urlquote as django_urlquote
+from django.utils.module_loading import import_string
 from django.utils.six.moves import reduce as reduce_function
 from django.utils.six.moves import xmlrpc_client
 
@@ -98,6 +99,28 @@ def get_descriptor(file_input, read=True):
             return open(file_input, mode='wb')
     else:
         return file_input
+
+
+def get_storage_subclass(dotted_path):
+    """
+    Import a storage class and return a subclass that will always return eq
+    True to avoid creating a new migration when for runtime storage class
+    changes.
+    """
+    imported_storage_class = import_string(dotted_path=dotted_path)
+
+    class StorageSubclass(imported_storage_class):
+        def __init__(self, *args, **kwargs):
+            return super(StorageSubclass, self).__init__(*args, **kwargs)
+
+        def __eq__(self, other):
+            return True
+
+        def deconstruct(self):
+            return ('mayan.apps.common.classes.FakeStorageSubclass', (), {})
+
+
+    return StorageSubclass
 
 
 def TemporaryFile(*args, **kwargs):
