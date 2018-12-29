@@ -19,7 +19,10 @@ from mayan.apps.common.views import (
     SingleObjectListView
 )
 
-from .events import event_user_created, event_user_edited
+from .events import (
+    event_group_created, event_group_edited, event_user_created,
+    event_user_edited
+)
 from .forms import UserForm
 from .icons import icon_group_setup, icon_user_setup
 from .links import link_group_create, link_user_create
@@ -62,12 +65,30 @@ class GroupCreateView(SingleObjectCreateView):
     post_action_redirect = reverse_lazy('user_management:group_list')
     view_permission = permission_group_create
 
+    def form_valid(self, form):
+        group = form.save()
+
+        event_group_created.commit(
+            actor=self.request.user, target=group
+        )
+
+        messages.success(
+            self.request, _('Group "%s" created successfully.') % group
+        )
+        return super(GroupCreateView, self).form_valid(form=form)
+
 
 class GroupEditView(SingleObjectEditView):
     fields = ('name',)
     model = Group
     object_permission = permission_group_edit
     post_action_redirect = reverse_lazy('user_management:group_list')
+
+    def form_valid(self, form):
+        event_group_edited.commit(
+            actor=self.request.user, target=self.get_object()
+        )
+        return super(GroupEditView, self).form_valid(form=form)
 
     def get_extra_context(self):
         return {

@@ -21,7 +21,7 @@ from .utils import get_user_label_text
 
 
 def condition_is_not_superuser(context):
-    user = context['resolved_object']
+    user = context['object']
     return not user.is_superuser and not user.is_staff
 
 
