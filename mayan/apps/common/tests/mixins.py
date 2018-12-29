@@ -130,22 +130,27 @@ class TempfileCheckMixin(object):
 
 
 class UserMixin(object):
+    auto_create_group = True
+    auto_create_users = True
+
     def setUp(self):
         super(UserMixin, self).setUp()
-        self.admin_user = get_user_model().objects.create_superuser(
-            username=TEST_ADMIN_USERNAME, email=TEST_ADMIN_EMAIL,
-            password=TEST_ADMIN_PASSWORD
-        )
+        if self.auto_create_users:
+            self.admin_user = get_user_model().objects.create_superuser(
+                username=TEST_ADMIN_USERNAME, email=TEST_ADMIN_EMAIL,
+                password=TEST_ADMIN_PASSWORD
+            )
 
-        self.user = get_user_model().objects.create_user(
-            username=TEST_USER_USERNAME, email=TEST_USER_EMAIL,
-            password=TEST_USER_PASSWORD
-        )
+            self.user = get_user_model().objects.create_user(
+                username=TEST_USER_USERNAME, email=TEST_USER_EMAIL,
+                password=TEST_USER_PASSWORD
+            )
 
-        self.group = Group.objects.create(name=TEST_GROUP_NAME)
-        self.role = Role.objects.create(label=TEST_ROLE_LABEL)
-        self.group.user_set.add(self.user)
-        self.role.groups.add(self.group)
+        if self.auto_create_group:
+            self.group = Group.objects.create(name=TEST_GROUP_NAME)
+            self.role = Role.objects.create(label=TEST_ROLE_LABEL)
+            self.group.user_set.add(self.user)
+            self.role.groups.add(self.group)
 
     def grant_access(self, obj, permission):
         AccessControlList.objects.grant(

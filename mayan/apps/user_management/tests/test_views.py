@@ -28,55 +28,55 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
         super(UserManagementViewTestCase, self).setUp()
         self.login_user()
 
-    def _request_user_create_view(self):
-        return self.post(
-            viewname='user_management:user_create', data={
-                'username': TEST_USER_2_USERNAME
-            }
-        )
+    #def _request_test_user_create_view(self):
+    #    return self.post(
+    #        viewname='user_management:user_create', data={
+    #            'username': TEST_USER_2_USERNAME
+    #        }
+    #    )
 
     def test_user_create_view_no_permission(self):
-        response = self._request_user_create_view()
+        response = self._request_test_user_create_view()
         self.assertEqual(response.status_code, 403)
         self.assertEqual(get_user_model().objects.count(), 2)
         self.assertFalse(TEST_USER_2_USERNAME in get_user_model().objects.values_list('username', flat=True))
 
     def test_user_create_view_with_permission(self):
         self.grant_permission(permission=permission_user_create)
-        response = self._request_user_create_view()
+        response = self._request_test_user_create_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(get_user_model().objects.count(), 3)
         self.assertTrue(TEST_USER_2_USERNAME in get_user_model().objects.values_list('username', flat=True))
 
     def _request_user_groups_view(self):
         return self.post(
-            viewname='user_management:user_groups', args=(self.user_2.pk,)
+            viewname='user_management:user_groups', args=(self.test_user.pk,)
         )
 
     def test_user_groups_view_no_permission(self):
-        self._create_test_user_2()
+        self._create_test_user()
         response = self._request_user_groups_view()
         self.assertEqual(response.status_code, 403)
 
     def test_user_groups_view_with_access(self):
-        self._create_test_user_2()
-        self.grant_access(permission=permission_user_edit, obj=self.user_2)
+        self._create_test_user()
+        self.grant_access(permission=permission_user_edit, obj=self.test_user)
 
         response = self._request_user_groups_view()
         self.assertContains(
-            response=response, text=self.user_2.username, status_code=200
+            response=response, text=self.test_user.username, status_code=200
         )
 
     def _request_set_password_view(self, password):
         return self.post(
-            viewname='user_management:user_set_password', args=(self.user_2.pk,),
+            viewname='user_management:user_set_password', args=(self.test_user.pk,),
             data={
                 'new_password1': password, 'new_password2': password
             }
         )
 
     def test_user_set_password_view_no_access(self):
-        self._create_test_user_2()
+        self._create_test_user()
         response = self._request_set_password_view(
             password=TEST_USER_PASSWORD_EDITED
         )
@@ -90,13 +90,13 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
                 username=TEST_USER_2_USERNAME, password=TEST_USER_PASSWORD_EDITED
             )
 
-        response = self.get('common:current_user_details')
+        response = self.get(viewname='user_management:current_user_details')
 
         self.assertEqual(response.status_code, 302)
 
     def test_user_set_password_view_with_access(self):
-        self._create_test_user_2()
-        self.grant_access(permission=permission_user_edit, obj=self.user_2)
+        self._create_test_user()
+        self.grant_access(permission=permission_user_edit, obj=self.test_user)
 
         response = self._request_set_password_view(
             password=TEST_USER_PASSWORD_EDITED
@@ -108,7 +108,7 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
         self.login(
             username=TEST_USER_2_USERNAME, password=TEST_USER_PASSWORD_EDITED
         )
-        response = self.get('common:current_user_details')
+        response = self.get(viewname='user_management:current_user_details')
 
         self.assertEqual(response.status_code, 200)
 
@@ -116,14 +116,14 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
         return self.post(
             viewname='user_management:user_multiple_set_password',
             data={
-                'id_list': self.user_2.pk,
+                'id_list': self.test_user.pk,
                 'new_password1': password,
                 'new_password2': password
             }
         )
 
     def test_user_multiple_set_password_view_no_access(self):
-        self._create_test_user_2()
+        self._create_test_user()
         response = self._request_multiple_user_set_password_view(
             password=TEST_USER_PASSWORD_EDITED
         )
@@ -137,12 +137,12 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
                 username=TEST_USER_2_USERNAME, password=TEST_USER_PASSWORD_EDITED
             )
 
-        response = self.get('common:current_user_details')
+        response = self.get(viewname='user_management:current_user_details')
         self.assertEqual(response.status_code, 302)
 
     def test_user_multiple_set_password_view_with_access(self):
-        self._create_test_user_2()
-        self.grant_access(permission=permission_user_edit, obj=self.user_2)
+        self._create_test_user()
+        self.grant_access(permission=permission_user_edit, obj=self.test_user)
 
         response = self._request_multiple_user_set_password_view(
             password=TEST_USER_PASSWORD_EDITED
@@ -154,24 +154,24 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
         self.login(
             username=TEST_USER_2_USERNAME, password=TEST_USER_PASSWORD_EDITED
         )
-        response = self.get('common:current_user_details')
+        response = self.get(viewname='user_management:current_user_details')
 
         self.assertEqual(response.status_code, 200)
 
     def _request_user_delete_view(self):
         return self.post(
-            viewname='user_management:user_delete', args=(self.user_2.pk,)
+            viewname='user_management:user_delete', args=(self.test_user.pk,)
         )
 
     def test_user_delete_view_no_access(self):
-        self._create_test_user_2()
+        self._create_test_user()
         response = self._request_user_delete_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(get_user_model().objects.count(), 3)
 
     def test_user_delete_view_with_access(self):
-        self._create_test_user_2()
-        self.grant_access(permission=permission_user_delete, obj=self.user_2)
+        self._create_test_user()
+        self.grant_access(permission=permission_user_delete, obj=self.test_user)
         response = self._request_user_delete_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(get_user_model().objects.count(), 2)
@@ -179,19 +179,19 @@ class UserManagementViewTestCase(UserTestMixin, GenericViewTestCase):
     def _request_user_multiple_delete_view(self):
         return self.post(
             viewname='user_management:user_multiple_delete', data={
-                'id_list': self.user_2.pk
+                'id_list': self.test_user.pk
             }
         )
 
     def test_user_multiple_delete_view_no_access(self):
-        self._create_test_user_2()
+        self._create_test_user()
         response = self._request_user_multiple_delete_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(get_user_model().objects.count(), 3)
 
     def test_user_multiple_delete_view_with_access(self):
-        self._create_test_user_2()
-        self.grant_access(permission=permission_user_delete, obj=self.user_2)
+        self._create_test_user()
+        self.grant_access(permission=permission_user_delete, obj=self.test_user)
         response = self._request_user_multiple_delete_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(get_user_model().objects.count(), 2)
@@ -217,7 +217,8 @@ class MetadataLookupIntegrationTestCase(GenericDocumentViewTestCase):
         )
 
         response = self.get(
-            viewname='metadata:metadata_edit', args=(self.document.pk,)
+            viewname='metadata:document_metadata_edit',
+            kwargs={'pk': self.document.pk}
         )
         self.assertContains(
             response=response, text='<option value="{}">{}</option>'.format(
@@ -234,7 +235,8 @@ class MetadataLookupIntegrationTestCase(GenericDocumentViewTestCase):
         )
 
         response = self.get(
-            viewname='metadata:metadata_edit', args=(self.document.pk,)
+            viewname='metadata:document_metadata_edit',
+            kwargs={'pk': self.document.pk}
         )
 
         self.assertContains(

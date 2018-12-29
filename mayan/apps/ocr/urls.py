@@ -44,7 +44,7 @@ urlpatterns = [
     url(
         r'^document_types/(?P<pk>\d+)/ocr/settings/$',
         DocumentTypeSettingsEditView.as_view(),
-        name='document_type_ocr_settings'
+        name='document_type_settings'
     ),
     url(r'^errors/$', EntryListView.as_view(), name='entry_list'),
 ]

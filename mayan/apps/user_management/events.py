@@ -9,15 +9,15 @@ namespace = EventTypeNamespace(
 )
 
 event_group_created = namespace.add_event_type(
-    label=_('Group created'), name='created'
+    label=_('Group created'), name='group_created'
 )
 event_group_edited = namespace.add_event_type(
-    label=_('Group edited'), name='edited'
+    label=_('Group edited'), name='group_edited'
 )
 
 event_user_created = namespace.add_event_type(
-    label=_('User created'), name='created'
+    label=_('User created'), name='user_created'
 )
 event_user_edited = namespace.add_event_type(
-    label=_('User edited'), name='edited'
+    label=_('User edited'), name='user_edited'
 )

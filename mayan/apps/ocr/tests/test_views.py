@@ -21,7 +21,8 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_content_view(self):
         return self.get(
-            viewname='ocr:document_ocr_content', args=(self.document.pk,)
+            viewname='ocr:document_content',
+            kwargs={'pk': self.document.pk}
         )
 
     def test_document_content_view_no_permissions(self):
@@ -44,9 +45,8 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_page_content_view(self):
         return self.get(
-            viewname='ocr:document_page_ocr_content', args=(
-                self.document.pages.first().pk,
-            )
+            viewname='ocr:document_page_content',
+            kwargs={'pk': self.document.pages.first().pk}
         )
 
     def test_document_page_content_view_no_permissions(self):
@@ -69,7 +69,8 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_submit_view(self):
         return self.post(
-            viewname='ocr:document_submit', args=(self.document.pk,)
+            viewname='ocr:document_submit',
+            kwargs={'pk': self.document.pk}
         )
 
     def test_document_submit_view_no_permission(self):
@@ -87,7 +88,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_multiple_document_submit_view(self):
         return self.post(
-            viewname='ocr:document_submit_multiple',
+            viewname='ocr:document_multiple_submit',
             data={
                 'id_list': self.document.pk,
             }
@@ -108,7 +109,8 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_ocr_download_view(self):
         return self.get(
-            viewname='ocr:document_ocr_download', args=(self.document.pk,)
+            viewname='ocr:document_download',
+            kwargs={'pk': self.document.pk}
         )
 
     def test_document_ocr_download_view_no_permission(self):
@@ -141,8 +143,8 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_type_ocr_settings_view(self):
         return self.get(
-            viewname='ocr:document_type_ocr_settings',
-            args=(self.document.document_type.pk,)
+            viewname='ocr:document_type_settings',
+            kwargs={'pk': self.document.document_type.pk}
         )
 
     def test_document_type_ocr_settings_view_no_permission(self):
