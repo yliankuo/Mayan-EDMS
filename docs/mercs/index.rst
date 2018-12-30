@@ -27,6 +27,8 @@ Draft
 .. toctree::
    :maxdepth: 1
 
+   ../mercs/draft-explicit-arguments
+   ../mercs/draft-lower-information-disclose
    ../mercs/merging-roles-and-groups
 
 
