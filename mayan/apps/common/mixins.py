@@ -71,13 +71,16 @@ class ExternalObjectViewMixin(object):
 
     def get_external_object(self, klass=None, permission=None):
         klass = klass or self.external_object_class
-        permission = permission or self.external_object_permission
+        permission = permission or self.get_external_object_permission()
 
         return get_object_or_404(
             klass=self.get_external_object_queryset(
                 klass=klass, permission=permission
             ), pk=self.kwargs[self.external_object_pk_url_kwarg]
         )
+
+    def get_external_object_permission(self):
+        return self.external_object_permission
 
     def get_external_object_queryset(self, klass, permission=None):
         queryset = klass.objects.all()
