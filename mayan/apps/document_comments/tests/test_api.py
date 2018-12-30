@@ -26,7 +26,7 @@ class CommentAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
     def _request_comment_create_view(self):
         return self.post(
-            viewname='rest_api:comment-list', args=(self.document.pk,),
+            viewname='rest_api:comment-list', kwargs={'document_pk': self.document.pk},
             data={
                 'comment': TEST_COMMENT_TEXT
             }
@@ -47,9 +47,10 @@ class CommentAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
     def _request_comment_delete_view(self):
         return self.delete(
-            viewname='rest_api:comment-detail', args=(
-                self.document.pk, self.comment.pk,
-            )
+            viewname='rest_api:comment-detail', kwargs={
+                'document_pk': self.document.pk,
+                'comment_pk': self.comment.pk
+            }
         )
 
     def test_comment_delete_view_no_access(self):
@@ -69,9 +70,10 @@ class CommentAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
     def _request_comment_view(self):
         return self.get(
-            viewname='rest_api:comment-detail', args=(
-                self.document.pk, self.comment.pk,
-            )
+            viewname='rest_api:comment-detail', kwargs={
+                'document_pk': self.document.pk,
+                'comment_pk': self.comment.pk
+            }
         )
 
     def test_comment_detail_view_no_access(self):
@@ -90,7 +92,8 @@ class CommentAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
     def _request_comment_list_view(self):
         return self.get(
-            viewname='rest_api:comment-list', args=(self.document.pk,)
+            viewname='rest_api:comment-list',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_comment_list_view_no_access(self):

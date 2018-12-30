@@ -10,26 +10,26 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^comment/(?P<pk>\d+)/delete/$', DocumentCommentDeleteView.as_view(),
-        name='comment_delete'
+        regex=r'^comments/(?P<comment_pk>\d+)/delete/$', name='comment_delete',
+        view=DocumentCommentDeleteView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/comment/add/$', DocumentCommentCreateView.as_view(),
-        name='comment_add'
+        regex=r'^documents/(?P<document_pk>\d+)/comments/add/$',
+        name='comment_add', view=DocumentCommentCreateView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/comment/list/$',
-        DocumentCommentListView.as_view(), name='comments_for_document'
+        regex=r'^documents/(?P<document_pk>\d+)/comments/$',
+        name='comments_for_document', view=DocumentCommentListView.as_view()
     ),
 ]
 
 api_urls = [
     url(
-        r'^documents/(?P<document_pk>[0-9]+)/comments/$',
-        APICommentListView.as_view(), name='comment-list'
+        regex=r'^documents/(?P<document_pk>[0-9]+)/comments/$',
+        name='comment-list', view=APICommentListView.as_view()
     ),
     url(
-        r'^documents/(?P<document_pk>[0-9]+)/comments/(?P<comment_pk>[0-9]+)/$',
-        APICommentView.as_view(), name='comment-detail'
+        regex=r'^documents/(?P<document_pk>[0-9]+)/comments/(?P<comment_pk>[0-9]+)/$',
+        name='comment-detail', view=APICommentView.as_view()
     ),
 ]

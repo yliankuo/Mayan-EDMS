@@ -4,8 +4,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect
-from django.shortcuts import resolve_url
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, resolve_url
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
@@ -62,6 +62,33 @@ class ExtraContextMixin(object):
         context = super(ExtraContextMixin, self).get_context_data(**kwargs)
         context.update(self.get_extra_context())
         return context
+
+
+class ExternalObjectViewMixin(object):
+    external_object_pk_url_kwarg = 'pk'
+    external_object_class = None
+    external_object_permission = None
+
+    def get_external_object(self, klass=None, permission=None):
+        klass = klass or self.external_object_class
+        permission = permission or self.external_object_permission
+
+        return get_object_or_404(
+            klass=self.get_external_object_queryset(
+                klass=klass, permission=permission
+            ), pk=self.kwargs[self.external_object_pk_url_kwarg]
+        )
+
+    def get_external_object_queryset(self, klass, permission=None):
+        queryset = klass.objects.all()
+
+        if permission:
+            queryset = AccessControlList.objects.filter_by_access(
+                permission=permission, queryset=queryset,
+                user=self.request.user
+            )
+
+        return queryset
 
 
 class FormExtraKwargsMixin(object):
@@ -247,8 +274,8 @@ class ObjectActionMixin(object):
 
 class ObjectListPermissionFilterMixin(object):
     """
-    access_object_retrieve_method is have the entire view check against
-    an object permission and not the individual secondary items.
+    access_object_retrieve_method is used to  have the entire view check
+    against an object permission and not the individual secondary items.
     """
     access_object_retrieve_method = None
     object_permission = None
@@ -289,18 +316,29 @@ class ObjectNameMixin(object):
 
 
 class ObjectPermissionCheckMixin(object):
+    """
+    If object_permission_raise_404 is True an HTTP 404 error will be raised
+    instead of the normal 403.
+    """
     object_permission = None
+    object_permission_raise_404 = False
 
     def get_permission_object(self):
         return self.get_object()
 
     def dispatch(self, request, *args, **kwargs):
         if self.object_permission:
-            AccessControlList.objects.check_access(
-                permissions=self.object_permission, user=request.user,
-                obj=self.get_permission_object(),
-                related=getattr(self, 'object_permission_related', None)
-            )
+            try:
+                AccessControlList.objects.check_access(
+                    permissions=self.object_permission, user=request.user,
+                    obj=self.get_permission_object(),
+                    related=getattr(self, 'object_permission_related', None)
+                )
+            except PermissionDenied:
+                if self.object_permission_raise_404:
+                    raise Http404
+                else:
+                    raise
 
         return super(
             ObjectPermissionCheckMixin, self

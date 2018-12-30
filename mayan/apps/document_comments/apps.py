@@ -53,6 +53,10 @@ class DocumentCommentsApp(MayanAppConfig):
             )
         )
 
+        ModelPermission.register_inheritance(
+            model=Comment, related='document',
+        )
+
         SourceColumn(source=Comment, label=_('Date'), attribute='submit_date')
         SourceColumn(
             source=Comment, label=_('User'),
