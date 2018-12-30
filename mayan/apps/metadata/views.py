@@ -23,31 +23,28 @@ from mayan.apps.documents.permissions import (
 
 from .api import save_metadata_list
 from .forms import (
-    DocumentAddMetadataForm, DocumentMetadataFormSet,
+    DocumentMetadataAddForm, DocumentMetadataFormSet,
     DocumentMetadataRemoveFormSet,
     DocumentTypeMetadataTypeRelationshipFormSet, MetadataTypeForm
 )
-from .icons import (
-    icon_document_metadata_add, icon_document_metadata_edit,
-    icon_document_metadata_remove, icon_metadata
-)
+from .icons import icon_metadata
 from .links import (
     link_document_metadata_add, link_document_multiple_metadata_add,
     link_metadata_type_create
 )
 from .models import DocumentMetadata, MetadataType
 from .permissions import (
-    permission_metadata_document_add, permission_metadata_document_edit,
-    permission_metadata_document_remove, permission_metadata_document_view,
+    permission_document_metadata_add, permission_document_metadata_edit,
+    permission_document_metadata_remove, permission_document_metadata_view,
     permission_metadata_type_create, permission_metadata_type_delete,
     permission_metadata_type_edit, permission_metadata_type_view
 )
 
 
 class DocumentMetadataAddView(MultipleObjectFormActionView):
-    form_class = DocumentAddMetadataForm
+    form_class = DocumentMetadataAddForm
     model = Document
-    object_permission = permission_metadata_document_add
+    object_permission = permission_document_metadata_add
     success_message = _('Metadata add request performed on %(count)d document')
     success_message_plural = _(
         'Metadata add request performed on %(count)d documents'
@@ -87,7 +84,7 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
             return HttpResponseRedirect(
                 '%s?%s' % (
                     reverse(
-                        viewname='metadata:document_metadata_multiple_edit'
+                        viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
                         {
                             'id_list': ','.join(
@@ -107,7 +104,6 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
         queryset = self.get_queryset()
 
         result = {
-            'submit_icon_class': icon_document_metadata_add,
             'submit_label': _('Add'),
             'title': ungettext(
                 'Add metadata types to document',
@@ -213,7 +209,7 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
 class DocumentMetadataEditView(MultipleObjectFormActionView):
     form_class = DocumentMetadataFormSet
     model = Document
-    object_permission = permission_metadata_document_edit
+    object_permission = permission_document_metadata_edit
     success_message = _(
         'Metadata edit request performed on %(count)d document'
     )
@@ -255,7 +251,7 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
             return HttpResponseRedirect(
                 '%s?%s' % (
                     reverse(
-                        viewname='metadata:document_metadata_multiple_edit'
+                        viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
                         {
                             'id_list': ','.join(
@@ -305,7 +301,6 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
                 'and assign them corresponding values.'
             ),
             'no_results_title': _('There is no metadata to edit'),
-            'submit_icon_class': icon_document_metadata_edit,
             'submit_label': _('Edit'),
             'title': ungettext(
                 'Edit document metadata',
@@ -396,7 +391,7 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
 class DocumentMetadataListView(SingleObjectListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_metadata_document_view,
+            permissions=permission_document_metadata_view,
             user=self.request.user, obj=self.get_document()
         )
 
@@ -435,7 +430,7 @@ class DocumentMetadataListView(SingleObjectListView):
 class DocumentMetadataRemoveView(MultipleObjectFormActionView):
     form_class = DocumentMetadataRemoveFormSet
     model = Document
-    object_permission = permission_metadata_document_remove
+    object_permission = permission_document_metadata_remove
     success_message = _(
         'Metadata remove request performed on %(count)d document'
     )
@@ -477,7 +472,7 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
             return HttpResponseRedirect(
                 '%s?%s' % (
                     reverse(
-                        viewname='metadata:document_metadata_multiple_edit'
+                        viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
                         {
                             'id_list': ','.join(
@@ -498,7 +493,6 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
 
         result = {
             'form_display_mode_table': True,
-            'submit_icon_class': icon_document_metadata_remove,
             'submit_label': _('Remove'),
             'title': ungettext(
                 'Remove metadata types from the document',

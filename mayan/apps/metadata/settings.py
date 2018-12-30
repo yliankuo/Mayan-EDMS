@@ -8,6 +8,7 @@ from .parsers import MetadataParser
 from .validators import MetadataValidator
 
 namespace = Namespace(name='metadata', label=_('Metadata'))
+
 setting_available_validators = namespace.add_setting(
     global_name='METADATA_AVAILABLE_VALIDATORS',
     default=MetadataValidator.get_import_paths()

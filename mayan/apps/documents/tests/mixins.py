@@ -24,12 +24,13 @@ class DocumentTestMixin(object):
             label=TEST_DOCUMENT_TYPE_LABEL
         )
 
-    def upload_document(self):
+    def upload_document(self, filename=None):
         self._calculate_test_document_path()
 
         with open(self.test_document_path, mode='rb') as file_object:
             document = self.document_type.new_document(
-                file_object=file_object, label=self.test_document_filename
+                file_object=file_object,
+                label=filename or self.test_document_filename
             )
         return document
 

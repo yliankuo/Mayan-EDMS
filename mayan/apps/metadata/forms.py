@@ -122,7 +122,7 @@ class DocumentMetadataForm(forms.Form):
 DocumentMetadataFormSet = formset_factory(DocumentMetadataForm, extra=0)
 
 
-class DocumentAddMetadataForm(forms.Form):
+class DocumentMetadataAddForm(forms.Form):
     metadata_type = forms.ModelMultipleChoiceField(
         help_text=_('Metadata types to be added to the selected documents.'),
         label=_('Metadata type'), queryset=MetadataType.objects.all(),
@@ -143,23 +143,9 @@ class DocumentAddMetadataForm(forms.Form):
         else:
             queryset = MetadataType.objects.none()
 
-        super(DocumentAddMetadataForm, self).__init__(*args, **kwargs)
+        super(DocumentMetadataAddForm, self).__init__(*args, **kwargs)
 
         self.fields['metadata_type'].queryset = queryset
-
-
-class MetadataTypeForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(MetadataTypeForm, self).__init__(*args, **kwargs)
-        self.fields['lookup'].help_text = format_lazy(
-            '{}{}{}', self.fields['lookup'].help_text,
-            _(' Available template context variables: '),
-            MetadataLookup.get_as_help_text()
-        )
-
-    class Meta:
-        fields = ('name', 'label', 'default', 'lookup', 'validation', 'parser')
-        model = MetadataType
 
 
 class DocumentMetadataRemoveForm(DocumentMetadataForm):
@@ -281,3 +267,17 @@ class DocumentTypeMetadataTypeRelationshipFormSet(DocumentTypeMetadataTypeRelati
         _user = kwargs.pop('_user')
         super(DocumentTypeMetadataTypeRelationshipFormSet, self).__init__(*args, **kwargs)
         self.form_kwargs.update({'_user': _user})
+
+
+class MetadataTypeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(MetadataTypeForm, self).__init__(*args, **kwargs)
+        self.fields['lookup'].help_text = format_lazy(
+            '{}{}{}', self.fields['lookup'].help_text,
+            _(' Available template context variables: '),
+            MetadataLookup.get_as_help_text()
+        )
+
+    class Meta:
+        fields = ('name', 'label', 'default', 'lookup', 'validation', 'parser')
+        model = MetadataType

@@ -11,25 +11,24 @@ from .icons import (
     icon_document_metadata_remove, icon_document_metadata_view,
     icon_document_multiple_metadata_add, icon_document_multiple_metadata_edit,
     icon_document_multiple_metadata_remove, icon_metadata_type_create,
-    icon_document_type_metadata_types, icon_metadata_type_document_types,
-    icon_metadata_type_delete, icon_metadata_type_edit,
-    icon_metadata_type_list,
+    icon_document_type_metadata_types, icon_metadata_type_delete,
+    icon_metadata_type_edit, icon_metadata_type_list
 )
 from .permissions import (
-    permission_metadata_document_add, permission_metadata_document_edit,
-    permission_metadata_document_remove, permission_metadata_document_view,
+    permission_document_metadata_add, permission_document_metadata_edit,
+    permission_document_metadata_remove, permission_document_metadata_view,
     permission_metadata_type_create, permission_metadata_type_delete,
     permission_metadata_type_edit, permission_metadata_type_view
 )
 
 link_document_metadata_add = Link(
     args='object.pk', icon_class=icon_document_metadata_add,
-    permissions=(permission_metadata_document_add,), text=_('Add metadata'),
+    permissions=(permission_document_metadata_add,), text=_('Add metadata'),
     view='metadata:document_metadata_add',
 )
 link_document_metadata_edit = Link(
     args='object.pk', icon_class=icon_document_metadata_edit,
-    permissions=(permission_metadata_document_edit,), text=_('Edit metadata'),
+    permissions=(permission_document_metadata_edit,), text=_('Edit metadata'),
     view='metadata:document_metadata_edit'
 )
 link_document_multiple_metadata_add = Link(
@@ -47,12 +46,12 @@ link_document_multiple_metadata_remove = Link(
 )
 link_document_metadata_remove = Link(
     args='object.pk', icon_class=icon_document_metadata_remove,
-    permissions=(permission_metadata_document_remove,),
+    permissions=(permission_document_metadata_remove,),
     text=_('Remove metadata'), view='metadata:document_metadata_remove',
 )
 link_document_metadata_view = Link(
     args='resolved_object.pk', icon_class=icon_document_metadata_view,
-    permissions=(permission_metadata_document_view,), text=_('Metadata'),
+    permissions=(permission_document_metadata_view,), text=_('Metadata'),
     view='metadata:document_metadata_view',
 )
 link_document_type_metadata_types = Link(
@@ -61,7 +60,7 @@ link_document_type_metadata_types = Link(
     view='metadata:document_type_metadata_types',
 )
 link_metadata_type_document_types = Link(
-    args='resolved_object.pk', icon_class=icon_metadata_type_document_types,
+    args='resolved_object.pk', icon_class=icon_document_type,
     permissions=(permission_document_type_edit,), text=_('Document types'),
     view='metadata:metadata_type_document_types',
 )
@@ -85,5 +84,3 @@ link_metadata_type_list = Link(
     permissions=(permission_metadata_type_view,), text=_('Metadata types'),
     view='metadata:metadata_type_list'
 )
-
-

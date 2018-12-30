@@ -37,8 +37,5 @@ icon_document_type_metadata_types = Icon(
 icon_metadata = Icon(driver_name='fontawesome', symbol='database')
 icon_metadata_type_create = Icon(driver_name='fontawesome', symbol='plus')
 icon_metadata_type_delete = Icon(driver_name='fontawesome', symbol='times')
-icon_metadata_type_document_types = Icon(
-    driver_name='fontawesome', symbol='book'
-)
 icon_metadata_type_edit = Icon(driver_name='fontawesome', symbol='pencil-alt')
 icon_metadata_type_list = Icon(driver_name='fontawesome', symbol='database')

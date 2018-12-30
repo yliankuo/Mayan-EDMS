@@ -25,7 +25,7 @@ class MetadataTestsMixin(object):
 
     def _request_metadata_type_create_view(self):
         return self.post(
-            viewname='metadata:setup_metadata_type_create', data={
+            viewname='metadata:metadata_type_create', data={
                 'label': TEST_METADATA_TYPE_LABEL,
                 'name': TEST_METADATA_TYPE_NAME
             }
@@ -33,14 +33,14 @@ class MetadataTestsMixin(object):
 
     def _request_metadata_type_delete_view(self):
         return self.post(
-            viewname='metadata:setup_metadata_type_delete', args=(
+            viewname='metadata:metadata_type_delete', args=(
                 self.metadata_type.pk,
             ),
         )
 
     def _request_metadata_type_edit_view(self):
         return self.post(
-            viewname='metadata:setup_metadata_type_edit', args=(
+            viewname='metadata:metadata_type_edit', args=(
                 self.metadata_type.pk,), data={
                 'label': TEST_METADATA_TYPE_LABEL_EDITED,
                 'name': TEST_METADATA_TYPE_NAME_EDITED
@@ -52,7 +52,7 @@ class MetadataTestsMixin(object):
         # blindly sets the first form of the formset.
 
         return self.post(
-            viewname='metadata:setup_metadata_type_document_types',
+            viewname='metadata:metadata_type_document_types',
             args=(self.metadata_type.pk,), data={
                 'form-TOTAL_FORMS': '1',
                 'form-INITIAL_FORMS': '0',
@@ -62,5 +62,5 @@ class MetadataTestsMixin(object):
 
     def _request_metadata_type_list_view(self):
         return self.get(
-            viewname='metadata:setup_metadata_type_list',
+            viewname='metadata:metadata_type_list',
         )
