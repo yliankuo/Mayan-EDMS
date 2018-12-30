@@ -1,10 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.shortcuts import get_object_or_404
-
 from rest_framework import generics
 
-from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import ExternalObjectViewMixin
 from mayan.apps.documents.models import Document
 
 from .permissions import (
@@ -14,27 +12,22 @@ from .permissions import (
 from .serializers import CommentSerializer, WritableCommentSerializer
 
 
-class APICommentListView(generics.ListCreateAPIView):
+class APICommentListView(ExternalObjectViewMixin, generics.ListCreateAPIView):
     """
     get: Returns a list of all the document comments.
     post: Create a new document comment.
     """
+    external_object_pk_url_kwarg = 'document_pk'
+    external_object_class = Document
+
     def get_document(self):
+        return self.get_external_object()
+
+    def get_external_object_permission(self):
         if self.request.method == 'GET':
-            permission_required = permission_comment_view
+            return permission_comment_view
         else:
-            permission_required = permission_comment_create
-
-        document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
-        )
-
-        AccessControlList.objects.check_access(
-            permissions=permission_required, user=self.request.user,
-            obj=document
-        )
-
-        return document
+            return permission_comment_create
 
     def get_queryset(self):
         return self.get_document().comments.all()
@@ -66,30 +59,24 @@ class APICommentListView(generics.ListCreateAPIView):
         return context
 
 
-class APICommentView(generics.RetrieveDestroyAPIView):
+class APICommentView(ExternalObjectViewMixin, generics.RetrieveDestroyAPIView):
     """
     delete: Delete the selected document comment.
     get: Returns the details of the selected document comment.
     """
+    external_object_pk_url_kwarg = 'document_pk'
+    external_object_class = Document
     lookup_url_kwarg = 'comment_pk'
     serializer_class = CommentSerializer
 
     def get_document(self):
+        return self.get_external_object()
+
+    def get_external_object_permission(self):
         if self.request.method == 'GET':
-            permission_required = permission_comment_view
+            return permission_comment_view
         else:
-            permission_required = permission_comment_delete
-
-        document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
-        )
-
-        AccessControlList.objects.check_access(
-            permissions=permission_required, user=self.request.user,
-            obj=document
-        )
-
-        return document
+            return permission_comment_delete
 
     def get_queryset(self):
         return self.get_document().comments.all()

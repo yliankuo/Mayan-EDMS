@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.documents.models import Document
 
 from .events import (
-    event_document_comment_create, event_document_comment_delete
+    event_document_comment_created, event_document_comment_deleted
 )
 
 logger = logging.getLogger(__name__)
@@ -49,11 +49,11 @@ class Comment(models.Model):
         user = kwargs.pop('_user', None)
         super(Comment, self).delete(*args, **kwargs)
         if user:
-            event_document_comment_delete.commit(
+            event_document_comment_deleted.commit(
                 actor=user, target=self.document
             )
         else:
-            event_document_comment_delete.commit(target=self.document)
+            event_document_comment_deleted.commit(target=self.document)
 
     def save(self, *args, **kwargs):
         user = kwargs.pop('_user', None) or self.user
@@ -61,15 +61,15 @@ class Comment(models.Model):
         super(Comment, self).save(*args, **kwargs)
         if is_new:
             if user:
-                event_document_comment_create.commit(
-                    actor=user, target=self.document
+                event_document_comment_created.commit(
+                    actor=user, action_object=self.document, target=self
                 )
                 logger.info(
                     'Comment "%s" added to document "%s" by user "%s"',
                     self.comment, self.document, user
                 )
             else:
-                event_document_comment_create.commit(target=self.document)
+                event_document_comment_created.commit(target=self.document)
                 logger.info(
                     'Comment "%s" added to document "%s"', self.comment,
                     self.document

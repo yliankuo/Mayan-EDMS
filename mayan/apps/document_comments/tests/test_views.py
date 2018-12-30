@@ -8,19 +8,13 @@ from ..permissions import (
 )
 
 from .literals import TEST_COMMENT_TEXT
+from .mixins import CommentsTestMixin
 
 
-class CommentsViewsTestCase(GenericDocumentViewTestCase):
+class CommentsViewsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
     def setUp(self):
         super(CommentsViewsTestCase, self).setUp()
         self.login_user()
-
-    def _request_document_comment_add_view(self):
-        return self.post(
-            viewname='comments:comment_add',
-            kwargs={'document_pk': self.document.pk},
-            data={'comment': TEST_COMMENT_TEXT}
-        )
 
     def test_document_comment_add_view_no_permission(self):
         response = self._request_document_comment_add_view()
@@ -38,12 +32,6 @@ class CommentsViewsTestCase(GenericDocumentViewTestCase):
     def _create_test_comment(self):
         self.test_comment = self.document.comments.create(
             user=self.user, comment=TEST_COMMENT_TEXT
-        )
-
-    def _request_document_comment_delete_view(self):
-        return self.post(
-            viewname='comments:comment_delete',
-            kwargs={'comment_pk': self.test_comment.pk},
         )
 
     def test_document_comment_delete_view_no_permission(self):

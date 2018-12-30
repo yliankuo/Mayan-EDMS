@@ -12,7 +12,7 @@ from mayan.apps.events import ModelEventType
 from mayan.apps.navigation import SourceColumn
 
 from .events import (
-    event_document_comment_create, event_document_comment_delete
+    event_document_comment_created, event_document_comment_deleted
 )
 from .links import (
     link_comment_add, link_comment_delete, link_comments_for_document
@@ -32,6 +32,7 @@ class DocumentCommentsApp(MayanAppConfig):
     verbose_name = _('Document comments')
 
     def ready(self):
+        from actstream import registry
         super(DocumentCommentsApp, self).ready()
 
         Document = apps.get_model(
@@ -42,7 +43,7 @@ class DocumentCommentsApp(MayanAppConfig):
 
         ModelEventType.register(
             model=Document, event_types=(
-                event_document_comment_create, event_document_comment_delete
+                event_document_comment_created, event_document_comment_deleted
             )
         )
 
@@ -86,3 +87,5 @@ class DocumentCommentsApp(MayanAppConfig):
         menu_facet.bind_links(
             links=(link_comments_for_document,), sources=(Document,)
         )
+
+        registry.register(Comment)
