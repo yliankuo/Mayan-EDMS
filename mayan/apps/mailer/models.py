@@ -114,7 +114,7 @@ class UserMailer(models.Model):
         """
         Deserialize the stored backend data.
         """
-        return json.loads(self.backend_data)
+        return json.loads(s=self.backend_data)
 
     def natural_key(self):
         return (self.label,)
@@ -150,7 +150,9 @@ class UserMailer(models.Model):
                     mimetype=attachment['mimetype']
                 )
 
-            email_message.attach_alternative(body, 'text/html')
+            email_message.attach_alternative(
+                content=body, mimetype='text/html'
+            )
 
             try:
                 email_message.send()

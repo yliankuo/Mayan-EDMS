@@ -5,16 +5,10 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.navigation import Link
 
 from .icons import (
-    icon_document_send,
-    icon_document_send_link,
-    icon_document_multiple_send,
-    icon_document_multiple_send_link,
-
-    icon_system_mailer_error_log, icon_user_mailer_create,
-    icon_user_mailer_delete,icon_user_mailer_edit,
-
-    icon_user_mailer_list, icon_user_mailer_setup,
-    icon_user_mailer_test
+    icon_document_multiple_send, icon_document_multiple_send_link,
+    icon_document_send, icon_document_send_link, icon_system_mailer_error_log,
+    icon_user_mailer_create, icon_user_mailer_delete, icon_user_mailer_edit,
+    icon_user_mailer_list, icon_user_mailer_setup, icon_user_mailer_test
 )
 from .permissions import (
     permission_mailing_link, permission_mailing_send_document,

@@ -47,8 +47,8 @@ class DocumentMailForm(forms.Form):
             }
 
         queryset = AccessControlList.objects.filter_by_access(
-            permission=permission_user_mailer_use, user=user,
-            queryset=UserMailer.objects.filter(enabled=True)
+            permission=permission_user_mailer_use,
+            queryset=UserMailer.objects.filter(enabled=True), user=user
         )
 
         self.fields['user_mailer'].queryset = queryset
@@ -96,8 +96,10 @@ class UserMailerDynamicForm(DynamicModelForm):
     def __init__(self, *args, **kwargs):
         result = super(UserMailerDynamicForm, self).__init__(*args, **kwargs)
         if self.instance.backend_data:
-            for key, value in json.loads(self.instance.backend_data).items():
-                self.fields[key].initial = value
+            for key, value in json.loads(s=self.instance.backend_data).items():
+                field = self.fields.get(key)
+                if field:
+                    field.initial = value
 
         return result
 

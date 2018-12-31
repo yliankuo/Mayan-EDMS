@@ -67,7 +67,7 @@ class MailerBackend(six.with_metaclass(MailerBackendMetaclass, MailerBackendBase
     def initialize():
         for app in apps.get_app_configs():
             try:
-                import_module('{}.mailers'.format(app.name))
+                import_module(name='{}.mailers'.format(app.name))
             except ImportError as exception:
                 if force_text(exception) not in ('No module named mailers', 'No module named \'{}.mailers\''.format(app.name)):
                     logger.error(

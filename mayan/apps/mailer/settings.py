@@ -5,13 +5,14 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.smart_settings import Namespace
 
 from .literals import (
-    DEFAULT_DOCUMENT_BODY_TEMPLATE, DEFAULT_LINK_BODY_TEMPLATE
+    DEFAULT_DOCUMENT_BODY_TEMPLATE, DEFAULT_DOCUMENT_SUBJECT_TEMPLATE,
+    DEFAULT_LINK_BODY_TEMPLATE, DEFAULT_LINK_SUBJECT_TEMPLATE
 )
 
 namespace = Namespace(name='mailer', label=_('Mailing'))
 
 setting_link_subject_template = namespace.add_setting(
-    default=_('Link for document: {{ document }}'),
+    default=DEFAULT_LINK_SUBJECT_TEMPLATE,
     help_text=_('Template for the document link email form subject line.'),
     global_name='MAILER_LINK_SUBJECT_TEMPLATE'
 )
@@ -24,7 +25,7 @@ setting_link_body_template = namespace.add_setting(
     global_name='MAILER_LINK_BODY_TEMPLATE'
 )
 setting_document_subject_template = namespace.add_setting(
-    default=_('Document: {{ document }}'),
+    default=DEFAULT_DOCUMENT_SUBJECT_TEMPLATE,
     help_text=_('Template for the document email form subject line.'),
     global_name='MAILER_DOCUMENT_SUBJECT_TEMPLATE'
 )

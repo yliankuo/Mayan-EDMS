@@ -20,8 +20,8 @@ from mayan.celery import app
 
 from .classes import MailerBackend
 from .links import (
-    link_document_send, link_document_send_link, link_document_multiple_send,
-    link_document_multiple_send_link, link_system_mailer_error_log,
+    link_document_multiple_send, link_document_multiple_send_link,
+    link_document_send, link_document_send_link, link_system_mailer_error_log,
     link_user_mailer_create, link_user_mailer_delete, link_user_mailer_edit,
     link_user_mailer_list, link_user_mailer_log_list, link_user_mailer_setup,
     link_user_mailer_test
@@ -48,8 +48,8 @@ class MailerApp(MayanAppConfig):
             app_label='documents', model_name='Document'
         )
 
-        LogEntry = self.get_model('LogEntry')
-        UserMailer = self.get_model('UserMailer')
+        LogEntry = self.get_model(model_name='LogEntry')
+        UserMailer = self.get_model(model_name='UserMailer')
 
         MailerBackend.initialize()
 

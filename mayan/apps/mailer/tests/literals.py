@@ -17,3 +17,4 @@ TEST_RECIPIENTS_MULTIPLE_MIXED_RESULT = [
 ]
 TEST_USER_MAILER_BACKEND_PATH = 'mayan.apps.mailer.tests.mailers.TestBackend'
 TEST_USER_MAILER_LABEL = 'test user mailer label'
+TEST_USER_MAILER_LABEL_EDITED = 'test user mailer label edited'
