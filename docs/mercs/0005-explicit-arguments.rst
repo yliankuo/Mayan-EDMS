@@ -1,13 +1,13 @@
-===========================
-MERC XX: Explicit arguments
-===========================
+==========================
+MERC 5: Explicit arguments
+==========================
 
-:MERC: XX
+:MERC: 5
 :Author: Roberto Rosario
-:Status: Draft
-:Type: Process
+:Status: Accepted
+:Type: Feature
 :Created: 2018-12-30
-:Last-Modified: 2018-12-30
+:Last-Modified: 2018-12-31
 
 .. contents:: Table of Contents
    :depth: 3
@@ -144,6 +144,6 @@ callable's interface.
 .. code-block:: python
 
     url(
-        regex=r'^documents/(?P<pk>[0-9]+)/versions/(?P<version_pk>[0-9]+)/pages/(?P<page_pk>[0-9]+)/image/$',
+        regex=r'^documents/(?P<pk>[0-9]+)/versions/(?P<document_version_pk>[0-9]+)/pages/(?P<document_page_pk>[0-9]+)/image/$',
         name='documentpage-image', view=APIDocumentPageImageView.as_view()
     ),

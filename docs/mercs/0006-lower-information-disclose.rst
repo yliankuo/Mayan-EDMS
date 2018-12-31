@@ -1,13 +1,13 @@
-===================================
-MERC XX: Lower information disclose
-===================================
+==================================
+MERC 6: Lower information disclose
+==================================
 
-:MERC: XX
+:MERC: 6
 :Author: Michael Price
-:Status: Draft
-:Type: Process
+:Status: Accepted
+:Type: Feature
 :Created: 2018-12-30
-:Last-Modified: 2018-12-30
+:Last-Modified: 2018-12-31
 
 .. contents:: Table of Contents
    :depth: 3

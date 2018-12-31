@@ -20,6 +20,8 @@ Accepted
    ../mercs/0001-merc-process
    ../mercs/0002-test-writing
    ../mercs/0003-using-javascript-libraries
+   ../mercs/0005-explicit-arguments
+   ../mercs/0006-lower-information-disclose
 
 Draft
 -----
@@ -27,8 +29,6 @@ Draft
 .. toctree::
    :maxdepth: 1
 
-   ../mercs/draft-explicit-arguments
-   ../mercs/draft-lower-information-disclose
    ../mercs/merging-roles-and-groups
 
 
@@ -51,3 +51,5 @@ Feature
 
    ../mercs/0002-test-writing
    ../mercs/0003-using-javascript-libraries
+   ../mercs/0005-explicit-arguments
+   ../mercs/0006-lower-information-disclose
