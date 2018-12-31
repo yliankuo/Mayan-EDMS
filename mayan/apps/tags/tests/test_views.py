@@ -81,7 +81,7 @@ class TagViewTestCase(TagTestMixin, GenericViewTestCase):
         self._create_tag()
 
         response = self._request_edit_tag_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         tag = Tag.objects.get(pk=self.tag.pk)
         self.assertEqual(tag.label, TEST_TAG_LABEL)
         self.assertEqual(tag.color, TEST_TAG_COLOR)

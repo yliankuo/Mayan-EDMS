@@ -14,6 +14,34 @@ class TagTestMixin(object):
             color=TEST_TAG_COLOR, label=TEST_TAG_LABEL
         )
 
+    def _request_api_tag_create_view(self):
+        return self.post(
+            viewname='rest_api:tag-list', data={
+                'label': TEST_TAG_LABEL, 'color': TEST_TAG_COLOR
+            }
+        )
+
+    def _request_api_tag_delete_view(self):
+        return self.delete(
+            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}
+        )
+
+    def _request_api_tag_edit_via_patch_view(self):
+        return self.patch(
+            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}, data={
+                'label': TEST_TAG_LABEL_EDITED,
+                'color': TEST_TAG_COLOR_EDITED
+            }
+        )
+
+    def _request_api_tag_edit_via_put_view(self):
+        return self.put(
+            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}, data={
+                'label': TEST_TAG_LABEL_EDITED,
+                'color': TEST_TAG_COLOR_EDITED
+            }
+        )
+
     def _request_tag_create_view(self):
         return self.post(
             viewname='tags:tag_create', data={
@@ -24,12 +52,12 @@ class TagTestMixin(object):
 
     def _request_tag_delete_view(self):
         return self.post(
-            viewname='tags:tag_delete', args=(self.tag.pk,)
+            viewname='tags:tag_delete', kwargs={'tag_pk': self.tag.pk}
         )
 
     def _request_tag_edit_view(self):
         return self.post(
-            viewname='tags:tag_edit', args=(self.tag.pk,), data={
+            viewname='tags:tag_edit', kwargs={'tag_pk': self.tag.pk}, data={
                 'label': TEST_TAG_LABEL_EDITED, 'color': TEST_TAG_COLOR_EDITED
             }
         )
@@ -42,7 +70,7 @@ class TagTestMixin(object):
 
     def _request_edit_tag_view(self):
         return self.post(
-            viewname='tags:tag_edit', args=(self.tag.pk,), data={
+            viewname='tags:tag_edit', kwargs={'tag_pk': self.tag.pk}, data={
                 'label': TEST_TAG_LABEL_EDITED, 'color': TEST_TAG_COLOR_EDITED
             }
         )
@@ -57,7 +85,8 @@ class TagTestMixin(object):
 
     def _request_attach_tag_view(self):
         return self.post(
-            viewname='tags:tag_attach', args=(self.document.pk,), data={
+            viewname='tags:tag_attach',
+            kwargs={'document_pk': self.document.pk}, data={
                 'tags': self.tag.pk,
                 'user': self.user.pk
             }
@@ -74,7 +103,7 @@ class TagTestMixin(object):
     def _request_single_document_multiple_tag_remove_view(self):
         return self.post(
             viewname='tags:single_document_multiple_tag_remove',
-            args=(self.document.pk,), data={
+            kwargs={'document_pk': self.document.pk}, data={
                 'id_list': self.document.pk,
                 'tags': self.tag.pk,
             }

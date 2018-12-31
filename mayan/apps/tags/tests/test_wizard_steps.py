@@ -29,7 +29,8 @@ class TaggedDocumentUploadTestCase(GenericDocumentViewTestCase):
     def _request_upload_interactive_document_create_view(self):
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
             return self.post(
-                viewname='sources:upload_interactive', args=(self.source.pk,),
+                viewname='sources:upload_interactive',
+                kwargs={'source_id': self.source.pk},
                 data={
                     'document_type_id': self.document_type.pk,
                     'source-file': file_object,

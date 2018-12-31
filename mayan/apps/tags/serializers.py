@@ -1,10 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.core.exceptions import PermissionDenied
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.reverse import reverse
 
 from mayan.apps.acls.models import AccessControlList
@@ -16,13 +15,17 @@ from .permissions import permission_tag_attach
 
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     documents_url = serializers.HyperlinkedIdentityField(
+        lookup_field='pk', lookup_url_kwarg='tag_pk',
         view_name='rest_api:tag-document-list'
     )
     documents_count = serializers.SerializerMethodField()
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:tag-detail'},
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'tag_pk',
+                'view_name': 'rest_api:tag-detail'
+            }
         }
         fields = (
             'color', 'documents_count', 'documents_url', 'id', 'label', 'url'
@@ -88,38 +91,27 @@ class DocumentTagSerializer(TagSerializer):
             'tag URL.'
         )
     )
+    tag_pk = serializers.IntegerField(
+        help_text=_('Primary key of the tag to be added.'), write_only=True
+    )
 
     class Meta(TagSerializer.Meta):
-        fields = TagSerializer.Meta.fields + ('document_tag_url',)
-        read_only_fields = TagSerializer.Meta.fields
+        fields = TagSerializer.Meta.fields + ('document_tag_url', 'tag_pk')
+        read_only_fields = TagSerializer.Meta.fields + ('document_tag_url',)
 
     def get_document_tag_url(self, instance):
         return reverse(
-            'rest_api:document-tag-detail', args=(
-                self.context['document'].pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document-tag-detail', kwargs={
+                'document_pk': self.context['document'].pk,
+                'tag_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
-
-class NewDocumentTagSerializer(serializers.Serializer):
-    tag_pk = serializers.IntegerField(
-        help_text=_('Primary key of the tag to be added.')
-    )
-
     def create(self, validated_data):
-        try:
-            tag = Tag.objects.get(pk=validated_data['tag_pk'])
-
-            try:
-                AccessControlList.objects.check_access(
-                    permissions=permission_tag_attach,
-                    user=self.context['request'].user, obj=tag
-                )
-            except PermissionDenied:
-                pass
-            else:
-                tag.documents.add(validated_data['document'])
-        except Exception as exception:
-            raise ValidationError(exception)
-
-        return {'tag_pk': tag.pk}
+        queryset = AccessControlList.objects.filter_by_access(
+            permission=permission_tag_attach, queryset=Tag.objects.all(),
+            user=self.context['request'].user
+        )
+        tag = get_object_or_404(queryset=queryset, pk=validated_data['tag_pk'])
+        tag.documents.add(self.context['document'])
+        return tag

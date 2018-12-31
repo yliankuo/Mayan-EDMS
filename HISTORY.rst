@@ -213,7 +213,10 @@
 - Event handler to highlight panels when selected.
 - Improve duplicated document display.
 - Filter document duplicted count by access.
-
+- Updated the tags app to comply with MERCs 5 and 6.
+- The tags app permission workflow is now reciprocal. In order
+  to attach a tag, the user's role will need the tag attach
+  permissions for both, the document and the tag.
 
 3.1.9 (2018-11-01)
 ==================

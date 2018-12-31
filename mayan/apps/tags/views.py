@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 class TagAttachActionView(MultipleObjectFormActionView):
     form_class = TagMultipleSelectionForm
     model = Document
+    pk_url_kwarg = 'document_pk'
     object_permission = permission_tag_attach
     success_message = _('Tag attach request performed on %(count)d document')
     success_message_plural = _(
@@ -75,7 +76,9 @@ class TagAttachActionView(MultipleObjectFormActionView):
         if queryset.count() == 1:
             result.update(
                 {
-                    'queryset': Tag.objects.exclude(pk__in=queryset.first().tags.all())
+                    'queryset': Tag.objects.exclude(
+                        pk__in=queryset.first().tags.all()
+                    )
                 }
             )
 
@@ -84,7 +87,11 @@ class TagAttachActionView(MultipleObjectFormActionView):
     def get_post_action_redirect(self):
         queryset = self.get_queryset()
         if queryset.count() == 1:
-            return reverse('tags:document_tags', args=(queryset.first().pk,))
+            return reverse(
+                viewname='tags:document_tags', kwargs={
+                    'document_pk': queryset.first().pk
+                }
+            )
         else:
             return super(TagAttachActionView, self).get_post_action_redirect()
 
@@ -132,6 +139,7 @@ class TagCreateView(SingleObjectCreateView):
 
 class TagDeleteActionView(MultipleObjectConfirmActionView):
     model = Tag
+    pk_url_kwarg = 'tag_pk'
     post_action_redirect = reverse_lazy('tags:tag_list')
     object_permission = permission_tag_delete
     success_message = _('Tag delete request performed on %(count)d tag')
@@ -181,6 +189,8 @@ class TagEditView(SingleObjectEditView):
     fields = ('label', 'color')
     model = Tag
     object_permission = permission_tag_edit
+    object_permission_raise_404 = True
+    pk_url_kwarg = 'tag_pk'
     post_action_redirect = reverse_lazy('tags:tag_list')
 
     def get_extra_context(self):
@@ -221,7 +231,7 @@ class TagListView(SingleObjectListView):
 
 class TagTaggedItemListView(DocumentListView):
     def get_tag(self):
-        return get_object_or_404(klass=Tag, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Tag, pk=self.kwargs['tag_pk'])
 
     def get_document_queryset(self):
         return self.get_tag().documents.all()
@@ -240,7 +250,9 @@ class TagTaggedItemListView(DocumentListView):
 
 class DocumentTagListView(TagListView):
     def dispatch(self, request, *args, **kwargs):
-        self.document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        self.document = get_object_or_404(
+            klass=Document, pk=self.kwargs['document_pk']
+        )
 
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=request.user,
@@ -256,12 +268,12 @@ class DocumentTagListView(TagListView):
         context.update(
             {
                 'hide_link': True,
-                'no_results_title': _('Document has no tags attached'),
                 'no_results_main_link': link_tag_attach.resolve(
                     context=RequestContext(
                         self.request, {'object': self.document}
                     )
                 ),
+                'no_results_title': _('Document has no tags attached'),
                 'object': self.document,
                 'title': _('Tags for document: %s') % self.document,
             }
@@ -300,7 +312,9 @@ class TagRemoveActionView(MultipleObjectFormActionView):
             result.update(
                 {
                     'object': queryset.first(),
-                    'title': _('Remove tags from document: %s') % queryset.first()
+                    'title': _(
+                        'Remove tags from document: %s'
+                    ) % queryset.first()
                 }
             )
 
@@ -326,7 +340,11 @@ class TagRemoveActionView(MultipleObjectFormActionView):
     def get_post_action_redirect(self):
         queryset = self.get_queryset()
         if queryset.count() == 1:
-            return reverse('tags:document_tags', args=(queryset.first().pk,))
+            return reverse(
+                viewname='tags:document_tags', kwargs={
+                    'document_pk': queryset.first().pk
+                }
+            )
         else:
             return super(TagRemoveActionView, self).get_post_action_redirect()
 
