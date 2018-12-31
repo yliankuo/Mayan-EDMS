@@ -42,7 +42,7 @@ class DocumentTypeCreateView(SingleObjectCreateView):
         'delete_time_unit'
     )
     model = DocumentType
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
     view_permission = permission_document_type_create
 
     def get_extra_context(self):
@@ -59,7 +59,8 @@ class DocumentTypeCreateView(SingleObjectCreateView):
 class DocumentTypeDeleteView(SingleObjectDeleteView):
     model = DocumentType
     object_permission = permission_document_type_delete
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
+    pk_url_kwarg = 'document_type_pk'
 
     def get_extra_context(self):
         return {
@@ -71,7 +72,7 @@ class DocumentTypeDeleteView(SingleObjectDeleteView):
 
 class DocumentTypeDocumentListView(DocumentListView):
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=DocumentType, pk=self.kwargs['document_type_pk'])
 
     def get_document_queryset(self):
         return self.get_document_type().documents.all()
@@ -94,7 +95,10 @@ class DocumentTypeEditView(SingleObjectEditView):
     )
     model = DocumentType
     object_permission = permission_document_type_edit
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    pk_url_kwarg = 'document_type_pk'
+    post_action_redirect = reverse_lazy(
+        viewname='documents:document_type_list'
+    )
 
     def get_extra_context(self):
         return {
@@ -146,7 +150,7 @@ class DocumentTypeFilenameCreateView(SingleObjectCreateView):
         )
 
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=DocumentType, pk=self.kwargs['document_type_pk'])
 
     def get_extra_context(self):
         return {
@@ -164,6 +168,7 @@ class DocumentTypeFilenameCreateView(SingleObjectCreateView):
 class DocumentTypeFilenameDeleteView(SingleObjectDeleteView):
     model = DocumentTypeFilename
     object_permission = permission_document_type_edit
+    pk_url_kwarg = 'filename_pk'
 
     def get_extra_context(self):
         return {
@@ -181,8 +186,8 @@ class DocumentTypeFilenameDeleteView(SingleObjectDeleteView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'documents:document_type_filename_list',
-            args=(self.get_object().document_type.pk,)
+            viewname='documents:document_type_filename_list',
+            kwargs={'document_type_pk': self.get_object().document_type.pk}
         )
 
 
@@ -190,6 +195,7 @@ class DocumentTypeFilenameEditView(SingleObjectEditView):
     fields = ('enabled', 'filename',)
     model = DocumentTypeFilename
     object_permission = permission_document_type_edit
+    pk_url_kwarg = 'filename_pk'
 
     def get_extra_context(self):
         document_type_filename = self.get_object()
@@ -209,8 +215,8 @@ class DocumentTypeFilenameEditView(SingleObjectEditView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'documents:document_type_filename_list',
-            args=(self.get_object().document_type.pk,)
+            viewname='documents:document_type_filename_list',
+            kwargs={'document_type_pk': self.get_object().document_type.pk}
         )
 
 
@@ -219,7 +225,7 @@ class DocumentTypeFilenameListView(SingleObjectListView):
     object_permission = permission_document_type_view
 
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=DocumentType, pk=self.kwargs['document_type_pk'])
 
     def get_extra_context(self):
         return {

@@ -22,7 +22,7 @@ class DocumentVersionTestCase(GenericDocumentViewTestCase):
     def _request_document_version_list_view(self):
         return self.get(
             viewname='documents:document_version_list',
-            args=(self.document.pk,)
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_version_list_no_permission(self):
@@ -43,7 +43,7 @@ class DocumentVersionTestCase(GenericDocumentViewTestCase):
     def _request_document_version_revert_view(self, document_version):
         return self.post(
             viewname='documents:document_version_revert',
-            args=(document_version.pk,)
+            kwargs={'document_version_pk': document_version.pk}
         )
 
     def test_document_version_revert_no_permission(self):

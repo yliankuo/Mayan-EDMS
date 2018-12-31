@@ -26,25 +26,28 @@ class DocumentPageSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_document_version_url(self, instance):
         return reverse(
-            'rest_api:documentversion-detail', args=(
-                instance.document.pk, instance.document_version.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-detail', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.document_version.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_image_url(self, instance):
         return reverse(
-            'rest_api:documentpage-image', args=(
-                instance.document.pk, instance.document_version.pk,
-                instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentpage-image', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.document_version.pk,
+                'document_page_pk': instance.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:documentpage-detail', args=(
-                instance.document.pk, instance.document_version.pk,
-                instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentpage-detail', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.document_version.pk,
+                'document_page_pk': instance.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -56,14 +59,18 @@ class DocumentTypeFilenameSerializer(serializers.ModelSerializer):
 
 class DocumentTypeSerializer(serializers.HyperlinkedModelSerializer):
     documents_url = serializers.HyperlinkedIdentityField(
-        view_name='rest_api:documenttype-document-list',
+        lookup_field='pk', lookup_url_kwarg='document_type_pk',
+        view_name='rest_api:documenttype-document-list'
     )
     documents_count = serializers.SerializerMethodField()
     filenames = DocumentTypeFilenameSerializer(many=True, read_only=True)
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:documenttype-detail'},
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'view_name': 'rest_api:documenttype-detail'
+            }
         }
         fields = (
             'delete_time_period', 'delete_time_unit', 'documents_url',
@@ -78,13 +85,17 @@ class DocumentTypeSerializer(serializers.HyperlinkedModelSerializer):
 
 class WritableDocumentTypeSerializer(serializers.ModelSerializer):
     documents_url = serializers.HyperlinkedIdentityField(
-        view_name='rest_api:documenttype-document-list',
+        lookup_field='pk', lookup_url_kwarg='document_type_pk',
+        view_name='rest_api:documenttype-document-list'
     )
     documents_count = serializers.SerializerMethodField()
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:documenttype-detail'},
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'view_name': 'rest_api:documenttype-detail'
+            }
         }
         fields = (
             'delete_time_period', 'delete_time_unit', 'documents_url',
@@ -106,7 +117,10 @@ class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         extra_kwargs = {
-            'document': {'view_name': 'rest_api:document-detail'},
+            'document': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
+                'view_name': 'rest_api:document-detail'
+            },
             'file': {'use_url': False},
         }
         fields = (
@@ -121,30 +135,33 @@ class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_document_url(self, instance):
         return reverse(
-            'rest_api:document-detail', args=(
-                instance.document.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document-detail', kwargs={
+                'document_pk': instance.document.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_download_url(self, instance):
         return reverse(
-            'rest_api:documentversion-download', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-download', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_pages_url(self, instance):
         return reverse(
-            'rest_api:documentversion-page-list', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-page-list', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:documentversion-detail', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-detail', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -167,30 +184,33 @@ class WritableDocumentVersionSerializer(serializers.ModelSerializer):
 
     def get_document_url(self, instance):
         return reverse(
-            'rest_api:document-detail', args=(
-                instance.document.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document-detail', kwargs={
+                'document_pk': instance.document.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_download_url(self, instance):
         return reverse(
-            'rest_api:documentversion-download', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-download', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_pages_url(self, instance):
         return reverse(
-            'rest_api:documentversion-page-list', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-page-list', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:documentversion-detail', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:documentversion-detail', kwargs={
+                'document_pk': instance.document.pk,
+                'document_version_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -213,13 +233,20 @@ class NewDocumentVersionSerializer(serializers.Serializer):
 class DeletedDocumentSerializer(serializers.HyperlinkedModelSerializer):
     document_type_label = serializers.SerializerMethodField()
     restore = serializers.HyperlinkedIdentityField(
+        lookup_field='pk', lookup_url_kwarg='document_pk',
         view_name='rest_api:trasheddocument-restore'
     )
 
     class Meta:
         extra_kwargs = {
-            'document_type': {'view_name': 'rest_api:documenttype-detail'},
-            'url': {'view_name': 'rest_api:trasheddocument-detail'}
+            'document_type': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'view_name': 'rest_api:documenttype-detail'
+            },
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
+                'view_name': 'rest_api:trasheddocument-detail'
+            }
         }
         fields = (
             'date_added', 'deleted_date_time', 'description', 'document_type',
@@ -240,13 +267,20 @@ class DocumentSerializer(serializers.HyperlinkedModelSerializer):
     document_type = DocumentTypeSerializer()
     latest_version = DocumentVersionSerializer(many=False, read_only=True)
     versions_url = serializers.HyperlinkedIdentityField(
-        view_name='rest_api:document-version-list',
+        lookup_field='pk', lookup_url_kwarg='document_pk',
+        view_name='rest_api:document-version-list'
     )
 
     class Meta:
         extra_kwargs = {
-            'document_type': {'view_name': 'rest_api:documenttype-detail'},
-            'url': {'view_name': 'rest_api:document-detail'}
+            'document_type': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'view_name': 'rest_api:documenttype-detail'
+            },
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
+                'view_name': 'rest_api:document-detail'
+            }
         }
         fields = (
             'date_added', 'description', 'document_type', 'id', 'label',
@@ -260,9 +294,11 @@ class WritableDocumentSerializer(serializers.ModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
     latest_version = DocumentVersionSerializer(many=False, read_only=True)
     versions = serializers.HyperlinkedIdentityField(
-        view_name='rest_api:document-version-list',
+        lookup_field='pk', lookup_url_kwarg='document_pk',
+        view_name='rest_api:document-version-list'
     )
     url = serializers.HyperlinkedIdentityField(
+        lookup_field='pk', lookup_url_kwarg='document_pk',
         view_name='rest_api:document-detail',
     )
 

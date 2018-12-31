@@ -2,12 +2,14 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from furl import furl
+
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, resolve_url
 from django.urls import reverse
+from django.utils.encoding import force_text
 from django.utils.http import urlencode
-from django.utils.six.moves.urllib.parse import parse_qs, urlparse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView
 
@@ -37,11 +39,10 @@ logger = logging.getLogger(__name__)
 
 class DocumentPageInteractiveTransformation(RedirectView):
     def dispatch(self, request, *args, **kwargs):
-        object = self.get_object()
+        obj = self.get_object()
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=object
+            obj=obj, permissions=permission_document_view, user=request.user,
         )
 
         return super(DocumentPageInteractiveTransformation, self).dispatch(
@@ -49,11 +50,14 @@ class DocumentPageInteractiveTransformation(RedirectView):
         )
 
     def get_object(self):
-        return get_object_or_404(klass=DocumentPage, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=DocumentPage, pk=self.kwargs['document_page_pk']
+        )
 
     def get_redirect_url(self, *args, **kwargs):
         url = reverse(
-            'documents:document_page_view', args=(self.kwargs['pk'],)
+            viewname='documents:document_page_view',
+            kwargs={'document_page_pk': self.kwargs['document_page_pk']}
         )
 
         query_dict = {
@@ -70,8 +74,8 @@ class DocumentPageInteractiveTransformation(RedirectView):
 class DocumentPageListView(SingleObjectListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=self.request.user,
-            obj=self.get_document()
+            obj=self.get_document(), permissions=permission_document_view,
+            user=self.request.user,
         )
 
         return super(
@@ -79,7 +83,7 @@ class DocumentPageListView(SingleObjectListView):
         ).dispatch(request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_extra_context(self):
         return {
@@ -109,64 +113,63 @@ class DocumentPageNavigationBase(RedirectView):
         )
 
     def get_object(self):
-        return get_object_or_404(klass=DocumentPage, pk=self.kwargs['pk'])
-
-    def get_redirect_url(self, *args, **kwargs):
-        parse_result = urlparse(
-            self.request.META.get(
-                'HTTP_REFERER', resolve_url(
-                    settings.LOGIN_REDIRECT_URL
-                )
-            )
+        return get_object_or_404(
+            klass=DocumentPage, pk=self.kwargs['document_page_pk']
         )
 
-        query_dict = parse_qs(parse_result.query)
+    def get_redirect_url(self, *args, **kwargs):
+        """
+        Attempt to jump to the same kind of view but resolved to a new
+        object of the same kind.
+        """
+        previous_url = self.request.META.get('HTTP_REFERER', None)
 
-        resolver_match = resolve(parse_result.path)
+        if not previous_url:
+            try:
+                previous_url = self.get_object().get_absolute_url()
+            except AttributeError:
+                previous_url = resolve_url(settings.LOGIN_REDIRECT_URL)
 
-        # Default is to stay on the same view
-        url = parse_result.path
+        parsed_url = furl(url=previous_url)
 
-        new_object = self.navigation_function()
+        # Obtain the view name to be able to resolve it back with new keyword
+        # arguments.
+        resolver_match = resolve(path=force_text(parsed_url.path))
 
-        # Inject new_object pk in the referer's view pk or object_id kwargs
-        if 'pk' in resolver_match.kwargs:
-            resolver_match.kwargs['pk'] = new_object.pk
+        new_kwargs = self.get_new_kwargs()
+
+        if set(new_kwargs) == set(resolver_match.kwargs):
+            # It is the same type of object, reuse the URL to stay in the
+            # same kind of view but pointing to a new object
             url = reverse(
-                resolver_match.view_name, kwargs=resolver_match.kwargs
-            )
-        elif 'object_id' in resolver_match.kwargs:
-            resolver_match.kwargs['object_id'] = new_object.pk
-            url = reverse(
-                resolver_match.view_name, kwargs=resolver_match.kwargs
+                viewname=resolver_match.view_name, kwargs=new_kwargs
             )
         else:
-            messages.warning(
-                self.request, _(
-                    'Unknown view keyword argument schema, unable to '
-                    'redirect.'
-                )
-            )
+            url = parsed_url.path
 
-        return '{}?{}'.format(url, urlencode(query_dict, doseq=True))
+        # Update just the path to retain the querystring in case there is
+        # transformation data.
+        parsed_url.path = url
+
+        return parsed_url.tostr()
 
 
 class DocumentPageNavigationFirst(DocumentPageNavigationBase):
-    def navigation_function(self):
+    def get_new_kwargs(self):
         document_page = self.get_object()
 
-        return document_page.siblings.first()
+        return {'document_page_pk': document_page.siblings.first().pk}
 
 
 class DocumentPageNavigationLast(DocumentPageNavigationBase):
-    def navigation_function(self):
+    def get_new_kwargs(self):
         document_page = self.get_object()
 
-        return document_page.siblings.last()
+        return {'document_page_pk': document_page.siblings.last().pk}
 
 
 class DocumentPageNavigationNext(DocumentPageNavigationBase):
-    def navigation_function(self):
+    def get_new_kwargs(self):
         document_page = self.get_object()
 
         try:
@@ -175,14 +178,16 @@ class DocumentPageNavigationNext(DocumentPageNavigationBase):
             )
         except DocumentPage.DoesNotExist:
             messages.warning(
-                self.request, _('There are no more pages in this document')
+                request=self.request, message=_(
+                    'There are no more pages in this document'
+                )
             )
         finally:
-            return document_page
+            return {'document_page_pk': document_page.pk}
 
 
 class DocumentPageNavigationPrevious(DocumentPageNavigationBase):
-    def navigation_function(self):
+    def get_new_kwargs(self):
         document_page = self.get_object()
 
         try:
@@ -191,12 +196,12 @@ class DocumentPageNavigationPrevious(DocumentPageNavigationBase):
             )
         except DocumentPage.DoesNotExist:
             messages.warning(
-                self.request, _(
+                request=self.request, message=_(
                     'You are already at the first page of this document'
                 )
             )
         finally:
-            return document_page
+            return {'document_page_pk': document_page.pk}
 
 
 class DocumentPageRotateLeftView(DocumentPageInteractiveTransformation):
@@ -253,7 +258,9 @@ class DocumentPageView(SimpleView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=DocumentPage, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=DocumentPage, pk=self.kwargs['document_page_pk']
+        )
 
 
 class DocumentPageViewResetView(RedirectView):

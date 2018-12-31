@@ -27,18 +27,18 @@ logger = logging.getLogger(__name__)
 class DocumentVersionListView(SingleObjectListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_document_version_view, user=request.user,
-            obj=self.get_document()
+            obj=self.get_document(),
+            permissions=permission_document_version_view, user=request.user
         )
 
-        self.get_document().add_as_recent_document_for_user(request.user)
+        self.get_document().add_as_recent_document_for_user(user=request.user)
 
         return super(
             DocumentVersionListView, self
         ).dispatch(request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_extra_context(self):
         return {
@@ -67,18 +67,22 @@ class DocumentVersionRevertView(ConfirmView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=DocumentVersion, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=DocumentVersion, pk=self.kwargs['document_version_pk']
+        )
 
     def view_action(self):
         try:
             self.get_object().revert(_user=self.request.user)
             messages.success(
-                self.request, _('Document version reverted successfully')
+                request=self.request, message=_(
+                    'Document version reverted successfully'
+                )
             )
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error reverting document version; %s') % exception
+                request=self.request,
+                message=_('Error reverting document version; %s') % exception
             )
 
 
@@ -86,6 +90,7 @@ class DocumentVersionDownloadFormView(DocumentDownloadFormView):
     form_class = DocumentVersionDownloadForm
     model = DocumentVersion
     multiple_download_view = None
+    pk_url_kwarg = 'document_version_pk'
     querystring_form_fields = (
         'compressed', 'zip_filename', 'preserve_extension'
     )
@@ -108,7 +113,7 @@ class DocumentVersionDownloadFormView(DocumentDownloadFormView):
         )
 
         if not id_list:
-            id_list = self.kwargs['pk']
+            id_list = self.kwargs['document_version_pk']
 
         return self.model.objects.filter(
             pk__in=id_list.split(',')
@@ -118,6 +123,7 @@ class DocumentVersionDownloadFormView(DocumentDownloadFormView):
 class DocumentVersionDownloadView(DocumentDownloadView):
     model = DocumentVersion
     object_permission = permission_document_download
+    pk_url_kwarg = 'document_version_pk'
 
     @staticmethod
     def get_item_file(item):

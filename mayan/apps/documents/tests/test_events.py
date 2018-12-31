@@ -29,7 +29,8 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
         Action.objects.all().delete()
 
         response = self.get(
-            'documents:document_download', args=(self.document.pk,)
+            viewname='documents:document_download',
+            kwargs={'document_pk': self.document.pk}
         )
 
         self.assertEqual(response.status_code, 403)
@@ -49,7 +50,8 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
         self.expected_content_type = 'image/png; charset=utf-8'
 
         response = self.get(
-            viewname='documents:document_download', args=(self.document.pk,),
+            viewname='documents:document_download',
+            kwargs={'document_pk': self.document.pk}
         )
 
         # Download the file to close the file descriptor
@@ -73,7 +75,8 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
         Action.objects.all().delete()
 
         response = self.get(
-            viewname='documents:document_preview', args=(self.document.pk,)
+            viewname='documents:document_preview',
+            kwargs={'document_pk': self.document.pk}
         )
 
         self.assertEqual(response.status_code, 403)
@@ -90,7 +93,8 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
             permission_document_view.stored_permission
         )
         self.get(
-            viewname='documents:document_preview', args=(self.document.pk,),
+            viewname='documents:document_preview',
+            kwargs={'document_pk': self.document.pk}
         )
 
         event = Action.objects.any(obj=self.document).first()

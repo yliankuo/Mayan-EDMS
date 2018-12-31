@@ -50,7 +50,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_type_delete(self):
         return self.post(
             viewname='documents:document_type_delete',
-            args=(self.document_type.pk,)
+            kwargs={'document_type_pk': self.document_type.pk}
         )
 
     def test_document_type_delete_view_no_permission(self):
@@ -69,7 +69,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_type_edit(self):
         return self.post(
             viewname='documents:document_type_edit',
-            args=(self.document_type.pk,),
+            kwargs={'document_type_pk': self.document_type.pk},
             data={
                 'label': TEST_DOCUMENT_TYPE_LABEL_EDITED,
                 'delete_time_period': DEFAULT_DELETE_PERIOD,
@@ -105,7 +105,7 @@ class DocumentTypeQuickLabelViewsTestCase(DocumentTypeQuickLabelTestMixin, Gener
     def _request_quick_label_create(self):
         return self.post(
             viewname='documents:document_type_filename_create',
-            args=(self.document_type.pk,),
+            kwargs={'document_type_pk': self.document_type.pk},
             data={
                 'filename': TEST_DOCUMENT_TYPE_QUICK_LABEL,
             }
@@ -132,7 +132,7 @@ class DocumentTypeQuickLabelViewsTestCase(DocumentTypeQuickLabelTestMixin, Gener
     def _request_quick_label_delete(self):
         return self.post(
             viewname='documents:document_type_filename_delete',
-            args=(self.document_type_filename.pk,),
+            kwargs={'filename_pk': self.document_type_filename.pk},
         )
 
     def test_document_type_quick_label_delete_no_access(self):
@@ -158,7 +158,7 @@ class DocumentTypeQuickLabelViewsTestCase(DocumentTypeQuickLabelTestMixin, Gener
     def _request_quick_label_edit(self):
         return self.post(
             viewname='documents:document_type_filename_edit',
-            args=(self.document_type_filename.pk,),
+            kwargs={'filename_pk': self.document_type_filename.pk},
             data={
                 'filename': TEST_DOCUMENT_TYPE_QUICK_LABEL_EDITED,
             }
@@ -193,7 +193,7 @@ class DocumentTypeQuickLabelViewsTestCase(DocumentTypeQuickLabelTestMixin, Gener
     def _request_quick_label_list_view(self):
         return self.get(
             viewname='documents:document_type_filename_list',
-            args=(self.document_type.pk,),
+            kwargs={'document_type_pk': self.document_type.pk},
         )
 
     def test_document_type_quick_label_list_no_access(self):

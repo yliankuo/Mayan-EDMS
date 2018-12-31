@@ -16,7 +16,8 @@ class DeletedDocumentTestCase(GenericDocumentViewTestCase):
 
     def _request_document_restore_view(self):
         return self.post(
-            viewname='documents:document_restore', args=(self.document.pk,)
+            viewname='documents:document_restore',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_restore_view_no_permission(self):
@@ -42,7 +43,8 @@ class DeletedDocumentTestCase(GenericDocumentViewTestCase):
 
     def _request_document_trash_view(self):
         return self.post(
-            viewname='documents:document_trash', args=(self.document.pk,)
+            viewname='documents:document_trash',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_trash_no_permissions(self):
@@ -63,7 +65,8 @@ class DeletedDocumentTestCase(GenericDocumentViewTestCase):
 
     def _request_document_delete_view(self):
         return self.post(
-            viewname='documents:document_delete', args=(self.document.pk,),
+            viewname='documents:document_delete',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_delete_no_permissions(self):

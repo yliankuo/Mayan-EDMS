@@ -135,7 +135,10 @@ class Document(models.Model):
             return False
 
     def get_absolute_url(self):
-        return reverse('documents:document_preview', args=(self.pk,))
+        return reverse(
+            viewname='documents:document_preview',
+            kwargs={'document_pk': self.pk}
+        )
 
     def get_api_image_url(self, *args, **kwargs):
         latest_version = self.latest_version

@@ -23,7 +23,7 @@ class DuplicatedDocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_duplicates_list_view(self):
         return self.get(
             viewname='documents:document_duplicates_list',
-            args=(self.document.pk,)
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_duplicated_document_list_no_permissions(self):

@@ -101,7 +101,10 @@ class DocumentPage(models.Model):
         return combined_cache_filename
 
     def get_absolute_url(self):
-        return reverse('documents:document_page_view', args=(self.pk,))
+        return reverse(
+            viewname='documents:document_page_view',
+            kwargs={'document_page_pk': self.pk}
+        )
 
     def get_api_image_url(self, *args, **kwargs):
         """
@@ -123,9 +126,11 @@ class DocumentPage(models.Model):
         final_url = furl()
         final_url.args = kwargs
         final_url.path = reverse(
-            'rest_api:documentpage-image', args=(
-                self.document.pk, self.document_version.pk, self.pk
-            )
+            viewname='rest_api:documentpage-image', kwargs={
+                'document_pk': self.document.pk,
+                'document_version_pk': self.document_version.pk,
+                'document_page_pk': self.pk
+            }
         )
         final_url.args['_hash'] = transformations_hash
         count = 1

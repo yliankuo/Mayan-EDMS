@@ -33,7 +33,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_properties_view(self):
         return self.get(
             viewname='documents:document_properties',
-            args=(self.document.pk,)
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_view_no_permissions(self):
@@ -69,7 +69,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_type_edit(self, document_type):
         return self.post(
             viewname='documents:document_document_type_edit',
-            args=(self.document.pk,),
+            kwargs={'document_pk': self.document.pk},
             data={'document_type': document_type.pk}
         )
 
@@ -177,7 +177,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_download_form_view(self):
         return self.get(
             viewname='documents:document_download_form',
-            args=(self.document.pk,),
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_download_form_view_no_permission(self):
@@ -199,7 +199,8 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_download_view(self):
         return self.get(
-            viewname='documents:document_download', args=(self.document.pk,)
+            viewname='documents:document_download',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_download_view_no_permission(self):
@@ -259,9 +260,9 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_version_download(self, data=None):
         data = data or {}
         return self.get(
-            viewname='documents:document_version_download', args=(
-                self.document.latest_version.pk,
-            ), data=data
+            viewname='documents:document_version_download', kwargs={
+                'document_version_pk': self.document.latest_version.pk,
+            }, data=data
         )
 
     def test_document_version_download_view_no_permission(self):
@@ -319,7 +320,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_update_page_count_view(self):
         return self.post(
             viewname='documents:document_update_page_count',
-            args=(self.document.pk,)
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_update_page_count_view_no_permission(self):
@@ -371,7 +372,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_clear_transformations_view(self):
         return self.post(
             viewname='documents:document_clear_transformations',
-            args=(self.document.pk,)
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_clear_transformations_view_no_permission(self):
@@ -505,9 +506,9 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_page_view(self, document_page):
         return self.get(
-            viewname='documents:document_page_view', args=(
-                document_page.pk,
-            )
+            viewname='documents:document_page_view', kwargs={
+                'document_page_pk': document_page.pk
+            }
         )
 
     def test_document_page_view_no_permissions(self):
@@ -530,9 +531,9 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_print_view(self):
         return self.get(
-            viewname='documents:document_print', args=(
-                self.document.pk,
-            ), data={
+            viewname='documents:document_print', kwargs={
+                'document_pk': self.document.pk
+            }, data={
                 'page_group': PAGE_RANGE_ALL
             }
         )
@@ -564,7 +565,8 @@ class DocumentsQuickLabelViewsTestCase(DocumentTypeQuickLabelTestMixin, GenericD
         data.update(extra_data or {})
 
         return self.post(
-            viewname='documents:document_edit', args=(self.document.pk,),
+            viewname='documents:document_edit',
+            kwargs={'document_pk': self.document.pk},
             data=data
         )
 

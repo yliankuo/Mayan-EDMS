@@ -66,7 +66,7 @@ class DocumentListView(SingleObjectListView):
             return super(DocumentListView, self).get_context_data(**kwargs)
         except Exception as exception:
             messages.error(
-                self.request, _(
+                request=self.request, message=_(
                     'Error retrieving document list: %(exception)s.'
                 ) % {
                     'exception': exception
@@ -105,10 +105,11 @@ class DeletedDocumentDeleteView(ConfirmView):
     extra_context = {
         'title': _('Delete the selected document?')
     }
+    pk_url_kwarg = 'document_pk'
 
     def object_action(self, instance):
         source_document = get_object_or_404(
-            Document.passthrough, pk=instance.pk
+            klass=Document.passthrough, pk=instance.pk
         )
 
         AccessControlList.objects.check_access(
@@ -121,10 +122,14 @@ class DeletedDocumentDeleteView(ConfirmView):
         )
 
     def view_action(self):
-        instance = get_object_or_404(DeletedDocument, pk=self.kwargs['pk'])
+        instance = get_object_or_404(
+            klass=DeletedDocument, pk=self.kwargs['document_pk']
+        )
         self.object_action(instance=instance)
         messages.success(
-            self.request, _('Document: %(document)s deleted.') % {
+            request=self.request, message=_(
+                'Document: %(document)s deleted.'
+            ) % {
                 'document': instance
             }
         )
@@ -144,8 +149,8 @@ class DeletedDocumentListView(DocumentListView):
 
     def get_document_queryset(self):
         return AccessControlList.objects.filter_by_access(
-            permission_document_view, self.request.user,
-            queryset=DeletedDocument.trash.all()
+            permission=permission_document_view,
+            queryset=DeletedDocument.trash.all(), user=self.request.user
         )
 
     def get_extra_context(self):
@@ -172,6 +177,7 @@ class DocumentDocumentTypeEditView(MultipleObjectFormActionView):
     form_class = DocumentTypeFilteredSelectForm
     model = Document
     object_permission = permission_document_properties_edit
+    pk_url_kwarg = 'document_pk'
     success_message = _(
         'Document type change request performed on %(count)d document'
     )
@@ -216,7 +222,7 @@ class DocumentDocumentTypeEditView(MultipleObjectFormActionView):
         )
 
         messages.success(
-            self.request, _(
+            request=self.request, message=_(
                 'Document type for "%s" changed successfully.'
             ) % instance
         )
@@ -225,8 +231,8 @@ class DocumentDocumentTypeEditView(MultipleObjectFormActionView):
 class DocumentDuplicatesListView(DocumentListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=self.request.user,
-            obj=self.get_document()
+            obj=self.get_document(), permissions=permission_document_view,
+            user=self.request.user
         )
 
         return super(
@@ -234,7 +240,7 @@ class DocumentDuplicatesListView(DocumentListView):
         ).dispatch(request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_extra_context(self):
         context = super(DocumentDuplicatesListView, self).get_extra_context()
@@ -262,6 +268,7 @@ class DocumentEditView(SingleObjectEditView):
     form_class = DocumentForm
     model = Document
     object_permission = permission_document_properties_edit
+    pk_url_kwarg = 'document_pk'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(
@@ -283,7 +290,8 @@ class DocumentEditView(SingleObjectEditView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'documents:document_properties', args=(self.get_object().pk,)
+            viewname='documents:document_properties',
+            kwargs={'document_pk': self.get_object().pk}
         )
 
 
@@ -291,6 +299,7 @@ class DocumentPreviewView(SingleObjectDetailView):
     form_class = DocumentPreviewForm
     model = Document
     object_permission = permission_document_view
+    pk_url_kwarg = 'document_pk'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(
@@ -322,19 +331,23 @@ class DocumentRestoreView(ConfirmView):
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_restore, user=self.request.user,
-            obj=source_document
+            obj=source_document, permissions=permission_document_restore,
+            user=self.request.user
         )
 
         instance.restore()
 
     def view_action(self):
-        instance = get_object_or_404(klass=DeletedDocument, pk=self.kwargs['pk'])
+        instance = get_object_or_404(
+            klass=DeletedDocument, pk=self.kwargs['document_pk']
+        )
 
         self.object_action(instance=instance)
 
         messages.success(
-            self.request, _('Document: %(document)s restored.') % {
+            request=self.request, message=_(
+                'Document: %(document)s restored.'
+            ) % {
                 'document': instance
             }
         )
@@ -357,15 +370,15 @@ class DocumentTrashView(ConfirmView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_post_action_redirect(self):
-        return reverse('documents:document_list_recent_access')
+        return reverse(viewname='documents:document_list_recent_access')
 
     def object_action(self, instance):
         AccessControlList.objects.check_access(
-            permissions=permission_document_trash, user=self.request.user,
-            obj=instance
+            obj=instance, permissions=permission_document_trash,
+            user=self.request.user
         )
 
         instance.delete()
@@ -376,7 +389,9 @@ class DocumentTrashView(ConfirmView):
         self.object_action(instance=instance)
 
         messages.success(
-            self.request, _('Document: %(document)s moved to trash successfully.') % {
+            request=self.request, message=_(
+                'Document: %(document)s moved to trash successfully.'
+            ) % {
                 'document': instance
             }
         )
@@ -397,6 +412,7 @@ class DocumentView(SingleObjectDetailView):
     form_class = DocumentPropertiesForm
     model = Document
     object_permission = permission_document_view
+    pk_url_kwarg = 'document_pk'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(DocumentView, self).dispatch(request, *args, **kwargs)
@@ -417,7 +433,7 @@ class EmptyTrashCanView(ConfirmView):
     }
     view_permission = permission_empty_trash
     action_cancel_redirect = post_action_redirect = reverse_lazy(
-        'documents:document_list_deleted'
+        viewname='documents:document_list_deleted'
     )
 
     def view_action(self):
@@ -426,7 +442,9 @@ class EmptyTrashCanView(ConfirmView):
                 kwargs={'deleted_document_id': deleted_document.pk}
             )
 
-        messages.success(self.request, _('Trash emptied successfully'))
+        messages.success(
+            request=self.request, message=_('Trash emptied successfully')
+        )
 
 
 class DocumentDownloadFormView(FormView):
@@ -458,7 +476,8 @@ class DocumentDownloadFormView(FormView):
             url = reverse(self.multiple_download_view)
         else:
             url = reverse(
-                self.single_download_view, args=(self.queryset.first().pk,)
+                viewname=self.single_download_view,
+                kwargs={'document_pk': self.queryset.first().pk}
             )
 
         return HttpResponseRedirect('{}?{}'.format(url, querystring))
@@ -469,7 +488,7 @@ class DocumentDownloadFormView(FormView):
         )
 
         if not id_list:
-            id_list = self.kwargs['pk']
+            id_list = self.kwargs['document_pk']
 
         return self.model.objects.filter(
             pk__in=id_list.split(',')
@@ -480,10 +499,10 @@ class DocumentDownloadFormView(FormView):
             {
                 'name': 'appearance/generic_list_items_subtemplate.html',
                 'context': {
-                    'object_list': self.queryset,
                     'hide_link': True,
                     'hide_links': True,
                     'hide_multi_item_actions': True,
+                    'object_list': self.queryset
                 }
             }
         ]
@@ -507,8 +526,8 @@ class DocumentDownloadFormView(FormView):
 
     def get_queryset(self):
         return AccessControlList.objects.filter_by_access(
-            permission_document_download, self.request.user,
-            queryset=self.get_document_queryset()
+            permission=permission_document_download,
+            queryset=self.get_document_queryset(), user=self.request.user
         )
 
 
@@ -516,6 +535,7 @@ class DocumentDownloadView(SingleObjectDownloadView):
     model = Document
     # Set to None to disable the .get_object call
     object_permission = None
+    pk_url_kwarg = 'document_pk'
 
     @staticmethod
     def commit_event(item, request):
@@ -541,7 +561,7 @@ class DocumentDownloadView(SingleObjectDownloadView):
         )
 
         if not id_list:
-            id_list = self.kwargs['pk']
+            id_list = self.kwargs[self.pk_url_kwarg]
 
         queryset = self.model.objects.filter(pk__in=id_list.split(','))
 
@@ -594,6 +614,8 @@ class DocumentDownloadView(SingleObjectDownloadView):
 class DocumentUpdatePageCountView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_document_tools
+    pk_url_kwarg = 'document_pk'
+
     success_message = _(
         '%(count)d document queued for page count recalculation'
     )
@@ -632,7 +654,7 @@ class DocumentUpdatePageCountView(MultipleObjectConfirmActionView):
             )
         else:
             messages.error(
-                self.request, _(
+                request=self.request, message=_(
                     'Document "%(document)s" is empty. Upload at least one '
                     'document version before attempting to detect the '
                     'page count.'
@@ -645,6 +667,7 @@ class DocumentUpdatePageCountView(MultipleObjectConfirmActionView):
 class DocumentTransformationsClearView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_transformation_delete
+    pk_url_kwarg = 'document_pk'
     success_message = _(
         'Transformation clear request processed for %(count)d document'
     )
@@ -682,7 +705,7 @@ class DocumentTransformationsClearView(MultipleObjectConfirmActionView):
                 Transformation.objects.get_for_model(page).delete()
         except Exception as exception:
             messages.error(
-                self.request, _(
+                request=self.request, message=_(
                     'Error deleting the page transformations for '
                     'document: %(document)s; %(error)s.'
                 ) % {
@@ -710,7 +733,7 @@ class DocumentTransformationsCloneView(FormView):
             )
         except Exception as exception:
             messages.error(
-                self.request, _(
+                request=self.request, message=_(
                     'Error deleting the page transformations for '
                     'document: %(document)s; %(error)s.'
                 ) % {
@@ -719,7 +742,9 @@ class DocumentTransformationsCloneView(FormView):
             )
         else:
             messages.success(
-                self.request, _('Transformations cloned successfully.')
+                request=self.request, message=_(
+                    'Transformations cloned successfully.'
+                )
             )
 
         return super(DocumentTransformationsCloneView, self).form_valid(form=form)
@@ -743,14 +768,16 @@ class DocumentTransformationsCloneView(FormView):
         return context
 
     def get_object(self):
-        instance = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
-
-        AccessControlList.objects.check_access(
-            permissions=permission_transformation_edit,
-            user=self.request.user, obj=instance
+        instance = get_object_or_404(
+            klass=Document, pk=self.kwargs['document_pk']
         )
 
-        instance.add_as_recent_document_for_user(self.request.user)
+        AccessControlList.objects.check_access(
+            obj=instance, permissions=permission_transformation_edit,
+            user=self.request.user
+        )
+
+        instance.add_as_recent_document_for_user(user=self.request.user)
 
         return instance
 
@@ -761,11 +788,11 @@ class DocumentPrint(FormView):
     def dispatch(self, request, *args, **kwargs):
         instance = self.get_object()
         AccessControlList.objects.check_access(
-            permissions=permission_document_print, user=self.request.user,
-            obj=instance
+            obj=instance, permissions=permission_document_print,
+            user=self.request.user
         )
 
-        instance.add_as_recent_document_for_user(self.request.user)
+        instance.add_as_recent_document_for_user(user=self.request.user)
 
         self.page_group = self.request.GET.get('page_group')
         self.page_range = self.request.GET.get('page_range')
@@ -792,8 +819,8 @@ class DocumentPrint(FormView):
                 {
                     'appearance_type': 'plain',
                     'pages': pages,
-                    'width': setting_print_width.value,
                     'height': setting_print_height.value,
+                    'width': setting_print_width.value
                 }
             )
 
@@ -804,7 +831,8 @@ class DocumentPrint(FormView):
 
         context = {
             'form_action': reverse(
-                'documents:document_print', args=(instance.pk,)
+                viewname='documents:document_print',
+                kwargs={'document_pk': instance.pk}
             ),
             'object': instance,
             'submit_label': _('Submit'),
@@ -816,7 +844,7 @@ class DocumentPrint(FormView):
         return context
 
     def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_template_names(self):
         if self.page_group or self.page_range:
