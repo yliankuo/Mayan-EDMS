@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.http import HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
@@ -349,6 +349,7 @@ class SimpleView(ViewPermissionCheckMixin, ExtraContextMixin, TemplateView):
 
 class SingleObjectCreateView(ObjectNameMixin, ViewPermissionCheckMixin, ExtraContextMixin, RedirectionMixin, FormExtraKwargsMixin, CreateView):
     template_name = 'appearance/generic_form.html'
+    error_message_duplicate = None
 
     def form_valid(self, form):
         # This overrides the original Django form_valid method
@@ -363,6 +364,24 @@ class SingleObjectCreateView(ObjectNameMixin, ViewPermissionCheckMixin, ExtraCon
             save_extra_data = self.get_save_extra_data()
         else:
             save_extra_data = {}
+
+        try:
+            self.object.validate_unique()
+        except ValidationError as exception:
+            context = self.get_context_data()
+
+            error_message = self.get_error_message_duplicate() or _(
+                'Duplicate data error: %(error)s'
+            ) % {
+                'error': '\n'.join(exception.messages)
+            }
+
+            messages.error(
+                request=self.request, message=error_message
+            )
+            return super(
+                SingleObjectCreateView, self
+            ).form_invalid(form=form)
 
         try:
             self.object.save(**save_extra_data)
@@ -390,6 +409,9 @@ class SingleObjectCreateView(ObjectNameMixin, ViewPermissionCheckMixin, ExtraCon
             )
 
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_error_message_duplicate(self):
+        return self.error_message_duplicate
 
 
 class SingleObjectDynamicFormCreateView(DynamicFormViewMixin, SingleObjectCreateView):
@@ -550,17 +572,17 @@ class SingleObjectListView(ListModeMixin, PaginationMixin, ViewPermissionCheckMi
         return setting_paginate_by.value
 
     def get_queryset(self):
-        self.field_name = self.get_sort_field()
-        if self.get_sort_order() == TEXT_SORT_ORDER_CHOICE_ASCENDING:
-            sort_order = ''
-        else:
-            sort_order = '-'
-
         try:
             queryset = super(SingleObjectListView, self).get_queryset()
         except ImproperlyConfigured:
             self.queryset = self.get_object_list()
             queryset = super(SingleObjectListView, self).get_queryset()
+
+        self.field_name = self.get_sort_field()
+        if self.get_sort_order() == TEXT_SORT_ORDER_CHOICE_ASCENDING:
+            sort_order = ''
+        else:
+            sort_order = '-'
 
         if self.field_name:
             queryset = queryset.order_by(
