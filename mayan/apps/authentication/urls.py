@@ -11,32 +11,33 @@ from .views import (
 )
 
 urlpatterns = [
-    url(r'^login/$', login_view, name='login_view'),
+    url(regex=r'^login/$', name='login_view', view=login_view),
     url(
-        r'^password/change/done/$', password_change_done,
-        name='password_change_done'
+        regex=r'^logout/$', kwargs={'next_page': settings.LOGIN_REDIRECT_URL},
+        name='logout_view', view=logout
     ),
     url(
-        r'^password/change/$', password_change_view,
-        name='password_change_view'
+        regex=r'^password/change/$', name='password_change_view',
+        view=password_change_view
     ),
     url(
-        r'^logout/$', logout, {'next_page': settings.LOGIN_REDIRECT_URL},
-        name='logout_view'
+        regex=r'^password/change/done/$', name='password_change_done',
+        view=password_change_done
     ),
     url(
-        r'^password/reset/$', password_reset_view, name='password_reset_view'
+        regex=r'^password/reset/$', name='password_reset_view',
+        view=password_reset_view
     ),
     url(
-        r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        password_reset_confirm_view, name='password_reset_confirm_view'
+        regex=r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        name='password_reset_confirm_view', view=password_reset_confirm_view
     ),
     url(
-        r'^password/reset/complete/$', password_reset_complete_view,
-        name='password_reset_complete_view'
+        regex=r'^password/reset/complete/$',
+        name='password_reset_complete_view', view=password_reset_complete_view
     ),
     url(
-        r'^password/reset/done/$', password_reset_done_view,
-        name='password_reset_done_view'
+        regex=r'^password/reset/done/$', name='password_reset_done_view',
+        view=password_reset_done_view
     ),
 ]

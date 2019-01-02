@@ -91,7 +91,7 @@ def password_change_view(request):
     return password_change(
         request, extra_context=extra_context,
         template_name='appearance/generic_form.html',
-        post_change_redirect=reverse('authentication:password_change_done'),
+        post_change_redirect=reverse(viewname='authentication:password_change_done'),
     )
 
 
@@ -112,7 +112,7 @@ def password_reset_complete_view(request):
     }
 
     return password_reset_complete(
-        request, extra_context=extra_context,
+        request=request, extra_context=extra_context,
         template_name='authentication/password_reset_complete.html'
     )
 
@@ -124,7 +124,7 @@ def password_reset_confirm_view(request, uidb64=None, token=None):
     }
 
     return password_reset_confirm(
-        request, extra_context=extra_context,
+        request=request, extra_context=extra_context,
         template_name='authentication/password_reset_confirm.html',
         post_reset_redirect=reverse(
             'authentication:password_reset_complete_view'
@@ -139,7 +139,7 @@ def password_reset_done_view(request):
     }
 
     return password_reset_done(
-        request, extra_context=extra_context,
+        request=request, extra_context=extra_context,
         template_name='authentication/password_reset_done.html'
     )
 
@@ -151,7 +151,7 @@ def password_reset_view(request):
     }
 
     return password_reset(
-        request, extra_context=extra_context,
+        request=request, extra_context=extra_context,
         email_template_name='authentication/password_reset_email.html',
         extra_email_context={
             'project_title': setting_project_title.value,
