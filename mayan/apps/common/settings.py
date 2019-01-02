@@ -11,7 +11,7 @@ from mayan.apps.smart_settings import Namespace
 
 from .literals import DEFAULT_COMMON_HOME_VIEW
 
-namespace = Namespace(name='common', label=_('Common'))
+namespace = Namespace(label=_('Common'), name='common')
 
 setting_auto_logging = namespace.add_setting(
     global_name='COMMON_AUTO_LOGGING',
@@ -86,7 +86,7 @@ setting_temporary_directory = namespace.add_setting(
     is_path=True
 )
 
-namespace = Namespace(name='django', label=_('Django'))
+namespace = Namespace(label=_('Django'), name='django')
 
 setting_django_allowed_hosts = namespace.add_setting(
     global_name='ALLOWED_HOSTS', default=settings.ALLOWED_HOSTS,
@@ -402,7 +402,7 @@ setting_django_wsgi_application = namespace.add_setting(
     ),
 )
 
-namespace = Namespace(name='celery', label=_('Celery'))
+namespace = Namespace(label=_('Celery'), name='celery')
 
 setting_celery_always_eager = namespace.add_setting(
     global_name='CELERY_TASK_ALWAYS_EAGER',

@@ -46,7 +46,7 @@ class DeleteExtraDataMixin(object):
         else:
             self.object.delete()
 
-        return HttpResponseRedirect(success_url)
+        return HttpResponseRedirect(redirect_to=success_url)
 
 
 class DynamicFormViewMixin(object):
@@ -179,9 +179,9 @@ class MultipleInstanceActionMixin(object):
 
     def get_success_message(self, count):
         return ungettext(
-            self.success_message,
-            self.success_message_plural,
-            count
+            singular=self.success_message,
+            plural=self.success_message_plural,
+            number=count
         ) % {
             'count': count,
         }
@@ -197,11 +197,11 @@ class MultipleInstanceActionMixin(object):
                 count += 1
 
         messages.success(
-            self.request,
-            self.get_success_message(count=count)
+            request=self.request,
+            message=self.get_success_message(count=count)
         )
 
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(redirect_to=self.get_success_url())
 
 
 class MultipleObjectMixin(object):
@@ -278,9 +278,9 @@ class ObjectActionMixin(object):
 
     def get_success_message(self, count):
         return ungettext(
-            self.success_message,
-            self.success_message_plural,
-            count
+            singular=self.success_message,
+            plural=self.success_message_plural,
+            number=count
         ) % {
             'count': count,
         }
@@ -299,14 +299,15 @@ class ObjectActionMixin(object):
                 pass
             except ActionError:
                 messages.error(
-                    self.request, self.error_message % {'instance': instance}
+                    request=self.request,
+                    message=self.error_message % {'instance': instance}
                 )
             else:
                 self.action_count += 1
 
         messages.success(
-            self.request,
-            self.get_success_message(count=self.action_count)
+            request=self.request,
+            message=self.get_success_message(count=self.action_count)
         )
 
 
@@ -321,17 +322,20 @@ class ObjectListPermissionFilterMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if self.access_object_retrieve_method and self.object_permission:
             AccessControlList.objects.check_access(
-                permissions=(self.object_permission,), user=request.user,
-                obj=getattr(self, self.access_object_retrieve_method)()
+                obj=getattr(self, self.access_object_retrieve_method)(),
+                permissions=(self.object_permission,), user=request.user
             )
-        return super(ObjectListPermissionFilterMixin, self).dispatch(request, *args, **kwargs)
+        return super(ObjectListPermissionFilterMixin, self).dispatch(
+            request, *args, **kwargs
+        )
 
     def get_queryset(self):
         queryset = super(ObjectListPermissionFilterMixin, self).get_queryset()
 
         if not self.access_object_retrieve_method and self.object_permission:
             return AccessControlList.objects.filter_by_access(
-                self.object_permission, self.request.user, queryset=queryset
+                obj=self.object_permission, queryset=queryset,
+                user=self.request.user
             )
         else:
             return queryset
@@ -368,9 +372,10 @@ class ObjectPermissionCheckMixin(object):
         if self.object_permission:
             try:
                 AccessControlList.objects.check_access(
-                    permissions=self.object_permission, user=request.user,
                     obj=self.get_permission_object(),
-                    related=getattr(self, 'object_permission_related', None)
+                    permissions=self.object_permission,
+                    related=getattr(self, 'object_permission_related', None),
+                    user=request.user
                 )
             except PermissionDenied:
                 if self.object_permission_raise_404:
@@ -437,8 +442,8 @@ class ViewPermissionCheckMixin(object):
     def dispatch(self, request, *args, **kwargs):
         if self.view_permission:
             Permission.check_permissions(
-                requester=self.request.user,
-                permissions=(self.view_permission,)
+                permissions=(self.view_permission,),
+                requester=self.request.user
             )
 
         return super(

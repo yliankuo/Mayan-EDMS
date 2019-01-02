@@ -37,9 +37,7 @@ class BaseTestCase(DatabaseConversionMixin, ACLBaseTestMixin, ContentTypeCheckMi
 
 
 class GenericViewTestCase(BaseTestCase):
-    def setUp(self):
-        super(GenericViewTestCase, self).setUp()
-        self.has_test_view = False
+    has_test_view = False
 
     def tearDown(self):
         from mayan.urls import urlpatterns
@@ -87,13 +85,10 @@ class GenericViewTestCase(BaseTestCase):
             path=path, data=data, follow=follow
         )
 
-    def login(self, username, password):
-        logged_in = self.client.login(username=username, password=password)
+    def login(self, *args, **kwargs):
+        logged_in = self.client.login(*args, **kwargs)
 
-        user = get_user_model().objects.get(username=username)
-
-        self.assertTrue(logged_in)
-        self.assertTrue(user.is_authenticated)
+        return logged_in
 
     def login_user(self):
         self.login(username=TEST_USER_USERNAME, password=TEST_USER_PASSWORD)

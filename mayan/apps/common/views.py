@@ -15,6 +15,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView, TemplateView
 
 from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import (
+    ContentTypeViewMixin, ExternalObjectViewMixin
+)
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
 from .forms import (
@@ -171,7 +174,9 @@ class ObjectErrorLogEntryListClearView(ConfirmView):
         )
 
 
-class ObjectErrorLogEntryListView(SingleObjectListView):
+class ObjectErrorLogEntryListView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectListView):
+    #TODO: Update for MERC 6. Return 404.
+    """
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
             obj=self.get_object(), permissions=permission_error_log_view,
@@ -181,6 +186,7 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
         return super(ObjectErrorLogEntryListView, self).dispatch(
             request, *args, **kwargs
         )
+    """
 
     def get_extra_context(self):
         return {
@@ -202,6 +208,7 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
             'title': _('Error log entries for: %s' % self.get_object()),
         }
 
+    """
     def get_object(self):
         content_type = get_object_or_404(
             klass=ContentType, app_label=self.kwargs['app_label'],
@@ -211,9 +218,9 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
         return get_object_or_404(
             klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
-
+    """
     def get_object_list(self):
-        return self.get_object().error_logs.all()
+        return self.get_external_object().error_logs.all()
 
 
 class PackagesLicensesView(SimpleView):

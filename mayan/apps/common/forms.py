@@ -9,6 +9,8 @@ from django.db import models
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.acls.models import AccessControlList
+
 from .classes import Package
 from .models import UserLocaleProfile
 from .utils import resolve_attribute
@@ -134,12 +136,20 @@ class FilteredSelectionForm(forms.Form):
     Form to select the from a list of choice filtered by access. Can be
     configure to allow single or multiple selection.
     """
+    _field_name = None
+    _label = None
+    _help_text = None
+    _permission = None
+    _queryset = None
+    _widget_class = None
+    _widget_attributes = None
+
     def __init__(self, *args, **kwargs):
-        field_name = kwargs.pop('field_name', None)
-        label = kwargs.pop('label', None)
-        help_text = kwargs.pop('help_text', None)
-        permission = kwargs.pop('permission', None)
-        queryset = kwargs.pop('queryset', None)
+        field_name = self._field_name or kwargs.pop('field_name', None)
+        label = self._label or kwargs.pop('label', None)
+        help_text = self._help_text or kwargs.pop('help_text', None)
+        permission = self._permission or kwargs.pop('permission', None)
+        queryset = self.get_queryset() or kwargs.pop('queryset', None)
 
         if queryset is None:
             model = kwargs.pop('model', None)
@@ -150,12 +160,19 @@ class FilteredSelectionForm(forms.Form):
 
             queryset = model.objects.all()
 
-        user = kwargs.pop('user', None)
-        widget_class = kwargs.pop('widget_class', None)
-        widget_attributes = kwargs.pop('widget_attributes', {'size': '10'})
+        user = self.get_user() or kwargs.pop('user', None)
+        widget_class = self._widget_class or kwargs.pop('widget_class', None)
+        widget_attributes = self._widget_attributes or kwargs.pop(
+            'widget_attributes', {'size': '10'}
+        )
 
         if not widget_class:
-            if kwargs.pop('allow_multiple', False):
+            if self._allow_multiple is not None:
+                allow_multiple = self._allow_multiple
+            else:
+                allow_multiple = self.kwargs.pop('allow_multiple', False)
+
+            if allow_multiple:
                 extra_kwargs = {}
                 field_class = forms.ModelMultipleChoiceField
                 widget_class = forms.widgets.SelectMultiple
@@ -176,6 +193,12 @@ class FilteredSelectionForm(forms.Form):
             queryset=queryset, required=True,
             widget=widget_class(attrs=widget_attributes), **extra_kwargs
         )
+
+    def get_queryset(self):
+        return self._queryset
+
+    def get_user(self):
+        return None
 
 
 class LicenseForm(FileDisplayForm):

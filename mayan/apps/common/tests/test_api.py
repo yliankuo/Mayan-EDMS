@@ -12,7 +12,7 @@ TEST_TEMPLATE_RESULT = '<div'
 
 class CommonAPITestCase(BaseAPITestCase):
     def test_content_type_list_view(self):
-        response = self.client.get(reverse('rest_api:content-type-list'))
+        response = self.client.get(reverse(viewname='rest_api:content-type-list'))
         self.assertEqual(response.status_code, 200)
 
     @override_settings(LANGUAGE_CODE='de')

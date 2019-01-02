@@ -301,7 +301,9 @@ class Template(object):
         self.__class__._registry[name] = self
 
     def get_absolute_url(self):
-        return reverse('rest_api:template-detail', args=(self.name,))
+        return reverse(
+            viewname='rest_api:template-detail', kwargs={'template_pk': self.name}
+        )
 
     def render(self, request):
         context = {
