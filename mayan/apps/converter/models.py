@@ -31,7 +31,9 @@ class Transformation(models.Model):
     """
     content_type = models.ForeignKey(on_delete=models.CASCADE, to=ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey(
+        ct_field='content_type', fk_field='object_id'
+    )
     order = models.PositiveIntegerField(
         blank=True, db_index=True, default=0, help_text=_(
             'Order in which the transformations will be executed. If left '

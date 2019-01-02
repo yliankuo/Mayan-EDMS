@@ -16,10 +16,10 @@ class TransformationForm(forms.ModelForm):
 
     def clean(self):
         try:
-            yaml.safe_load(self.cleaned_data['arguments'])
+            yaml.safe_load(stream=self.cleaned_data['arguments'])
         except yaml.YAMLError:
             raise ValidationError(
-                _(
+                message=_(
                     '"%s" not a valid entry.'
                 ) % self.cleaned_data['arguments']
             )

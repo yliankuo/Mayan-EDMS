@@ -34,18 +34,6 @@ class BaseTransformation(object):
         return result.hexdigest()
 
     @classmethod
-    def register(cls, transformation):
-        cls._registry[transformation.name] = transformation
-
-    @classmethod
-    def get_transformation_choices(cls):
-        return sorted(
-            [
-                (name, klass.get_label()) for name, klass in cls._registry.items()
-            ]
-        )
-
-    @classmethod
     def get(cls, name):
         return cls._registry[name]
 
@@ -57,6 +45,19 @@ class BaseTransformation(object):
             )
         else:
             return cls.label
+
+    @classmethod
+    def get_transformation_choices(cls):
+        return sorted(
+            [
+                (name, klass.get_label()) for name, klass in cls._registry.items()
+            ]
+        )
+
+    @classmethod
+    def register(cls, transformation):
+        cls._registry[transformation.name] = transformation
+
 
     def __init__(self, **kwargs):
         self.kwargs = {}

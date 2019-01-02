@@ -23,16 +23,14 @@ class ConverterApp(MayanAppConfig):
     def ready(self):
         super(ConverterApp, self).ready()
 
-        Transformation = self.get_model('Transformation')
+        Transformation = self.get_model(model_name='Transformation')
 
-        SourceColumn(source=Transformation, label=_('Order'), attribute='order')
+        SourceColumn(attribute='order', source=Transformation)
         SourceColumn(
             source=Transformation, label=_('Transformation'),
             func=lambda context: force_text(context['object'])
         )
-        SourceColumn(
-            source=Transformation, label=_('Arguments'), attribute='arguments'
-        )
+        SourceColumn(attribute='arguments', source=Transformation)
 
         menu_object.bind_links(
             links=(link_transformation_edit, link_transformation_delete),

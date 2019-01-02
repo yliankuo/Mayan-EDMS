@@ -80,7 +80,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def _transformation_delete_view(self):
         return self.post(
             viewname='converter:transformation_delete', kwargs={
-                'pk': self.transformation.pk
+                'transformation_pk': self.transformation.pk
             }
         )
 
@@ -104,7 +104,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def _transformation_edit_view(self):
         return self.post(
             viewname='converter:transformation_edit', kwargs={
-                'pk': self.transformation.pk
+                'transformation_pk': self.transformation.pk
             }, data={
                 'arguments': TEST_TRANSFORMATION_ARGUMENT_EDITED,
                 'name': self.transformation.name

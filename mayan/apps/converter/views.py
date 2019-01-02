@@ -29,15 +29,16 @@ logger = logging.getLogger(__name__)
 
 class TransformationDeleteView(SingleObjectDeleteView):
     model = Transformation
+    pk_url_kwarg = 'transformation_pk'
 
     def dispatch(self, request, *args, **kwargs):
         self.transformation = get_object_or_404(
-            klass=Transformation, pk=self.kwargs['pk']
+            klass=Transformation, pk=self.kwargs['transformation_pk']
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_delete, user=request.user,
-            obj=self.transformation.content_object
+            permissions=permission_transformation_delete,
+            obj=self.transformation.content_object, user=request.user
         )
 
         return super(TransformationDeleteView, self).dispatch(
@@ -46,11 +47,11 @@ class TransformationDeleteView(SingleObjectDeleteView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'converter:transformation_list', args=(
-                self.transformation.content_type.app_label,
-                self.transformation.content_type.model,
-                self.transformation.object_id
-            )
+            viewname='converter:transformation_list', kwargs={
+                'app_label': self.transformation.content_type.app_label,
+                'model': self.transformation.content_type.model,
+                'object_id': self.transformation.object_id
+            }
         )
 
     def get_extra_context(self):
@@ -58,11 +59,11 @@ class TransformationDeleteView(SingleObjectDeleteView):
             'content_object': self.transformation.content_object,
             'navigation_object_list': ('content_object', 'transformation'),
             'previous': reverse(
-                'converter:transformation_list', args=(
-                    self.transformation.content_type.app_label,
-                    self.transformation.content_type.model,
-                    self.transformation.object_id
-                )
+                viewname='converter:transformation_list', kwargs={
+                    'app_label': self.transformation.content_type.app_label,
+                    'model': self.transformation.content_type.model,
+                    'object_id': self.transformation.object_id
+                }
             ),
             'title': _(
                 'Delete transformation "%(transformation)s" for: '
@@ -92,8 +93,8 @@ class TransformationCreateView(SingleObjectCreateView):
             raise Http404
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_create, user=request.user,
-            obj=self.content_object
+            permissions=permission_transformation_create,
+            obj=self.content_object, user=request.user
         )
 
         return super(TransformationCreateView, self).dispatch(
@@ -108,9 +109,11 @@ class TransformationCreateView(SingleObjectCreateView):
             instance.save()
         except Exception as exception:
             logger.debug('Invalid form, exception: %s', exception)
-            return super(TransformationCreateView, self).form_invalid(form)
+            return super(TransformationCreateView, self).form_invalid(
+                form=form
+            )
         else:
-            return super(TransformationCreateView, self).form_valid(form)
+            return super(TransformationCreateView, self).form_valid(form=form)
 
     def get_extra_context(self):
         return {
@@ -123,32 +126,34 @@ class TransformationCreateView(SingleObjectCreateView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'converter:transformation_list', args=(
-                self.kwargs['app_label'], self.kwargs['model'],
-                self.kwargs['object_id']
-            )
+            viewname='converter:transformation_list', kwargs={
+                'app_label': self.kwargs['app_label'],
+                'model': self.kwargs['model'],
+                'object_id': self.kwargs['object_id']
+            }
         )
 
     def get_queryset(self):
-        return Transformation.objects.get_for_model(self.content_object)
+        return Transformation.objects.get_for_model(obj=self.content_object)
 
 
 class TransformationEditView(SingleObjectEditView):
     form_class = TransformationForm
     model = Transformation
+    pk_url_kwarg = 'transformation_pk'
 
     def dispatch(self, request, *args, **kwargs):
         self.transformation = get_object_or_404(
-            klass=Transformation, pk=self.kwargs['pk']
+            klass=Transformation, pk=self.kwargs['transformation_pk']
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_edit, user=request.user,
-            obj=self.transformation.content_object
+            obj=self.transformation.content_object,
+            permissions=permission_transformation_edit, user=request.user
         )
 
         return super(TransformationEditView, self).dispatch(
-            request, *args, **kwargs
+            request=request, *args, **kwargs
         )
 
     def form_valid(self, form):
@@ -158,9 +163,9 @@ class TransformationEditView(SingleObjectEditView):
             instance.save()
         except Exception as exception:
             logger.debug('Invalid form, exception: %s', exception)
-            return super(TransformationEditView, self).form_invalid(form)
+            return super(TransformationEditView, self).form_invalid(form=form)
         else:
-            return super(TransformationEditView, self).form_valid(form)
+            return super(TransformationEditView, self).form_valid(form=form)
 
     def get_extra_context(self):
         return {
@@ -177,11 +182,11 @@ class TransformationEditView(SingleObjectEditView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'converter:transformation_list', args=(
-                self.transformation.content_type.app_label,
-                self.transformation.content_type.model,
-                self.transformation.object_id
-            )
+            viewname='converter:transformation_list', kwargs={
+                'app_label': self.transformation.content_type.app_label,
+                'model': self.transformation.content_type.model,
+                'object_id': self.transformation.object_id
+            }
         )
 
 
@@ -200,12 +205,13 @@ class TransformationListView(SingleObjectListView):
             raise Http404
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_view, user=request.user,
-            obj=self.content_object
+            obj=self.content_object,
+            permissions=permission_transformation_view,
+            user=request.user
         )
 
         return super(TransformationListView, self).dispatch(
-            request, *args, **kwargs
+            request=request, *args, **kwargs
         )
 
     def get_extra_context(self):
@@ -230,4 +236,4 @@ class TransformationListView(SingleObjectListView):
         }
 
     def get_object_list(self):
-        return Transformation.objects.get_for_model(self.content_object)
+        return Transformation.objects.get_for_model(obj=self.content_object)
