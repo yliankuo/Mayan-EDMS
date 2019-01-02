@@ -65,8 +65,8 @@ class Index(models.Model):
     def get_absolute_url(self):
         try:
             return reverse(
-                'indexing:index_instance_node_view',
-                args=(self.instance_root.pk,)
+                viewname='indexing:index_instance_node_view',
+                kwargs={'index_instance_node_pk': self.instance_root.pk}
             )
         except IndexInstanceNode.DoesNotExist:
             return '#'
@@ -190,24 +190,19 @@ class IndexTemplateNode(MPTTModel):
             'Enter a template to render. '
             'Use Django\'s default templating language '
             '(https://docs.djangoproject.com/en/1.11/ref/templates/builtins/)'
-        ),
-        verbose_name=_('Indexing expression')
+        ), verbose_name=_('Indexing expression')
     )
     enabled = models.BooleanField(
-        default=True,
-        help_text=_(
+        default=True, help_text=_(
             'Causes this node to be visible and updated when document data '
             'changes.'
-        ),
-        verbose_name=_('Enabled')
+        ), verbose_name=_('Enabled')
     )
     link_documents = models.BooleanField(
-        default=False,
-        help_text=_(
+        default=False, help_text=_(
             'Check this option to have this node act as a container for '
             'documents and not as a parent for further nodes.'
-        ),
-        verbose_name=_('Link documents')
+        ), verbose_name=_('Link documents')
     )
 
     class Meta:
@@ -216,7 +211,7 @@ class IndexTemplateNode(MPTTModel):
 
     def __str__(self):
         if self.is_root_node():
-            return ugettext('Root')
+            return ugettext(message='Root')
         else:
             return self.expression
 
@@ -250,7 +245,7 @@ class IndexTemplateNode(MPTTModel):
 
                         for child in self.get_children():
                             child.index_document(
-                                document=document, acquire_lock=False,
+                                acquire_lock=False, document=document,
                                 index_instance_node_parent=index_instance_root_node
                             )
                 elif self.enabled:
@@ -267,7 +262,7 @@ class IndexTemplateNode(MPTTModel):
 
                         try:
                             context = {'document': document}
-                            template = Template(self.expression)
+                            template = Template(source=self.expression)
                             result = template.render(**context)
                         except Exception as exception:
                             logger.debug('Evaluating error: %s', exception)
@@ -294,7 +289,7 @@ class IndexTemplateNode(MPTTModel):
 
                                 for child in self.get_children():
                                     child.index_document(
-                                        document=document, acquire_lock=False,
+                                        acquire_lock=False, document=document,
                                         index_instance_node_parent=index_instance_node
                                     )
             finally:
@@ -341,7 +336,7 @@ class IndexInstanceNode(MPTTModel):
         # Prevent another process to delete this node.
         try:
             lock = locking_backend.acquire_lock(
-                self.index_template_node.get_lock_string()
+                name=self.index_template_node.get_lock_string()
             )
         except LockError:
             raise
@@ -359,7 +354,10 @@ class IndexInstanceNode(MPTTModel):
                 lock.release()
 
     def get_absolute_url(self):
-        return reverse('indexing:index_instance_node_view', args=(self.pk,))
+        return reverse(
+            viewname='indexing:index_instance_node_view',
+            kwargs={'index_instance_node_pk': self.pk}
+        )
 
     def get_children_count(self):
         return self.get_children().count()
@@ -369,28 +367,29 @@ class IndexInstanceNode(MPTTModel):
 
     def get_descendants_document_count(self, user):
         return AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=user,
+            permission=permission_document_view,
             queryset=Document.objects.filter(
                 index_instance_nodes__in=self.get_descendants(
                     include_self=True
                 )
-            )
+            ), user=user
         ).count()
 
     def get_full_path(self):
         result = []
         for node in self.get_ancestors(include_self=True):
             if node.is_root_node():
-                result.append(force_text(self.index()))
+                result.append(force_text(s=self.index()))
             else:
-                result.append(force_text(node))
+                result.append(force_text(s=node))
 
         return ' / '.join(result)
 
     def get_item_count(self, user):
         if self.index_template_node.link_documents:
             queryset = AccessControlList.objects.filter_by_access(
-                permission_document_view, user, queryset=self.documents
+                permission=permission_document_view, queryset=self.documents,
+                user=user
             )
 
             return queryset.count()
@@ -417,7 +416,7 @@ class IndexInstanceNode(MPTTModel):
         # parent template node for the lock
         try:
             lock = locking_backend.acquire_lock(
-                self.index_template_node.get_lock_string()
+                name=self.index_template_node.get_lock_string()
             )
         except LockError:
             raise

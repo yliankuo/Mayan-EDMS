@@ -65,12 +65,14 @@ class DocumentIndexingApp(MayanAppConfig):
             app_label='documents', model_name='DocumentType'
         )
 
-        DocumentIndexInstanceNode = self.get_model('DocumentIndexInstanceNode')
+        DocumentIndexInstanceNode = self.get_model(
+            model_name='DocumentIndexInstanceNode'
+        )
 
-        Index = self.get_model('Index')
-        IndexInstance = self.get_model('IndexInstance')
-        IndexInstanceNode = self.get_model('IndexInstanceNode')
-        IndexTemplateNode = self.get_model('IndexTemplateNode')
+        Index = self.get_model(model_name='Index')
+        IndexInstance = self.get_model(model_name='IndexInstance')
+        IndexInstanceNode = self.get_model(model_name='IndexInstanceNode')
+        IndexTemplateNode = self.get_model(model_name='IndexTemplateNode')
 
         ModelPermission.register(
             model=Index, permissions=(

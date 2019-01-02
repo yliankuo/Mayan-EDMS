@@ -23,8 +23,9 @@ class IndexListForm(forms.Form):
         user = kwargs.pop('user')
         super(IndexListForm, self).__init__(*args, **kwargs)
         queryset = AccessControlList.objects.filter_by_access(
-            permission=permission_document_indexing_rebuild, user=user,
-            queryset=Index.objects.filter(enabled=True)
+            permission=permission_document_indexing_rebuild,
+            queryset=Index.objects.filter(enabled=True),
+            user=user
         )
         self.fields['indexes'].queryset = queryset
 

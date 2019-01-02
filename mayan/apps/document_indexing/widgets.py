@@ -12,7 +12,7 @@ def get_instance_link(index_instance_node):
     Return an HTML anchor to an index node instance
     """
     return mark_safe(
-        '<a href="{url}">{text}</a>'.format(
+        s='<a href="{url}">{text}</a>'.format(
             url=index_instance_node.get_absolute_url(),
             text=escape(index_instance_node.get_full_path())
         )
@@ -20,6 +20,7 @@ def get_instance_link(index_instance_node):
 
 
 def index_instance_item_link(index_instance_item):
+    #TODO: Replace with a file template
     IndexInstanceNode = apps.get_model(
         app_label='document_indexing', model_name='IndexInstanceNode'
     )
@@ -33,7 +34,7 @@ def index_instance_item_link(index_instance_item):
         icon = ''
 
     return mark_safe(
-        '%(icon)s&nbsp;<a href="%(url)s">%(text)s</a>' % {
+        s='%(icon)s&nbsp;<a href="%(url)s">%(text)s</a>' % {
             'url': index_instance_item.get_absolute_url(),
             'icon': icon,
             'text': index_instance_item
@@ -45,8 +46,9 @@ def node_level(node):
     """
     Render an indented tree like output for a specific node
     """
+    #TODO: Replace with a file template
     return mark_safe(
-        ''.join(
+        s=''.join(
             [
                 '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' * node.get_level(),
                 '' if node.is_root_node() else icon_index_level_up.render(),
@@ -57,6 +59,7 @@ def node_level(node):
 
 
 def node_tree(node, user):
+    #TODO: Replace with a file template
     result = []
 
     result.append('<div class="list-group">')
@@ -84,4 +87,4 @@ def node_tree(node, user):
 
     result.append('</div>')
 
-    return mark_safe(''.join(result))
+    return mark_safe(s=''.join(result))
