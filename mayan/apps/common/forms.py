@@ -4,6 +4,7 @@ import os
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
@@ -111,7 +112,10 @@ class FileDisplayForm(forms.Form):
     text = forms.CharField(
         label='',
         widget=TextAreaDiv(
-            attrs={'class': 'full-height scrollable', 'data-height-difference': 270}
+            attrs={
+                'class': 'full-height scrollable',
+                'data-height-difference': 270
+            }
         )
     )
 
@@ -123,6 +127,55 @@ class FileDisplayForm(forms.Form):
             )
             with open(file_path) as file_object:
                 self.fields['text'].initial = file_object.read()
+
+
+class FilteredSelectionForm(forms.Form):
+    """
+    Form to select the from a list of choice filtered by access. Can be
+    configure to allow single or multiple selection.
+    """
+    def __init__(self, *args, **kwargs):
+        field_name = kwargs.pop('field_name', None)
+        label = kwargs.pop('label', None)
+        help_text = kwargs.pop('help_text', None)
+        permission = kwargs.pop('permission', None)
+        queryset = kwargs.pop('queryset', None)
+
+        if queryset is None:
+            model = kwargs.pop('model', None)
+            if not model:
+                raise ImproperlyConfigured(
+                    'Must provide a queryset or a model.'
+                )
+
+            queryset = model.objects.all()
+
+        user = kwargs.pop('user', None)
+        widget_class = kwargs.pop('widget_class', None)
+        widget_attributes = kwargs.pop('widget_attributes', {'size': '10'})
+
+        if not widget_class:
+            if kwargs.pop('allow_multiple', False):
+                extra_kwargs = {}
+                field_class = forms.ModelMultipleChoiceField
+                widget_class = forms.widgets.SelectMultiple
+            else:
+                extra_kwargs = {'empty_label': None}
+                field_class = forms.ModelChoiceField
+                widget_class = forms.widgets.Select
+
+        super(FilteredSelectionForm, self).__init__(*args, **kwargs)
+
+        if permission:
+            queryset = AccessControlList.objects.filter_by_access(
+                permission=permission, queryset=queryset, user=user
+            )
+
+        self.fields[field_name] = field_class(
+            help_text=help_text, label=label,
+            queryset=queryset, required=True,
+            widget=widget_class(attrs=widget_attributes), **extra_kwargs
+        )
 
 
 class LicenseForm(FileDisplayForm):
