@@ -154,7 +154,7 @@ class NPMRegistry(object):
 
     def _read_package(self):
         with self.package_file.open(mode='rb') as file_object:
-            self._package_data = json.loads(file_object.read())
+            self._package_data = json.loads(s=file_object.read())
 
     def install(self, package=None):
         if package:
