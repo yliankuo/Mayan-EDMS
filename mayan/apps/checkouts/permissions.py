@@ -7,14 +7,14 @@ from mayan.apps.permissions import PermissionNamespace
 namespace = PermissionNamespace(label=_('Document checkout'), name='checkouts')
 
 permission_document_checkin = namespace.add_permission(
-    name='checkin_document', label=_('Check in documents')
+    label=_('Check in documents'), name='checkin_document'
 )
 permission_document_checkin_override = namespace.add_permission(
-    name='checkin_document_override', label=_('Forcefully check in documents')
+    label=_('Forcefully check in documents'), name='checkin_document_override'
 )
 permission_document_checkout = namespace.add_permission(
-    name='checkout_document', label=_('Check out documents')
+    label=_('Check out documents'), name='checkout_document'
 )
 permission_document_checkout_detail_view = namespace.add_permission(
-    name='checkout_detail_view', label=_('Check out details view')
+    label=_('Check out details view'), name='checkout_detail_view'
 )

@@ -73,7 +73,9 @@ class DocumentCheckout(models.Model):
         super(DocumentCheckout, self).delete(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('checkout:checkout_info', args=(self.document.pk,))
+        return reverse(
+            viewname='checkout:checkout_info', kwargs={'pk': self.document.pk}
+        )
 
     def natural_key(self):
         return self.document.natural_key()

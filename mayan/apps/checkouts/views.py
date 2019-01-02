@@ -28,11 +28,13 @@ class CheckoutDocumentView(SingleObjectCreateView):
     form_class = DocumentCheckoutForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        self.document = get_object_or_404(
+            klass=Document, pk=self.kwargs['document_pk']
+        )
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_checkout, user=request.user,
-            obj=self.document
+            obj=self.document, permissions=permission_document_checkout,
+            user=request.user
         )
 
         return super(
@@ -46,19 +48,24 @@ class CheckoutDocumentView(SingleObjectCreateView):
             instance.document = self.document
             instance.save()
         except DocumentAlreadyCheckedOut:
-            messages.error(self.request, _('Document already checked out.'))
+            messages.error(
+                request=self.request,
+                message=_('Document already checked out.')
+            )
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error trying to check out document; %s') % exception
+                request=self.request,
+                message=_('Error trying to check out document; %s') % exception
             )
         else:
             messages.success(
-                self.request,
-                _('Document "%s" checked out successfully.') % self.document
+                request=self.request,
+                message=_(
+                    'Document "%s" checked out successfully.'
+                ) % self.document
             )
 
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(redirect_to=self.get_success_url())
 
     def get_extra_context(self):
         return {
@@ -67,15 +74,18 @@ class CheckoutDocumentView(SingleObjectCreateView):
         }
 
     def get_post_action_redirect(self):
-        return reverse('checkouts:checkout_info', args=(self.document.pk,))
+        return reverse(
+            viewname='checkouts:checkout_info',
+            kwargs={'document_pk': self.document.pk}
+        )
 
 
 class CheckoutListView(DocumentListView):
     def get_document_queryset(self):
         return AccessControlList.objects.filter_by_access(
             permission=permission_document_checkout_detail_view,
-            user=self.request.user,
-            queryset=DocumentCheckout.objects.checked_out_documents()
+            queryset=DocumentCheckout.objects.checked_out_documents(),
+            user=self.request.user
         )
 
     def get_extra_context(self):
@@ -129,7 +139,7 @@ class CheckoutDetailView(SingleObjectDetailView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
 
 class DocumentCheckinView(ConfirmView):
@@ -151,38 +161,43 @@ class DocumentCheckinView(ConfirmView):
         return context
 
     def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
     def get_post_action_redirect(self):
-        return reverse('checkouts:checkout_info', args=(self.get_object().pk,))
+        return reverse(
+            viewname='checkouts:checkout_info',
+            kwargs={'document_pk': self.get_object().pk}
+        )
 
     def view_action(self):
         document = self.get_object()
 
         if document.get_checkout_info().user == self.request.user:
             AccessControlList.objects.check_access(
-                permissions=permission_document_checkin,
-                user=self.request.user, obj=document
+                obj=document, permissions=permission_document_checkin,
+                user=self.request.user
             )
         else:
             AccessControlList.objects.check_access(
-                permissions=permission_document_checkin_override,
-                user=self.request.user, obj=document
+                obj=document, permissions=permission_document_checkin_override,
+                user=self.request.user
             )
 
         try:
             document.check_in(user=self.request.user)
         except DocumentNotCheckedOut:
             messages.error(
-                self.request, _('Document has not been checked out.')
+                request=self.request, message=_(
+                    'Document has not been checked out.'
+                )
             )
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error trying to check in document; %s') % exception
+                request=self.request,
+                message=_('Error trying to check in document; %s') % exception
             )
         else:
             messages.success(
-                self.request,
-                _('Document "%s" checked in successfully.') % document
+                request=self.request,
+                message=_('Document "%s" checked in successfully.') % document
             )

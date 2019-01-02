@@ -23,7 +23,8 @@ from ..permissions import (
 class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
     def _request_document_check_in_view(self):
         return self.post(
-            viewname='checkouts:checkin_document', args=(self.document.pk,),
+            viewname='checkouts:checkin_document',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_checkin_document_view_no_permission(self):
@@ -72,7 +73,8 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
 
     def _request_document_checkout_view(self):
         return self.post(
-            viewname='checkouts:checkout_document', args=(self.document.pk,),
+            viewname='checkouts:checkout_document',
+            kwargs={'document_pk': self.document.pk},
             data={
                 'expiration_datetime_0': 2,
                 'expiration_datetime_1': TIME_DELTA_UNIT_DAYS,
@@ -125,7 +127,8 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         self.assertTrue(self.document.is_checked_out())
 
         response = self.post(
-            'sources:upload_version', args=(self.document.pk,),
+            viewname='sources:upload_version',
+            kwargs={'document_pk': self.document.pk},
             follow=True
         )
 
@@ -135,7 +138,8 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         )
 
         response = self.get(
-            'documents:document_version_list', args=(self.document.pk,),
+            viewname='documents:document_version_list',
+            kwargs={'document_pk': self.document.pk},
             follow=True
         )
 
@@ -176,7 +180,9 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         )
 
         response = self.post(
-            'checkouts:checkin_document', args=(self.document.pk,), follow=True
+            viewname='checkouts:checkin_document',
+            kwargs={'document_pk': self.document.pk},
+            follow=True
         )
 
         self.assertContains(
@@ -212,7 +218,9 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
             permission_document_checkout_detail_view.stored_permission
         )
         response = self.post(
-            'checkouts:checkin_document', args=(self.document.pk,), follow=True
+            viewname='checkouts:checkin_document',
+            kwargs={'document_pk': self.document.pk},
+            follow=True
         )
 
         self.assertContains(
