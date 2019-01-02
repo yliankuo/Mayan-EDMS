@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, resolve_url
@@ -26,6 +27,14 @@ __all__ = (
     'ObjectPermissionCheckMixin', 'RedirectionMixin',
     'ViewPermissionCheckMixin'
 )
+
+
+class ContentTypeViewMixin(object):
+    def get_content_type(self):
+        return get_object_or_404(
+            klass=ContentType, app_label=self.kwargs['app_label'],
+            model=self.kwargs['model']
+        )
 
 
 class DeleteExtraDataMixin(object):
@@ -65,25 +74,47 @@ class ExtraContextMixin(object):
 
 
 class ExternalObjectViewMixin(object):
-    external_object_pk_url_kwarg = 'pk'
     external_object_class = None
     external_object_permission = None
+    external_object_pk_url_kwarg = 'pk'
+    external_object_pk_url_kwargs = None  # Usage: {'pk': 'pk'}
+    external_object_queryset = None
 
-    def get_external_object(self, klass=None, permission=None):
-        klass = klass or self.external_object_class
-        permission = permission or self.get_external_object_permission()
+    def get_pk_url_kwargs(self):
+        pk_url_kwargs = {}
 
+        if self.external_object_pk_url_kwargs:
+            pk_url_kwargs = self.external_object_pk_url_kwargs
+        else:
+            pk_url_kwargs['pk'] = self.external_object_pk_url_kwarg
+
+        for key, value in pk_url_kwargs.items():
+            pk_url_kwargs[key] = self.kwargs[value]
+
+        return pk_url_kwargs
+
+    def get_external_object(self):
         return get_object_or_404(
-            klass=self.get_external_object_queryset(
-                klass=klass, permission=permission
-            ), pk=self.kwargs[self.external_object_pk_url_kwarg]
+            klass=self.get_external_object_queryset_filtered(),
+            **self.get_pk_url_kwargs()
         )
 
     def get_external_object_permission(self):
         return self.external_object_permission
 
-    def get_external_object_queryset(self, klass, permission=None):
-        queryset = klass.objects.all()
+    def get_external_object_queryset(self):
+        if not self.external_object_queryset and not self.external_object_class:
+            raise ImproperlyConfigured(
+                'View must provide either an external_object_queryset, '
+                'an external_object_class or a custom '
+                'get_external_object_queryset() method.'
+            )
+
+        return self.external_object_queryset or self.external_object_class.objects.all()
+
+    def get_external_object_queryset_filtered(self):
+        queryset = self.get_external_object_queryset()
+        permission = self.get_external_object_permission()
 
         if permission:
             queryset = AccessControlList.objects.filter_by_access(
@@ -175,7 +206,10 @@ class MultipleInstanceActionMixin(object):
 
 class MultipleObjectMixin(object):
     """
-    Mixin that allows a view to work on a single or multiple objects
+    Mixin that allows a view to work on a single or multiple objects. It can
+    receive a pk, a slug or a list of IDs via an id_list query.
+    The pk, slug, and ID list parameter name can be changed using the
+    attributes: pk_url_kwargs, slug_url_kwarg, and pk_list_key.
     """
     model = None
     object_permission = None
@@ -227,7 +261,8 @@ class MultipleObjectMixin(object):
 
         if self.object_permission:
             return AccessControlList.objects.filter_by_access(
-                self.object_permission, self.request.user, queryset=queryset
+                permission=self.object_permission, queryset=queryset,
+                user=self.request.user
             )
         else:
             return queryset
@@ -277,7 +312,7 @@ class ObjectActionMixin(object):
 
 class ObjectListPermissionFilterMixin(object):
     """
-    access_object_retrieve_method is used to  have the entire view check
+    access_object_retrieve_method is used to have the entire view check
     against an object permission and not the individual secondary items.
     """
     access_object_retrieve_method = None
