@@ -6,7 +6,7 @@ from mayan.apps.smart_settings import Namespace
 
 from .literals import DEFAULT_EMAIL, DEFAULT_PASSWORD, DEFAULT_USERNAME
 
-namespace = Namespace(name='autoadmin', label=_('Auto administrator'))
+namespace = Namespace(label=_('Auto administrator'), name='autoadmin')
 
 setting_email = namespace.add_setting(
     global_name='AUTOADMIN_EMAIL', default=DEFAULT_EMAIL,

@@ -40,16 +40,18 @@ class AutoadminAccountAdapter(DefaultAccountAdapter):
         Give superuser privileges automagically if the email address of a
         user confirming their email is listed in ``settings.ADMINS``.
         """
-        super(AutoadminAccountAdapter,
-              self).confirm_email(request, email_address)
+        super(AutoadminAccountAdapter, self).confirm_email(
+            request=request, email_address=email_address
+        )
 
         if email_address.email in ADMIN_EMAIL_ADDRESSES:
             user = email_address.user
             user.is_staff = user.is_superuser = True
             user.save()
 
-            messages.add_message(
-                request, messages.INFO,
-                _('Welcome Admin! You have been given superuser privileges. '
-                  'Use them with caution.')
+            messages.info(
+                request=request, message=_(
+                    'Welcome Admin! You have been given superuser '
+                    'privileges. Use them with caution.'
+                )
             )

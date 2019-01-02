@@ -1,9 +1,7 @@
 from __future__ import unicode_literals
 
-from django.test import TestCase
-from django.urls import reverse
-
 from mayan.apps.common.settings import setting_home_view
+from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.common.tests.utils import mute_stdout
 
 from ..models import AutoAdminSingleton
@@ -11,15 +9,16 @@ from ..models import AutoAdminSingleton
 from .literals import TEST_FIRST_TIME_LOGIN_TEXT, TEST_MOCK_VIEW_TEXT
 
 
-class AutoAdminViewCase(TestCase):
+class AutoAdminViewCase(GenericViewTestCase):
+    auto_create_group = False
+    auto_create_users = False
+
     def setUp(self):
         with mute_stdout():
             AutoAdminSingleton.objects.create_autoadmin()
 
     def _request_home_view(self):
-        return self.client.get(
-            reverse(setting_home_view.value), follow=True
-        )
+        return self.get(viewname=setting_home_view.value, follow=True)
 
     def test_login_302_view(self):
         response = self._request_home_view()
@@ -31,7 +30,7 @@ class AutoAdminViewCase(TestCase):
 
     def test_login_ok_view(self):
         autoadmin = AutoAdminSingleton.objects.get()
-        logged_in = self.client.login(
+        logged_in = self.login(
             username=autoadmin.account,
             password=autoadmin.password
         )
