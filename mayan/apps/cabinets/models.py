@@ -53,11 +53,13 @@ class Cabinet(MPTTModel):
         """
         self.documents.add(document)
         event_cabinets_add_document.commit(
-            action_object=self, actor=user, target=document
+            actor=user, action_object=self, target=document
         )
 
     def get_absolute_url(self):
-        return reverse('cabinets:cabinet_view', args=(self.pk,))
+        return reverse(
+            viewname='cabinets:cabinet_view', kwargs={'cabinet_pk': self.pk}
+        )
 
     def get_document_count(self, user):
         """
@@ -72,7 +74,8 @@ class Cabinet(MPTTModel):
         filtered by access.
         """
         return AccessControlList.objects.filter_by_access(
-            permission_document_view, user, queryset=self.documents
+            permission=permission_document_view, queryset=self.documents,
+            user=user
         )
 
     def get_full_path(self):
@@ -93,7 +96,7 @@ class Cabinet(MPTTModel):
         """
         self.documents.remove(document)
         event_cabinets_remove_document.commit(
-            action_object=self, actor=user, target=document
+            actor=user, action_object=self, target=document
         )
 
     def validate_unique(self, exclude=None):
@@ -105,9 +108,13 @@ class Cabinet(MPTTModel):
         """
         with transaction.atomic():
             if connection.vendor == 'oracle':
-                queryset = Cabinet.objects.filter(parent=self.parent, label=self.label)
+                queryset = Cabinet.objects.filter(
+                    parent=self.parent, label=self.label
+                )
             else:
-                queryset = Cabinet.objects.select_for_update().filter(parent=self.parent, label=self.label)
+                queryset = Cabinet.objects.select_for_update().filter(
+                    parent=self.parent, label=self.label
+                )
 
             if queryset.exists():
                 params = {

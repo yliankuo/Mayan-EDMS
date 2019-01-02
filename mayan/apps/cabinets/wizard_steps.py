@@ -28,7 +28,7 @@ class WizardStepCabinets(WizardStep):
     @classmethod
     def done(cls, wizard):
         result = {}
-        cleaned_data = wizard.get_cleaned_data_for_step(cls.name)
+        cleaned_data = wizard.get_cleaned_data_for_step(step=cls.name)
         if cleaned_data:
             result['cabinets'] = [
                 force_text(cabinet.pk) for cabinet in cleaned_data['cabinets']

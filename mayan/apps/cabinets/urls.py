@@ -14,61 +14,74 @@ from .views import (
 )
 
 urlpatterns = [
-    url(r'^list/$', CabinetListView.as_view(), name='cabinet_list'),
     url(
-        r'^(?P<pk>\d+)/child/add/$', CabinetChildAddView.as_view(),
-        name='cabinet_child_add'
-    ),
-    url(r'^create/$', CabinetCreateView.as_view(), name='cabinet_create'),
-    url(
-        r'^(?P<pk>\d+)/edit/$', CabinetEditView.as_view(), name='cabinet_edit'
+        regex=r'^cabinets/$', name='cabinet_list',
+        view=CabinetListView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/delete/$', CabinetDeleteView.as_view(),
-        name='cabinet_delete'
-    ),
-    url(r'^(?P<pk>\d+)/$', CabinetDetailView.as_view(), name='cabinet_view'),
-
-    url(
-        r'^document/(?P<pk>\d+)/cabinet/add/$',
-        DocumentAddToCabinetView.as_view(), name='cabinet_add_document'
+        regex=r'^cabinets/create/$', name='cabinet_create',
+        view=CabinetCreateView.as_view()
     ),
     url(
-        r'^document/multiple/cabinet/add/$',
-        DocumentAddToCabinetView.as_view(),
-        name='cabinet_add_multiple_documents'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/$', name='cabinet_view',
+        view=CabinetDetailView.as_view()
     ),
     url(
-        r'^document/(?P<pk>\d+)/cabinet/remove/$',
-        DocumentRemoveFromCabinetView.as_view(), name='document_cabinet_remove'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/delete/$', name='cabinet_delete',
+        view=CabinetDeleteView.as_view()
     ),
     url(
-        r'^document/multiple/cabinet/remove/$',
-        DocumentRemoveFromCabinetView.as_view(),
-        name='multiple_document_cabinet_remove'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/edit/$', name='cabinet_edit',
+        view=CabinetEditView.as_view()
     ),
     url(
-        r'^document/(?P<pk>\d+)/cabinet/list/$',
-        DocumentCabinetListView.as_view(), name='document_cabinet_list'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/child/add/$',
+        name='cabinet_child_add', view=CabinetChildAddView.as_view()
+    ),
+    url(
+        regex=r'^documents/(?P<document_pk>\d+)/cabinets/add/$',
+        name='document_cabinet_add', view=DocumentAddToCabinetView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/cabinets/add/$',
+        name='document_multiple_cabinet_add',
+        view=DocumentAddToCabinetView.as_view()
+    ),
+    url(
+        regex=r'^documents/(?P<document_pk>\d+)/cabinets/remove/$',
+        name='document_cabinet_remove',
+        view=DocumentRemoveFromCabinetView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/cabinets/remove/$',
+        name='document_multiple_cabinet_remove',
+        view=DocumentRemoveFromCabinetView.as_view()
+    ),
+    url(
+        regex=r'^documents/(?P<document_pk>\d+)/cabinets/list/$',
+        name='document_cabinet_list', view=DocumentCabinetListView.as_view()
     ),
 ]
 
 api_urls = [
     url(
-        r'^cabinets/(?P<pk>[0-9]+)/documents/(?P<document_pk>[0-9]+)/$',
-        APICabinetDocumentView.as_view(), name='cabinet-document'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/documents/(?P<document_pk>\d+)/$',
+        name='cabinet-document', view=APICabinetDocumentView.as_view()
     ),
     url(
-        r'^cabinets/(?P<pk>[0-9]+)/documents/$',
-        APICabinetDocumentListView.as_view(), name='cabinet-document-list'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/documents/$',
+        name='cabinet-document-list', view=APICabinetDocumentListView.as_view()
     ),
     url(
-        r'^cabinets/(?P<pk>[0-9]+)/$', APICabinetView.as_view(),
-        name='cabinet-detail'
+        regex=r'^cabinets/(?P<cabinet_pk>\d+)/$', name='cabinet-detail',
+        view=APICabinetView.as_view()
     ),
-    url(r'^cabinets/$', APICabinetListView.as_view(), name='cabinet-list'),
     url(
-        r'^documents/(?P<pk>[0-9]+)/cabinets/$',
-        APIDocumentCabinetListView.as_view(), name='document-cabinet-list'
+        regex=r'^cabinets/$', name='cabinet-list',
+        view=APICabinetListView.as_view()
+    ),
+    url(
+        regex=r'^documents/(?P<document_pk>\d+)/cabinets/$',
+        name='document-cabinet-list', view=APIDocumentCabinetListView.as_view()
     ),
 ]

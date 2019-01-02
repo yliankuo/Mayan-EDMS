@@ -54,7 +54,7 @@ class CabinetSerializer(serializers.ModelSerializer):
     def get_parent_url(self, obj):
         if obj.parent:
             return reverse(
-                'rest_api:cabinet-detail', args=(obj.parent.pk,),
+                viewname='rest_api:cabinet-detail', kwargs={'cabinet_pk': obj.parent.pk},
                 format=self.context['format'],
                 request=self.context.get('request')
             )
@@ -167,9 +167,10 @@ class CabinetDocumentSerializer(DocumentSerializer):
 
     def get_cabinet_document_url(self, instance):
         return reverse(
-            'rest_api:cabinet-document', args=(
-                self.context['cabinet'].pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:cabinet-document', kwargs={
+                'cabinet_pk': self.context['cabinet'].pk,
+                'document_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 

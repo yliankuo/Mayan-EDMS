@@ -21,7 +21,7 @@ from mayan.apps.documents.views import DocumentListView
 from .forms import CabinetListForm
 from .icons import icon_cabinet
 from .links import (
-    link_cabinet_add_document, link_cabinet_child_add, link_cabinet_create
+    link_cabinet_child_add, link_cabinet_create, link_document_cabinet_add
 )
 from .models import Cabinet
 from .permissions import (
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 class CabinetCreateView(SingleObjectCreateView):
     fields = ('label',)
     model = Cabinet
-    post_action_redirect = reverse_lazy('cabinets:cabinet_list')
+    post_action_redirect = reverse_lazy(viewname='cabinets:cabinet_list')
     view_permission = permission_cabinet_create
 
     def get_extra_context(self):
@@ -64,8 +64,8 @@ class CabinetChildAddView(SingleObjectCreateView):
         cabinet = super(CabinetChildAddView, self).get_object(*args, **kwargs)
 
         AccessControlList.objects.check_access(
-            permissions=permission_cabinet_edit, user=self.request.user,
-            obj=cabinet.get_root()
+            permissions=permission_cabinet_edit, obj=cabinet.get_root(),
+            user=self.request.user, raise_404=True
         )
 
         return cabinet
@@ -81,7 +81,9 @@ class CabinetChildAddView(SingleObjectCreateView):
 class CabinetDeleteView(SingleObjectDeleteView):
     model = Cabinet
     object_permission = permission_cabinet_delete
-    post_action_redirect = reverse_lazy('cabinets:cabinet_list')
+    object_permission_raise_404 = True
+    pk_url_kwarg = 'cabinet_pk'
+    post_action_redirect = reverse_lazy(viewname='cabinets:cabinet_list')
 
     def get_extra_context(self):
         return {
@@ -95,8 +97,9 @@ class CabinetDetailView(DocumentListView):
 
     def get_document_queryset(self):
         queryset = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=self.request.user,
-            queryset=self.get_object().documents.all()
+            permission=permission_document_view,
+            queryset=self.get_object().documents.all(),
+            user=self.request.user
         )
 
         return queryset
@@ -133,7 +136,9 @@ class CabinetDetailView(DocumentListView):
         return context
 
     def get_object(self):
-        cabinet = get_object_or_404(klass=Cabinet, pk=self.kwargs['pk'])
+        cabinet = get_object_or_404(
+            klass=Cabinet, pk=self.kwargs['cabinet_pk']
+        )
 
         if cabinet.is_root_node():
             permission_object = cabinet
@@ -141,8 +146,8 @@ class CabinetDetailView(DocumentListView):
             permission_object = cabinet.get_root()
 
         AccessControlList.objects.check_access(
-            permissions=permission_cabinet_view, user=self.request.user,
-            obj=permission_object
+            permissions=permission_cabinet_view, obj=permission_object,
+            user=self.request.user, raise_404=True
         )
 
         return cabinet
@@ -152,7 +157,9 @@ class CabinetEditView(SingleObjectEditView):
     fields = ('label',)
     model = Cabinet
     object_permission = permission_cabinet_edit
-    post_action_redirect = reverse_lazy('cabinets:cabinet_list')
+    object_permission_raise_404 = True
+    pk_url_kwarg = 'cabinet_pk'
+    post_action_redirect = reverse_lazy(viewname='cabinets:cabinet_list')
 
     def get_extra_context(self):
         return {
@@ -188,11 +195,13 @@ class CabinetListView(SingleObjectListView):
 
 class DocumentCabinetListView(CabinetListView):
     def dispatch(self, request, *args, **kwargs):
-        self.document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        self.document = get_object_or_404(
+            klass=Document, pk=self.kwargs['document_pk']
+        )
 
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=request.user,
-            obj=self.document
+            obj=self.document, raise_404=True
         )
 
         return super(DocumentCabinetListView, self).dispatch(
@@ -203,7 +212,7 @@ class DocumentCabinetListView(CabinetListView):
         return {
             'hide_link': True,
             'no_results_icon': icon_cabinet,
-            'no_results_main_link': link_cabinet_add_document.resolve(
+            'no_results_main_link': link_document_cabinet_add.resolve(
                 context=RequestContext(
                     request=self.request, dict_={'object': self.document}
                 )
@@ -226,6 +235,7 @@ class DocumentAddToCabinetView(MultipleObjectFormActionView):
     form_class = CabinetListForm
     model = Document
     object_permission = permission_cabinet_add_document
+    pk_url_kwarg = 'document_pk'
     success_message = _(
         'Add to cabinet request performed on %(count)d document'
     )
@@ -286,11 +296,11 @@ class DocumentAddToCabinetView(MultipleObjectFormActionView):
         for cabinet in form.cleaned_data['cabinets']:
             AccessControlList.objects.check_access(
                 obj=cabinet, permissions=permission_cabinet_add_document,
-                user=self.request.user
+                user=self.request.user, raise_404=True
             )
             if cabinet in cabinet_membership:
                 messages.warning(
-                    self.request, _(
+                    request=self.request, message=_(
                         'Document: %(document)s is already in '
                         'cabinet: %(cabinet)s.'
                     ) % {
@@ -302,7 +312,7 @@ class DocumentAddToCabinetView(MultipleObjectFormActionView):
                     document=instance, user=self.request.user
                 )
                 messages.success(
-                    self.request, _(
+                    request=self.request, message=_(
                         'Document: %(document)s added to cabinet: '
                         '%(cabinet)s successfully.'
                     ) % {
@@ -315,6 +325,7 @@ class DocumentRemoveFromCabinetView(MultipleObjectFormActionView):
     form_class = CabinetListForm
     model = Document
     object_permission = permission_cabinet_remove_document
+    pk_url_kwarg = 'document_pk'
     success_message = _(
         'Remove from cabinet request performed on %(count)d document'
     )
@@ -373,12 +384,12 @@ class DocumentRemoveFromCabinetView(MultipleObjectFormActionView):
         for cabinet in form.cleaned_data['cabinets']:
             AccessControlList.objects.check_access(
                 obj=cabinet, permissions=permission_cabinet_remove_document,
-                user=self.request.user
+                user=self.request.user, raise_404=True
             )
 
             if cabinet not in cabinet_membership:
                 messages.warning(
-                    self.request, _(
+                    request=self.request, message=_(
                         'Document: %(document)s is not in cabinet: '
                         '%(cabinet)s.'
                     ) % {
@@ -390,7 +401,7 @@ class DocumentRemoveFromCabinetView(MultipleObjectFormActionView):
                     document=instance, user=self.request.user
                 )
                 messages.success(
-                    self.request, _(
+                    request=self.request, message=_(
                         'Document: %(document)s removed from cabinet: '
                         '%(cabinet)s.'
                     ) % {

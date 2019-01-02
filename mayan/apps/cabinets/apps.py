@@ -16,11 +16,11 @@ from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.navigation import SourceColumn
 
 from .links import (
-    link_cabinet_add_document, link_cabinet_add_multiple_documents,
     link_cabinet_child_add, link_cabinet_create, link_cabinet_delete,
     link_cabinet_edit, link_cabinet_list, link_cabinet_view,
-    link_custom_acl_list, link_document_cabinet_list,
-    link_document_cabinet_remove, link_multiple_document_cabinet_remove
+    link_custom_acl_list, link_document_cabinet_add,
+    link_document_cabinet_list, link_document_cabinet_remove,
+    link_document_multiple_cabinet_add, link_document_multiple_cabinet_remove
 )
 from .menus import menu_cabinets
 from .methods import method_get_document_cabinets
@@ -49,8 +49,8 @@ class CabinetsApp(MayanAppConfig):
             app_label='documents', model_name='Document'
         )
 
-        DocumentCabinet = self.get_model('DocumentCabinet')
-        Cabinet = self.get_model('Cabinet')
+        DocumentCabinet = self.get_model(model_name='DocumentCabinet')
+        Cabinet = self.get_model(model_name='Cabinet')
 
         # Add explicit order_by as DocumentCabinet ordering Meta option has no
         # effect.
@@ -80,18 +80,17 @@ class CabinetsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=Document, label=_('Cabinets'),
             func=lambda context: widget_document_cabinets(
                 document=context['object'], user=context['request'].user
-            ), order=1
+            ), order=1, label=_('Cabinets'), source=Document
         )
 
         document_page_search.add_model_field(
-            field='document_version__document__cabinets__label',
-            label=_('Cabinets')
+            label=_('Cabinets'),
+            field='document_version__document__cabinets__label'
         )
         document_search.add_model_field(
-            field='cabinets__label', label=_('Cabinets')
+            label=_('Cabinets'), field='cabinets__label'
         )
 
         menu_facet.bind_links(
@@ -108,8 +107,8 @@ class CabinetsApp(MayanAppConfig):
 
         menu_multi_item.bind_links(
             links=(
-                link_cabinet_add_multiple_documents,
-                link_multiple_document_cabinet_remove
+                link_document_multiple_cabinet_add,
+                link_document_multiple_cabinet_remove
             ), sources=(Document,)
         )
         menu_object.bind_links(
@@ -125,10 +124,10 @@ class CabinetsApp(MayanAppConfig):
             ), sources=(Cabinet,)
         )
         menu_sidebar.bind_links(
-            links=(link_cabinet_add_document, link_document_cabinet_remove),
+            links=(link_document_cabinet_add, link_document_cabinet_remove),
             sources=(
                 'cabinets:document_cabinet_list',
-                'cabinets:cabinet_add_document',
+                'cabinets:document_cabinet_add',
                 'cabinets:document_cabinet_remove'
             )
         )

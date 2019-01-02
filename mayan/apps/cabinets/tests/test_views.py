@@ -53,14 +53,15 @@ class CabinetViewTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
 
     def _request_delete_cabinet(self):
         return self.post(
-            viewname='cabinets:cabinet_delete', args=(self.cabinet.pk,)
+            viewname='cabinets:cabinet_delete',
+            kwargs={'cabinet_pk': self.cabinet.pk}
         )
 
     def test_cabinet_delete_view_no_permission(self):
         self._create_cabinet()
 
         response = self._request_delete_cabinet()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Cabinet.objects.count(), 1)
 
     def test_cabinet_delete_view_with_access(self):
@@ -74,7 +75,7 @@ class CabinetViewTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
 
     def _request_edit_cabinet(self):
         return self.post(
-            viewname='cabinets:cabinet_edit', args=(self.cabinet.pk,), data={
+            viewname='cabinets:cabinet_edit', kwargs={'cabinet_pk': self.cabinet.pk}, data={
                 'label': TEST_CABINET_EDITED_LABEL
             }
         )
@@ -83,7 +84,7 @@ class CabinetViewTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self._create_cabinet()
 
         response = self._request_edit_cabinet()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.label, TEST_CABINET_LABEL)
 
@@ -125,15 +126,13 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
 
     def _add_document_to_cabinet(self):
         return self.post(
-            viewname='cabinets:cabinet_add_document', args=(
-                self.document.pk,
-            ), data={'cabinets': self.cabinet.pk}
+            viewname='cabinets:document_cabinet_add', kwargs={
+                'document_pk': self.document.pk
+            }, data={'cabinets': self.cabinet.pk}
         )
 
     def test_cabinet_add_document_view_no_permission(self):
         self._create_cabinet()
-
-        self.grant_permission(permission=permission_cabinet_view)
 
         response = self._add_document_to_cabinet()
 
@@ -143,10 +142,37 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.documents.count(), 0)
 
-    def test_cabinet_add_document_view_with_access(self):
+    def test_cabinet_add_document_view_with_cabinet_access(self):
         self._create_cabinet()
 
-        self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
+        self.grant_access(
+            obj=self.cabinet, permission=permission_cabinet_add_document
+        )
+        response = self._add_document_to_cabinet()
+
+        self.assertContains(
+            response, text='Select a valid choice.', status_code=404
+        )
+        self.cabinet.refresh_from_db()
+        self.assertEqual(self.cabinet.documents.count(), 0)
+
+    def test_cabinet_add_document_view_with_document_access(self):
+        self._create_cabinet()
+
+        self.grant_access(
+            obj=self.cabinet, permission=permission_cabinet_add_document
+        )
+        response = self._add_document_to_cabinet()
+
+        self.assertContains(
+            response, text='Select a valid choice.', status_code=404
+        )
+        self.cabinet.refresh_from_db()
+        self.assertEqual(self.cabinet.documents.count(), 0)
+
+    def test_cabinet_add_document_view_with_full_access(self):
+        self._create_cabinet()
+
         self.grant_access(
             obj=self.cabinet, permission=permission_cabinet_add_document
         )
@@ -166,15 +192,13 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
 
     def _request_add_multiple_documents_to_cabinet(self):
         return self.post(
-            viewname='cabinets:cabinet_add_multiple_documents', data={
+            viewname='cabinets:document_multiple_cabinet_add', data={
                 'id_list': (self.document.pk,), 'cabinets': self.cabinet.pk
             }
         )
 
     def test_cabinet_add_multiple_documents_view_no_permission(self):
         self._create_cabinet()
-
-        self.grant_permission(permission=permission_cabinet_view)
 
         response = self._request_add_multiple_documents_to_cabinet()
 
@@ -184,7 +208,7 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.documents.count(), 0)
 
-    def test_cabinet_add_multiple_documents_view_with_access(self):
+    def test_cabinet_add_multiple_documents_view_with_full_access(self):
         self._create_cabinet()
 
         self.grant_access(
@@ -206,7 +230,7 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
     def _request_remove_document_from_cabinet(self):
         return self.post(
             viewname='cabinets:document_cabinet_remove',
-            args=(self.document.pk,), data={
+            kwargs={'document_pk': self.document.pk}, data={
                 'cabinets': (self.cabinet.pk,),
             }
         )
@@ -225,7 +249,7 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self.cabinet.refresh_from_db()
         self.assertEqual(self.cabinet.documents.count(), 1)
 
-    def test_cabinet_remove_document_view_with_access(self):
+    def test_cabinet_remove_document_view_with_full_access(self):
         self._create_cabinet()
 
         self.cabinet.documents.add(self.document)
@@ -245,7 +269,8 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
 
     def _request_document_cabinet_list(self):
         return self.get(
-            viewname='cabinets:document_cabinet_list', args=(self.document.pk,)
+            viewname='cabinets:document_cabinet_list',
+            kwargs={'document_pk': self.document.pk}
         )
 
     def test_document_cabinet_list_view_no_permission(self):
@@ -253,10 +278,10 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self.cabinet.documents.add(self.document)
         response = self._request_document_cabinet_list()
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=403
+            response=response, text=self.document.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.cabinet.label, status_code=403
+            response=response, text=self.cabinet.label, status_code=404
         )
 
     def test_document_cabinet_list_view_with_cabinet_access(self):
@@ -265,10 +290,10 @@ class DocumentViewsTestCase(CabinetTestMixin, GenericDocumentViewTestCase):
         self.grant_access(obj=self.cabinet, permission=permission_cabinet_view)
         response = self._request_document_cabinet_list()
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=403
+            response=response, text=self.document.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.cabinet.label, status_code=403
+            response=response, text=self.cabinet.label, status_code=404
         )
 
     def test_document_cabinet_list_view_with_document_access(self):
