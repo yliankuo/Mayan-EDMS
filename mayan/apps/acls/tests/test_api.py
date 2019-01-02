@@ -35,13 +35,12 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.get(
             viewname='rest_api:accesscontrollist-list',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk
+            }
         )
-
         self.assertEqual(
             response.data['results'][0]['content_type']['app_label'],
             self.document_content_type.app_label
@@ -55,11 +54,12 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.delete(
             viewname='rest_api:accesscontrollist-detail',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk,
+                'acl_pk': self.acl.pk
+            }
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -70,11 +70,12 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.get(
             viewname='rest_api:accesscontrollist-detail',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk,
+                'acl_pk': self.acl.pk
+            }
         )
         self.assertEqual(
             response.data['content_type']['app_label'],
@@ -90,12 +91,12 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.delete(
             viewname='rest_api:accesscontrollist-permission-detail',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk,
-                permission.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk,
+                'acl_pk': self.acl.pk, 'permission_pk': permission.pk
+            }
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(self.acl.permissions.count(), 0)
@@ -106,16 +107,16 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.get(
             viewname='rest_api:accesscontrollist-permission-detail',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk,
-                permission.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk, 'acl_pk': self.acl.pk,
+                'permission_pk': permission.pk
+            }
         )
 
         self.assertEqual(
-            response.data['pk'], permission_document_view.pk
+            response.data['permission_pk'], permission_document_view.pk
         )
 
     def test_object_acl_permission_list_view(self):
@@ -123,15 +124,16 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.get(
             viewname='rest_api:accesscontrollist-permission-list',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk
-            )
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk,
+                'acl_pk': self.acl.pk
+            }
         )
 
         self.assertEqual(
-            response.data['results'][0]['pk'],
+            response.data['results'][0]['permission_pk'],
             permission_document_view.pk
         )
 
@@ -140,11 +142,11 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.post(
             viewname='rest_api:accesscontrollist-permission-list',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk, self.acl.pk
-            ), data={'permission_pk': permission_acl_view.pk}
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk, 'acl_pk': self.acl.pk
+            }, data={'permission_pk': permission_acl_view.pk}
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -158,11 +160,11 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_object_acl_post_no_permissions_added_view(self):
         response = self.post(
             viewname='rest_api:accesscontrollist-list',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk
-            ), data={'role_pk': self.role.pk}
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk
+            }, data={'role_pk': self.role.pk}
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -179,11 +181,11 @@ class ACLAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_object_acl_post_with_permissions_added_view(self):
         response = self.post(
             viewname='rest_api:accesscontrollist-list',
-            args=(
-                self.document_content_type.app_label,
-                self.document_content_type.model,
-                self.document.pk
-            ), data={
+            kwargs={
+                'app_label': self.document_content_type.app_label,
+                'model': self.document_content_type.model,
+                'object_id': self.document.pk
+            }, data={
                 'role_pk': self.role.pk,
                 'permissions_pk_list': permission_acl_view.pk
 

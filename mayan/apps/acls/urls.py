@@ -12,35 +12,40 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/create/$',
-        ACLCreateView.as_view(), name='acl_create'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/create/$',
+        name='acl_create', view=ACLCreateView.as_view()
     ),
     url(
-        r'^(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/list/$',
-        ACLListView.as_view(), name='acl_list'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/list/$',
+        name='acl_list', view=ACLListView.as_view()
     ),
-    url(r'^(?P<pk>\d+)/delete/$', ACLDeleteView.as_view(), name='acl_delete'),
     url(
-        r'^(?P<pk>\d+)/permissions/$', ACLPermissionsView.as_view(),
-        name='acl_permissions'
+        regex=r'^acls/(?P<acl_pk>\d+)/delete/$', name='acl_delete',
+        view=ACLDeleteView.as_view()
+    ),
+    url(
+        regex=r'^acls/(?P<acl_pk>\d+)/permissions/$', name='acl_permissions',
+        view=ACLPermissionsView.as_view()
     ),
 ]
 
 api_urls = [
     url(
-        r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_pk>\d+)/acls/$',
-        APIObjectACLListView.as_view(), name='accesscontrollist-list'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/$',
+        name='accesscontrollist-list', view=APIObjectACLListView.as_view()
     ),
     url(
-        r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_pk>\d+)/acls/(?P<pk>\d+)/$',
-        APIObjectACLView.as_view(), name='accesscontrollist-detail'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_pk>\d+)/$',
+        name='accesscontrollist-detail', view=APIObjectACLView.as_view()
     ),
     url(
-        r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_pk>\d+)/acls/(?P<pk>\d+)/permissions/$',
-        APIObjectACLPermissionListView.as_view(), name='accesscontrollist-permission-list'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_pk>\d+)/permissions/$',
+        name='accesscontrollist-permission-list',
+        view=APIObjectACLPermissionListView.as_view()
     ),
     url(
-        r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_pk>\d+)/acls/(?P<pk>\d+)/permissions/(?P<permission_pk>\d+)/$',
-        APIObjectACLPermissionView.as_view(), name='accesscontrollist-permission-detail'
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_pk>\d+)/permissions/(?P<permission_pk>\d+)/$',
+        name='accesscontrollist-permission-detail',
+        view=APIObjectACLPermissionView.as_view()
     ),
 ]

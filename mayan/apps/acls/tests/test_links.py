@@ -35,7 +35,7 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         }
 
         self.assertEqual(
-            resolved_link.url, reverse('acls:acl_create', kwargs=kwargs)
+            resolved_link.url, reverse(viewname='acls:acl_create', kwargs=kwargs)
         )
 
     def test_document_acl_delete_link(self):
@@ -53,7 +53,7 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse('acls:acl_delete', args=(acl.pk,))
+            resolved_link.url, reverse(viewname='acls:acl_delete', kwargs={'acl_pk': acl.pk})
         )
 
     def test_document_acl_edit_link(self):
@@ -71,7 +71,7 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse('acls:acl_permissions', args=(acl.pk,))
+            resolved_link.url, reverse(viewname='acls:acl_permissions', kwargs={'acl_pk': acl.pk})
         )
 
     def test_document_acl_list_link(self):
@@ -96,5 +96,5 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         }
 
         self.assertEqual(
-            resolved_link.url, reverse('acls:acl_list', kwargs=kwargs)
+            resolved_link.url, reverse(viewname='acls:acl_list', kwargs=kwargs)
         )

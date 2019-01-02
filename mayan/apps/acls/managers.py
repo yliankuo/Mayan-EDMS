@@ -55,7 +55,9 @@ class AccessControlListManager(models.Manager):
             except AttributeError:
                 # AttributeError means non model objects: ie Statistics
                 # These can't have ACLs so we raise PermissionDenied
-                raise PermissionDenied(_('Insufficient access for: %s') % obj)
+                raise PermissionDenied(
+                    _('Insufficient access for: %(object)s') % {'object': obj}
+                )
             except KeyError:
                 pass
             else:
@@ -89,7 +91,7 @@ class AccessControlListManager(models.Manager):
 
                     user_roles.append(role)
 
-            if not self.filter(content_type=ContentType.objects.get_for_model(obj), object_id=obj.pk, permissions__in=stored_permissions, role__in=user_roles).exists():
+            if not self.filter(content_type=ContentType.objects.get_for_model(model=obj), object_id=obj.pk, permissions__in=stored_permissions, role__in=user_roles).exists():
                 logger.debug(
                     'Permissions "%s" on "%s" denied for user "%s"',
                     permissions, obj, user
@@ -104,8 +106,8 @@ class AccessControlListManager(models.Manager):
     def filter_by_access(self, permission, user, queryset):
         if user.is_superuser or user.is_staff:
             logger.debug(
-                'Unfiltered queryset returned to user "%s" as superuser or staff',
-                user
+                'Unfiltered queryset returned to user "%s" as superuser '
+                'or staff', user
             )
             return queryset
 
@@ -138,10 +140,11 @@ class AccessControlListManager(models.Manager):
                     except TypeError:
                         # Is not a function, try it as a field
                         parent_content_type = ContentType.objects.get_for_model(
-                            parent_object
+                            model=parent_object
                         )
                         parent_queryset = self.filter(
-                            content_type=parent_content_type, role__in=user_roles,
+                            content_type=parent_content_type,
+                            role__in=user_roles,
                             permissions=permission.stored_permission
                         )
                         parent_acl_query = Q(
@@ -159,7 +162,10 @@ class AccessControlListManager(models.Manager):
                         result = []
                         for entry in queryset:
                             try:
-                                self.check_access(permissions=permission, user=user, obj=entry)
+                                self.check_access(
+                                    obj=entry, permissions=permission,
+                                    user=user
+                                )
                             except PermissionDenied:
                                 pass
                             else:
@@ -170,7 +176,9 @@ class AccessControlListManager(models.Manager):
                     parent_acl_query = Q()
 
             # Directly granted access
-            content_type = ContentType.objects.get_for_model(queryset.model)
+            content_type = ContentType.objects.get_for_model(
+                model=queryset.model
+            )
             acl_query = Q(pk__in=self.filter(
                 content_type=content_type, role__in=user_roles,
                 permissions=permission.stored_permission
@@ -194,7 +202,9 @@ class AccessControlListManager(models.Manager):
                 return StoredPermission.objects.none()
 
         try:
-            parent_accessor = ModelPermission.get_inheritance(type(instance))
+            parent_accessor = ModelPermission.get_inheritance(
+                model=type(instance)
+            )
         except KeyError:
             return StoredPermission.objects.none()
         else:
@@ -229,6 +239,8 @@ class AccessControlListManager(models.Manager):
         )
 
         acl.permissions.add(permission.stored_permission)
+
+        return acl
 
     def revoke(self, permission, role, obj):
         content_type = ContentType.objects.get_for_model(model=obj)

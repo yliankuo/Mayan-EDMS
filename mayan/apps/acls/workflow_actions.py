@@ -98,7 +98,9 @@ class GrantAccessAction(WorkflowAction):
 
     def get_form_schema(self, *args, **kwargs):
         self.fields['content_type']['kwargs']['queryset'] = ModelPermission.get_classes(as_content_type=True)
-        self.fields['permissions']['kwargs']['choices'] = Permission.all(as_choices=True)
+        self.fields['permissions']['kwargs']['choices'] = Permission.all(
+            as_choices=True
+        )
         return super(GrantAccessAction, self).get_form_schema(*args, **kwargs)
 
     def get_execute_data(self):

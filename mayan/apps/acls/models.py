@@ -5,6 +5,7 @@ import logging
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -64,6 +65,11 @@ class AccessControlList(models.Model):
             'role': self.role
         }
 
+    def get_absolute_url(self):
+        return reverse(
+            viewname='acls:acl_permissions', kwargs={'acl_pk': self.pk}
+        )
+
     def get_inherited_permissions(self):
         return AccessControlList.objects.get_inherited_permissions(
             role=self.role, obj=self.content_object
@@ -78,3 +84,4 @@ class AccessControlList(models.Model):
         )
 
         return result or _('None')
+    get_permission_titles.short_description = _('Permissions')

@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
+
 from rest_framework import generics
 
 from .models import AccessControlList
@@ -25,7 +26,7 @@ class APIObjectACLListView(generics.ListCreateAPIView):
         )
 
         content_object = get_object_or_404(
-            klass=content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
 
         if self.request.method == 'GET':
@@ -89,7 +90,7 @@ class APIObjectACLView(generics.RetrieveDestroyAPIView):
         )
 
         content_object = get_object_or_404(
-            klass=content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
 
         AccessControlList.objects.check_access(
@@ -110,7 +111,7 @@ class APIObjectACLPermissionListView(generics.ListCreateAPIView):
     """
     def get_acl(self):
         return get_object_or_404(
-            klass=self.get_content_object().acls, pk=self.kwargs['pk']
+            klass=self.get_content_object().acls, pk=self.kwargs['acl_pk']
         )
 
     def get_content_object(self):
@@ -120,7 +121,7 @@ class APIObjectACLPermissionListView(generics.ListCreateAPIView):
         )
 
         content_object = get_object_or_404(
-            klass=content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
 
         AccessControlList.objects.check_access(
@@ -167,7 +168,7 @@ class APIObjectACLPermissionView(generics.RetrieveDestroyAPIView):
 
     def get_acl(self):
         return get_object_or_404(
-            klass=self.get_content_object().acls, pk=self.kwargs['pk']
+            klass=self.get_content_object().acls, pk=self.kwargs['acl_pk']
         )
 
     def get_content_object(self):
@@ -177,7 +178,7 @@ class APIObjectACLPermissionView(generics.RetrieveDestroyAPIView):
         )
 
         content_object = get_object_or_404(
-            klass=content_type.model_class(), pk=self.kwargs['object_pk']
+            klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
 
         AccessControlList.objects.check_access(
