@@ -62,7 +62,7 @@ class APIIndexNodeInstanceDocumentListView(generics.ListAPIView):
 
     def get_queryset(self):
         index_node_instance = get_object_or_404(
-            klass=IndexInstanceNode, pk=self.kwargs['pk']
+            klass=IndexInstanceNode, pk=self.kwargs['index_instance_node_pk']
         )
         AccessControlList.objects.check_access(
             permissions=permission_document_indexing_view,
@@ -109,7 +109,7 @@ class APIDocumentIndexListView(generics.ListAPIView):
     serializer_class = IndexInstanceNodeSerializer
 
     def get_queryset(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=self.request.user,
             obj=document

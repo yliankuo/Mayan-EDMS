@@ -92,7 +92,7 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         document = self.upload_document()
 
         self.assertEqual(
-            [instance.value for instance in IndexInstanceNode.objects.all().order_by('pk')],
+            [instance.value for instance in IndexInstanceNode.objects.all().order_by('index_instance_node_pk')],
             [
                 '', force_text(document.date_added.year),
                 force_text(document.date_added.month).zfill(2)
@@ -100,7 +100,7 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         )
 
         self.assertTrue(
-            document in list(IndexInstanceNode.objects.order_by('pk').last().documents.all())
+            document in list(IndexInstanceNode.objects.order_by('index_instance_node_pk').last().documents.all())
         )
 
     def test_dual_level_dual_document_index(self):
@@ -131,7 +131,7 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         Index.objects.rebuild()
 
         self.assertEqual(
-            [instance.value for instance in IndexInstanceNode.objects.all().order_by('pk')],
+            [instance.value for instance in IndexInstanceNode.objects.all().order_by('index_instance_node_pk')],
             [
                 '', force_text(self.document_2.uuid), self.document_2.label,
                 force_text(self.document.uuid), self.document.label

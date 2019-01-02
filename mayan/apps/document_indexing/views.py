@@ -39,14 +39,15 @@ class SetupIndexCreateView(SingleObjectCreateView):
     extra_context = {'title': _('Create index')}
     fields = ('label', 'slug', 'enabled')
     model = Index
-    post_action_redirect = reverse_lazy('indexing:index_setup_list')
+    post_action_redirect = reverse_lazy(viewname='indexing:index_setup_list')
     view_permission = permission_document_indexing_create
 
 
 class SetupIndexDeleteView(SingleObjectDeleteView):
     model = Index
-    post_action_redirect = reverse_lazy('indexing:index_setup_list')
     object_permission = permission_document_indexing_delete
+    pk_url_kwarg = 'index_pk'
+    post_action_redirect = reverse_lazy(viewname='indexing:index_setup_list')
 
     def get_extra_context(self):
         return {
@@ -58,8 +59,9 @@ class SetupIndexDeleteView(SingleObjectDeleteView):
 class SetupIndexEditView(SingleObjectEditView):
     fields = ('label', 'slug', 'enabled')
     model = Index
-    post_action_redirect = reverse_lazy('indexing:index_setup_list')
     object_permission = permission_document_indexing_edit
+    pk_url_kwarg = 'index_pk'
+    post_action_redirect = reverse_lazy(viewname='indexing:index_setup_list')
 
     def get_extra_context(self):
         return {
@@ -101,25 +103,25 @@ class SetupIndexDocumentTypesView(AssignRemoveView):
 
     def get_document_queryset(self):
         return AccessControlList.objects.filter_by_access(
-            permission_document_view, self.request.user,
-            queryset=DocumentType.objects.all()
+            permission_document_view, queryset=DocumentType.objects.all(),
+            user=self.request.user
         )
 
     def get_extra_context(self):
         return {
             'object': self.get_object(),
-            'title': _(
-                'Document types linked to index: %s'
-            ) % self.get_object(),
             'subtitle': _(
                 'Only the documents of the types selected will be shown '
                 'in the index when built. Only the events of the documents '
                 'of the types select will trigger updates in the index.'
             ),
+            'title': _(
+                'Document types linked to index: %s'
+            ) % self.get_object()
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Index, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Index, pk=self.kwargs['index_pk'])
 
     def left_list(self):
         return AssignRemoveView.generate_choices(
@@ -133,7 +135,7 @@ class SetupIndexDocumentTypesView(AssignRemoveView):
 
     def right_list(self):
         return AssignRemoveView.generate_choices(
-            self.get_document_queryset() & self.get_object().document_types.all()
+            choices=self.get_document_queryset() & self.get_object().document_types.all()
         )
 
 
@@ -149,7 +151,7 @@ class SetupIndexTreeTemplateListView(SingleObjectListView):
         }
 
     def get_index(self):
-        return get_object_or_404(klass=Index, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Index, pk=self.kwargs['index_pk'])
 
     def get_object_list(self):
         return self.get_index().template_root.get_descendants(
@@ -163,13 +165,13 @@ class TemplateNodeCreateView(SingleObjectCreateView):
 
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_document_indexing_edit, user=request.user,
-            obj=self.get_parent_node().index
+            obj=self.get_parent_node().index,
+            permissions=permission_document_indexing_edit, user=request.user
         )
 
         return super(
             TemplateNodeCreateView, self
-        ).dispatch(request, *args, **kwargs)
+        ).dispatch(request=request, *args, **kwargs)
 
     def get_extra_context(self):
         return {
@@ -185,7 +187,9 @@ class TemplateNodeCreateView(SingleObjectCreateView):
         }
 
     def get_parent_node(self):
-        return get_object_or_404(klass=IndexTemplateNode, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=IndexTemplateNode, pk=self.kwargs['index_template_node_pk']
+        )
 
 
 class TemplateNodeDeleteView(SingleObjectDeleteView):
@@ -205,7 +209,8 @@ class TemplateNodeDeleteView(SingleObjectDeleteView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'indexing:index_setup_view', args=(self.get_object().index.pk,)
+            viewname='indexing:index_setup_view',
+            kwargs={'index_pk': self.get_object().index.pk}
         )
 
 
@@ -227,7 +232,8 @@ class TemplateNodeEditView(SingleObjectEditView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'indexing:index_setup_view', args=(self.get_object().index.pk,)
+           viewname='indexing:index_setup_view',
+           kwargs={'index_pk': self.get_object().index.pk}
         )
 
 
@@ -252,7 +258,9 @@ class IndexListView(SingleObjectListView):
 
     def get_object_list(self):
         queryset = IndexInstance.objects.filter(enabled=True)
-        return queryset.filter(node_templates__index_instance_nodes__isnull=False).distinct()
+        return queryset.filter(
+            node_templates__index_instance_nodes__isnull=False
+        ).distinct()
 
 
 class IndexInstanceNodeView(DocumentListView):
@@ -260,21 +268,24 @@ class IndexInstanceNodeView(DocumentListView):
 
     def dispatch(self, request, *args, **kwargs):
         self.index_instance_node = get_object_or_404(
-            klass=IndexInstanceNode, pk=self.kwargs['pk']
+            klass=IndexInstanceNode, pk=self.kwargs['index_instance_node_pk']
         )
 
         AccessControlList.objects.check_access(
+            obj=self.index_instance_node.index(),
             permissions=permission_document_indexing_instance_view,
-            user=request.user, obj=self.index_instance_node.index()
+            user=request.user
         )
 
         if self.index_instance_node:
             if self.index_instance_node.index_template_node.link_documents:
                 return super(IndexInstanceNodeView, self).dispatch(
-                    request, *args, **kwargs
+                    request=request, *args, **kwargs
                 )
 
-        return SingleObjectListView.dispatch(self, request, *args, **kwargs)
+        return SingleObjectListView.dispatch(
+            self, request=request, *args, **kwargs
+        )
 
     def get_document_queryset(self):
         if self.index_instance_node:
@@ -331,16 +342,18 @@ class DocumentIndexNodeListView(SingleObjectListView):
 
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=self.get_document()
+            obj=self.get_document(), permissions=permission_document_view,
+            user=request.user
         )
 
         return super(
             DocumentIndexNodeListView, self
-        ).dispatch(request, *args, **kwargs)
+        ).dispatch(request=request, *args, **kwargs)
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=Document, pk=self.kwargs['document_pk']
+        )
 
     def get_extra_context(self):
         return {
@@ -381,7 +394,7 @@ class RebuildIndexesView(FormView):
             count += 1
 
         messages.success(
-            self.request, ungettext(
+            request=self.request, message=ungettext(
                 singular='%(count)d index queued for rebuild.',
                 plural='%(count)d indexes queued for rebuild.',
                 number=count
@@ -398,4 +411,4 @@ class RebuildIndexesView(FormView):
         }
 
     def get_post_action_redirect(self):
-        return reverse('common:tools_list')
+        return reverse(viewname='common:tools_list')
