@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 
-from mayan.apps.common.tests.mixins import UserMixin
+from mayan.apps.acls.tests.mixins import ACLBaseTestMixin
 from mayan.apps.permissions.classes import Permission
 from mayan.apps.smart_settings.classes import Namespace
 from mayan.apps.user_management.tests import (
@@ -14,7 +14,7 @@ from mayan.apps.user_management.tests import (
 )
 
 
-class BaseAPITestCase(UserMixin, APITestCase):
+class BaseAPITestCase(ACLBaseTestMixin, APITestCase):
     """
     API test case class that invalidates permissions and smart settings
     """
