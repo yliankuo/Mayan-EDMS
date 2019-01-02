@@ -19,33 +19,20 @@ class ButtonWidget(forms.widgets.Widget):
         return value
 
 
-class DisableableSelectWidget(forms.SelectMultiple):
-    allow_multiple_selected = True
+class DisableableSelectWidget(forms.widgets.SelectMultiple):
+    def create_option(self, *args, **kwargs):
+        result = super(DisableableSelectWidget, self).create_option(*args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        self.disabled_choices = kwargs.pop('disabled_choices', ())
-        super(DisableableSelectWidget, self).__init__(*args, **kwargs)
+        # Get a keyword argument named value or the second positional argument
+        # Current interface as of Django 1.11
+        # def create_option(self, name, value, label, selected, index,
+        # subindex=None, attrs=None):
+        value = kwargs.get('value', args[1])
 
-    def render_option(self, selected_choices, option_value, option_label):
-        if option_value is None:
-            option_value = ''
-        option_value = force_text(option_value)
-        if option_value in selected_choices:
-            selected_html = mark_safe(' selected="selected"')
-            if not self.allow_multiple_selected:
-                # Only allow for a single selection.
-                selected_choices.remove(option_value)
-        else:
-            selected_html = ''
-        if option_value in self.disabled_choices:
-            disabled_html = u' disabled="disabled"'
-        else:
-            disabled_html = ''
-        return format_html('<option value="{0}"{1}{2}>{3}</option>',
-                           option_value,
-                           selected_html,
-                           disabled_html,
-                           force_text(option_label))
+        if value in self.disabled_choices:
+            result['attrs'].update({'disabled': 'disabled'})
+
+        return result
 
 
 # From: http://www.peterbe.com/plog/emailinput-html5-django
@@ -59,9 +46,12 @@ class EmailInput(forms.widgets.Input):
     def render(self, name, value, attrs=None):
         if attrs is None:
             attrs = {}
-        attrs.update(dict(autocorrect='off',
-                          autocapitalize='off',
-                          spellcheck='false'))
+        attrs.update(
+            {
+                'autocorrect': 'off', 'autocapitalize': 'off',
+                'spellcheck': 'false'
+            }
+        )
         return super(EmailInput, self).render(name, value, attrs=attrs)
 
 
