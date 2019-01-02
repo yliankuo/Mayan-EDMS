@@ -23,7 +23,7 @@ class FontAwesomeDriver(IconDriver):
         self.symbol = symbol
 
     def render(self):
-        return get_template(self.template_name).render(
+        return get_template(template_name=self.template_name).render(
             context={'symbol': self.symbol}
         )
 
@@ -37,7 +37,7 @@ class FontAwesomeDualDriver(IconDriver):
         self.secondary_symbol = secondary_symbol
 
     def render(self):
-        return get_template(self.template_name).render(
+        return get_template(template_name=self.template_name).render(
             context={
                 'data': (
                     {
@@ -55,7 +55,6 @@ class FontAwesomeDualDriver(IconDriver):
         )
 
 
-
 class FontAwesomeCSSDriver(IconDriver):
     name = 'fontawesomecss'
     template_name = 'appearance/icons/font_awesome_css.html'
@@ -64,7 +63,7 @@ class FontAwesomeCSSDriver(IconDriver):
         self.css_classes = css_classes
 
     def render(self):
-        return get_template(self.template_name).render(
+        return get_template(template_name=self.template_name).render(
             context={'css_classes': self.css_classes}
         )
 
@@ -77,7 +76,7 @@ class FontAwesomeMasksDriver(IconDriver):
         self.data = data
 
     def render(self):
-        return get_template(self.template_name).render(
+        return get_template(template_name=self.template_name).render(
             context={'data': self.data}
         )
 
@@ -90,7 +89,7 @@ class FontAwesomeLayersDriver(IconDriver):
         self.data = data
 
     def render(self):
-        return get_template(self.template_name).render(
+        return get_template(template_name=self.template_name).render(
             context={'data': self.data}
         )
 
