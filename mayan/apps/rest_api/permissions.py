@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 
 from rest_framework.permissions import BasePermission
 
@@ -33,6 +34,10 @@ class MayanPermission(BasePermission):
             view, 'mayan_object_permissions', {}
         ).get(request.method, None)
 
+        object_permissions_raise_404 = getattr(
+            view, 'mayan_object_permissions_raise_404', ()
+        )
+
         if required_permission:
             try:
                 if hasattr(view, 'mayan_permission_attribute_check'):
@@ -47,7 +52,10 @@ class MayanPermission(BasePermission):
                         obj=obj
                     )
             except PermissionDenied:
-                return False
+                if request.method in object_permissions_raise_404:
+                    raise Http404
+                else:
+                    return False
             else:
                 return True
         else:

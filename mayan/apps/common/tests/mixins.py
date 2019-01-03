@@ -4,23 +4,78 @@ import glob
 import os
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.conf.urls import url
 from django.core import management
-
-from mayan.apps.user_management.tests import (
-    TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME,
-    TEST_GROUP_NAME, TEST_USER_EMAIL, TEST_USER_PASSWORD,
-    TEST_USER_USERNAME
-)
+from django.http import HttpResponse
+from django.template import Context, Template
+from django.test.utils import ContextList
+from django.urls import clear_url_caches, reverse
 
 from ..settings import setting_temporary_directory
 
+from .literals import TEST_VIEW_NAME, TEST_VIEW_URL
 from .utils import mute_stdout
 
 
 if getattr(settings, 'COMMON_TEST_FILE_HANDLES', False):
     import psutil
+
+
+class ClientMethodsTestCaseMixin(object):
+    def delete(self, viewname=None, path=None, *args, **kwargs):
+        data = kwargs.pop('data', {})
+        follow = kwargs.pop('follow', False)
+
+        if viewname:
+            path = reverse(viewname=viewname, *args, **kwargs)
+
+        return self.client.delete(
+            path=path, data=data, follow=follow
+        )
+
+    def get(self, viewname=None, path=None, *args, **kwargs):
+        data = kwargs.pop('data', {})
+        follow = kwargs.pop('follow', False)
+
+        if viewname:
+            path = reverse(viewname=viewname, *args, **kwargs)
+
+        return self.client.get(
+            path=path, data=data, follow=follow
+        )
+
+    def patch(self, viewname=None, path=None, *args, **kwargs):
+        data = kwargs.pop('data', {})
+        follow = kwargs.pop('follow', False)
+
+        if viewname:
+            path = reverse(viewname=viewname, *args, **kwargs)
+
+        return self.client.patch(
+            path=path, data=data, follow=follow
+        )
+
+    def post(self, viewname=None, path=None, *args, **kwargs):
+        data = kwargs.pop('data', {})
+        follow = kwargs.pop('follow', False)
+
+        if viewname:
+            path = reverse(viewname=viewname, *args, **kwargs)
+
+        return self.client.post(
+            path=path, data=data, follow=follow
+        )
+
+    def put(self, viewname=None, path=None, *args, **kwargs):
+        data = kwargs.pop('data', {})
+        follow = kwargs.pop('follow', False)
+
+        if viewname:
+            path = reverse(viewname=viewname, *args, **kwargs)
+
+        return self.client.put(
+            path=path, data=data, follow=follow
+        )
 
 
 class ContentTypeCheckMixin(object):
@@ -55,7 +110,7 @@ class DatabaseConversionMixin(object):
             )
 
 
-class OpenFileCheckMixin(object):
+class OpenFileCheckTestCaseMixin(object):
     def _get_descriptor_count(self):
         process = psutil.Process()
         return process.num_fds()
@@ -65,7 +120,7 @@ class OpenFileCheckMixin(object):
         return process.open_files()
 
     def setUp(self):
-        super(OpenFileCheckMixin, self).setUp()
+        super(OpenFileCheckTestCaseMixin, self).setUp()
         if getattr(settings, 'COMMON_TEST_FILE_HANDLES', False):
             self._open_files = self._get_open_files()
 
@@ -80,10 +135,10 @@ class OpenFileCheckMixin(object):
 
             self._skip_file_descriptor_test = False
 
-        super(OpenFileCheckMixin, self).tearDown()
+        super(OpenFileCheckTestCaseMixin, self).tearDown()
 
 
-class TempfileCheckMixin(object):
+class TempfileCheckTestCaseMixin(object):
     # Ignore the jvmstat instrumentation and GitLab's CI .config files
     # Ignore LibreOffice fontconfig cache dir
     ignore_globs = ('hsperfdata_*', '.config', '.cache')
@@ -108,7 +163,7 @@ class TempfileCheckMixin(object):
         ) - set(ignored_result)
 
     def setUp(self):
-        super(TempfileCheckMixin, self).setUp()
+        super(TempfileCheckTestCaseMixin, self).setUp()
         if getattr(settings, 'COMMON_TEST_TEMP_FILES', False):
             self._temporary_items = self._get_temporary_entries()
 
@@ -123,4 +178,43 @@ class TempfileCheckMixin(object):
                     ','.join(final_temporary_items - self._temporary_items)
                 )
             )
-        super(TempfileCheckMixin, self).tearDown()
+        super(TempfileCheckTestCaseMixin, self).tearDown()
+
+
+class TestViewTestCaseMixin(object):
+    has_test_view = False
+
+    def tearDown(self):
+        from mayan.urls import urlpatterns
+
+        self.client.logout()
+        if self.has_test_view:
+            urlpatterns.pop(0)
+        super(TestViewTestCaseMixin, self).tearDown()
+
+    def add_test_view(self, test_object):
+        from mayan.urls import urlpatterns
+
+        def test_view(request):
+            template = Template('{{ object }}')
+            context = Context(
+                {'object': test_object, 'resolved_object': test_object}
+            )
+            return HttpResponse(template.render(context=context))
+
+        urlpatterns.insert(0, url(TEST_VIEW_URL, test_view, name=TEST_VIEW_NAME))
+        clear_url_caches()
+        self.has_test_view = True
+
+    def get_test_view(self):
+        response = self.get(TEST_VIEW_NAME)
+        if isinstance(response.context, ContextList):
+            # template widget rendering causes test client response to be
+            # ContextList rather than RequestContext. Typecast to dictionary
+            # before updating.
+            result = dict(response.context).copy()
+            result.update({'request': response.wsgi_request})
+            return Context(result)
+        else:
+            response.context.update({'request': response.wsgi_request})
+            return Context(response.context)
