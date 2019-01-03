@@ -15,7 +15,7 @@ class IndexManager(models.Manager):
         return self.get(slug=slug)
 
     def index_document(self, document):
-        for index in self.filter(enabled=True, document_types=document.document_type):
+        for index in self.filter(document_types=document.document_type, enabled=True):
             index.index_document(document=document)
 
     def rebuild(self):

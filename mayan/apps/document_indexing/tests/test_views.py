@@ -45,7 +45,10 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
         self.assertEqual(Index.objects.first().label, TEST_INDEX_LABEL)
 
     def _request_index_delete_view(self, index):
-        return self.post('indexing:index_setup_delete', args=(index.pk,))
+        return self.post(
+            viewname='indexing:index_setup_delete',
+            kwargs={'index_pk': index.pk}
+        )
 
     def test_index_delete_view_no_permission(self):
         index = Index.objects.create(
@@ -72,7 +75,9 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
 
     def _request_index_edit_view(self, index):
         return self.post(
-            'indexing:index_setup_edit', args=(index.pk,), data={
+            viewname='indexing:index_setup_edit', kwargs={
+                'index_pk': index.pk
+            }, data={
                 'label': TEST_INDEX_LABEL_EDITED, 'slug': TEST_INDEX_SLUG
             }
         )
@@ -122,7 +127,8 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
 
     def _request_index_instance_node_view(self, index_instance_node):
         return self.get(
-            'indexing:index_instance_node_view', args=(index_instance_node.pk,)
+            viewname='indexing:index_instance_node_view',
+            kwargs={'index_instance_node_pk': index_instance_node.pk}
         )
 
     def test_index_instance_node_view_no_permission(self):
@@ -146,7 +152,9 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
             index_instance_node=self.index.instance_root
         )
 
-        self.assertContains(response, text=TEST_INDEX_LABEL, status_code=200)
+        self.assertContains(
+            response=response, text=TEST_INDEX_LABEL, status_code=200
+        )
 
     def _request_index_rebuild_get_view(self):
         return self.get(
