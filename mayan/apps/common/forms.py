@@ -131,48 +131,76 @@ class FileDisplayForm(forms.Form):
                 self.fields['text'].initial = file_object.read()
 
 
+class FilteredSelectionFormOptions(object):
+    # Dictionary list of option names and default values
+    option_definitions = (
+        {'allow_multiple': False},
+        {'field_name': None},
+        {'help_text': None},
+        {'label': None},
+        {'model': None},
+        {'permission': None},
+        {'queryset': None},
+        {'user': None},
+        {'widget_class': None},
+        {'widget_attributes': {'size': '10'}},
+    )
+
+    def __init__(self, form, kwargs, options=None):
+        """
+        Option definitions will be iterated. The option value will be
+        determined in the following order: as passed via keyword
+        arguments during form intialization, as form get_... method or
+        finally as static Meta options. This is to allow a form with
+        Meta options or method to be overrided at initialization
+        and increase the usability of a single class.
+        """
+        for option_definition in self.option_definitions:
+            name = option_definition.keys()[0]
+            default_value = option_definition.values()[0]
+
+            try:
+                # Check for a runtime value via kwargs
+                value = kwargs.pop(name)
+            except KeyError:
+                try:
+                    # Check if there is a get_... method
+                    value = getattr(self, 'get_{}'.format(name))()
+                except AttributeError:
+                    try:
+                        # Check the meta class options
+                        value = getattr(options, name)
+                    except AttributeError:
+                        value = default_value
+
+            setattr(self, name, value)
+
+
 class FilteredSelectionForm(forms.Form):
     """
     Form to select the from a list of choice filtered by access. Can be
     configure to allow single or multiple selection.
     """
-    _field_name = None
-    _label = None
-    _help_text = None
-    _permission = None
-    _queryset = None
-    _widget_class = None
-    _widget_attributes = None
-
     def __init__(self, *args, **kwargs):
-        field_name = self._field_name or kwargs.pop('field_name', None)
-        label = self._label or kwargs.pop('label', None)
-        help_text = self._help_text or kwargs.pop('help_text', None)
-        permission = self._permission or kwargs.pop('permission', None)
-        queryset = self.get_queryset() or kwargs.pop('queryset', None)
-
-        if queryset is None:
-            model = kwargs.pop('model', None)
-            if not model:
-                raise ImproperlyConfigured(
-                    'Must provide a queryset or a model.'
-                )
-
-            queryset = model.objects.all()
-
-        user = self.get_user() or kwargs.pop('user', None)
-        widget_class = self._widget_class or kwargs.pop('widget_class', None)
-        widget_attributes = self._widget_attributes or kwargs.pop(
-            'widget_attributes', {'size': '10'}
+        opts = FilteredSelectionFormOptions(
+            form=self, kwargs=kwargs, options=getattr(self, 'Meta', None)
         )
 
-        if not widget_class:
-            if self._allow_multiple is not None:
-                allow_multiple = self._allow_multiple
-            else:
-                allow_multiple = self.kwargs.pop('allow_multiple', False)
+        if opts.queryset is None:
+            if not opts.model:
+                raise ImproperlyConfigured(
+                    '{} requires a queryset or a model to be specified as '
+                    'a meta option or passed during initialization.'.format(
+                        self.__class__
+                    )
+                )
 
-            if allow_multiple:
+            queryset = opts.model.objects.all()
+        else:
+            queryset = opts.queryset
+
+        if not opts.widget_class:
+            if opts.allow_multiple:
                 extra_kwargs = {}
                 field_class = forms.ModelMultipleChoiceField
                 widget_class = forms.widgets.SelectMultiple
@@ -180,25 +208,23 @@ class FilteredSelectionForm(forms.Form):
                 extra_kwargs = {'empty_label': None}
                 field_class = forms.ModelChoiceField
                 widget_class = forms.widgets.Select
+        else:
+            widget_class = opts.widget_class
 
         super(FilteredSelectionForm, self).__init__(*args, **kwargs)
 
-        if permission:
+        if opts.permission:
             queryset = AccessControlList.objects.filter_by_access(
-                permission=permission, queryset=queryset, user=user
+                permission=opts.permission, queryset=queryset,
+                user=opts.user
             )
 
-        self.fields[field_name] = field_class(
-            help_text=help_text, label=label,
+        self.fields[opts.field_name] = field_class(
+            help_text=opts.help_text, label=opts.label,
             queryset=queryset, required=True,
-            widget=widget_class(attrs=widget_attributes), **extra_kwargs
+            widget=widget_class(attrs=opts.widget_attributes),
+            **extra_kwargs
         )
-
-    def get_queryset(self):
-        return self._queryset
-
-    def get_user(self):
-        return None
 
 
 class LicenseForm(FileDisplayForm):
