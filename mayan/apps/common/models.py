@@ -18,8 +18,49 @@ from .storages import storage_sharedupload
 logger = logging.getLogger(__name__)
 
 
+#TODO: move outside of models.py
 def upload_to(instance, filename):
     return 'shared-file-{}'.format(uuid.uuid4().hex)
+
+
+class ErrorLogNamespace(models.Model):
+    name = models.CharField(
+        max_length=128, verbose_name=_('Internal name')
+    )
+    label = models.CharField(
+        db_index=True, max_length=128, verbose_name=_('Label')
+    )
+    support_objects = models.BooleanField(
+        default=True, help_text=_(
+            'If set to True the error log namespace will be partitioned '
+            'for individual foreign model instances. If set to False, '
+            'the namespace will be flat and will behave like a singleton.'
+        ), verbose_name=_('Support objects')
+    )
+
+    class Meta:
+        ordering = ('label',)
+        verbose_name = _('Error log namespace')
+        verbose_name_plural = _('Error log namespace')
+
+
+class ErrorLogPartition(models.Model):
+    namespace = models.ForeignKey(
+        on_delete=models.CASCADE, related_name='partitions',
+        to=ErrorLogNamespace, verbose_name=_('Namespace')
+    )
+    content_type = models.ForeignKey(
+        blank=True, on_delete=models.CASCADE, null=True,
+        related_name='error_log_object_content_type', to=ContentType,
+    )
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    content_object = GenericForeignKey(
+        ct_field='content_type', fk_field='object_id',
+    )
+
+    class Meta:
+        verbose_name = _('Error log partition')
+        verbose_name_plural = _('Error log partitions')
 
 
 class ErrorLogEntry(models.Model):
@@ -27,23 +68,16 @@ class ErrorLogEntry(models.Model):
     Class to store an error log for any object. Uses generic foreign keys to
     reference the parent object.
     """
-    namespace = models.CharField(
-        max_length=128, verbose_name=_('Namespace')
-    )
-    content_type = models.ForeignKey(
-        blank=True, on_delete=models.CASCADE, null=True,
-        related_name='error_log_content_type', to=ContentType,
-    )
-    object_id = models.PositiveIntegerField(blank=True, null=True)
-    content_object = GenericForeignKey(
-        ct_field='content_type', fk_field='object_id',
+    obj = models.ForeignKey(
+        on_delete=models.CASCADE, related_name='entries',
+        to=ErrorLogObject, verbose_name=_('Object')
     )
     datetime = models.DateTimeField(
         auto_now_add=True, db_index=True, verbose_name=_('Date time')
     )
-    result = models.TextField(blank=True, null=True, verbose_name=_('Result'))
+    text = models.TextField(blank=True, null=True, verbose_name=_('Text'))
 
-    objects = ErrorLogEntryManager()
+    #objects = ErrorLogEntryManager()
 
     class Meta:
         ordering = ('datetime',)
