@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
 
-from django.core import management
+from django.apps import apps
 
 
 def handler_purge_permissions(**kwargs):
-    management.call_command('purgepermissions')
+    StoredPermission = apps.get_model(
+        app_label='permissions', model_name='StoredPermission'
+    )
+    StoredPermission.objects.purge_obsolete()

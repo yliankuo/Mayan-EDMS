@@ -22,3 +22,10 @@ class StoredPermissionManager(models.Manager):
         return self.model.objects.filter(
             permissionholder__holder_type=ct
         ).filter(permissionholder__holder_id=holder.pk)
+
+    def purge_obsolete(self):
+        for permission in self.all():
+            try:
+                permission.volatile_permission
+            except KeyError:
+                permission.delete()
