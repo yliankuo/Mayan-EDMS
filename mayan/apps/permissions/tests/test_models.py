@@ -14,18 +14,18 @@ class PermissionTestCase(BaseTestCase):
 
     def test_no_permissions(self):
         with self.assertRaises(PermissionDenied):
-            Permission.check_permissions(
-                requester=self.user, permissions=(permission_role_view,)
+            Permission.check_user_permission(
+                permission=permission_role_view, user=self._test_case_user
             )
 
     def test_with_permissions(self):
-        self.group.user_set.add(self.user)
-        self.role.permissions.add(permission_role_view.stored_permission)
-        self.role.groups.add(self.group)
+        self._test_case_group.user_set.add(self._test_case_user)
+        self._test_case_role.permissions.add(permission_role_view.stored_permission)
+        self._test_case_role.groups.add(self._test_case_group)
 
         try:
-            Permission.check_permissions(
-                requester=self.user, permissions=(permission_role_view,)
+            Permission.check_user_permission(
+                permission=permission_role_view, user=self._test_case_user
             )
         except PermissionDenied:
             self.fail('PermissionDenied exception was not expected.')

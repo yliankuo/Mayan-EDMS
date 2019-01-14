@@ -2,8 +2,11 @@ from __future__ import unicode_literals
 
 
 class PermissionError(Exception):
-    pass
+    """Base permission exception"""
 
 
 class InvalidNamespace(PermissionError):
-    pass
+    """
+    Invalid namespace name. This is probably an obsolete permission namespace,
+    execute the management command "purgepermissions" and try again.
+    """

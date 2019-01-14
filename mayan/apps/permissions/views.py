@@ -27,7 +27,7 @@ from .permissions import (
 )
 
 
-class GroupRoleMembersView(AssignRemoveView):
+class GroupRolesView(AssignRemoveView):
     grouped = False
     left_list_title = _('Available roles')
     right_list_title = _('Group roles')
@@ -44,7 +44,7 @@ class GroupRoleMembersView(AssignRemoveView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Group, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Group, pk=self.kwargs['group_id'])
 
     def left_list(self):
         return [
@@ -65,22 +65,24 @@ class RoleCreateView(SingleObjectCreateView):
     fields = ('label',)
     model = Role
     view_permission = permission_role_create
-    post_action_redirect = reverse_lazy('permissions:role_list')
+    post_action_redirect = reverse_lazy(viewname='permissions:role_list')
 
 
 class RoleDeleteView(SingleObjectDeleteView):
     model = Role
     object_permission = permission_role_delete
-    post_action_redirect = reverse_lazy('permissions:role_list')
+    pk_url_kwarg = 'role_id'
+    post_action_redirect = reverse_lazy(viewname='permissions:role_list')
 
 
 class RoleEditView(SingleObjectEditView):
     fields = ('label',)
     model = Role
     object_permission = permission_role_edit
+    pk_url_kwarg = 'role_id'
 
 
-class SetupRoleMembersView(AssignRemoveView):
+class RoleGroupsView(AssignRemoveView):
     grouped = False
     left_list_title = _('Available groups')
     right_list_title = _('Role groups')
@@ -101,24 +103,48 @@ class SetupRoleMembersView(AssignRemoveView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Role, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Role, pk=self.kwargs['role_id'])
 
     def left_list(self):
         return [
             (force_text(group.pk), group.name) for group in set(Group.objects.all()) - set(self.get_object().groups.all())
         ]
 
+    def remove(self, item):
+        group = get_object_or_404(klass=Group, pk=item)
+        self.get_object().groups.remove(group)
+
     def right_list(self):
         return [
             (force_text(group.pk), group.name) for group in self.get_object().groups.all()
         ]
 
-    def remove(self, item):
-        group = get_object_or_404(klass=Group, pk=item)
-        self.get_object().groups.remove(group)
+
+class RoleListView(SingleObjectListView):
+    model = Role
+    object_permission = permission_role_view
+
+    def get_extra_context(self):
+        return {
+            'hide_object': True,
+            'no_results_icon': icon_role_list,
+            'no_results_main_link': link_role_create.resolve(
+                context=RequestContext(request=self.request)
+            ),
+            'no_results_text': _(
+                'Roles are authorization units. They contain '
+                'user groups which inherit the role permissions for the '
+                'entire system. Roles can also part of access '
+                'controls lists. Access controls list are permissions '
+                'granted to a role for specific objects which its group '
+                'members inherit.'
+            ),
+            'no_results_title': _('There are no roles'),
+            'title': _('Roles'),
+        }
 
 
-class SetupRolePermissionsView(AssignRemoveView):
+class RolePermissionsView(AssignRemoveView):
     grouped = True
     left_list_title = _('Available permissions')
     right_list_title = _('Granted permissions')
@@ -156,7 +182,7 @@ class SetupRolePermissionsView(AssignRemoveView):
             permissions=(permission_permission_grant, permission_permission_revoke),
             user=self.request.user, obj=self.get_object()
         )
-        return super(SetupRolePermissionsView, self).dispatch(request, *args, **kwargs)
+        return super(RolePermissionsView, self).dispatch(request, *args, **kwargs)
 
     def get_extra_context(self):
         return {
@@ -169,20 +195,15 @@ class SetupRolePermissionsView(AssignRemoveView):
         }
 
     def get_object(self):
-        return get_object_or_404(klass=Role, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Role, pk=self.kwargs['role_id'])
 
     def left_list(self):
         Permission.refresh()
 
-        return SetupRolePermissionsView.generate_choices(
+        return RolePermissionsView.generate_choices(
             entries=StoredPermission.objects.exclude(
                 id__in=self.get_object().permissions.values_list('pk', flat=True)
             )
-        )
-
-    def right_list(self):
-        return SetupRolePermissionsView.generate_choices(
-            entries=self.get_object().permissions.all()
         )
 
     def remove(self, item):
@@ -192,26 +213,7 @@ class SetupRolePermissionsView(AssignRemoveView):
         permission = get_object_or_404(klass=StoredPermission, pk=item)
         self.get_object().permissions.remove(permission)
 
-
-class RoleListView(SingleObjectListView):
-    model = Role
-    object_permission = permission_role_view
-
-    def get_extra_context(self):
-        return {
-            'hide_object': True,
-            'no_results_icon': icon_role_list,
-            'no_results_main_link': link_role_create.resolve(
-                context=RequestContext(request=self.request)
-            ),
-            'no_results_text': _(
-                'Roles are authorization units. They contain '
-                'user groups which inherit the role permissions for the '
-                'entire system. Roles can also part of access '
-                'controls lists. Access controls list are permissions '
-                'granted to a role for specific objects which its group '
-                'members inherit.'
-            ),
-            'no_results_title': _('There are no roles'),
-            'title': _('Roles'),
-        }
+    def right_list(self):
+        return RolePermissionsView.generate_choices(
+            entries=self.get_object().permissions.all()
+        )
