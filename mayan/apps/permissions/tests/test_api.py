@@ -10,13 +10,11 @@ from mayan.apps.user_management.tests.literals import TEST_GROUP_NAME
 from ..classes import Permission
 from ..models import Role
 from ..permissions import (
-    permission_role_create, permission_role_delete,
-    permission_role_edit, permission_role_view
+    permission_role_create, permission_role_delete, permission_role_edit,
+    permission_role_view
 )
 
-from .literals import (
-    TEST_ROLE_LABEL, TEST_ROLE_LABEL_EDITED
-)
+from .literals import TEST_ROLE_LABEL, TEST_ROLE_LABEL_EDITED
 from .mixins import RoleTestMixin
 
 

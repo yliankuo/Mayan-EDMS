@@ -6,21 +6,21 @@ from . import PermissionNamespace
 
 namespace = PermissionNamespace(label=_('Permissions'), name='permissions')
 
-permission_role_view = namespace.add_permission(
-    name='role_view', label=_('View roles')
-)
-permission_role_edit = namespace.add_permission(
-    name='role_edit', label=_('Edit roles')
-)
-permission_role_create = namespace.add_permission(
-    name='role_create', label=_('Create roles')
-)
-permission_role_delete = namespace.add_permission(
-    name='role_delete', label=_('Delete roles')
-)
 permission_permission_grant = namespace.add_permission(
-    name='permission_grant', label=_('Grant permissions')
+    label=_('Grant permissions'), name='permission_grant'
 )
 permission_permission_revoke = namespace.add_permission(
-    name='permission_revoke', label=_('Revoke permissions')
+    label=_('Revoke permissions'), name='permission_revoke'
+)
+permission_role_create = namespace.add_permission(
+    label=_('Create roles'), name='role_create'
+)
+permission_role_delete = namespace.add_permission(
+    label=_('Delete roles'), name='role_delete'
+)
+permission_role_edit = namespace.add_permission(
+    label=_('Edit roles'), name='role_edit'
+)
+permission_role_view = namespace.add_permission(
+    label=_('View roles'), name='role_view'
 )

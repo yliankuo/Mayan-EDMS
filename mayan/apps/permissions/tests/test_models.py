@@ -5,13 +5,13 @@ from django.core.exceptions import PermissionDenied
 from mayan.apps.common.tests import BaseTestCase
 
 from ..classes import Permission, PermissionNamespace
-from ..permissions import permission_role_view
 from ..models import StoredPermission
+from ..permissions import permission_role_view
 
 from .literals import (
-    TEST_INVALID_PERMISSION_NAMESPACE_NAME, TEST_INVALID_PERMISSION_NAME,
-    TEST_PERMISSION_NAMESPACE_NAME, TEST_PERMISSION_NAMESPACE_LABEL,
-    TEST_PERMISSION_NAME, TEST_PERMISSION_LABEL
+    TEST_INVALID_PERMISSION_NAME, TEST_INVALID_PERMISSION_NAMESPACE_NAME,
+    TEST_PERMISSION_LABEL, TEST_PERMISSION_NAME,
+    TEST_PERMISSION_NAMESPACE_LABEL, TEST_PERMISSION_NAMESPACE_NAME
 )
 
 

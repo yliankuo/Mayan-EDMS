@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 logger = logging.getLogger(__name__)
 

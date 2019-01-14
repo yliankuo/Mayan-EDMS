@@ -8,7 +8,7 @@ from ..models import Role
 from ..permissions import (
     permission_permission_grant, permission_permission_revoke,
     permission_role_create, permission_role_delete, permission_role_edit,
-    permission_role_view,
+    permission_role_view
 )
 
 from .literals import TEST_ROLE_LABEL, TEST_ROLE_LABEL_EDITED

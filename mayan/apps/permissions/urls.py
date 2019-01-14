@@ -5,7 +5,7 @@ from django.conf.urls import url
 from .api_views import APIPermissionList, APIRoleListView, APIRoleView
 from .views import (
     GroupRolesView, RoleCreateView, RoleDeleteView, RoleEditView,
-    RoleListView, RoleGroupsView, RolePermissionsView
+    RoleGroupsView, RoleListView, RolePermissionsView
 )
 
 urlpatterns = [

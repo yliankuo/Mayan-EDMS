@@ -22,8 +22,8 @@ from .links import link_role_create
 from .models import Role, StoredPermission
 from .permissions import (
     permission_permission_grant, permission_permission_revoke,
-    permission_role_view, permission_role_create, permission_role_delete,
-    permission_role_edit
+    permission_role_create, permission_role_delete, permission_role_edit,
+    permission_role_view
 )
 
 

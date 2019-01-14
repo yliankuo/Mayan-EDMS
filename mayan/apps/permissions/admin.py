@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.contrib import admin
 
-from .models import StoredPermission, Role
+from .models import Role, StoredPermission
 
 
 @admin.register(Role)
