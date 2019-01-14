@@ -59,7 +59,7 @@ class StoredPermission(models.Model):
     def natural_key(self):
         return (self.namespace, self.name)
 
-    def requester_has_this(self, user):
+    def user_has_this(self, user):
         """
         Helper method to check if an user has been granted this permission.
         The check is done sequentially over all of the user's groups and
@@ -73,20 +73,13 @@ class StoredPermission(models.Model):
             )
             return True
 
-        # Request is one of the permission's holders?
-        for group in user.groups.all():
-            for role in group.roles.all():
-                if self in role.permissions.all():
-                    logger.debug(
-                        'Permission "%s" granted to user "%s" through role "%s"',
-                        self, user, role
-                    )
-                    return True
-
-        logger.debug(
-            'Fallthru: Permission "%s" not granted to user "%s"', self, user
-        )
-        return False
+        if Role.objects.filter(groups__user=user, permissions=self).exists():
+            return True
+        else:
+            logger.debug(
+                'Fallthru: Permission "%s" not granted to user "%s"', self, user
+            )
+            return False
 
 
 @python_2_unicode_compatible
@@ -120,8 +113,14 @@ class Role(models.Model):
         return self.label
 
     def get_absolute_url(self):
-        return reverse('permissions:role_list')
+        return reverse(viewname='permissions:role_list')
+
+    def grant(self, permission):
+        self.permissions.add(permission.stored_permission)
 
     def natural_key(self):
         return (self.label,)
     natural_key.dependencies = ['auth.Group', 'permissions.StoredPermission']
+
+    def revoke(self, permission):
+        self.permissions.remove(permission.stored_permission)
