@@ -190,8 +190,6 @@ class ModelEventType(object):
     """
     Class to allow matching a model to a specific set of events.
     """
-    _inheritances = {}
-    _proxies = {}
     _registry = {}
 
     @classmethod
@@ -211,11 +209,6 @@ class ModelEventType(object):
         if class_events:
             events.extend(class_events)
 
-        proxy = cls._proxies.get(type(instance))
-
-        if proxy:
-            events.extend(cls._registry.get(proxy))
-
         pks = [
             event.id for event in set(events)
         ]
@@ -225,19 +218,7 @@ class ModelEventType(object):
         )
 
     @classmethod
-    def get_inheritance(cls, model):
-        return cls._inheritances[model]
-
-    @classmethod
     def register(cls, model, event_types):
         cls._registry.setdefault(model, [])
         for event_type in event_types:
             cls._registry[model].append(event_type)
-
-    @classmethod
-    def register_inheritance(cls, model, related):
-        cls._inheritances[model] = related
-
-    @classmethod
-    def register_proxy(cls, source, model):
-        cls._proxies[model] = source
