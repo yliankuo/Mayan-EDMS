@@ -217,6 +217,11 @@
 - The tags app permission workflow is now reciprocal. In order
   to attach a tag, the user's role will need the tag attach
   permissions for both, the document and the tag.
+- Refactor and optimize the access control computation. Most of
+  the computation has been moved to the database instead of doing
+  filtering in Python. The refactor added cascading access checking
+  in preparation for nested cabinet access control and the removal
+  of the permission proxy support which is now redundant.
 
 3.1.9 (2018-11-01)
 ==================

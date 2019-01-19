@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.common import MayanAppConfig, menu_object, menu_sidebar
 from mayan.apps.navigation import SourceColumn
 
+from .classes import ModelPermission
 from .links import link_acl_create, link_acl_delete, link_acl_permissions
 
 
@@ -21,6 +22,9 @@ class ACLsApp(MayanAppConfig):
 
         AccessControlList = self.get_model(model_name='AccessControlList')
 
+        ModelPermission.register_inheritance(
+            model=AccessControlList, related='content_object',
+        )
         SourceColumn(
             attribute='role', is_identifier=True, is_sortable=True,
             source=AccessControlList
