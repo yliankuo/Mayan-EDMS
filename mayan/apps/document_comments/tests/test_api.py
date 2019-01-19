@@ -16,10 +16,6 @@ from .mixins import CommentsTestMixin
 
 
 class CommentAPITestCase(CommentsTestMixin, DocumentTestMixin, BaseAPITestCase):
-    def setUp(self):
-        super(CommentAPITestCase, self).setUp()
-        self.login_user()
-
     def _request_api_comment_create_view(self):
         return self.post(
             viewname='rest_api:comment-list',

@@ -47,7 +47,6 @@ class MailDocumentView(MultipleObjectFormActionView):
     form_class = DocumentMailForm
     model = Document
     object_permission = permission_mailing_send_document
-    object_permission_raise_404 = True
     pk_url_kwarg = 'document_pk'
     success_message = _('%(count)d document queued for email delivery')
     success_message_plural = _(
@@ -173,7 +172,6 @@ class UserMailingCreateView(SingleObjectDynamicFormCreateView):
 class UserMailingDeleteView(SingleObjectDeleteView):
     model = UserMailer
     object_permission = permission_user_mailer_delete
-    object_permission_raise_404 = True
     pk_url_kwarg = 'mailer_pk'
     post_action_redirect = reverse_lazy(viewname='mailer:user_mailer_list')
 
@@ -187,7 +185,6 @@ class UserMailingEditView(SingleObjectDynamicFormEditView):
     form_class = UserMailerDynamicForm
     model = UserMailer
     object_permission = permission_user_mailer_edit
-    object_permission_raise_404 = True
     pk_url_kwarg = 'mailer_pk'
 
     def get_extra_context(self):

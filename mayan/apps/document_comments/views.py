@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.common.generics import (
     SingleObjectCreateView, SingleObjectDeleteView, SingleObjectListView
 )
-from mayan.apps.common.mixins import ExternalObjectViewMixin
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.models import Document
 
 from .icons import icon_comments_for_document
@@ -19,11 +19,11 @@ from .permissions import (
 )
 
 
-class DocumentCommentCreateView(ExternalObjectViewMixin, SingleObjectCreateView):
-    fields = ('comment',)
-    external_object_pk_url_kwarg = 'document_pk'
+class DocumentCommentCreateView(ExternalObjectMixin, SingleObjectCreateView):
     external_object_class = Document
     external_object_permission = permission_comment_create
+    external_object_pk_url_kwarg = 'document_id'
+    fields = ('comment',)
     model = Comment
 
     def get_document(self):
@@ -43,7 +43,7 @@ class DocumentCommentCreateView(ExternalObjectViewMixin, SingleObjectCreateView)
     def get_post_action_redirect(self):
         return reverse(
             viewname='comments:comments_for_document', kwargs={
-                'document_pk': self.kwargs['document_pk']
+                'document_id': self.kwargs['document_id']
             }
         )
 
@@ -55,9 +55,8 @@ class DocumentCommentCreateView(ExternalObjectViewMixin, SingleObjectCreateView)
 
 class DocumentCommentDeleteView(SingleObjectDeleteView):
     model = Comment
-    pk_url_kwarg = 'comment_pk'
+    pk_url_kwarg = 'comment_id'
     object_permission = permission_comment_delete
-    object_permission_raise_404 = True
 
     def get_delete_extra_data(self):
         return {'_user': self.request.user}
@@ -71,15 +70,15 @@ class DocumentCommentDeleteView(SingleObjectDeleteView):
     def get_post_action_redirect(self):
         return reverse(
             viewname='comments:comments_for_document', kwargs={
-                'document_pk': self.get_object().document.pk
+                'document_id': self.get_object().document.pk
             }
         )
 
 
-class DocumentCommentListView(ExternalObjectViewMixin, SingleObjectListView):
-    external_object_pk_url_kwarg = 'document_pk'
+class DocumentCommentListView(ExternalObjectMixin, SingleObjectListView):
     external_object_class = Document
     external_object_permission = permission_comment_view
+    external_object_pk_url_kwarg = 'document_id'
 
     def get_document(self):
         return self.get_external_object()

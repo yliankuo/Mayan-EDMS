@@ -12,10 +12,6 @@ from .mixins import CommentsTestMixin
 
 
 class CommentsViewsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
-    def setUp(self):
-        super(CommentsViewsTestCase, self).setUp()
-        self.login_user()
-
     def test_document_comment_add_view_no_permission(self):
         response = self._request_document_comment_add_view()
         self.assertEqual(response.status_code, 404)
@@ -31,7 +27,7 @@ class CommentsViewsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
 
     def _create_test_comment(self):
         self.test_comment = self.document.comments.create(
-            user=self.user, comment=TEST_COMMENT_TEXT
+            user=self._test_case_user, comment=TEST_COMMENT_TEXT
         )
 
     def test_document_comment_delete_view_no_permission(self):
@@ -54,7 +50,7 @@ class CommentsViewsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
     def _request_document_comment_list_view(self):
         return self.get(
             viewname='comments:comments_for_document',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_comment_list_view_no_permissions(self):

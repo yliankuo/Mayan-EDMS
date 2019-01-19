@@ -13,10 +13,6 @@ from .mixins import CommentsTestMixin
 
 
 class CommentEventsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
-    def setUp(self):
-        super(CommentEventsTestCase, self).setUp()
-        self.login_user()
-
     def test_comment_created_event_no_permissions(self):
         Action.objects.all().delete()
 

@@ -60,18 +60,18 @@ class DocumentCommentsApp(MayanAppConfig):
 
         SourceColumn(source=Comment, label=_('Date'), attribute='submit_date')
         SourceColumn(
-            source=Comment, label=_('User'),
-            func=lambda context: context['object'].user.get_full_name() if context['object'].user.get_full_name() else context['object'].user
+            func=lambda context: context['object'].user.get_full_name() if context['object'].user.get_full_name() else context['object'].user,
+            label=_('User'), source=Comment
         )
         SourceColumn(source=Comment, label=_('Comment'), attribute='comment')
 
         document_page_search.add_model_field(
+            label=_('Comments'),
             field='document_version__document__comments__comment',
-            label=_('Comments')
         )
         document_search.add_model_field(
-            field='comments__comment',
-            label=_('Comments')
+            label=_('Comments'),
+            field='comments__comment'
         )
 
         menu_sidebar.bind_links(
