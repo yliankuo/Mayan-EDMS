@@ -25,7 +25,7 @@ class TransformationManager(models.Manager):
         """
         Copy transformation from source to all targets
         """
-        content_type = ContentType.objects.get_for_model(obj=source)
+        content_type = ContentType.objects.get_for_model(model=source)
 
         # Get transformations
         transformations = self.filter(
