@@ -9,7 +9,6 @@ from ..models import AccessControlList
 
 
 class ACLTestCaseMixin(RoleTestCaseMixin, UserTestCaseMixin):
-
     def setUp(self):
         super(ACLTestCaseMixin, self).setUp()
         if hasattr(self, '_test_case_user'):

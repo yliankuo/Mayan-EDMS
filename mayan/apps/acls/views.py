@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import itertools
 import logging
 
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse
@@ -11,7 +10,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.common.mixins import (
-    ContentTypeViewMixin, ExternalObjectViewMixin
+    ContentTypeViewMixin, ExternalObjectMixin
 )
 from mayan.apps.common.views import (
     AssignRemoveView, SingleObjectCreateView, SingleObjectDeleteView,
@@ -30,7 +29,7 @@ from .permissions import permission_acl_edit, permission_acl_view
 logger = logging.getLogger(__name__)
 
 
-class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectCreateView):
+class ACLCreateView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectCreateView):
     external_object_permission = permission_acl_edit
     external_object_pk_url_kwarg = 'object_id'
     form_class = ACLCreateForm
@@ -77,11 +76,9 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectC
 
 
 class ACLDeleteView(SingleObjectDeleteView):
-    object_permission = permission_acl_edit
-    object_permission_related = 'content_object'
-    object_permission_raise_404 = True
     model = AccessControlList
-    pk_url_kwarg = 'acl_pk'
+    object_permission = permission_acl_edit
+    pk_url_kwarg = 'acl_id'
 
     def get_extra_context(self):
         return {
@@ -100,7 +97,7 @@ class ACLDeleteView(SingleObjectDeleteView):
         )
 
 
-class ACLListView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectListView):
+class ACLListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListView):
     external_object_permission = permission_acl_view
     external_object_pk_url_kwarg = 'object_id'
 
@@ -211,24 +208,15 @@ class ACLPermissionsView(AssignRemoveView):
         return StoredPermission.objects.filter(pk__in=merged_pks)
 
     def get_object(self):
-        acl = get_object_or_404(
-            klass=AccessControlList, pk=self.kwargs['acl_pk']
+        return get_object_or_404(
+            klass=self.get_queryset(), pk=self.kwargs['acl_id']
         )
 
-        # Get the ACL, from this get the object of the ACL, from the object
-        # get all ACLs it holds as a filtered queryset by access.
-
-        try:
-            AccessControlList.objects.check_access(
-                permissions=(permission_acl_edit,), obj=acl.content_object,
-                user=self.request.user
-            )
-        except PermissionDenied:
-            queryset = AccessControlList.objects.none()
-        else:
-            queryset = acl.content_object.acls.all()
-
-        return get_object_or_404(klass=queryset, pk=self.kwargs['acl_pk'])
+    def get_queryset(self):
+        return AccessControlList.objects.restrict_queryset(
+            permission=permission_acl_edit,
+            queryset=AccessControlList.objects.all(), user=self.request.user
+        )
 
     def get_right_list_help_text(self):
         if self.get_object().get_inherited_permissions():

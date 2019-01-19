@@ -99,7 +99,7 @@ class AccessControlListViewTestCase(RoleTestMixin, GenericDocumentViewTestCase):
 
     def _request_acl_delete_view(self):
         return self.post(
-            viewname='acls:acl_delete', kwargs={'acl_pk': self.test_acl.pk}
+            viewname='acls:acl_delete', kwargs={'acl_id': self.test_acl.pk}
         )
 
     def test_acl_delete_view_no_permission(self):
@@ -154,7 +154,7 @@ class AccessControlListViewTestCase(RoleTestMixin, GenericDocumentViewTestCase):
     def _request_get_acl_permissions_view(self):
         return self.get(
             viewname='acls:acl_permissions',
-            kwargs={'acl_pk': self.test_acl.pk}
+            kwargs={'acl_id': self.test_acl.pk}
         )
 
     def test_acl_permissions_view_get_no_permission(self):
