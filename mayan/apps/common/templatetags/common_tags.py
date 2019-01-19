@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import logging
+
 from django.template import Context, Library, VariableDoesNotExist, Variable
 from django.template.defaultfilters import truncatechars
 from django.template.loader import get_template
@@ -14,6 +16,7 @@ from ..icons import icon_list_mode_items, icon_list_mode_list
 from ..literals import MESSAGE_SQLITE_WARNING
 from ..utils import check_for_sqlite, resolve_attribute
 
+logger = logging.getLogger(__name__)
 register = Library()
 
 
