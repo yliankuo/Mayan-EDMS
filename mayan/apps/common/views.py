@@ -16,7 +16,7 @@ from django.views.generic import RedirectView, TemplateView
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.mixins import (
-    ContentTypeViewMixin, ExternalObjectViewMixin
+    ContentTypeViewMixin, ExternalObjectMixin
 )
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
@@ -174,7 +174,7 @@ class ObjectErrorLogEntryListClearView(ConfirmView):
         )
 
 
-class ObjectErrorLogEntryListView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectListView):
+class ObjectErrorLogEntryListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListView):
     #TODO: Update for MERC 6. Return 404.
     """
     def dispatch(self, request, *args, **kwargs):

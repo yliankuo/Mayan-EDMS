@@ -16,8 +16,8 @@ from mayan.apps.permissions import Permission
 from .exceptions import ActionError
 from .forms import DynamicForm
 from .literals import (
-    TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST, TEXT_LIST_AS_ITEMS_PARAMETER,
-    TEXT_LIST_AS_ITEMS_VARIABLE_NAME
+    PK_LIST_SEPARATOR, TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST,
+    TEXT_LIST_AS_ITEMS_PARAMETER, TEXT_LIST_AS_ITEMS_VARIABLE_NAME
 )
 
 __all__ = (
@@ -73,7 +73,7 @@ class ExtraContextMixin(object):
         return context
 
 
-class ExternalObjectViewMixin(object):
+class ExternalObjectMixin(object):
     external_object_class = None
     external_object_permission = None
     external_object_pk_url_kwarg = 'pk'
@@ -214,7 +214,7 @@ class MultipleObjectMixin(object):
     model = None
     object_permission = None
     pk_list_key = 'id_list'
-    pk_list_separator = ','
+    pk_list_separator = PK_LIST_SEPARATOR
     pk_url_kwarg = 'pk'
     queryset = None
     slug_url_kwarg = 'slug'
@@ -334,7 +334,7 @@ class ObjectListPermissionFilterMixin(object):
 
         if not self.access_object_retrieve_method and self.object_permission:
             return AccessControlList.objects.filter_by_access(
-                obj=self.object_permission, queryset=queryset,
+                permission=self.object_permission, queryset=queryset,
                 user=self.request.user
             )
         else:
@@ -359,38 +359,27 @@ class ObjectNameMixin(object):
 
 class ObjectPermissionCheckMixin(object):
     """
-    If object_permission_raise_404 is True an HTTP 404 error will be raised
-    instead of the normal 403.
+    Filter the queryset of the view by the `object_permission` provided.
+    If no `object_permission` is provide the queryset will be returned
+    as is.
     """
     object_permission = None
-    object_permission_raise_404 = False
 
-    def get_permission_object(self):
-        return self.get_object()
+    def get_queryset(self):
+        queryset = super(ObjectPermissionCheckMixin, self).get_queryset()
 
-    def dispatch(self, request, *args, **kwargs):
         if self.object_permission:
-            try:
-                AccessControlList.objects.check_access(
-                    obj=self.get_permission_object(),
-                    permissions=self.object_permission,
-                    related=getattr(self, 'object_permission_related', None),
-                    user=request.user
-                )
-            except PermissionDenied:
-                if self.object_permission_raise_404:
-                    raise Http404
-                else:
-                    raise
+            return AccessControlList.objects.restrict_queryset(
+                permission=self.object_permission, queryset=queryset,
+                user=self.request.user
+            )
 
-        return super(
-            ObjectPermissionCheckMixin, self
-        ).dispatch(request, *args, **kwargs)
+        return queryset
 
 
 class RedirectionMixin(object):
-    post_action_redirect = None
     action_cancel_redirect = None
+    post_action_redirect = None
 
     def dispatch(self, request, *args, **kwargs):
         post_action_redirect = self.get_post_action_redirect()
