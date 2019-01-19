@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.events import EventTypeNamespace
 
 namespace = EventTypeNamespace(
-    name='file_metadata', label=_('File metadata')
+    label=_('File metadata'), name='file_metadata'
 )
 
 event_file_metadata_document_version_submit = namespace.add_event_type(

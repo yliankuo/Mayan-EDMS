@@ -6,7 +6,7 @@ from mayan.apps.smart_settings import Namespace
 
 from .literals import DEFAULT_EXIF_PATH
 
-namespace = Namespace(name='file_metadata', label=_('File metadata'))
+namespace = Namespace(label=_('File metadata'), name='file_metadata')
 
 setting_drivers_arguments = namespace.add_setting(
     global_name='FILE_METADATA_DRIVERS_ARGUMENTS',

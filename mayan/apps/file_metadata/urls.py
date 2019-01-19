@@ -9,29 +9,30 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^documents/(?P<pk>\d+)/drivers/$', DocumentDriverListView.as_view(),
-        name='document_driver_list'
+        regex=r'^documents/(?P<document_id>\d+)/drivers/$',
+        name='document_driver_list', view=DocumentDriverListView.as_view()
+
     ),
     url(
-        r'^documents/(?P<pk>\d+)/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit'
+        regex=r'^documents/(?P<document_id>\d+)/submit/$',
+        name='document_submit', view=DocumentSubmitView.as_view()
     ),
     url(
-        r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
-        name='document_multiple_submit'
+        regex=r'^documents/multiple/submit/$', name='document_multiple_submit',
+        view=DocumentSubmitView.as_view()
     ),
     url(
-        r'^document_types/(?P<pk>\d+)/ocr/settings/$',
-        DocumentTypeSettingsEditView.as_view(),
-        name='document_type_settings'
+        regex=r'^document_types/(?P<document_type_id>\d+)/ocr/settings/$',
+        name='document_type_settings',
+        view=DocumentTypeSettingsEditView.as_view()
     ),
     url(
-        r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
-        name='document_type_submit'
+        regex=r'^document_types/submit/$', name='document_type_submit',
+        view=DocumentTypeSubmitView.as_view()
     ),
     url(
-        r'^document_version_driver/(?P<pk>\d+)/attributes/$',
-        DocumentVersionDriverEntryFileMetadataListView.as_view(),
-        name='document_version_driver_file_metadata_list'
+        regex=r'^document_version_driver/(?P<document_version_driver_id>\d+)/attributes/$',
+        name='document_version_driver_file_metadata_list',
+        view=DocumentVersionDriverEntryFileMetadataListView.as_view()
     ),
 ]

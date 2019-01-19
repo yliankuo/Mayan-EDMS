@@ -45,7 +45,9 @@ class DocumentDriverListView(SingleObjectListView):
         }
 
     def get_object(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(
+            klass=Document, pk=self.kwargs['document_id']
+        )
         AccessControlList.objects.check_access(
             permissions=permission_file_metadata_view,
             user=self.request.user, obj=document
@@ -72,7 +74,8 @@ class DocumentVersionDriverEntryFileMetadataListView(SingleObjectListView):
 
     def get_object(self):
         document_version_driver_entry = get_object_or_404(
-            klass=DocumentVersionDriverEntry, pk=self.kwargs['pk']
+            klass=DocumentVersionDriverEntry,
+            pk=self.kwargs['document_version_driver_id']
         )
         AccessControlList.objects.check_access(
             obj=document_version_driver_entry.document_version,
@@ -88,6 +91,7 @@ class DocumentVersionDriverEntryFileMetadataListView(SingleObjectListView):
 class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_file_metadata_submit
+    pk_url_kwarg = 'document_id'
     success_message = '%(count)d document submitted to the file metadata queue.'
     success_message_plural = '%(count)d documents submitted to the file metadata queue.'
 
@@ -111,10 +115,12 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
 class DocumentTypeSettingsEditView(SingleObjectEditView):
     fields = ('auto_process',)
     object_permission = permission_document_type_file_metadata_setup
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
 
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=DocumentType, pk=self.kwargs['document_type_id']
+        )
 
     def get_extra_context(self):
         return {
@@ -135,7 +141,7 @@ class DocumentTypeSubmitView(FormView):
         )
     }
     form_class = DocumentTypeFilteredSelectForm
-    post_action_redirect = reverse_lazy('common:tools_list')
+    post_action_redirect = reverse_lazy(viewname='common:tools_list')
 
     def get_form_extra_kwargs(self):
         return {

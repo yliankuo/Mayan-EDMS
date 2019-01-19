@@ -35,7 +35,7 @@ class EXIFToolDriver(FileMetadataDriver):
         try:
             document_version.save_to_file(filepath=temp_filename)
             result = self.command_exiftool(temp_filename)
-            return json.loads(result.stdout)[0]
+            return json.loads(s=result.stdout)[0]
         finally:
             fs_cleanup(filename=temp_filename)
 

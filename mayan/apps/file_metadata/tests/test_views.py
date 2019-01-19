@@ -20,8 +20,8 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_version_driver_list_view(self):
         return self.get(
-            args=(self.document.pk,),
             viewname='file_metadata:document_driver_list',
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_version_driver_list_view_no_permission(self):
@@ -39,10 +39,8 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_version_file_metadata_list_view(self):
         return self.get(
-            args=(
-                self.document.latest_version.file_metadata_drivers.first().pk,
-            ),
             viewname='file_metadata:document_version_driver_file_metadata_list',
+            kwargs={'document_version_driver_id': self.document.latest_version.file_metadata_drivers.first().pk}
         )
 
     def test_document_version_file_metadata_list_view_no_permission(self):
@@ -62,7 +60,8 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_submit_view(self):
         return self.post(
-            viewname='file_metadata:document_submit', args=(self.document.pk,)
+            viewname='file_metadata:document_submit',
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_submit_view_no_permission(self):
@@ -86,7 +85,7 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_multiple_document_submit_view(self):
         return self.post(
-            viewname='file_metadata:document_submit_multiple',
+            viewname='file_metadata:document_multiple_submit',
             data={
                 'id_list': self.document.pk,
             }
@@ -120,7 +119,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_type_settings_view(self):
         return self.get(
             viewname='file_metadata:document_type_settings',
-            args=(self.document.document_type.pk,)
+            kwargs={'document_type_id': self.document.document_type.pk}
         )
 
     def test_document_type_settings_view_no_permission(self):
