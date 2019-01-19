@@ -87,6 +87,26 @@ def fs_cleanup(filename, file_descriptor=None, suppress_exceptions=True):
                 raise
 
 
+def get_related_field(model, related_field_name):
+    try:
+        local_field_name, remaining_field_path = related_field_name.split(
+            LOOKUP_SEP, 1
+        )
+    except ValueError:
+        local_field_name = related_field_name
+        remaining_field_path = None
+
+    related_field = model._meta.get_field(local_field_name)
+
+    if remaining_field_path:
+        return get_related_field(
+            model=related_field.related_model,
+            related_field_name=remaining_field_path
+        )
+
+    return related_field
+
+
 def get_descriptor(file_input, read=True):
     try:
         # Is it a file like object?
@@ -118,7 +138,6 @@ def get_storage_subclass(dotted_path):
 
         def deconstruct(self):
             return ('mayan.apps.common.classes.FakeStorageSubclass', (), {})
-
 
     return StorageSubclass
 
