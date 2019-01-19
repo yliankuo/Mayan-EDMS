@@ -2,42 +2,43 @@ from __future__ import unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
 
-from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from .classes import Template
 from .serializers import ContentTypeSerializer, TemplateSerializer
 
 
-class APIContentTypeList(generics.ListAPIView):
+class APIContentTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Returns a list of all the available content types.
+    list:
+    Return a list of all the available content types.
+
+    retrieve:
+    Return the given content type details.
     """
-    serializer_class = ContentTypeSerializer
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'content_type_id'
     queryset = ContentType.objects.order_by('app_label', 'model')
+    serializer_class = ContentTypeSerializer
 
 
-class APITemplateListView(generics.ListAPIView):
+class APITemplateViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Returns a list of partial templates.
-    get: Returns a list of partial templates.
+    list:
+    Return a list of partial templates.
+
+    retrieve:
+    Return the given partial template details.
     """
-    serializer_class = TemplateSerializer
+    lookup_url_kwarg = 'name'
     permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        return Template.all(rendered=True, request=self.request)
-
-
-class APITemplateView(generics.RetrieveAPIView):
-    """
-    Returns the selected partial template details.
-    get: Retrieve the details of the partial template.
-    """
     serializer_class = TemplateSerializer
-    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         return Template.get(name=self.kwargs['name']).render(
             request=self.request
         )
+
+    def get_queryset(self):
+        return Template.all(rendered=True, request=self.request)
