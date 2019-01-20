@@ -32,7 +32,7 @@ class KeyAPITestCase(BaseAPITestCase):
     def test_key_create_view_no_permission(self):
         response = self._request_key_create_view()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Key.objects.all().count(), 0)
+        self.assertEqual(Key.objects.count(), 0)
 
     def test_key_create_view_with_permission(self):
         self.grant_permission(permission=permission_key_upload)
@@ -50,7 +50,7 @@ class KeyAPITestCase(BaseAPITestCase):
 
     def _request_key_delete_view(self):
         return self.delete(
-            viewname='rest_api:key-detail', args=(self.key.pk,)
+            viewname='rest_api:key-detail', kwargs={'key_id': self.key.pk}
         )
 
     def test_key_delete_view_no_access(self):
@@ -72,7 +72,7 @@ class KeyAPITestCase(BaseAPITestCase):
 
     def _request_key_detail_view(self):
         return self.get(
-            viewname='rest_api:key-detail', args=(self.key.pk,)
+            viewname='rest_api:key-detail', kwargs={'key_id': self.key.pk}
         )
 
     def test_key_detail_view_no_access(self):

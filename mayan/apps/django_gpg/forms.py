@@ -44,6 +44,6 @@ class KeyDetailForm(DetailForm):
 
 class KeySearchForm(forms.Form):
     term = forms.CharField(
-        label=_('Term'),
-        help_text=_('Name, e-mail, key ID or key fingerprint to look for.')
+        help_text=_('Name, e-mail, key ID or key fingerprint to look for.'),
+        label=_('Term')
     )

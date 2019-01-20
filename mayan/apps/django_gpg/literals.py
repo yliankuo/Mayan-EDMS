@@ -9,6 +9,7 @@ if platform.system() == 'OpenBSD':
 else:
     DEFAULT_GPG_PATH = '/usr/bin/gpg1'
 
+DEFAULT_KEYSERVER = 'pool.sks-keyservers.net'
 DEFAULT_SETTING_GPG_BACKEND = 'mayan.apps.django_gpg.classes.PythonGNUPGBackend'
 
 ERROR_MSG_BAD_PASSPHRASE = 'BAD_PASSPHRASE'

@@ -8,6 +8,7 @@ from .models import Key
 class KeySerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {
+            'lookup_url_kwarg': 'key_id',
             'url': {'view_name': 'rest_api:key-detail'},
         }
         fields = (

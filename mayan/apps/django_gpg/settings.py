@@ -4,7 +4,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.smart_settings import Namespace
 
-from .literals import DEFAULT_GPG_PATH, DEFAULT_SETTING_GPG_BACKEND
+from .literals import (
+    DEFAULT_GPG_PATH, DEFAULT_KEYSERVER, DEFAULT_SETTING_GPG_BACKEND
+)
 
 namespace = Namespace(name='django_gpg', label=_('Signatures'))
 
@@ -23,6 +25,6 @@ setting_gpg_backend_arguments = namespace.add_setting(
     )
 )
 setting_keyserver = namespace.add_setting(
-    global_name='SIGNATURES_KEYSERVER', default='pool.sks-keyservers.net',
+    global_name='SIGNATURES_KEYSERVER', default=DEFAULT_KEYSERVER,
     help_text=_('Keyserver used to query for keys.')
 )

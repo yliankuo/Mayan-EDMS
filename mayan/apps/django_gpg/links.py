@@ -11,16 +11,18 @@ from .permissions import (
 )
 
 link_key_delete = Link(
-    args=('resolved_object.pk',), permissions=(permission_key_delete,),
-    tags='dangerous', text=_('Delete'), view='django_gpg:key_delete',
+    kwargs={'key_id': 'resolved_object.pk'},
+    permissions=(permission_key_delete,), tags='dangerous', text=_('Delete'),
+    view='django_gpg:key_delete'
 )
 link_key_detail = Link(
-    args=('resolved_object.pk',), permissions=(permission_key_view,),
-    text=_('Details'), view='django_gpg:key_detail',
+    kwargs={'key_id': 'resolved_object.pk'}, permissions=(permission_key_view,),
+    text=_('Details'), view='django_gpg:key_detail'
 )
 link_key_download = Link(
-    args=('resolved_object.pk',), permissions=(permission_key_download,),
-    text=_('Download'), view='django_gpg:key_download',
+    kwargs={'key_id': 'resolved_object.pk'},
+    permissions=(permission_key_download,), text=_('Download'),
+    view='django_gpg:key_download'
 )
 link_key_query = Link(
     icon_class=icon_keyserver_search,
@@ -28,7 +30,7 @@ link_key_query = Link(
     view='django_gpg:key_query'
 )
 link_key_receive = Link(
-    args='object.key_id', keep_query=True,
+    keep_query=True, kwargs={'key_id': 'object.key_id'},
     permissions=(permission_key_receive,), text=_('Import'),
     view='django_gpg:key_receive',
 )
