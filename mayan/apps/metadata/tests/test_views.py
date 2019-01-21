@@ -38,13 +38,13 @@ class DocumentMetadataTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
     def _request_get_document_metadata_add_view(self):
         return self.get(
             viewname='metadata:document_metadata_add',
-            kwargs={'pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
         )
 
     def _request_post_document_metadata_add_view(self):
         return self.post(
             viewname='metadata:document_metadata_add',
-            kwargs={'pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={'metadata_type': self.metadata_type.pk}
         )
 
@@ -109,14 +109,14 @@ class DocumentMetadataTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
 
         response = self.get(
             viewname='metadata:document_metadata_edit',
-            kwargs={'pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
         self.assertContains(response, 'Edit', status_code=200)
 
         response = self.post(
             viewname='metadata:document_metadata_edit',
-            kwargs={'pk': self.document.pk}, data={
+            kwargs={'document_id': self.document.pk}, data={
                 'form-0-id': document_metadata_2.metadata_type.pk,
                 'form-0-update': True,
                 'form-0-value': TEST_DOCUMENT_METADATA_VALUE_2,
@@ -136,13 +136,13 @@ class DocumentMetadataTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
     def _request_get_document_document_metadata_remove_view(self):
         return self.get(
             viewname='metadata:document_metadata_remove',
-            kwargs={'pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def _request_post_document_document_metadata_remove_view(self):
         return self.post(
             viewname='metadata:document_metadata_remove',
-            kwargs={'pk': self.document.pk}, data={
+            kwargs={'document_id': self.document.pk}, data={
                 'form-0-id': self.document_metadata.metadata_type.pk,
                 'form-0-update': True,
                 'form-TOTAL_FORMS': '1',
@@ -338,7 +338,7 @@ class DocumentMetadataTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
 
         self.post(
             viewname='metadata:document_metadata_add',
-            kwargs={'pk': self.document.pk}, data={
+            kwargs={'document_id': self.document.pk}, data={
                 'metadata_type': [self.metadata_type.pk, metadata_type_2.pk],
             }
         )
@@ -385,7 +385,7 @@ class MetadataTypeViewTestCase(DocumentTestMixin, MetadataTestsMixin, GenericVie
 
         response = self._request_metadata_type_delete_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertQuerysetEqual(
             qs=MetadataType.objects.values('label', 'name'),
             values=[
@@ -414,7 +414,7 @@ class MetadataTypeViewTestCase(DocumentTestMixin, MetadataTestsMixin, GenericVie
 
         response = self._request_metadata_type_edit_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertQuerysetEqual(
             qs=MetadataType.objects.values('label', 'name'),
             values=[
@@ -472,8 +472,7 @@ class MetadataTypeViewTestCase(DocumentTestMixin, MetadataTestsMixin, GenericVie
         self.upload_document()
 
         response = self._request_metadata_type_relationship_edit_view()
-
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
         self.document_type.refresh_from_db()
 
@@ -489,8 +488,7 @@ class MetadataTypeViewTestCase(DocumentTestMixin, MetadataTestsMixin, GenericVie
         )
 
         response = self._request_metadata_type_relationship_edit_view()
-
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
         self.document_type.refresh_from_db()
 

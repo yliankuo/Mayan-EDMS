@@ -33,9 +33,9 @@ from .events import (
     event_metadata_type_relationship
 )
 from .handlers import (
-    handler_post_document_type_metadata_type_add,
+    handler_index_document, handler_post_document_type_metadata_type_add,
     handler_post_document_type_metadata_type_delete,
-    handler_post_document_type_change_metadata, handler_index_document,
+    handler_post_document_type_change,
 )
 from .links import (
     link_document_metadata_add, link_document_metadata_edit,
@@ -255,8 +255,8 @@ class MetadataApp(MayanAppConfig):
             sender=DocumentTypeMetadataType
         )
         post_document_type_change.connect(
-            dispatch_uid='metadata_handler_post_document_type_change_metadata',
-            receiver=handler_post_document_type_change_metadata,
+            dispatch_uid='metadata_handler_post_document_type_change',
+            receiver=handler_post_document_type_change,
             sender=Document
         )
         post_save.connect(

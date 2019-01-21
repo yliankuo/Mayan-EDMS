@@ -9,10 +9,6 @@ class MetadataParser(object):
     _registry = []
 
     @classmethod
-    def register(cls, parser):
-        cls._registry.append(parser)
-
-    @classmethod
     def get_all(cls):
         return cls._registry
 
@@ -23,6 +19,10 @@ class MetadataParser(object):
     @classmethod
     def get_import_paths(cls):
         return [validator.get_import_path() for validator in cls.get_all()]
+
+    @classmethod
+    def register(cls, parser):
+        cls._registry.append(parser)
 
     def execute(self, input_data):
         raise NotImplementedError

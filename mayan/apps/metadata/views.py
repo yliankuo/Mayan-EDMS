@@ -45,6 +45,7 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
     form_class = DocumentMetadataAddForm
     model = Document
     object_permission = permission_document_metadata_add
+    pk_url_kwarg = 'document_id'
     success_message = _('Metadata add request performed on %(count)d document')
     success_message_plural = _(
         'Metadata add request performed on %(count)d documents'
@@ -62,9 +63,11 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
 
         if len(set([document.document_type.pk for document in queryset])) > 1:
             messages.error(
-                request, _('Selected documents must be of the same type.')
+                message=_(
+                    'Selected documents must be of the same type.'
+                ), request=request
             )
-            return HttpResponseRedirect(self.previous_url)
+            return HttpResponseRedirect(redirect_to=self.previous_url)
 
         return result
 
@@ -75,14 +78,14 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse(
+                redirect_to=reverse(
                     viewname='metadata:document_metadata_edit',
-                    args=(queryset.first().pk,)
+                    kwargs={'document_id': queryset.first().pk}
                 )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
-                '%s?%s' % (
+                redirect_to='%s?%s' % (
                     reverse(
                         viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
@@ -106,9 +109,9 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
         result = {
             'submit_label': _('Add'),
             'title': ungettext(
-                'Add metadata types to document',
-                'Add metadata types to documents',
-                queryset.count()
+                singular='Add metadata types to document',
+                plural='Add metadata types to documents',
+                number=queryset.count()
             )
         }
 
@@ -169,8 +172,7 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
                     created = True
             except Exception as exception:
                 messages.error(
-                    self.request,
-                    _(
+                    message=_(
                         'Error adding metadata type '
                         '"%(metadata_type)s" to document: '
                         '%(document)s; %(exception)s'
@@ -180,29 +182,30 @@ class DocumentMetadataAddView(MultipleObjectFormActionView):
                         'exception': ', '.join(
                             getattr(exception, 'messages', exception)
                         )
-                    }
+                    },
+                    request=self.request
                 )
             else:
                 if created:
                     messages.success(
-                        self.request,
-                        _(
+                        message=_(
                             'Metadata type: %(metadata_type)s '
                             'successfully added to document %(document)s.'
                         ) % {
                             'metadata_type': metadata_type,
                             'document': instance
-                        }
+                        },
+                        request=self.request
                     )
                 else:
                     messages.warning(
-                        self.request, _(
+                        message=_(
                             'Metadata type: %(metadata_type)s already '
                             'present in document %(document)s.'
                         ) % {
                             'metadata_type': metadata_type,
                             'document': instance
-                        }
+                        }, request=self.request
                     )
 
 
@@ -210,6 +213,7 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
     form_class = DocumentMetadataFormSet
     model = Document
     object_permission = permission_document_metadata_edit
+    pk_url_kwarg = 'document_id'
     success_message = _(
         'Metadata edit request performed on %(count)d document'
     )
@@ -229,9 +233,11 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
 
         if len(set([document.document_type.pk for document in queryset])) > 1:
             messages.error(
-                request, _('Selected documents must be of the same type.')
+                message=_(
+                    'Selected documents must be of the same type.'
+                ), request=request
             )
-            return HttpResponseRedirect(self.previous_url)
+            return HttpResponseRedirect(redirect_to=self.previous_url)
 
         return result
 
@@ -242,14 +248,14 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse(
+                redirect_to=reverse(
                     viewname='metadata:document_metadata_edit',
-                    args=(queryset.first().pk,)
+                    kwargs={'document_id': queryset.first().pk}
                 )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
-                '%s?%s' % (
+                redirect_to='%s?%s' % (
                     reverse(
                         viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
@@ -303,9 +309,9 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
             'no_results_title': _('There is no metadata to edit'),
             'submit_label': _('Edit'),
             'title': ungettext(
-                'Edit document metadata',
-                'Edit documents metadata',
-                queryset.count()
+                singular='Edit document metadata',
+                plural='Edit documents metadata',
+                number=queryset.count()
             )
         }
 
@@ -371,36 +377,31 @@ class DocumentMetadataEditView(MultipleObjectFormActionView):
                     exception_message = force_text(error)
 
                 messages.error(
-                    self.request, _(
+                    message=_(
                         'Error editing metadata for document: '
                         '%(document)s; %(exception)s.'
                     ) % {
                         'document': instance,
                         'exception': exception_message
-                    }
+                    }, request=self.request
                 )
         else:
             messages.success(
-                self.request,
-                _(
+                message=_(
                     'Metadata for document %s edited successfully.'
-                ) % instance
+                ) % instance, request=self.request
             )
 
 
 class DocumentMetadataListView(SingleObjectListView):
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_metadata_view,
-            user=self.request.user, obj=self.get_document()
-        )
-
-        return super(DocumentMetadataListView, self).dispatch(
-            request, *args, **kwargs
-        )
-
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_metadata_view,
+            queryset=Document.objects.all(),
+            user=self.request.user
+        )
+
+        return get_object_or_404(klass=queryset, pk=self.kwargs['document_id'])
 
     def get_extra_context(self):
         document = self.get_document()
@@ -431,6 +432,7 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
     form_class = DocumentMetadataRemoveFormSet
     model = Document
     object_permission = permission_document_metadata_remove
+    pk_url_kwarg = 'document_id'
     success_message = _(
         'Metadata remove request performed on %(count)d document'
     )
@@ -450,9 +452,11 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
 
         if len(set([document.document_type.pk for document in queryset])) > 1:
             messages.error(
-                request, _('Selected documents must be of the same type.')
+                message=_(
+                    'Selected documents must be of the same type.'
+                ), request=request
             )
-            return HttpResponseRedirect(self.previous_url)
+            return HttpResponseRedirect(redirect_to=self.previous_url)
 
         return result
 
@@ -463,14 +467,14 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
 
         if self.action_count == 1:
             return HttpResponseRedirect(
-                reverse(
+                redirect_to=reverse(
                     viewname='metadata:document_metadata_edit',
-                    args=(queryset.first().pk,)
+                    kwargs={'document_id': queryset.first().pk}
                 )
             )
         elif self.action_count > 1:
             return HttpResponseRedirect(
-                '%s?%s' % (
+                redirect_to='%s?%s' % (
                     reverse(
                         viewname='metadata:document_multiple_metadata_edit'
                     ), urlencode(
@@ -495,9 +499,9 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
             'form_display_mode_table': True,
             'submit_label': _('Remove'),
             'title': ungettext(
-                'Remove metadata types from the document',
-                'Remove metadata types from the documents',
-                queryset.count()
+                singular='Remove metadata types from the document',
+                plural='Remove metadata types from the documents',
+                number=queryset.count()
             )
         }
 
@@ -553,24 +557,22 @@ class DocumentMetadataRemoveView(MultipleObjectFormActionView):
                     )
                     document_metadata.delete(_user=self.request.user)
                     messages.success(
-                        self.request,
-                        _(
+                        message=_(
                             'Successfully remove metadata type "%(metadata_type)s" from document: %(document)s.'
                         ) % {
                             'metadata_type': metadata_type,
                             'document': instance
-                        }
+                        }, request=self.request
                     )
                 except Exception as exception:
                     messages.error(
-                        self.request,
-                        _(
+                        message=_(
                             'Error removing metadata type "%(metadata_type)s" from document: %(document)s; %(exception)s'
                         ) % {
                             'metadata_type': metadata_type,
                             'document': instance,
                             'exception': ', '.join(exception.messages)
-                        }
+                        }, request=self.request
                     )
 
 
@@ -593,6 +595,7 @@ class MetadataTypeCreateView(SingleObjectCreateView):
 class MetadataTypeDeleteView(SingleObjectDeleteView):
     model = MetadataType
     object_permission = permission_metadata_type_delete
+    pk_url_kwarg = 'metadata_type_id'
     post_action_redirect = reverse_lazy(
         viewname='metadata:metadata_type_list'
     )
@@ -609,6 +612,7 @@ class MetadataTypeEditView(SingleObjectEditView):
     form_class = MetadataTypeForm
     model = MetadataType
     object_permission = permission_metadata_type_edit
+    pk_url_kwarg = 'metadata_type_id'
     post_action_redirect = reverse_lazy(
         viewname='metadata:metadata_type_list'
     )
@@ -663,12 +667,14 @@ class SetupDocumentTypeMetadataTypes(FormView):
                 instance.save()
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error updating relationship; %s') % exception
+                message=_('Error updating relationship; %s') % exception,
+                request=self.request
             )
         else:
             messages.success(
-                self.request, _('Relationships updated successfully')
+                message=_(
+                    'Relationships updated successfully'
+                ), request=self.request
             )
 
         return super(
@@ -703,24 +709,27 @@ class SetupDocumentTypeMetadataTypes(FormView):
         initial = []
 
         for element in self.get_queryset():
-            initial.append({
-                'document_type': obj,
-                'main_model': self.main_model,
-                'metadata_type': element,
-            })
+            initial.append(
+                {
+                    'document_type': obj,
+                    'main_model': self.main_model,
+                    'metadata_type': element,
+                }
+            )
         return initial
 
     def get_object(self):
-        obj = get_object_or_404(klass=self.model, pk=self.kwargs['pk'])
-
-        AccessControlList.objects.check_access(
-            permissions=(permission_metadata_type_edit,),
-            user=self.request.user, obj=obj
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_metadata_type_edit,
+            queryset=self.model.objects.all(),
+            user=self.request.user
         )
-        return obj
+        return get_object_or_404(
+            klass=queryset, pk=self.kwargs['document_type_id']
+        )
 
     def get_post_action_redirect(self):
-        return reverse('documents:document_type_list')
+        return reverse(viewname='documents:document_type_list')
 
     def get_queryset(self):
         queryset = self.submodel.objects.all()
@@ -749,12 +758,24 @@ class SetupMetadataTypesDocumentTypes(SetupDocumentTypeMetadataTypes):
         initial = []
 
         for element in self.get_queryset():
-            initial.append({
-                'document_type': element,
-                'main_model': self.main_model,
-                'metadata_type': obj,
-            })
+            initial.append(
+                {
+                    'document_type': element,
+                    'main_model': self.main_model,
+                    'metadata_type': obj,
+                }
+            )
         return initial
+
+    def get_object(self):
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_metadata_type_edit,
+            queryset=self.model.objects.all(),
+            user=self.request.user
+        )
+        return get_object_or_404(
+            klass=queryset, pk=self.kwargs['metadata_type_id']
+        )
 
     def get_post_action_redirect(self):
         return reverse(viewname='metadata:metadata_type_list')

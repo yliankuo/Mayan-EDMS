@@ -22,14 +22,26 @@ from .permissions import (
 )
 
 link_document_metadata_add = Link(
-    args='object.pk', icon_class=icon_document_metadata_add,
+    icon_class=icon_document_metadata_add, kwargs={'document_id': 'object.pk'},
     permissions=(permission_document_metadata_add,), text=_('Add metadata'),
     view='metadata:document_metadata_add',
 )
 link_document_metadata_edit = Link(
-    args='object.pk', icon_class=icon_document_metadata_edit,
+    icon_class=icon_document_metadata_edit, kwargs={'document_id': 'object.pk'},
     permissions=(permission_document_metadata_edit,), text=_('Edit metadata'),
     view='metadata:document_metadata_edit'
+)
+link_document_metadata_remove = Link(
+    icon_class=icon_document_metadata_remove,
+    kwargs={'document_id': 'object.pk'},
+    permissions=(permission_document_metadata_remove,),
+    text=_('Remove metadata'), view='metadata:document_metadata_remove',
+)
+link_document_metadata_view = Link(
+    icon_class=icon_document_metadata_view,
+    kwargs={'document_id': 'resolved_object.pk'},
+    permissions=(permission_document_metadata_view,), text=_('Metadata'),
+    view='metadata:document_metadata_view',
 )
 link_document_multiple_metadata_add = Link(
     icon_class=icon_document_multiple_metadata_add, text=_('Add metadata'),
@@ -44,23 +56,15 @@ link_document_multiple_metadata_remove = Link(
     text=_('Remove metadata'),
     view='metadata:document_multiple_metadata_remove'
 )
-link_document_metadata_remove = Link(
-    args='object.pk', icon_class=icon_document_metadata_remove,
-    permissions=(permission_document_metadata_remove,),
-    text=_('Remove metadata'), view='metadata:document_metadata_remove',
-)
-link_document_metadata_view = Link(
-    args='resolved_object.pk', icon_class=icon_document_metadata_view,
-    permissions=(permission_document_metadata_view,), text=_('Metadata'),
-    view='metadata:document_metadata_view',
-)
 link_document_type_metadata_types = Link(
-    args='resolved_object.pk', icon_class=icon_document_type_metadata_types,
+    icon_class=icon_document_type_metadata_types,
+    kwargs={'document_type_id': 'resolved_object.pk'},
     permissions=(permission_document_type_edit,), text=_('Metadata types'),
     view='metadata:document_type_metadata_types',
 )
 link_metadata_type_document_types = Link(
-    args='resolved_object.pk', icon_class=icon_document_type,
+    icon_class=icon_document_type,
+    kwargs={'metadata_type_id': 'resolved_object.pk'},
     permissions=(permission_document_type_edit,), text=_('Document types'),
     view='metadata:metadata_type_document_types',
 )
@@ -70,12 +74,14 @@ link_metadata_type_create = Link(
     view='metadata:metadata_type_create'
 )
 link_metadata_type_delete = Link(
-    args='object.pk', icon_class=icon_metadata_type_delete,
+    icon_class=icon_metadata_type_delete,
+    kwargs={'metadata_type_id': 'object.pk'},
     permissions=(permission_metadata_type_delete,), tags='dangerous',
     text=_('Delete'), view='metadata:metadata_type_delete',
 )
 link_metadata_type_edit = Link(
-    args='object.pk', icon_class=icon_metadata_type_edit,
+    icon_class=icon_metadata_type_edit,
+    kwargs={'metadata_type_id': 'object.pk'},
     permissions=(permission_metadata_type_edit,), text=_('Edit'),
     view='metadata:metadata_type_edit'
 )

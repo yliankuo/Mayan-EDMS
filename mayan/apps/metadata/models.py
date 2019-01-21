@@ -98,7 +98,10 @@ class MetadataType(models.Model):
         return self.label
 
     def get_absolute_url(self):
-        return reverse('metadata:metadata_type_edit', kwargs={'pk': self.pk})
+        return reverse(
+            viewname='metadata:metadata_type_edit',
+            kwargs={'metadata_type_id': self.pk}
+        )
 
     if PY2:
         # Python 2 non unicode version
