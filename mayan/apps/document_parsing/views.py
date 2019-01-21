@@ -28,6 +28,7 @@ class DocumentContentView(SingleObjectDetailView):
     form_class = DocumentContentForm
     model = Document
     object_permission = permission_content_view
+    pk_url_kwarg = 'document_id'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(DocumentContentView, self).dispatch(
@@ -48,6 +49,7 @@ class DocumentContentView(SingleObjectDetailView):
 class DocumentContentDownloadView(SingleObjectDownloadView):
     model = Document
     object_permission = permission_content_view
+    pk_url_kwarg = 'document_id'
 
     def get_file(self):
         file_object = DocumentContentDownloadView.TextIteratorIO(
@@ -62,6 +64,7 @@ class DocumentPageContentView(SingleObjectDetailView):
     form_class = DocumentPageContentForm
     model = DocumentPage
     object_permission = permission_content_view
+    pk_url_kwarg = 'document_page_id'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(DocumentPageContentView, self).dispatch(
@@ -84,7 +87,7 @@ class DocumentParsingErrorsListView(SingleObjectListView):
     view_permission = permission_content_view
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_id'])
 
     def get_extra_context(self):
         return {
@@ -141,10 +144,12 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
 class DocumentTypeSettingsEditView(SingleObjectEditView):
     fields = ('auto_parsing',)
     object_permission = permission_document_type_parsing_setup
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
 
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=DocumentType, pk=self.kwargs['document_type_id']
+        )
 
     def get_extra_context(self):
         return {
@@ -163,7 +168,7 @@ class DocumentTypeSubmitView(FormView):
         'title': _('Submit all documents of a type for parsing')
     }
     form_class = DocumentTypeFilteredSelectForm
-    post_action_redirect = reverse_lazy('common:tools_list')
+    post_action_redirect = reverse_lazy(viewname='common:tools_list')
 
     def get_form_extra_kwargs(self):
         return {

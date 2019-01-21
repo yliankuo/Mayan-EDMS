@@ -22,19 +22,16 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
     # Ensure we use a PDF file
     test_document_filename = TEST_HYBRID_DOCUMENT
 
-    def setUp(self):
-        super(DocumentContentViewsTestCase, self).setUp()
-        self.login_user()
-
     def _request_document_content_view(self):
         return self.get(
-            'document_parsing:document_content', args=(self.document.pk,)
+            viewname='document_parsing:document_content',
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_content_view_no_permissions(self):
         response = self._request_document_content_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_document_content_view_with_access(self):
         self.grant_access(
@@ -48,15 +45,15 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
 
     def _request_document_page_content_view(self):
         return self.get(
-            viewname='document_parsing:document_page_content', args=(
-                self.document.pages.first().pk,
-            )
+            viewname='document_parsing:document_page_content', kwargs={
+                'document_page_id': self.document.pages.first().pk
+            }
         )
 
     def test_document_page_content_view_no_permissions(self):
         response = self._request_document_page_content_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_document_page_content_view_with_access(self):
         self.grant_access(
@@ -71,12 +68,12 @@ class DocumentContentViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_content_download_view(self):
         return self.get(
             viewname='document_parsing:document_content_download',
-            args=(self.document.pk,)
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_parsing_download_view_no_permission(self):
         response = self._request_document_content_download_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_download_view_with_access(self):
         self.expected_content_type = 'application/octet-stream; charset=utf-8'
@@ -98,14 +95,10 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
     # Ensure we use a PDF file
     test_document_filename = TEST_HYBRID_DOCUMENT
 
-    def setUp(self):
-        super(DocumentTypeViewsTestCase, self).setUp()
-        self.login_user()
-
     def _request_document_type_parsing_settings_view(self):
         return self.get(
             viewname='document_parsing:document_type_parsing_settings',
-            args=(self.document.document_type.pk,)
+            kwargs={'document_type_id': self.document.document_type.pk}
         )
 
     def test_document_type_parsing_settings_view_no_permission(self):

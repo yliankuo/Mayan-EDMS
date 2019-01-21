@@ -16,17 +16,14 @@ TEST_DOCUMENT_CONTENT = 'Sample text'
 class DocumentParsingAPITestCase(DocumentTestMixin, BaseAPITestCase):
     test_document_filename = TEST_HYBRID_DOCUMENT
 
-    def setUp(self):
-        super(DocumentParsingAPITestCase, self).setUp()
-        self.login_user()
-
     def _request_document_page_content_view(self):
         return self.get(
             viewname='rest_api:document-page-content-view',
-            args=(
-                self.document.pk, self.document.latest_version.pk,
-                self.document.latest_version.pages.first().pk,
-            )
+            kargs={
+                'document_id': self.document.pk,
+                'version_id': self.document.latest_version.pk,
+                'page_id': self.document.latest_version.pages.first().pk
+            }
         )
 
     def test_get_document_version_page_content_no_access(self):

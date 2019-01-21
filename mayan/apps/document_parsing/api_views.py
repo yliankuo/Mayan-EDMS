@@ -17,7 +17,7 @@ class APIDocumentPageContentView(generics.RetrieveAPIView):
     """
     Returns the content of the selected document page.
     """
-    lookup_url_kwarg = 'page_pk'
+    lookup_url_kwarg = 'document_page_id'
     mayan_object_permissions = {
         'GET': (permission_content_view,),
     }
@@ -25,11 +25,12 @@ class APIDocumentPageContentView(generics.RetrieveAPIView):
     serializer_class = DocumentPageContentSerializer
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_id'])
 
     def get_document_version(self):
         return get_object_or_404(
-            klass=self.get_document().versions.all(), pk=self.kwargs['version_pk']
+            klass=self.get_document().versions.all(),
+            pk=self.kwargs['document_version_id']
         )
 
     def get_queryset(self):

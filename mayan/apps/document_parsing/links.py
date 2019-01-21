@@ -16,22 +16,26 @@ from .permissions import (
 )
 
 link_document_content = Link(
-    args='resolved_object.id', icon_class=icon_document_content,
+    icon_class=icon_document_content,
+    kwargs={'document_id': 'resolved_object.id'},
     permissions=(permission_content_view,), text=_('Content'),
     view='document_parsing:document_content',
 )
 link_document_page_content = Link(
-    args='resolved_object.id', icon_class=icon_document_content,
+    icon_class=icon_document_content,
+    kwargs={'document_page_id': 'resolved_object.id'},
     permissions=(permission_content_view,), text=_('Content'),
     view='document_parsing:document_page_content',
 )
 link_document_parsing_errors_list = Link(
-    args='resolved_object.id', icon_class=icon_document_parsing_errors_list,
+    icon_class=icon_document_parsing_errors_list,
+    kwargs={'document_id': 'resolved_object.id'},
     permissions=(permission_content_view,), text=_('Parsing errors'),
     view='document_parsing:document_parsing_error_list'
 )
 link_document_content_download = Link(
-    args='resolved_object.id', icon_class=icon_document_content_download,
+    icon_class=icon_document_content_download,
+    kwargs={'document_id': 'resolved_object.id'},
     permissions=(permission_content_view,), text=_('Download content'),
     view='document_parsing:document_content_download'
 )
@@ -40,13 +44,14 @@ link_document_multiple_submit = Link(
     view='document_parsing:document_multiple_submit'
 )
 link_document_submit = Link(
-    args='resolved_object.id', icon_class=icon_document_submit,
+    icon_class=icon_document_submit,
+    kwargs={'document_id': 'resolved_object.id'},
     permissions=(permission_parse_document,),
     text=_('Submit for parsing'), view='document_parsing:document_submit'
 )
 link_document_type_parsing_settings = Link(
-    args='resolved_object.id',
     icon_class=icon_document_type_parsing_settings,
+    kwargs={'document_type_id': 'resolved_object.id'},
     permissions=(permission_document_type_parsing_setup,),
     text=_('Setup parsing'),
     view='document_parsing:document_type_parsing_settings',
