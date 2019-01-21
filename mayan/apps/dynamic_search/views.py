@@ -47,7 +47,8 @@ class ResultsView(SearchModelMixin, SingleObjectListView):
                 global_and_search = False
 
             return self.search_model.get_search_query(
-                query_string=self.request.GET, global_and_search=global_and_search
+                global_and_search=global_and_search,
+                query_string=self.request.GET
             )
 
     def get_object_list(self):
@@ -63,8 +64,8 @@ class ResultsView(SearchModelMixin, SingleObjectListView):
                 global_and_search = False
 
             queryset = self.search_model.search(
-                query_string=self.request.GET, user=self.request.user,
-                global_and_search=global_and_search
+                global_and_search=global_and_search,
+                query_string=self.request.GET, user=self.request.user
             )
 
             return queryset
@@ -79,7 +80,9 @@ class SearchView(SearchModelMixin, SimpleView):
         return {
             'form': self.get_form(),
             'form_action': reverse(
-                'search:results', args=(self.search_model.get_full_name(),)
+                viewname='search:results', kwargs={
+                    'search_model': self.search_model.get_full_name()
+                }
             ),
             'search_model': self.search_model,
             'submit_icon_class': icon_search_submit,

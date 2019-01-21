@@ -23,9 +23,9 @@ class SearchAPITestCase(DocumentTestMixin, BaseAPITestCase):
         return self.get(
             path='{}?q={}'.format(
                 reverse(
-                    'rest_api:search-view', args=(
-                        document_search.get_full_name(),
-                    )
+                    viewname='rest_api:search-view', kwargs={
+                        'search_model': document_search.get_full_name()
+                    }
                 ), self.document.label
             )
         )
