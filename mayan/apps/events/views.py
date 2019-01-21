@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.http import Http404, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse
@@ -18,9 +18,7 @@ from .classes import EventType, ModelEventType
 from .forms import (
     EventTypeUserRelationshipFormSet, ObjectEventTypeUserRelationshipFormSet
 )
-from .icons import (
-    icon_events_list, icon_user_notifications_list
-)
+from .icons import icon_events_list, icon_user_notifications_list
 from .links import link_event_types_subscriptions_list
 from .models import StoredEventType
 from .permissions import permission_events_view
@@ -46,7 +44,9 @@ class EventTypeSubscriptionListView(FormView):
 
     def dispatch(self, *args, **kwargs):
         EventType.refresh()
-        return super(EventTypeSubscriptionListView, self).dispatch(*args, **kwargs)
+        return super(
+            EventTypeSubscriptionListView, self
+        ).dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         try:
@@ -54,20 +54,18 @@ class EventTypeSubscriptionListView(FormView):
                 instance.save()
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error updating event subscription; %s') % exception
+                message=_('Error updating event subscription; %s') % exception,
+                request=self.request
             )
         else:
             messages.success(
-                self.request, _('Event subscriptions updated successfully')
+                message=_('Event subscriptions updated successfully'),
+                request=self.request
             )
 
         return super(
             EventTypeSubscriptionListView, self
         ).form_valid(form=form)
-
-    def get_object(self):
-        return self.request.user
 
     def get_extra_context(self):
         return {
@@ -83,12 +81,17 @@ class EventTypeSubscriptionListView(FormView):
         initial = []
 
         for element in self.get_queryset():
-            initial.append({
-                'user': obj,
-                'main_model': self.main_model,
-                'stored_event_type': element,
-            })
+            initial.append(
+                {
+                    'user': obj,
+                    'main_model': self.main_model,
+                    'stored_event_type': element,
+                }
+            )
         return initial
+
+    def get_object(self):
+        return self.request.user
 
     def get_queryset(self):
         # Return the queryset by name from the sorted list of the class
@@ -96,7 +99,7 @@ class EventTypeSubscriptionListView(FormView):
         return self.submodel.objects.filter(name__in=event_type_ids)
 
     def get_post_action_redirect(self):
-        return reverse('common:current_user_details')
+        return reverse(viewname='common:current_user_details')
 
 
 class NotificationListView(SingleObjectListView):
@@ -124,8 +127,12 @@ class NotificationListView(SingleObjectListView):
 
 class NotificationMarkRead(SimpleView):
     def dispatch(self, *args, **kwargs):
-        self.get_queryset().filter(pk=self.kwargs['pk']).update(read=True)
-        return HttpResponseRedirect(reverse('events:user_notifications_list'))
+        self.get_queryset().filter(
+            pk=self.kwargs['notification_id']
+        ).update(read=True)
+        return HttpResponseRedirect(
+            redirect_to=reverse(viewname='events:user_notifications_list')
+        )
 
     def get_queryset(self):
         return self.request.user.notifications.all()
@@ -134,24 +141,16 @@ class NotificationMarkRead(SimpleView):
 class NotificationMarkReadAll(SimpleView):
     def dispatch(self, *args, **kwargs):
         self.get_queryset().update(read=True)
-        return HttpResponseRedirect(reverse('events:user_notifications_list'))
+        return HttpResponseRedirect(
+            redirect_to=reverse(viewname='events:user_notifications_list')
+        )
 
     def get_queryset(self):
         return self.request.user.notifications.all()
 
 
 class ObjectEventListView(EventListView):
-    view_permissions = None
-
-    def _get_object(self):
-        content_type = get_object_or_404(
-            klass=ContentType, app_label=self.kwargs['app_label'],
-            model=self.kwargs['model']
-        )
-
-        return get_object_or_404(
-            klass=content_type.model_class(), pk=self.kwargs['object_id']
-        )
+    view_permission = None
 
     def get_extra_context(self):
         context = super(ObjectEventListView, self).get_extra_context()
@@ -171,12 +170,19 @@ class ObjectEventListView(EventListView):
         return context
 
     def get_object(self):
-        obj = self._get_object()
-        AccessControlList.objects.check_access(
-            permissions=permission_events_view, user=self.request.user,
-            obj=obj
+        content_type = get_object_or_404(
+            klass=ContentType, app_label=self.kwargs['app_label'],
+            model=self.kwargs['model']
         )
-        return obj
+
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_events_view,
+            queryset=content_type.model_class().objects.all(),
+            user=self.request.user
+        )
+        return get_object_or_404(
+            klass=queryset, pk=self.kwargs['object_id']
+        )
 
     def get_object_list(self):
         return any_stream(self.get_object())
@@ -197,39 +203,20 @@ class ObjectEventTypeSubscriptionListView(FormView):
                 instance.save()
         except Exception as exception:
             messages.error(
-                self.request,
-                _('Error updating object event subscription; %s') % exception
+                message=_(
+                    'Error updating object event subscription; %s'
+                ) % exception, request=self.request
             )
         else:
             messages.success(
-                self.request, _(
+                message=_(
                     'Object event subscriptions updated successfully.'
-                )
+                ), request=self.request
             )
 
         return super(
             ObjectEventTypeSubscriptionListView, self
         ).form_valid(form=form)
-
-    def get_object(self):
-        object_content_type = get_object_or_404(
-            klass=ContentType, app_label=self.kwargs['app_label'],
-            model=self.kwargs['model']
-        )
-
-        try:
-            content_object = object_content_type.get_object_for_this_type(
-                pk=self.kwargs['object_id']
-            )
-        except object_content_type.model_class().DoesNotExist:
-            raise Http404
-
-        AccessControlList.objects.check_access(
-            permissions=permission_events_view, user=self.request.user,
-            obj=content_object
-        )
-
-        return content_object
 
     def get_extra_context(self):
         return {
@@ -245,12 +232,29 @@ class ObjectEventTypeSubscriptionListView(FormView):
         initial = []
 
         for element in self.get_queryset():
-            initial.append({
-                'user': self.request.user,
-                'object': obj,
-                'stored_event_type': element,
-            })
+            initial.append(
+                {
+                    'user': self.request.user,
+                    'object': obj,
+                    'stored_event_type': element,
+                }
+            )
         return initial
+
+    def get_object(self):
+        content_type = get_object_or_404(
+            klass=ContentType, app_label=self.kwargs['app_label'],
+            model=self.kwargs['model']
+        )
+
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_events_view,
+            queryset=content_type.model_class().objects.all(),
+            user=self.request.user
+        )
+        return get_object_or_404(
+            klass=queryset, pk=self.kwargs['object_id']
+        )
 
     def get_queryset(self):
         return ModelEventType.get_for_instance(instance=self.get_object())

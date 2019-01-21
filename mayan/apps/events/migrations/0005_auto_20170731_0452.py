@@ -38,12 +38,12 @@ def operation_revert_event_types_names(apps, schema_editor):
     StoredEventType = apps.get_model('events', 'StoredEventType')
 
     known_namespaces = {
-        'documents\.': 'documents_',
-        'checkouts\.': 'checkouts_',
-        'document_comments\.': 'document_comment_',
-        'document_parsing\.': 'parsing_document_',
-        'ocr\.': 'ocr_',
-        'tags\.': 'tag_',
+        r'documents\.': 'documents_',
+        r'checkouts\.': 'checkouts_',
+        r'document_comments\.': 'document_comment_',
+        r'document_parsing\.': 'parsing_document_',
+        r'ocr\.': 'ocr_',
+        r'tags\.': 'tag_',
     }
 
     pattern = re.compile('|'.join(known_namespaces.keys()))
