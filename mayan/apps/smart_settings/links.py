@@ -12,8 +12,9 @@ link_namespace_list = Link(
     text=_('Settings'), view='settings:namespace_list'
 )
 link_namespace_detail = Link(
-    args='resolved_object.name', permissions=(permission_settings_view,),
-    text=_('Settings'), view='settings:namespace_detail',
+    kwargs={'namespace_name': 'resolved_object.name'},
+    permissions=(permission_settings_view,), text=_('Settings'),
+    view='settings:namespace_detail'
 )
 # Duplicate the link to use a different name
 link_namespace_root_list = Link(
@@ -21,6 +22,7 @@ link_namespace_root_list = Link(
     text=_('Namespaces'), view='settings:namespace_list'
 )
 link_setting_edit = Link(
-    args='resolved_object.global_name', permissions=(permission_settings_edit,),
-    text=_('Edit'), view='settings:setting_edit_view',
+    kwargs={'setting_global_name': 'resolved_object.global_name'},
+    permissions=(permission_settings_edit,), text=_('Edit'),
+    view='settings:setting_edit_view'
 )

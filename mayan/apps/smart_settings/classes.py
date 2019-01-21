@@ -35,12 +35,12 @@ class Namespace(object):
                     )
 
     @classmethod
-    def get_all(cls):
-        return sorted(cls._registry.values(), key=lambda x: x.label)
-
-    @classmethod
     def get(cls, name):
         return cls._registry[name]
+
+    @classmethod
+    def get_all(cls):
+        return sorted(cls._registry.values(), key=lambda x: x.label)
 
     @classmethod
     def invalidate_cache_all(cls):

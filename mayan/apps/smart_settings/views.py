@@ -39,7 +39,7 @@ class NamespaceDetailView(SingleObjectListView):
 
     def get_namespace(self):
         try:
-            return Namespace.get(self.kwargs['namespace_name'])
+            return Namespace.get(name=self.kwargs['namespace_name'])
         except KeyError:
             raise Http404(
                 _('Namespace: %s, not found') % self.kwargs['namespace_name']
@@ -57,7 +57,7 @@ class SettingEditView(FormView):
         self.get_object().value = form.cleaned_data['value']
         Setting.save_configuration()
         messages.success(
-            self.request, _('Setting updated successfully.')
+            message=_('Setting updated successfully.'), request=self.request
         )
         return super(SettingEditView, self).form_valid(form=form)
 
@@ -72,11 +72,11 @@ class SettingEditView(FormView):
         return {'setting': self.get_object()}
 
     def get_object(self):
-        return Setting.get(self.kwargs['setting_global_name'])
+        return Setting.get(global_name=self.kwargs['setting_global_name'])
 
     def get_post_action_redirect(self):
         return reverse(
-            'settings:namespace_detail', args=(
-                self.get_object().namespace.name,
-            )
+            viewname='settings:namespace_detail', kwargs={
+                'namespace_name': self.get_object().namespace.name
+            }
         )
