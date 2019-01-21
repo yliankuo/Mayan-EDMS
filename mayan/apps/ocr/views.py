@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _, ungettext
 
+from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (
     FormView, MultipleObjectConfirmActionView, SingleObjectDetailView,
     SingleObjectDownloadView, SingleObjectEditView, SingleObjectListView
@@ -26,6 +27,7 @@ class DocumentOCRContentView(SingleObjectDetailView):
     form_class = DocumentOCRContentForm
     model = Document
     object_permission = permission_ocr_content_view
+    pk_url_kwarg = 'document_id'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(DocumentOCRContentView, self).dispatch(
@@ -46,6 +48,7 @@ class DocumentOCRContentView(SingleObjectDetailView):
 class DocumentOCRDownloadView(SingleObjectDownloadView):
     model = Document
     object_permission = permission_ocr_content_view
+    pk_url_kwarg = 'document_id'
 
     def get_file(self):
         file_object = DocumentOCRDownloadView.TextIteratorIO(
@@ -60,7 +63,9 @@ class DocumentOCRErrorsListView(SingleObjectListView):
     object_permission = permission_ocr_document
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        return get_object_or_404(
+            klass=Document, pk=self.kwargs['document_id']
+        )
 
     def get_extra_context(self):
         return {
@@ -77,6 +82,7 @@ class DocumentPageOCRContentView(SingleObjectDetailView):
     form_class = DocumentPageOCRContentForm
     model = DocumentPage
     object_permission = permission_ocr_content_view
+    pk_url_kwarg = 'document_page_id'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(DocumentPageOCRContentView, self).dispatch(
@@ -98,6 +104,7 @@ class DocumentPageOCRContentView(SingleObjectDetailView):
 class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_ocr_document
+    pk_url_kwarg = 'document_id'
     success_message = '%(count)d document submitted to the OCR queue.'
     success_message_plural = '%(count)d documents submitted to the OCR queue.'
 
@@ -106,9 +113,9 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
 
         result = {
             'title': ungettext(
-                'Submit the selected document to the OCR queue?',
-                'Submit the selected documents to the OCR queue?',
-                queryset.count()
+                singular='Submit the selected document to the OCR queue?',
+                plural='Submit the selected documents to the OCR queue?',
+                number=queryset.count()
             )
         }
 
@@ -121,10 +128,20 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
 class DocumentTypeSettingsEditView(SingleObjectEditView):
     fields = ('auto_ocr',)
     object_permission = permission_document_type_ocr_setup
-    post_action_redirect = reverse_lazy('documents:document_type_list')
+    post_action_redirect = reverse_lazy(
+        viewname='documents:document_type_list'
+    )
 
     def get_document_type(self):
-        return get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_type_ocr_setup,
+            queryset=DocumentType.objects.all(),
+            user=self.request.user
+        )
+
+        return get_object_or_404(
+            klass=queryset, pk=self.kwargs['document_type_id']
+        )
 
     def get_extra_context(self):
         return {
@@ -143,7 +160,7 @@ class DocumentTypeSubmitView(FormView):
         'title': _('Submit all documents of a type for OCR')
     }
     form_class = DocumentTypeFilteredSelectForm
-    post_action_redirect = reverse_lazy('common:tools_list')
+    post_action_redirect = reverse_lazy(viewname='common:tools_list')
 
     def get_form_extra_kwargs(self):
         return {
@@ -160,14 +177,14 @@ class DocumentTypeSubmitView(FormView):
                 count += 1
 
         messages.success(
-            self.request, _(
+            message=_(
                 '%(count)d documents added to the OCR queue.'
             ) % {
                 'count': count,
-            }
+            }, request=self.request
         )
 
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(redirect_to=self.get_success_url())
 
 
 class EntryListView(SingleObjectListView):

@@ -38,7 +38,7 @@ class APIDocumentVersionOCRView(generics.GenericAPIView):
     """
     post: Submit a document version for OCR.
     """
-    lookup_url_kwarg = 'version_pk'
+    lookup_url_kwarg = 'document_version_pk'
     mayan_object_permissions = {
         'POST': (permission_ocr_document,)
     }
@@ -66,7 +66,7 @@ class APIDocumentPageOCRContentView(generics.RetrieveAPIView):
     """
     get: Returns the OCR content of the selected document page.
     """
-    lookup_url_kwarg = 'page_pk'
+    lookup_url_kwarg = 'document_page_pk'
     mayan_object_permissions = {
         'GET': (permission_ocr_content_view,),
     }
@@ -78,7 +78,7 @@ class APIDocumentPageOCRContentView(generics.RetrieveAPIView):
 
     def get_document_version(self):
         return get_object_or_404(
-            klass=self.get_document().versions.all(), pk=self.kwargs['version_pk']
+            klass=self.get_document().versions.all(), pk=self.kwargs['document_version_pk']
         )
 
     def get_queryset(self):

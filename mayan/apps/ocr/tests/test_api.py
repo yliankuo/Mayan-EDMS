@@ -23,7 +23,7 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_ocr_submit_view(self):
         return self.post(
             viewname='rest_api:document-ocr-submit-view',
-            args=(self.document.pk,)
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_submit_document_no_access(self):
@@ -42,7 +42,10 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_ocr_submit_view(self):
         return self.post(
             viewname='rest_api:document-version-ocr-submit-view',
-            args=(self.document.pk, self.document.latest_version.pk,)
+            kwargs={
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk
+            }
         )
 
     def test_submit_document_version_no_access(self):
@@ -61,10 +64,11 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_page_content_view(self):
         return self.get(
             viewname='rest_api:document-page-ocr-content-view',
-            args=(
-                self.document.pk, self.document.latest_version.pk,
-                self.document.latest_version.pages.first().pk,
-            )
+            kwargs={
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk,
+                'document_page_id': self.document.latest_version.pages.first().pk
+            }
         )
 
     def test_get_document_version_page_content_no_access(self):
