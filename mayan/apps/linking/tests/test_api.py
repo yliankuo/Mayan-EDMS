@@ -66,7 +66,7 @@ class SmartLinkAPITestCase(DocumentTestMixin, BaseAPITestCase):
         return self.post(
             viewname='rest_api:smartlink-list', data={
                 'label': TEST_SMART_LINK_LABEL,
-                'document_types_pk_list': self.document_type.pk
+                'document_types_id_list': self.document_type.pk
             },
         )
 
@@ -135,7 +135,7 @@ class SmartLinkAPITestCase(DocumentTestMixin, BaseAPITestCase):
             viewname='rest_api:smartlink-detail',
             args=(self.smart_link.pk,), data={
                 'label': TEST_SMART_LINK_LABEL_EDITED,
-                'document_types_pk_list': self.document_type.pk
+                'document_types_id_list': self.document_type.pk
             }
         )
 
@@ -163,7 +163,7 @@ class SmartLinkAPITestCase(DocumentTestMixin, BaseAPITestCase):
             viewname='rest_api:smartlink-detail',
             args=(self.smart_link.pk,), data={
                 'label': TEST_SMART_LINK_LABEL_EDITED,
-                'document_types_pk_list': self.document_type.pk
+                'document_types_id_list': self.document_type.pk
             }
         )
 
@@ -253,7 +253,9 @@ class SmartLinkConditionAPITestCase(BaseAPITestCase):
         self._create_smart_link()
         self._create_smart_link_condition()
         self._create_document()
-        self.grant_access(permission=permission_smart_link_view, obj=self.smart_link)
+        self.grant_access(
+            obj=self.smart_link, permission=permission_smart_link_view
+        )
         response = self._request_resolved_smart_link_detail_view()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse('label' in response.data)

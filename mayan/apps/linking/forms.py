@@ -45,5 +45,5 @@ class SmartLinkConditionForm(forms.ModelForm):
         )
 
     class Meta:
-        model = SmartLinkCondition
         exclude = ('smart_link',)
+        model = SmartLinkCondition
