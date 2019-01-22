@@ -22,28 +22,25 @@ from mayan.celery import app
 from .classes import WorkflowAction
 from .handlers import (
     handler_index_document, handler_launch_workflow,
-    handler_trigger_transition,
+    handler_trigger_transition
+)
+from .links import (
+    link_document_workflow_instance_list, link_tool_launch_all_workflows,
+    link_workflow_create, link_workflow_delete, link_workflow_document_types,
+    link_workflow_edit, link_workflow_instance_detail,
+    link_workflow_instance_transition, link_workflow_list,
+    link_workflow_preview, link_workflow_runtime_proxy_document_list,
+    link_workflow_runtime_proxy_list,
+    link_workflow_runtime_proxy_state_document_list,
+    link_workflow_runtime_proxy_state_list, link_workflow_state_action_delete,
+    link_workflow_state_action_edit, link_workflow_state_action_list,
+    link_workflow_state_action_selection, link_workflow_state_create,
+    link_workflow_state_delete, link_workflow_state_edit,
+    link_workflow_state_list, link_workflow_transition_create,
+    link_workflow_transition_delete, link_workflow_transition_edit,
+    link_workflow_transition_list, link_workflow_transition_triggers
 )
 from .methods import method_get_workflow
-from .links import (
-    link_document_workflow_instance_list, link_setup_workflow_create,
-    link_setup_workflow_delete, link_setup_workflow_document_types,
-    link_setup_workflow_edit, link_setup_workflow_list,
-    link_setup_workflow_state_action_delete,
-    link_setup_workflow_state_action_edit,
-    link_setup_workflow_state_action_list,
-    link_setup_workflow_state_action_selection,
-    link_setup_workflow_state_create, link_setup_workflow_state_delete,
-    link_setup_workflow_state_edit, link_setup_workflow_states,
-    link_setup_workflow_transition_create,
-    link_setup_workflow_transition_delete, link_setup_workflow_transition_edit,
-    link_setup_workflow_transitions, link_tool_launch_all_workflows,
-    link_workflow_document_list, link_workflow_instance_detail,
-    link_workflow_instance_transition,
-    link_workflow_instance_transition_events, link_workflow_list,
-    link_workflow_preview, link_workflow_state_document_list,
-    link_workflow_state_list
-)
 from .permissions import (
     permission_workflow_delete, permission_workflow_edit,
     permission_workflow_transition, permission_workflow_view
@@ -53,7 +50,7 @@ from .widgets import widget_transition_events
 
 
 class DocumentStatesApp(MayanAppConfig):
-    app_namespace = 'document_states'
+    app_namespace = 'workflows'
     app_url = 'workflows'
     has_rest_api = True
     has_tests = True
@@ -239,30 +236,30 @@ class DocumentStatesApp(MayanAppConfig):
         )
         menu_list_facet.bind_links(
             links=(
-                link_setup_workflow_document_types,
-                link_setup_workflow_states, link_setup_workflow_transitions,
+                link_workflow_document_types,
+                link_workflow_state_list, link_workflow_transition_list,
                 link_workflow_preview, link_acl_list
             ), sources=(Workflow,)
         )
-        menu_main.bind_links(links=(link_workflow_list,), position=10)
+        menu_main.bind_links(links=(link_workflow_runtime_proxy_list,), position=10)
         menu_object.bind_links(
             links=(
-                link_setup_workflow_edit,
-                link_setup_workflow_delete
+                link_workflow_edit,
+                link_workflow_delete
             ), sources=(Workflow,)
         )
         menu_object.bind_links(
             links=(
-                link_setup_workflow_state_edit,
-                link_setup_workflow_state_action_list,
-                link_setup_workflow_state_delete
+                link_workflow_state_edit,
+                link_workflow_state_action_list,
+                link_workflow_state_delete
             ), sources=(WorkflowState,)
         )
         menu_object.bind_links(
             links=(
-                link_setup_workflow_transition_edit,
-                link_workflow_instance_transition_events, link_acl_list,
-                link_setup_workflow_transition_delete
+                link_workflow_transition_edit,
+                link_workflow_transition_triggers, link_acl_list,
+                link_workflow_transition_delete
             ), sources=(WorkflowTransition,)
         )
         menu_object.bind_links(
@@ -273,60 +270,60 @@ class DocumentStatesApp(MayanAppConfig):
         )
         menu_object.bind_links(
             links=(
-                link_workflow_document_list, link_workflow_state_list,
+                link_workflow_runtime_proxy_document_list,
+                link_workflow_runtime_proxy_state_list,
             ), sources=(WorkflowRuntimeProxy,)
         )
         menu_object.bind_links(
             links=(
-                link_workflow_state_document_list,
+                link_workflow_runtime_proxy_state_document_list,
             ), sources=(WorkflowStateRuntimeProxy,)
         )
         menu_object.bind_links(
             links=(
-                link_setup_workflow_state_action_edit,
+                link_workflow_state_action_edit,
                 link_object_error_list,
-                link_setup_workflow_state_action_delete,
+                link_workflow_state_action_delete,
             ), sources=(WorkflowStateAction,)
         )
 
         menu_secondary.bind_links(
-            links=(link_setup_workflow_list, link_setup_workflow_create),
+            links=(link_workflow_list, link_workflow_create),
             sources=(
-                Workflow, 'document_states:setup_workflow_create',
-                'document_states:setup_workflow_list'
+                Workflow, 'document_states:workflow_create',
+                'document_states:workflow_list'
             )
         )
         menu_secondary.bind_links(
-            links=(link_workflow_list,),
+            links=(link_workflow_runtime_proxy_list,),
             sources=(
                 WorkflowRuntimeProxy,
             )
         )
         menu_secondary.bind_links(
-            links=(link_setup_workflow_state_action_selection,),
+            links=(link_workflow_state_action_selection,),
             sources=(
                 WorkflowState,
             )
         )
-        menu_setup.bind_links(links=(link_setup_workflow_list,))
+        menu_setup.bind_links(links=(link_workflow_list,))
         menu_sidebar.bind_links(
             links=(
-                link_setup_workflow_transition_create,
+                link_workflow_transition_create,
             ), sources=(
                 WorkflowTransition,
-                'document_states:setup_workflow_transition_list',
+                'document_states:workflow_transition_list',
             )
         )
         menu_sidebar.bind_links(
             links=(
-                link_setup_workflow_state_create,
+                link_workflow_state_create,
             ), sources=(
                 WorkflowState,
-                'document_states:setup_workflow_state_list',
+                'document_states:workflow_state_list',
             )
         )
         menu_tools.bind_links(links=(link_tool_launch_all_workflows,))
-
         post_save.connect(
             dispatch_uid='workflows_handler_launch_workflow',
             receiver=handler_launch_workflow, sender=Document

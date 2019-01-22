@@ -406,7 +406,7 @@ class WorkflowInstance(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            viewname='document_states:workflow_instance_detail',
+            viewname='workflows:workflow_instance_detail',
             kwargs={'workflow_instance_id': self.pk}
         )
 
