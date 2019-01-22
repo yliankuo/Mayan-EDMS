@@ -73,16 +73,24 @@ class DocumentStatesApp(MayanAppConfig):
             app_label='common', model_name='ErrorLogEntry'
         )
 
-        Workflow = self.get_model('Workflow')
-        WorkflowInstance = self.get_model('WorkflowInstance')
-        WorkflowInstanceLogEntry = self.get_model('WorkflowInstanceLogEntry')
-        WorkflowRuntimeProxy = self.get_model('WorkflowRuntimeProxy')
-        WorkflowState = self.get_model('WorkflowState')
-        WorkflowStateAction = self.get_model('WorkflowStateAction')
-        WorkflowStateRuntimeProxy = self.get_model('WorkflowStateRuntimeProxy')
-        WorkflowTransition = self.get_model('WorkflowTransition')
+        Workflow = self.get_model(model_name='Workflow')
+        WorkflowInstance = self.get_model(model_name='WorkflowInstance')
+        WorkflowInstanceLogEntry = self.get_model(
+            model_name='WorkflowInstanceLogEntry'
+        )
+        WorkflowRuntimeProxy = self.get_model(
+            model_name='WorkflowRuntimeProxy'
+        )
+        WorkflowState = self.get_model(model_name='WorkflowState')
+        WorkflowStateAction = self.get_model(
+            model_name='WorkflowStateAction'
+        )
+        WorkflowStateRuntimeProxy = self.get_model(
+            model_name='WorkflowStateRuntimeProxy'
+        )
+        WorkflowTransition = self.get_model(model_name='WorkflowTransition')
         WorkflowTransitionTriggerEvent = self.get_model(
-            'WorkflowTransitionTriggerEvent'
+            model_name='WorkflowTransitionTriggerEvent'
         )
 
         Document.add_to_class(

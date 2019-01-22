@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.smart_settings import Namespace
 
-namespace = Namespace(name='document_states', label=_('Workflows'))
+namespace = Namespace(label=_('Workflows'), name='document_states')
 
 settings_workflow_image_cache_time = namespace.add_setting(
     global_name='WORKFLOWS_IMAGE_CACHE_TIME', default='31556926',

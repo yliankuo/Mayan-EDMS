@@ -49,9 +49,8 @@ class DocumentStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
 
     def _request_workflow_delete_view(self):
         return self.post(
-            viewname='document_states:setup_workflow_delete', args=(
-                self.workflow.pk,
-            ),
+            viewname='document_states:setup_workflow_delete',
+            kwargs={'workflow_id': self.workflow.pk}
         )
 
     def test_workflow_delete_view_no_access(self):
@@ -69,9 +68,9 @@ class DocumentStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
 
     def _request_workflow_edit_view(self):
         return self.post(
-            viewname='document_states:setup_workflow_edit', args=(
-                self.workflow.pk,
-            ), data={
+            viewname='document_states:setup_workflow_edit',
+            kwargs={'workflow_id': self.workflow.pk},
+            data={
                 'label': TEST_WORKFLOW_LABEL_EDITED,
                 'internal_name': self.workflow.internal_name
             }
@@ -80,7 +79,7 @@ class DocumentStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
     def test_workflow_edit_view_no_access(self):
         self._create_workflow()
         response = self._request_workflow_edit_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.workflow.refresh_from_db()
         self.assertEqual(self.workflow.label, TEST_WORKFLOW_LABEL)
 
@@ -112,15 +111,14 @@ class DocumentStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
 
     def _request_workflow_preview_view(self):
         return self.get(
-            viewname='document_states:workflow_preview', args=(
-                self.workflow.pk,
-            ),
+            viewname='document_states:workflow_preview',
+            kwargs={'workflow_id': self.workflow.pk}
         )
 
     def test_workflow_preview_view_no_access(self):
         self._create_workflow()
         response = self._request_workflow_preview_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.assertTrue(self.workflow in Workflow.objects.all())
 
     def test_workflow_preview_view_with_access(self):
@@ -138,7 +136,8 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
     def _request_workflow_state_create_view(self):
         return self.post(
             viewname='document_states:setup_workflow_state_create',
-            args=(self.workflow.pk,), data={
+            kwargs={'workflow_id': self.workflow.pk},
+            data={
                 'label': TEST_WORKFLOW_STATE_LABEL,
                 'completion': TEST_WORKFLOW_STATE_COMPLETION,
             }
@@ -152,7 +151,9 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
 
     def test_create_workflow_state_with_access(self):
         self._create_workflow()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
+        self.grant_access(
+            permission=permission_workflow_edit, obj=self.workflow
+        )
         response = self._request_workflow_state_create_view()
         self.assertEquals(response.status_code, 302)
         self.assertEquals(WorkflowState.objects.count(), 1)
@@ -167,14 +168,14 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
     def _request_workflow_state_delete_view(self):
         return self.post(
             viewname='document_states:setup_workflow_state_delete',
-            args=(self.workflow_state.pk,)
+            kwargs={'workflow_state_id': self.workflow_state.pk}
         )
 
     def test_delete_workflow_state_no_access(self):
         self._create_workflow()
         self._create_workflow_states()
         response = self._request_workflow_state_delete_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.assertEquals(WorkflowState.objects.count(), 2)
 
     def test_delete_workflow_state_with_access(self):
@@ -188,7 +189,8 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
     def _request_workflow_state_edit_view(self):
         return self.post(
             viewname='document_states:setup_workflow_state_edit',
-            args=(self.workflow_state.pk,), data={
+            kwargs={'workflow_state_id': self.workflow_state.pk},
+            data={
                 'label': TEST_WORKFLOW_STATE_LABEL_EDITED
             }
         )
@@ -197,7 +199,7 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
         self._create_workflow()
         self._create_workflow_states()
         response = self._request_workflow_state_edit_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.assertEquals(self.workflow_state.label, TEST_WORKFLOW_STATE_LABEL)
 
     def test_edit_workflow_state_with_access(self):
@@ -212,14 +214,14 @@ class DocumentStateStateViewTestCase(WorkflowTestMixin, GenericViewTestCase):
     def _request_workflow_state_list_view(self):
         return self.get(
             viewname='document_states:setup_workflow_state_list',
-            args=(self.workflow.pk,)
+            kwargs={'workflow_id': self.workflow.pk}
         )
 
     def test_workflow_state_list_no_access(self):
         self._create_workflow()
         self._create_workflow_states()
         response = self._request_workflow_state_list_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
 
     def test_workflow_state_list_with_access(self):
         self._create_workflow()
@@ -260,7 +262,7 @@ class DocumentStateToolViewTestCase(GenericDocumentViewTestCase):
 
     def _request_workflow_launch_view(self):
         return self.post(
-            'document_states:tool_launch_all_workflows',
+            viewname='document_states:tool_launch_all_workflows',
         )
 
     def test_tool_launch_all_workflows_view_no_permission(self):
@@ -295,7 +297,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
     def _request_workflow_transition_create_view(self):
         return self.post(
             viewname='document_states:setup_workflow_transition_create',
-            args=(self.workflow.pk,), data={
+            kwargs={'workflow_id': self.workflow.pk}, data={
                 'label': TEST_WORKFLOW_TRANSITION_LABEL,
                 'origin_state': self.workflow_initial_state.pk,
                 'destination_state': self.workflow_state.pk,
@@ -306,7 +308,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
         self._create_workflow()
         self._create_workflow_states()
         response = self._request_workflow_transition_create_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.assertEquals(WorkflowTransition.objects.count(), 0)
 
     def test_create_workflow_transition_with_access(self):
@@ -332,7 +334,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
     def _request_workflow_transition_delete_view(self):
         return self.post(
             viewname='document_states:setup_workflow_transition_delete',
-            args=(self.workflow_transition.pk,)
+            kwargs={'workflow_transition_id': self.workflow_transition.pk}
         )
 
     def test_delete_workflow_transition_no_access(self):
@@ -340,7 +342,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
         self._create_workflow_states()
         self._create_workflow_transition()
         response = self._request_workflow_transition_delete_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.assertTrue(self.workflow_transition in WorkflowTransition.objects.all())
 
     def test_delete_workflow_transition_with_access(self):
@@ -355,7 +357,8 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
     def _request_workflow_transition_edit_view(self):
         return self.post(
             viewname='document_states:setup_workflow_transition_edit',
-            args=(self.workflow_transition.pk,), data={
+            kwargs={'workflow_transition_id': self.workflow_transition.pk},
+            data={
                 'label': TEST_WORKFLOW_TRANSITION_LABEL_EDITED,
                 'origin_state': self.workflow_initial_state.pk,
                 'destination_state': self.workflow_state.pk,
@@ -367,7 +370,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
         self._create_workflow_states()
         self._create_workflow_transition()
         response = self._request_workflow_transition_edit_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         self.workflow_transition.refresh_from_db()
         self.assertEqual(
             self.workflow_transition.label, TEST_WORKFLOW_TRANSITION_LABEL
@@ -388,7 +391,7 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
     def _request_workflow_transition_list_view(self):
         return self.get(
             viewname='document_states:setup_workflow_transition_list',
-            args=(self.workflow.pk,)
+            kwargs={'workflow_id': self.workflow.pk}
         )
 
     def test_workflow_transition_list_no_access(self):
@@ -411,7 +414,8 @@ class DocumentStateTransitionViewTestCase(WorkflowTestMixin, GenericDocumentView
     def _request_workflow_transition(self):
         return self.post(
             viewname='document_states:workflow_instance_transition',
-            args=(self.workflow_instance.pk,), data={
+            kwargs={'workflow_instance_id': self.workflow_instance.pk},
+            data={
                 'transition': self.workflow_transition.pk,
             }
         )
@@ -481,7 +485,7 @@ class DocumentStateTransitionEventViewTestCase(WorkflowTestMixin, GenericDocumen
     def _request_workflow_transition_event_list_view(self):
         return self.get(
             viewname='document_states:setup_workflow_transition_events',
-            args=(self.workflow_transition.pk,)
+            kwargs={'workflow_transition_id': self.workflow_transition.pk}
         )
 
     def test_workflow_transition_event_list_no_access(self):
@@ -489,7 +493,7 @@ class DocumentStateTransitionEventViewTestCase(WorkflowTestMixin, GenericDocumen
         self._create_workflow_states()
         self._create_workflow_transition()
         response = self._request_workflow_transition_event_list_view()
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
 
     def test_workflow_transition_event_list_with_access(self):
         self._create_workflow()

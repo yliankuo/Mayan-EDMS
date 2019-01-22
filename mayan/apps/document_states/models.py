@@ -87,7 +87,10 @@ class Workflow(models.Model):
     def get_api_image_url(self, *args, **kwargs):
         final_url = furl()
         final_url.args = kwargs
-        final_url.path = reverse('rest_api:workflow-image', args=(self.pk,))
+        final_url.path = reverse(
+            viewname='rest_api:workflow-image',
+            kwargs={'workflow_id': self.pk}
+        )
         final_url.args['_hash'] = self.get_hash()
 
         return final_url.tostr()
@@ -321,7 +324,7 @@ class WorkflowStateAction(models.Model):
     get_class_label.short_description = _('Action type')
 
     def loads(self):
-        return json.loads(self.action_data)
+        return json.loads(s=self.action_data)
 
 
 @python_2_unicode_compatible
@@ -403,7 +406,8 @@ class WorkflowInstance(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            'document_states:workflow_instance_detail', args=(str(self.pk),)
+            viewname='document_states:workflow_instance_detail',
+            kwargs={'workflow_instance_id': self.pk}
         )
 
     def get_context(self):

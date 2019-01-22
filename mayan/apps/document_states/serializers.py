@@ -48,9 +48,9 @@ class WorkflowDocumentTypeSerializer(DocumentTypeSerializer):
 
     def get_workflow_document_type_url(self, instance):
         return reverse(
-            'rest_api:workflow-document-type-detail', args=(
-                self.context['workflow'].pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflow-document-type-detail', kwargs={
+                'workflow_pk': self.context['workflow'].pk, 'document_type_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -70,16 +70,16 @@ class WorkflowStateSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:workflowstate-detail', args=(
-                instance.workflow.pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowstate-detail', kwargs={
+                'workflow_pk': instance.workflow.pk, 'workflow_state_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflow-detail', args=(
-                instance.workflow.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflow-detail', kwargs={
+                'workflow_pk': instance.workflow.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -98,16 +98,16 @@ class WorkflowTransitionSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:workflowtransition-detail', args=(
-                instance.workflow.pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowtransition-detail', kwargs={
+                'workflow_pk': instance.workflow.pk, 'transition_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflow-detail', args=(
-                instance.workflow.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflow-detail', kwargs={
+                'workflow_pk': instance.workflow.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -145,16 +145,16 @@ class WritableWorkflowTransitionSerializer(serializers.ModelSerializer):
 
     def get_url(self, instance):
         return reverse(
-            'rest_api:workflowtransition-detail', args=(
-                instance.workflow.pk, instance.pk
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowtransition-detail', kwargs={
+                'workflow_pk': instance.workflow.pk, 'transition_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflow-detail', args=(
-                instance.workflow.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflow-detail', kwargs={
+                'workflow_pk': instance.workflow.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def update(self, instance, validated_data):
@@ -190,9 +190,9 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_image_url(self, instance):
         return reverse(
-            'rest_api:workflow-image', args=(
-                instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflow-image', kwargs={
+                'workflow_pk': instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -210,10 +210,10 @@ class WorkflowInstanceLogEntrySerializer(serializers.ModelSerializer):
 
     def get_document_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflowinstance-detail', args=(
-                instance.workflow_instance.document.pk,
-                instance.workflow_instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowinstance-detail', kwargs={
+                'document_pk': instance.workflow_instance.document.pk,
+                'transition_pk': instance.workflow_instance.pk
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -248,16 +248,16 @@ class WorkflowInstanceSerializer(serializers.ModelSerializer):
 
     def get_document_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflowinstance-detail', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowinstance-detail', kwargs={
+                'document_pk': instance.document.pk, 'transition_pk': instance.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def get_log_entries_url(self, instance):
         return reverse(
-            'rest_api:workflowinstancelogentry-list', args=(
-                instance.document.pk, instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowinstancelogentry-list', kwargs={
+                'document_pk': instance.document.pk, 'workflow_pk': instance.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
 
@@ -339,10 +339,10 @@ class WritableWorkflowInstanceLogEntrySerializer(serializers.ModelSerializer):
 
     def get_document_workflow_url(self, instance):
         return reverse(
-            'rest_api:workflowinstance-detail', args=(
-                instance.workflow_instance.document.pk,
-                instance.workflow_instance.pk,
-            ), request=self.context['request'], format=self.context['format']
+            viewname='rest_api:workflowinstance-detail', kwargs={
+                'document_pk': instance.workflow_instance.document.pk,
+                'workflow_pk': instance.workflow_instance.pk,
+            }, request=self.context['request'], format=self.context['format']
         )
 
     def validate(self, attrs):

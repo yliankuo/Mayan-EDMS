@@ -7,23 +7,23 @@ from mayan.apps.permissions import PermissionNamespace
 namespace = PermissionNamespace(label=_('Document workflows'), name='document_states')
 
 permission_workflow_create = namespace.add_permission(
-    name='workflow_create', label=_('Create workflows')
+    label=_('Create workflows'), name='workflow_create'
 )
 permission_workflow_delete = namespace.add_permission(
-    name='workflow_delte', label=_('Delete workflows')
+    label=_('Delete workflows'), name='workflow_delte'
 )
 permission_workflow_edit = namespace.add_permission(
-    name='workflow_edit', label=_('Edit workflows')
+    label=_('Edit workflows'), name='workflow_edit'
 )
 permission_workflow_view = namespace.add_permission(
-    name='workflow_view', label=_('View workflows')
+    label=_('View workflows'), name='workflow_view'
 )
 # Translators: This text refers to the permission to grant user the ability to
 # 'transition workflows' from one state to another, to move the workflow
 # forwards
 permission_workflow_transition = namespace.add_permission(
-    name='workflow_transition', label=_('Transition workflows')
+    label=_('Transition workflows'), name='workflow_transition'
 )
 permission_workflow_tools = namespace.add_permission(
-    name='workflow_tools', label=_('Execute workflow tools')
+    label=_('Execute workflow tools'), name='workflow_tools'
 )
