@@ -150,11 +150,24 @@ class DocumentCreateWizard(SessionWizardView):
                     'none have been enabled, create one before proceeding.'
                 )
             )
-            return HttpResponseRedirect(reverse('sources:setup_source_list'))
+            return HttpResponseRedirect(reverse(viewname='sources:setup_source_list'))
 
         return super(
             DocumentCreateWizard, self
         ).dispatch(request, *args, **kwargs)
+
+    def done(self, form_list, **kwargs):
+        query_dict = {}
+
+        for step in WizardStep.get_all():
+            query_dict.update(step.done(wizard=self) or {})
+
+        url = furl(reverse(viewname='sources:upload_interactive'))
+        # Use equal and not .update() to get the same result as using
+        # urlencode(doseq=True)
+        url.args = query_dict
+
+        return HttpResponseRedirect(url)
 
     def get_context_data(self, form, **kwargs):
         context = super(
@@ -184,16 +197,3 @@ class DocumentCreateWizard(SessionWizardView):
 
     def get_form_kwargs(self, step):
         return WizardStep.get(name=step).get_form_kwargs(wizard=self) or {}
-
-    def done(self, form_list, **kwargs):
-        query_dict = {}
-
-        for step in WizardStep.get_all():
-            query_dict.update(step.done(wizard=self) or {})
-
-        url = furl(reverse('sources:upload_interactive'))
-        # Use equal and not .update() to get the same result as using
-        # urlencode(doseq=True)
-        url.args = query_dict
-
-        return HttpResponseRedirect(url)

@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 
-import os
-
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.smart_settings import Namespace
 
-from .literals import DEFAULT_SCANIMAGE_PATH
+from .literals import (
+    DEFAULT_SCANIMAGE_PATH, DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND,
+    DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS
+)
 
-namespace = Namespace(name='sources', label=_('Sources'))
+namespace = Namespace(label=_('Sources'), name='sources')
 
 setting_scanimage_path = namespace.add_setting(
     global_name='SOURCES_SCANIMAGE_PATH', default=DEFAULT_SCANIMAGE_PATH,
@@ -19,7 +19,7 @@ setting_scanimage_path = namespace.add_setting(
     is_path=True
 )
 setting_staging_file_image_cache_storage = namespace.add_setting(
-    global_name='SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND',
+    global_name=DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND,
     default='django.core.files.storage.FileSystemStorage', help_text=_(
         'Path to the Storage subclass to use when storing the cached '
         'staging_file image files.'
@@ -27,9 +27,7 @@ setting_staging_file_image_cache_storage = namespace.add_setting(
 )
 setting_staging_file_image_cache_storage_arguments = namespace.add_setting(
     global_name='SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS',
-    default={
-        'location': os.path.join(settings.MEDIA_ROOT, 'staging_file_cache')
-    }, help_text=_(
+    default=DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS, help_text=_(
         'Arguments to pass to the SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND.'
     )
 )

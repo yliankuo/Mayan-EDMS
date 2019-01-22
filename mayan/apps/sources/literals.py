@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 
+import os
 import platform
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 if platform.system() == 'OpenBSD':
@@ -15,6 +17,11 @@ DEFAULT_METADATA_ATTACHMENT_NAME = 'metadata.yaml'
 DEFAULT_POP3_TIMEOUT = 60
 DEFAULT_SOURCE_LOCK_EXPIRE = 600
 DEFAULT_SOURCE_TASK_RETRY_DELAY = 10
+
+DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND = 'SOURCES_STAGING_FILE_CACHE_STORAGE_BACKEND'
+DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND_ARGUMENTS = {
+    'location': os.path.join(settings.MEDIA_ROOT, 'staging_file_cache')
+}
 
 SCANNER_SOURCE_FLATBED = 'flatbed'
 SCANNER_SOURCE_ADF = 'Automatic Document Feeder'

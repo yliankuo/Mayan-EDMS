@@ -22,13 +22,13 @@ from .handlers import (
     handler_create_default_document_source, handler_initialize_periodic_tasks
 )
 from .links import (
-    link_document_create_multiple, link_setup_source_check_now,
-    link_setup_source_create_imap_email, link_setup_source_create_pop3_email,
-    link_setup_source_create_sane_scanner,
-    link_setup_source_create_staging_folder,
-    link_setup_source_create_watch_folder, link_setup_source_create_webform,
-    link_setup_source_delete, link_setup_source_edit, link_setup_source_logs,
-    link_setup_sources, link_staging_file_delete, link_upload_version
+    link_document_create_multiple, link_source_check_now,
+    link_source_create_imap_email, link_source_create_pop3_email,
+    link_source_create_sane_scanner,
+    link_source_create_staging_folder,
+    link_source_create_watch_folder, link_source_create_webform,
+    link_source_delete, link_source_edit, link_source_logs,
+    link_source_list, link_staging_file_delete, link_upload_version
 )
 from .queues import *  # NOQA
 from .widgets import StagingFileThumbnailWidget
@@ -45,24 +45,24 @@ class SourcesApp(MayanAppConfig):
     def ready(self):
         super(SourcesApp, self).ready()
 
-        POP3Email = self.get_model('POP3Email')
-        IMAPEmail = self.get_model('IMAPEmail')
-        Source = self.get_model('Source')
-        SourceLog = self.get_model('SourceLog')
-        SaneScanner = self.get_model('SaneScanner')
-        StagingFolderSource = self.get_model('StagingFolderSource')
-        WatchFolderSource = self.get_model('WatchFolderSource')
-        WebFormSource = self.get_model('WebFormSource')
+        POP3Email = self.get_model(model_name='POP3Email')
+        IMAPEmail = self.get_model(model_name='IMAPEmail')
+        Source = self.get_model(model_name='Source')
+        SourceLog = self.get_model(model_name='SourceLog')
+        SaneScanner = self.get_model(model_name='SaneScanner')
+        StagingFolderSource = self.get_model(model_name='StagingFolderSource')
+        WatchFolderSource = self.get_model(model_name='WatchFolderSource')
+        WebFormSource = self.get_model(model_name='WebFormSource')
 
         MissingItem(
-            label=_('Create a document source'),
+            condition=lambda: not Source.objects.exists(),
             description=_(
                 'Document sources are the way in which new documents are '
                 'feed to Mayan EDMS, create at least a web form source to '
                 'be able to upload documents from a browser.'
             ),
-            condition=lambda: not Source.objects.exists(),
-            view='sources:setup_source_list'
+            label=_('Create a document source'),
+            view='sources:source_list'
         )
 
         SourceColumn(
@@ -83,11 +83,11 @@ class SourcesApp(MayanAppConfig):
         )
         html_widget = StagingFileThumbnailWidget()
         SourceColumn(
-            source=StagingFile,
-            label=_('Thumbnail'),
             func=lambda context: html_widget.render(
                 instance=context['object'],
-            )
+            ),
+            label=_('Thumbnail'),
+            source=StagingFile
         )
 
         SourceColumn(
@@ -134,7 +134,7 @@ class SourcesApp(MayanAppConfig):
 
         menu_list_facet.bind_links(
             links=(
-                link_setup_source_logs, link_transformation_list,
+                link_source_logs, link_transformation_list,
             ), sources=(
                 POP3Email, IMAPEmail, SaneScanner, StagingFolderSource,
                 WatchFolderSource, WebFormSource
@@ -143,7 +143,7 @@ class SourcesApp(MayanAppConfig):
 
         menu_object.bind_links(
             links=(
-                link_setup_source_edit, link_setup_source_delete,
+                link_source_edit, link_source_delete,
             ), sources=(
                 POP3Email, IMAPEmail, SaneScanner, StagingFolderSource,
                 WatchFolderSource, WebFormSource
@@ -153,24 +153,24 @@ class SourcesApp(MayanAppConfig):
             links=(link_staging_file_delete,), sources=(StagingFile,)
         )
         menu_object.bind_links(
-            links=(link_setup_source_check_now,),
+            links=(link_source_check_now,),
             sources=(IMAPEmail, POP3Email, WatchFolderSource,)
         )
         menu_secondary.bind_links(
             links=(
-                link_setup_sources, link_setup_source_create_webform,
-                link_setup_source_create_sane_scanner,
-                link_setup_source_create_staging_folder,
-                link_setup_source_create_pop3_email,
-                link_setup_source_create_imap_email,
-                link_setup_source_create_watch_folder
+                link_source_list, link_source_create_webform,
+                link_source_create_sane_scanner,
+                link_source_create_staging_folder,
+                link_source_create_pop3_email,
+                link_source_create_imap_email,
+                link_source_create_watch_folder
             ), sources=(
                 POP3Email, IMAPEmail, StagingFolderSource, WatchFolderSource,
-                WebFormSource, 'sources:setup_source_list',
-                'sources:setup_source_create'
+                WebFormSource, 'sources:source_list',
+                'sources:source_create'
             )
         )
-        menu_setup.bind_links(links=(link_setup_sources,))
+        menu_setup.bind_links(links=(link_source_list,))
         menu_sidebar.bind_links(
             links=(link_upload_version,),
             sources=(
