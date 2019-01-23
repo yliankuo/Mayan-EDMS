@@ -6,6 +6,7 @@ import shutil
 import tempfile
 
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models.constants import LOOKUP_SEP
 from django.urls import resolve as django_resolve
 from django.urls.base import get_script_prefix
@@ -140,6 +141,30 @@ def get_storage_subclass(dotted_path):
             return ('mayan.apps.common.classes.FakeStorageSubclass', (), {})
 
     return StorageSubclass
+
+
+def introspect_attribute(attribute_name, obj):
+    try:
+        # Try as a related field
+        obj._meta.get_field(field_name=attribute_name)
+    except (AttributeError, FieldDoesNotExist):
+        attribute_name = attribute_name.replace('__', '.')
+
+        try:
+            # If there are separators in the attribute name, traverse them
+            # to the final attribute
+            attribute_part, attribute_remaining = attribute_name.split(
+                '.', 1
+            )
+        except ValueError:
+            return attribute_name, obj
+        else:
+            return introspect_attribute(
+                attribute_name=attribute_part,
+                obj=related_field.related_model,
+            )
+    else:
+        return attribute_name, obj
 
 
 def TemporaryFile(*args, **kwargs):
