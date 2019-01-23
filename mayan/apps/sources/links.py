@@ -19,7 +19,8 @@ from .literals import (
 )
 from .permissions import (
     permission_sources_create, permission_sources_delete,
-    permission_sources_edit, permission_sources_view
+    permission_sources_edit, permission_sources_view,
+    permission_staging_file_delete
 )
 
 
@@ -113,9 +114,9 @@ link_source_logs = Link(
 )
 link_staging_file_delete = Link(
     keep_query=True, kwargs={
-        'staging_file_pk': 'source.pk',
+        'staging_folder_id': 'source.pk',
         'encoded_filename': 'object.encoded_filename'
-    }, permissions=(permission_document_new_version, permission_document_create),
+    }, permissions=(permission_staging_file_delete,),
     tags='dangerous', text=_('Delete'), view='sources:staging_file_delete'
 )
 link_upload_version = Link(

@@ -210,9 +210,10 @@ class SourceLogView(SingleObjectListView):
         )
 
 
-class StagingFileDeleteView(SingleObjectDeleteView):
-    object_permission = permission_staging_file_delete
-    object_permission_related = 'staging_folder'
+class StagingFileDeleteView(ExternalObjectMixin, SingleObjectDeleteView):
+    external_object_class = StagingFolderSource
+    external_object_pk_url_kwarg = 'staging_folder_id'
+    external_object_permission = permission_staging_file_delete
 
     def get_extra_context(self):
         return {
@@ -228,9 +229,7 @@ class StagingFileDeleteView(SingleObjectDeleteView):
         )
 
     def get_source(self):
-        return get_object_or_404(
-            klass=StagingFolderSource, pk=self.kwargs['staging_folder_id']
-        )
+        return self.get_external_object()
 
 
 class UploadBaseView(ListModeMixin, MultiFormView):

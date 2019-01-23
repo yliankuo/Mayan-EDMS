@@ -200,7 +200,6 @@ class StagingFolderViewTestCase(GenericViewTestCase):
         self.temporary_directory = mkdtemp()
         shutil.copy(TEST_SMALL_DOCUMENT_PATH, self.temporary_directory)
         self.filename = os.path.basename(TEST_SMALL_DOCUMENT_PATH)
-        self.login_user()
 
     def tearDown(self):
         fs_cleanup(self.temporary_directory)
@@ -233,7 +232,7 @@ class StagingFolderViewTestCase(GenericViewTestCase):
         response = self._request_staging_file_delete_view(
             staging_file=staging_file
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(len(list(self.staging_folder.get_files())), 1)
 
     def test_staging_folder_delete_with_permission(self):
@@ -252,10 +251,6 @@ class StagingFolderViewTestCase(GenericViewTestCase):
 
 
 class SourcesViewsTestCase(GenericViewTestCase):
-    def setUp(self):
-        super(SourcesViewsTestCase, self).setUp()
-        self.login_user()
-
     def _create_web_source(self):
         self.source = WebFormSource.objects.create(
             enabled=True, label=TEST_SOURCE_LABEL,
