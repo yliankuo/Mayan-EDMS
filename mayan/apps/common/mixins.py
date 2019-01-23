@@ -117,7 +117,7 @@ class ExternalObjectMixin(object):
         permission = self.get_external_object_permission()
 
         if permission:
-            queryset = AccessControlList.objects.filter_by_access(
+            queryset = AccessControlList.objects.restrict_queryset(
                 permission=permission, queryset=queryset,
                 user=self.request.user
             )
@@ -260,7 +260,7 @@ class MultipleObjectMixin(object):
             )
 
         if self.object_permission:
-            return AccessControlList.objects.filter_by_access(
+            return AccessControlList.objects.restrict_queryset(
                 permission=self.object_permission, queryset=queryset,
                 user=self.request.user
             )
@@ -333,7 +333,7 @@ class ObjectListPermissionFilterMixin(object):
         queryset = super(ObjectListPermissionFilterMixin, self).get_queryset()
 
         if not self.access_object_retrieve_method and self.object_permission:
-            return AccessControlList.objects.filter_by_access(
+            return AccessControlList.objects.restrict_queryset(
                 permission=self.object_permission, queryset=queryset,
                 user=self.request.user
             )
