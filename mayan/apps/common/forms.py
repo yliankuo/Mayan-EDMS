@@ -141,6 +141,7 @@ class FilteredSelectionFormOptions(object):
         {'model': None},
         {'permission': None},
         {'queryset': None},
+        {'required': True},
         {'user': None},
         {'widget_class': None},
         {'widget_attributes': {'size': '10'}},
@@ -191,7 +192,7 @@ class FilteredSelectionForm(forms.Form):
                 raise ImproperlyConfigured(
                     '{} requires a queryset or a model to be specified as '
                     'a meta option or passed during initialization.'.format(
-                        self.__class__
+                        self.__class__.__name__
                     )
                 )
 
@@ -221,7 +222,7 @@ class FilteredSelectionForm(forms.Form):
 
         self.fields[opts.field_name] = field_class(
             help_text=opts.help_text, label=opts.label,
-            queryset=queryset, required=True,
+            queryset=queryset, required=opts.required,
             widget=widget_class(attrs=opts.widget_attributes),
             **extra_kwargs
         )
