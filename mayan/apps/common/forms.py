@@ -247,13 +247,13 @@ class FilteredSelectionForm(forms.Form):
         else:
             widget_class = opts.widget_class
 
-        super(FilteredSelectionForm, self).__init__(*args, **kwargs)
-
         if opts.permission:
             queryset = AccessControlList.objects.filter_by_access(
                 permission=opts.permission, queryset=queryset,
                 user=opts.user
             )
+
+        super(FilteredSelectionForm, self).__init__(*args, **kwargs)
 
         self.fields[opts.field_name] = field_class(
             help_text=opts.help_text, label=opts.label,
