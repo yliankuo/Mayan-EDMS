@@ -24,10 +24,11 @@ class LinkClassTestCase(GenericViewTestCase):
     def setUp(self):
         super(LinkClassTestCase, self).setUp()
 
-        self.add_test_view(test_object=self.group)
+        self.add_test_view(test_object=self._test_case_group)
 
         self.namespace = PermissionNamespace(
-            label=TEST_PERMISSION_NAMESPACE_TEXT, name=TEST_PERMISSION_NAMESPACE_NAME
+            label=TEST_PERMISSION_NAMESPACE_TEXT,
+            name=TEST_PERMISSION_NAMESPACE_NAME
         )
 
         self.permission = self.namespace.add_permission(
@@ -49,7 +50,7 @@ class LinkClassTestCase(GenericViewTestCase):
         self.login_user()
 
         link = Link(
-            permissions=(self.permission,), text=TEST_LINK_TEXT,
+            permission=self.permission, text=TEST_LINK_TEXT,
             view=TEST_VIEW_NAME
         )
 
@@ -65,11 +66,11 @@ class LinkClassTestCase(GenericViewTestCase):
         self.login_user()
 
         link = Link(
-            permissions=(self.permission,), text=TEST_LINK_TEXT,
+            permission=self.permission, text=TEST_LINK_TEXT,
             view=TEST_VIEW_NAME
         )
 
-        self.role.permissions.add(self.permission.stored_permission)
+        self._test_case_role.permissions.add(self.permission.stored_permission)
 
         response = self.get(TEST_VIEW_NAME)
         response.context.update({'request': response.wsgi_request})
@@ -84,12 +85,12 @@ class LinkClassTestCase(GenericViewTestCase):
         self.login_user()
 
         link = Link(
-            permissions=(self.permission,), text=TEST_LINK_TEXT,
+            permission=self.permission, text=TEST_LINK_TEXT,
             view=TEST_VIEW_NAME
         )
 
         acl = AccessControlList.objects.create(
-            content_object=self.group, role=self.role
+            content_object=self._test_case_group, role=self._test_case_role
         )
         acl.permissions.add(self.permission.stored_permission)
 
@@ -156,10 +157,11 @@ class MenuClassTestCase(GenericViewTestCase):
     def setUp(self):
         super(MenuClassTestCase, self).setUp()
 
-        self.add_test_view(test_object=self.group)
+        self.add_test_view(test_object=self._test_case_group)
 
         self.namespace = PermissionNamespace(
-            label=TEST_PERMISSION_NAMESPACE_TEXT, name=TEST_PERMISSION_NAMESPACE_NAME
+            label=TEST_PERMISSION_NAMESPACE_TEXT,
+            name=TEST_PERMISSION_NAMESPACE_NAME
         )
 
         self.permission = self.namespace.add_permission(
