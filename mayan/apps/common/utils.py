@@ -159,6 +159,7 @@ def introspect_attribute(attribute_name, obj):
         except ValueError:
             return attribute_name, obj
         else:
+            related_field = obj._meta.get_field(field_name=attribute_part)
             return introspect_attribute(
                 attribute_name=attribute_part,
                 obj=related_field.related_model,
