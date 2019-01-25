@@ -2,11 +2,14 @@ from __future__ import unicode_literals
 
 import itertools
 import logging
+import warnings
 
 from django.apps import apps
 from django.core.exceptions import PermissionDenied
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+
+from mayan.apps.common.warnings import InterfaceWarning
 
 from .exceptions import InvalidNamespace
 
@@ -75,6 +78,11 @@ class Permission(object):
     # Deprecated method
     @classmethod
     def check_permissions(cls, permissions, requester):
+        warnings.warn(
+            'The method .check_permissions() is deprecated. Use '
+            '.check_user_permission() instead.', InterfaceWarning
+        )
+
         try:
             for permission in permissions:
                 if permission.stored_permission.user_has_this(user=requester):
