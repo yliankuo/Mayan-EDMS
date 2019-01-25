@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 import glob
 import os
+import random
 
 from django.conf import settings
 from django.conf.urls import url
 from django.core import management
+from django.db import models
 from django.http import HttpResponse
 from django.template import Context, Template
 from django.test.utils import ContextList
@@ -136,6 +138,53 @@ class OpenFileCheckTestCaseMixin(object):
             self._skip_file_descriptor_test = False
 
         super(OpenFileCheckTestCaseMixin, self).tearDown()
+
+
+class RandomPrimaryKeyModelMonkeyPatchMixin(object):
+    random_primary_key_random_floor = 100
+    random_primary_key_random_ceiling = 10000
+    random_primary_key_maximum_attempts = 100
+
+    @staticmethod
+    def get_unique_primary_key(model):
+        pk_list = model._meta.default_manager.values_list('pk', flat=True)
+
+        attempts = 0
+        while True:
+            primary_key = random.randint(
+                RandomPrimaryKeyModelMonkeyPatchMixin.random_primary_key_random_floor,
+                RandomPrimaryKeyModelMonkeyPatchMixin.random_primary_key_random_ceiling
+            )
+
+            if primary_key not in pk_list:
+                break
+
+            attempts = attempts + 1
+
+            if attempts > RandomPrimaryKeyModelMonkeyPatchMixin.random_primary_key_maximum_attempts:
+                raise Exception(
+                    'Maximum number of retries for an unique random primary '
+                    'key reached.'
+                )
+
+        return primary_key
+
+    def setUp(self):
+        original_save = models.Model.save
+
+        def new_save(self, *args, **kwargs):
+            if self.pk:
+                return original_save(self, *args, **kwargs)
+            else:
+                self.pk = RandomPrimaryKeyModelMonkeyPatchMixin.get_unique_primary_key(
+                    model=self._meta.model
+                )
+                self.id = self.pk
+
+                return self.save_base(force_insert=True)
+
+        setattr(models.Model, 'save', new_save)
+        super(RandomPrimaryKeyModelMonkeyPatchMixin, self).setUp()
 
 
 class TempfileCheckTestCaseMixin(object):

@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.test import TestCase
-from django.urls import reverse
 from django_downloadview import assert_download_response
 
 from mayan.apps.acls.tests.mixins import ACLTestCaseMixin
@@ -10,12 +9,12 @@ from mayan.apps.smart_settings.classes import Namespace
 
 from .mixins import (
     ClientMethodsTestCaseMixin, ContentTypeCheckMixin, DatabaseConversionMixin,
-    OpenFileCheckTestCaseMixin, TempfileCheckTestCaseMixin,
-    TestViewTestCaseMixin
+    OpenFileCheckTestCaseMixin, RandomPrimaryKeyModelMonkeyPatchMixin,
+    TempfileCheckTestCaseMixin, TestViewTestCaseMixin
 )
 
 
-class BaseTestCase(DatabaseConversionMixin, ACLTestCaseMixin, ContentTypeCheckMixin, OpenFileCheckTestCaseMixin, TempfileCheckTestCaseMixin, TestCase):
+class BaseTestCase(RandomPrimaryKeyModelMonkeyPatchMixin, DatabaseConversionMixin, ACLTestCaseMixin, ContentTypeCheckMixin, OpenFileCheckTestCaseMixin, TempfileCheckTestCaseMixin, TestCase):
     """
     This is the most basic test case class any test in the project should use.
     """

@@ -224,6 +224,7 @@
   of the permission proxy support which is now redundant.
 - Remove the permissions to grant or revoke a permission to a role.
   The instead the role edit permission is used.
+- Add a test mixin to generate random model primary keys.
 
 3.1.9 (2018-11-01)
 ==================
