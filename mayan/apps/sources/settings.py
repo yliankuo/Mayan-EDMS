@@ -15,8 +15,7 @@ setting_scanimage_path = namespace.add_setting(
     global_name='SOURCES_SCANIMAGE_PATH', default=DEFAULT_SCANIMAGE_PATH,
     help_text=_(
         'File path to the scanimage program used to control image scanners.'
-    ),
-    is_path=True
+    )
 )
 setting_staging_file_image_cache_storage = namespace.add_setting(
     global_name=DEFAULT_STAGING_FILE_CACHE_STORAGE_BACKEND,

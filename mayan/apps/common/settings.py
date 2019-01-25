@@ -53,8 +53,7 @@ setting_production_error_log_path = namespace.add_setting(
     global_name='COMMON_PRODUCTION_ERROR_LOG_PATH',
     default=os.path.join(settings.MEDIA_ROOT, 'error.log'), help_text=_(
         'Path to the logfile that will track errors during production.'
-    ),
-    is_path=True
+    )
 )
 setting_project_title = namespace.add_setting(
     global_name='COMMON_PROJECT_TITLE',
@@ -82,8 +81,7 @@ setting_temporary_directory = namespace.add_setting(
     help_text=_(
         'Temporary directory used site wide to store thumbnails, previews '
         'and temporary files.'
-    ),
-    is_path=True
+    )
 )
 
 namespace = Namespace(label=_('Django'), name='django')

@@ -147,7 +147,7 @@ class Setting(object):
                 path=settings.CONFIGURATION_LAST_GOOD_FILEPATH
             )
 
-    def __init__(self, namespace, global_name, default, help_text=None, is_path=False, post_edit_function=None):
+    def __init__(self, namespace, global_name, default, help_text=None, post_edit_function=None):
         self.global_name = global_name
         self.default = default
         self.help_text = help_text
