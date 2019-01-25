@@ -19,61 +19,59 @@ from .permissions import (
 link_smart_link_condition_create = Link(
     icon_class=icon_smart_link_condition_create,
     kwargs={'smart_link_id': 'object.pk'},
-    permissions=(permission_smart_link_edit,), text=_('Create condition'),
+    permission=permission_smart_link_edit, text=_('Create condition'),
     view='linking:smart_link_condition_create'
 )
 link_smart_link_condition_delete = Link(
     kwargs={'smart_link_condition_id': 'resolved_object.pk'},
-    permissions=(permission_smart_link_edit,), tags='dangerous',
+    permission=permission_smart_link_edit, tags='dangerous',
     text=_('Delete'), view='linking:smart_link_condition_delete'
 )
 link_smart_link_condition_edit = Link(
     kwargs={'smart_link_condition_id': 'resolved_object.pk'},
-    permissions=(permission_smart_link_edit,), text=_('Edit'),
+    permission=permission_smart_link_edit, text=_('Edit'),
     view='linking:smart_link_condition_edit'
 )
 link_smart_link_condition_list = Link(
     icon_class=icon_smart_link_condition, kwargs={'smart_link_id': 'object.pk'},
-    permissions=(permission_smart_link_edit,), text=_('Conditions'),
+    permission=permission_smart_link_edit, text=_('Conditions'),
     view='linking:smart_link_condition_list'
 )
 link_smart_link_create = Link(
-    icon_class=icon_smart_link_create,
-    permissions=(permission_smart_link_create,),
+    icon_class=icon_smart_link_create, permission=permission_smart_link_create,
     text=_('Create new smart link'), view='linking:smart_link_create'
 )
 link_smart_link_delete = Link(
     kwargs={'smart_link_id': 'object.pk'},
-    permissions=(permission_smart_link_delete,),
-    tags='dangerous', text=_('Delete'), view='linking:smart_link_delete'
+    permission=permission_smart_link_delete, tags='dangerous',
+    text=_('Delete'), view='linking:smart_link_delete'
 )
 link_smart_link_document_types = Link(
     icon_class=icon_document_type, kwargs={'document_type_id': 'object.pk'},
-    permissions=(permission_smart_link_edit,), text=_('Document types'),
-    view='linking:smart_link_document_types',
+    permission=permission_smart_link_edit, text=_('Document types'),
+    view='linking:smart_link_document_types'
 )
 link_smart_link_edit = Link(
     kwargs={'smart_link_id': 'object.pk'},
-    permissions=(permission_smart_link_edit,),
-    text=_('Edit'), view='linking:smart_link_edit',
+    permission=permission_smart_link_edit, text=_('Edit'),
+    view='linking:smart_link_edit'
 )
 link_smart_link_instance_view = Link(
     kwargs={'document_id': 'document.pk', 'smart_link_id': 'object.pk'},
-    permissions=(permission_smart_link_view,), text=_('Documents'),
+    permission=permission_smart_link_view, text=_('Documents'),
     view='linking:resolved_smart_link_details'
 )
 link_smart_link_instances_for_document = Link(
     icon_class=icon_smart_link_instances_for_document,
     kwargs={'document_id': 'resolved_object.pk'},
-    permissions=(permission_document_view,), text=_('Smart links'),
-    view='linking:resolved_smart_links_for_document',
+    permission=permission_document_view, text=_('Smart links'),
+    view='linking:resolved_smart_links_for_document'
 )
 link_smart_link_list = Link(
-    permissions=(permission_smart_link_view,), text=_('Smart links'),
+    permission=permission_smart_link_view, text=_('Smart links'),
     view='linking:smart_link_list'
 )
 link_smart_link_setup = Link(
-    icon_class=icon_smart_link_setup,
-    permissions=(permission_smart_link_view,), text=_('Smart links'),
-    view='linking:smart_link_list'
+    icon_class=icon_smart_link_setup, permission=permission_smart_link_view,
+    text=_('Smart links'), view='linking:smart_link_list'
 )

@@ -30,21 +30,20 @@ def get_kwargs_factory(variable_name):
 
 link_acl_delete = Link(
     icon_class=icon_acl_delete, kwargs={'acl_id': 'resolved_object.pk'},
-    permissions=(permission_acl_edit,), permissions_related='content_object',
-    tags='dangerous', text=_('Delete'), view='acls:acl_delete',
+    permission=permission_acl_edit, tags='dangerous', text=_('Delete'),
+    view='acls:acl_delete',
 )
 link_acl_list = Link(
     icon_class=icon_acl_list, kwargs=get_kwargs_factory(
         variable_name='resolved_object'
-    ), permissions=(permission_acl_view,), text=_('ACLs'), view='acls:acl_list'
+    ), permission=permission_acl_view, text=_('ACLs'), view='acls:acl_list'
 )
 link_acl_create = Link(
     icon_class=icon_acl_new, kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_acl_edit,), text=_('New ACL'),
-    view='acls:acl_create'
+    permission=permission_acl_edit, text=_('New ACL'), view='acls:acl_create'
 )
 link_acl_permissions = Link(
     args='resolved_object.pk', icon_class=icon_permission,
-    permissions=(permission_acl_edit,), permissions_related='content_object',
-    text=_('Permissions'), view='acls:acl_permissions',
+    permission=permission_acl_edit, text=_('Permissions'),
+    view='acls:acl_permissions',
 )

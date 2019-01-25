@@ -19,12 +19,12 @@ from .permissions import (
 
 link_document_send = Link(
     args='resolved_object.pk', icon_class=icon_document_send,
-    permissions=(permission_mailing_send_document,), text=_('Email document'),
+    permission=permission_mailing_send_document, text=_('Email document'),
     view='mailer:document_send'
 )
 link_document_send_link = Link(
     args='resolved_object.pk', icon_class=icon_document_send_link,
-    permissions=(permission_mailing_link,), text=_('Email link'),
+    permission=permission_mailing_link, text=_('Email link'),
     view='mailer:document_send_link'
 )
 link_document_multiple_send = Link(
@@ -37,40 +37,40 @@ link_document_multiple_send_link = Link(
 )
 link_system_mailer_error_log = Link(
     icon_class=icon_system_mailer_error_log,
-    permissions=(permission_view_error_log,),
-    text=_('System mailer error log'), view='mailer:system_mailer_error_log',
+    permission=permission_view_error_log,
+    text=_('System mailer error log'), view='mailer:system_mailer_error_log'
 )
 link_user_mailer_create = Link(
     icon_class=icon_user_mailer_create,
-    permissions=(permission_user_mailer_create,),
-    text=_('User mailer create'), view='mailer:user_mailer_backend_selection',
+    permission=permission_user_mailer_create, text=_('User mailer create'),
+    view='mailer:user_mailer_backend_selection'
 )
 link_user_mailer_delete = Link(
     args='resolved_object.pk', icon_class=icon_user_mailer_delete,
-    permissions=(permission_user_mailer_delete,), tags='dangerous',
-    text=_('Delete'), view='mailer:user_mailer_delete',
+    permission=permission_user_mailer_delete, tags='dangerous',
+    text=_('Delete'), view='mailer:user_mailer_delete'
 )
 link_user_mailer_edit = Link(
     args='object.pk', icon_class=icon_user_mailer_edit,
-    permissions=(permission_user_mailer_edit,), text=_('Edit'),
-    view='mailer:user_mailer_edit',
+    permission=permission_user_mailer_edit, text=_('Edit'),
+    view='mailer:user_mailer_edit'
 )
 link_user_mailer_log_list = Link(
-    args='object.pk', permissions=(permission_user_mailer_view,),
-    text=_('Log'), view='mailer:user_mailer_log',
+    args='object.pk', permission=permission_user_mailer_view,
+    text=_('Log'), view='mailer:user_mailer_log'
 )
 link_user_mailer_list = Link(
     icon_class=icon_user_mailer_list,
-    permissions=(permission_user_mailer_view,),
-    text=_('Mailing profiles list'), view='mailer:user_mailer_list',
+    permission=permission_user_mailer_view,
+    text=_('Mailing profiles list'), view='mailer:user_mailer_list'
 )
 link_user_mailer_setup = Link(
     icon_class=icon_user_mailer_setup,
-    permissions=(permission_user_mailer_view,),
-    text=_('Mailing profiles'), view='mailer:user_mailer_list',
+    permission=permission_user_mailer_view,
+    text=_('Mailing profiles'), view='mailer:user_mailer_list'
 )
 link_user_mailer_test = Link(
     args='object.pk', icon_class=icon_user_mailer_test,
-    permissions=(permission_user_mailer_use,), text=_('Test'),
-    view='mailer:user_mailer_test',
+    permission=permission_user_mailer_use, text=_('Test'),
+    view='mailer:user_mailer_test'
 )

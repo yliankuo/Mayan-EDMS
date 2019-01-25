@@ -14,17 +14,17 @@ from .permissions import (
 )
 
 link_message_create = Link(
-    icon_class=icon_message_create, permissions=(permission_message_create,),
+    icon_class=icon_message_create, permission=permission_message_create,
     text=_('Create message'), view='motd:message_create'
 )
 link_message_delete = Link(
     icon_class=icon_message_delete, kwargs={'message_id': 'object.pk'},
-    permissions=(permission_message_delete,), tags='dangerous',
+    permission=permission_message_delete, tags='dangerous',
     text=_('Delete'), view='motd:message_delete'
 )
 link_message_edit = Link(
     icon_class=icon_message_edit, kwargs={'message_id': 'object.pk'},
-    permissions=(permission_message_edit,), text=_('Edit'),
+    permission=permission_message_edit, text=_('Edit'),
     view='motd:message_edit'
 )
 link_message_list = Link(

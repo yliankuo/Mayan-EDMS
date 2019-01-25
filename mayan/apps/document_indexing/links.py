@@ -45,27 +45,27 @@ link_index_setup_list = Link(
 )
 link_index_setup_create = Link(
     icon_class=icon_index_create,
-    permissions=(permission_document_indexing_create,), text=_('Create index'),
+    permission=permission_document_indexing_create, text=_('Create index'),
     view='indexing:index_setup_create'
 )
 link_index_setup_edit = Link(
     args='resolved_object.pk',
-    permissions=(permission_document_indexing_edit,), text=_('Edit'),
+    permission=permission_document_indexing_edit, text=_('Edit'),
     view='indexing:index_setup_edit',
 )
 link_index_setup_delete = Link(
     args='resolved_object.pk',
-    permissions=(permission_document_indexing_delete,), tags='dangerous',
+    permission=permission_document_indexing_delete, tags='dangerous',
     text=_('Delete'), view='indexing:index_setup_delete',
 )
 link_index_setup_view = Link(
     args='resolved_object.pk', icon_class=icon_index_setup_view,
-    permissions=(permission_document_indexing_edit,), text=_('Tree template'),
+    permission=permission_document_indexing_edit, text=_('Tree template'),
     view='indexing:index_setup_view',
 )
 link_index_setup_document_types = Link(
     args='resolved_object.pk', icon_class=icon_document_type,
-    permissions=(permission_document_indexing_edit,), text=_('Document types'),
+    permission=permission_document_indexing_edit, text=_('Document types'),
     view='indexing:index_setup_document_types',
 )
 link_rebuild_index_instances = Link(

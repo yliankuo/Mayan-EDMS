@@ -41,11 +41,11 @@ link_events_details = Link(
 link_events_for_object = Link(
     icon_class=icon_events_for_object,
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_events_view,), text=_('Events'),
+    permission=permission_events_view, text=_('Events'),
     view='events:events_for_object',
 )
 link_events_list = Link(
-    icon_class=icon_events_list, permissions=(permission_events_view,),
+    icon_class=icon_events_list, permission=permission_events_view,
     text=_('Events'), view='events:events_list'
 )
 link_event_types_subscriptions_list = Link(
@@ -63,7 +63,7 @@ link_notification_mark_read_all = Link(
 link_object_event_types_user_subcriptions_list = Link(
     icon_class=icon_object_event_types_user_subcriptions_list,
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_events_view,), text=_('Subscriptions'),
+    permission=permission_events_view, text=_('Subscriptions'),
     view='events:object_event_types_user_subcriptions_list',
 )
 link_user_notifications_list = Link(
