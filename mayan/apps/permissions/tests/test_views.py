@@ -6,7 +6,6 @@ from mayan.apps.user_management.tests import GroupTestMixin
 
 from ..models import Role
 from ..permissions import (
-    permission_permission_grant, permission_permission_revoke,
     permission_role_create, permission_role_delete, permission_role_edit,
     permission_role_view
 )
@@ -123,23 +122,15 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
             kwargs={'role_id': self.test_role.pk}
         )
 
-    def test_role_permissions_view_no_access(self):
+    def test_role_permissions_view_no_permission(self):
         self._create_test_role()
         response = self._request_role_permissions_view()
         self.assertEqual(response.status_code, 403)
 
-    def test_role_permissions_view_with_permission_grant(self):
+    def test_role_permissions_view_with_access(self):
         self._create_test_role()
         self.grant_access(
-            permission=permission_permission_grant, obj=self.test_role
-        )
-        response = self._request_role_permissions_view()
-        self.assertEqual(response.status_code, 200)
-
-    def test_role_permissions_view_with_permission_revoke(self):
-        self._create_test_role()
-        self.grant_access(
-            permission=permission_permission_revoke, obj=self.test_role
+            permission=permission_permission_view, obj=self.test_role
         )
         response = self._request_role_permissions_view()
         self.assertEqual(response.status_code, 200)

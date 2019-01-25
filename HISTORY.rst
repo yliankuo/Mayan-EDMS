@@ -222,6 +222,8 @@
   filtering in Python. The refactor added cascading access checking
   in preparation for nested cabinet access control and the removal
   of the permission proxy support which is now redundant.
+- Remove the permissions to grant or revoke a permission to a role.
+  The instead the role edit permission is used.
 
 3.1.9 (2018-11-01)
 ==================

@@ -6,12 +6,6 @@ from . import PermissionNamespace
 
 namespace = PermissionNamespace(label=_('Permissions'), name='permissions')
 
-permission_permission_grant = namespace.add_permission(
-    label=_('Grant permissions'), name='permission_grant'
-)
-permission_permission_revoke = namespace.add_permission(
-    label=_('Revoke permissions'), name='permission_revoke'
-)
 permission_role_create = namespace.add_permission(
     label=_('Create roles'), name='role_create'
 )

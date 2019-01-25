@@ -21,7 +21,6 @@ from .icons import icon_role_list
 from .links import link_role_create
 from .models import Role, StoredPermission
 from .permissions import (
-    permission_permission_grant, permission_permission_revoke,
     permission_role_create, permission_role_delete, permission_role_edit,
     permission_role_view
 )
@@ -147,6 +146,7 @@ class RoleListView(SingleObjectListView):
 class RolePermissionsView(AssignRemoveView):
     grouped = True
     left_list_title = _('Available permissions')
+    object_permission = permission_role_edit
     right_list_title = _('Granted permissions')
 
     @staticmethod
@@ -171,18 +171,8 @@ class RolePermissionsView(AssignRemoveView):
         return results
 
     def add(self, item):
-        Permission.check_permissions(
-            self.request.user, permissions=(permission_permission_grant,)
-        )
         permission = get_object_or_404(klass=StoredPermission, pk=item)
         self.get_object().permissions.add(permission)
-
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=(permission_permission_grant, permission_permission_revoke),
-            user=self.request.user, obj=self.get_object()
-        )
-        return super(RolePermissionsView, self).dispatch(request, *args, **kwargs)
 
     def get_extra_context(self):
         return {
@@ -207,9 +197,6 @@ class RolePermissionsView(AssignRemoveView):
         )
 
     def remove(self, item):
-        Permission.check_permissions(
-            self.request.user, permissions=(permission_permission_revoke,)
-        )
         permission = get_object_or_404(klass=StoredPermission, pk=item)
         self.get_object().permissions.remove(permission)
 
