@@ -55,7 +55,6 @@ class DocumentVersionListView(SingleObjectListView):
 
 class DocumentVersionRevertView(ConfirmView):
     object_permission = permission_document_version_revert
-    object_permission_related = 'document'
 
     def get_extra_context(self):
         return {

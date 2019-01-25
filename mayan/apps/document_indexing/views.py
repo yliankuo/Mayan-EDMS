@@ -195,7 +195,6 @@ class TemplateNodeCreateView(SingleObjectCreateView):
 class TemplateNodeDeleteView(SingleObjectDeleteView):
     model = IndexTemplateNode
     object_permission = permission_document_indexing_edit
-    object_permission_related = 'index'
 
     def get_extra_context(self):
         return {
@@ -218,7 +217,6 @@ class TemplateNodeEditView(SingleObjectEditView):
     form_class = IndexTemplateNodeForm
     model = IndexTemplateNode
     object_permission = permission_document_indexing_edit
-    object_permission_related = 'index'
 
     def get_extra_context(self):
         return {
@@ -338,7 +336,6 @@ class DocumentIndexNodeListView(SingleObjectListView):
     Show a list of indexes where the current document can be found
     """
     object_permission = permission_document_indexing_instance_view
-    object_permission_related = 'index'
 
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
