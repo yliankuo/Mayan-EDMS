@@ -12,43 +12,43 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^(?P<pk>\d+)/details/$',
-        DocumentVersionSignatureDetailView.as_view(),
-        name='document_version_signature_details'
+        regex=r'^signatures/(?P<signature_id>\d+)/$',
+        name='document_version_signature_details',
+        view=DocumentVersionSignatureDetailView.as_view()
     ),
     url(
-        r'^signature/(?P<pk>\d+)/download/$',
-        DocumentVersionSignatureDownloadView.as_view(),
-        name='document_version_signature_download'
+        regex=r'^signatures/(?P<signature_id>\d+)/download/$',
+        name='document_version_signature_download',
+        view=DocumentVersionSignatureDownloadView.as_view()
     ),
     url(
-        r'^document/version/(?P<pk>\d+)/signatures/list/$',
-        DocumentVersionSignatureListView.as_view(),
-        name='document_version_signature_list'
+        regex=r'^signatures/(?P<signature_id>\d+)/delete/$',
+        name='document_version_signature_delete',
+        view=DocumentVersionSignatureDeleteView.as_view()
     ),
     url(
-        r'^documents/version/(?P<pk>\d+)/signature/detached/upload/$',
-        DocumentVersionSignatureUploadView.as_view(),
-        name='document_version_signature_upload'
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/signatures/$',
+        name='document_version_signature_list',
+        view=DocumentVersionSignatureListView.as_view()
     ),
     url(
-        r'^documents/version/(?P<pk>\d+)/signature/detached/create/$',
-        DocumentVersionDetachedSignatureCreateView.as_view(),
-        name='document_version_signature_detached_create'
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/signatures/detached/create/$',
+        name='document_version_signature_detached_create',
+        view=DocumentVersionDetachedSignatureCreateView.as_view()
     ),
     url(
-        r'^documents/version/(?P<pk>\d+)/signature/embedded/create/$',
-        DocumentVersionEmbeddedSignatureCreateView.as_view(),
-        name='document_version_signature_embedded_create'
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/signatures/detached/upload/$',
+        name='document_version_signature_upload',
+        view=DocumentVersionSignatureUploadView.as_view()
     ),
     url(
-        r'^signature/(?P<pk>\d+)/delete/$',
-        DocumentVersionSignatureDeleteView.as_view(),
-        name='document_version_signature_delete'
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/signatures/embedded/create/$',
+        name='document_version_signature_embedded_create',
+        view=DocumentVersionEmbeddedSignatureCreateView.as_view()
     ),
     url(
-        r'^tools/all/document/version/signature/verify/$',
-        AllDocumentSignatureVerifyView.as_view(),
-        name='all_document_version_signature_verify'
-    ),
+        regex=r'^tools/documents/versions/signatures/verify/$',
+        name='all_document_version_signature_verify',
+        view=AllDocumentSignatureVerifyView.as_view()
+    )
 ]

@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from django.utils.module_loading import import_string
-
 from mayan.apps.common.utils import get_storage_subclass
 
 from .settings import (

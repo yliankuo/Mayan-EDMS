@@ -17,3 +17,6 @@ icon_document_version_signature_embedded_create = Icon(
 icon_document_version_signature_list = Icon(
     driver_name='fontawesome', symbol='certificate'
 )
+icon_document_version_signature_upload = Icon(
+    driver_name='fontawesome', symbol='upload'
+)

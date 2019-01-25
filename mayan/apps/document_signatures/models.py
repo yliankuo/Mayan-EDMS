@@ -14,12 +14,16 @@ from mayan.apps.django_gpg.exceptions import VerificationError
 from mayan.apps.django_gpg.models import Key
 from mayan.apps.documents.models import DocumentVersion
 
+from .literals import (
+    SIGNATURE_TYPE_CHOICES, SIGNATURE_TYPE_DETACHED, SIGNATURE_TYPE_EMBEDDED
+)
 from .managers import EmbeddedSignatureManager
 from .storages import storage_detachedsignature
 
 logger = logging.getLogger(__name__)
 
 
+# TODO: Move to an utils module or as a static class of DetachedSignature
 def upload_to(*args, **kwargs):
     return force_text(uuid.uuid4())
 
@@ -65,8 +69,8 @@ class SignatureBaseModel(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            'document_signatures:document_version_signature_detail',
-            args=(self.pk,)
+            viewname='document_signatures:document_version_signature_detail',
+            kwargs={'document_version_id': self.pk}
         )
 
     def get_key_id(self):
@@ -74,20 +78,41 @@ class SignatureBaseModel(models.Model):
             return self.public_key_fingerprint[-16:]
         else:
             return self.key_id
+    get_key_id.short_description = _('Key ID')
+
+    def get_signature_id(self):
+        return self.signature_id or _('None')
+    get_signature_id.short_description = _('Signature ID')
 
     def get_signature_type_display(self):
-        if self.is_detached:
-            return _('Detached')
+        if hasattr(self, 'signaturebasemodel_ptr'):
+            model = self
         else:
-            return _('Embedded')
+            model = self._meta.default_manager.get_subclass(pk=self.pk)
+
+        return dict(SIGNATURE_TYPE_CHOICES).get(
+            model.signature_type, _('Unknown')
+        )
+    get_signature_type_display.short_description = _('Type')
+
+    def is_key_available(self):
+        return self.public_key_fingerprint is not None
+
+    def get_key_available_display(self):
+        if self.is_key_available():
+            return _('Yes')
+        else:
+            return _('No')
+    get_key_available_display.short_description = _('Signature key present?')
 
     @property
-    def is_detached(self):
-        return hasattr(self, 'signature_file')
+    def signature_type(self):
+        if hasattr(self, 'signaturebasemodel_ptr'):
+            model = self
+        else:
+            model = self._meta.default_manager.get_subclass(pk=self.pk)
 
-    @property
-    def is_embedded(self):
-        return not hasattr(self, 'signature_file')
+        return model._signature_type
 
 
 class EmbeddedSignature(SignatureBaseModel):
@@ -96,6 +121,10 @@ class EmbeddedSignature(SignatureBaseModel):
     class Meta:
         verbose_name = _('Document version embedded signature')
         verbose_name_plural = _('Document version embedded signatures')
+
+    @property
+    def _signature_type(self):
+        return SIGNATURE_TYPE_EMBEDDED
 
     def save(self, *args, **kwargs):
         logger.debug('checking for embedded signature')
@@ -140,6 +169,10 @@ class DetachedSignature(SignatureBaseModel):
 
     def __str__(self):
         return '{}-{}'.format(self.document_version, _('signature'))
+
+    @property
+    def _signature_type(self):
+        return SIGNATURE_TYPE_DETACHED
 
     def delete(self, *args, **kwargs):
         if self.signature_file.name:

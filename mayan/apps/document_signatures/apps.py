@@ -63,15 +63,15 @@ class DocumentSignaturesApp(MayanAppConfig):
             app_label='django_gpg', model_name='Key'
         )
 
-        EmbeddedSignature = self.get_model('EmbeddedSignature')
+        EmbeddedSignature = self.get_model(model_name='EmbeddedSignature')
 
-        SignatureBaseModel = self.get_model('SignatureBaseModel')
+        SignatureBaseModel = self.get_model(model_name='SignatureBaseModel')
 
         DocumentVersion.register_post_save_hook(
-            order=1, func=EmbeddedSignature.objects.create
+            func=EmbeddedSignature.objects.create, order=1
         )
         DocumentVersion.register_pre_open_hook(
-            order=1, func=EmbeddedSignature.objects.open_signed
+            func=EmbeddedSignature.objects.open_signed, order=1
         )
 
         ModelPermission.register(
@@ -85,22 +85,15 @@ class DocumentSignaturesApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Date'), attribute='date'
+        ModelPermission.register_inheritance(
+            model=SignatureBaseModel, related='document_version'
         )
+
+        SourceColumn(attribute='date', source=SignatureBaseModel)
+        SourceColumn(attribute='get_key_id', source=SignatureBaseModel)
+        SourceColumn(attribute='get_signature_id', source=SignatureBaseModel)
         SourceColumn(
-            source=SignatureBaseModel, label=_('Key ID'),
-            attribute='get_key_id'
-        )
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Signature ID'),
-            func=lambda context: context['object'].signature_id or _('None')
-        )
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Type'),
-            func=lambda context: SignatureBaseModel.objects.get_subclass(
-                pk=context['object'].pk
-            ).get_signature_type_display()
+            attribute='get_signature_type_display', source=SignatureBaseModel
         )
 
         app.conf.task_queues.append(
