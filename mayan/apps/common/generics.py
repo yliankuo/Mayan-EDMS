@@ -421,10 +421,18 @@ class SingleObjectDynamicFormCreateView(DynamicFormViewMixin, SingleObjectCreate
 class SingleObjectDeleteView(ObjectNameMixin, DeleteExtraDataMixin, ViewPermissionCheckMixin, ObjectPermissionCheckMixin, ExtraContextMixin, RedirectionMixin, DeleteView):
     template_name = 'appearance/generic_confirm.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(SingleObjectDeleteView, self).get_context_data(**kwargs)
-        context.update({'delete_view': True})
-        return context
+    def __init__(self, *args, **kwargs):
+        result = super(SingleObjectDeleteView, self).__init__(*args, **kwargs)
+
+        if self.__class__.mro()[0].get_queryset != SingleObjectDeleteView.get_queryset:
+            raise ImproperlyConfigured(
+                '%(cls)s is overloading the get_queryset method. Subclasses '
+                'should implement the get_object_list method instead. ' % {
+                    'cls': self.__class__.__name__
+                }
+            )
+
+        return result
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -453,19 +461,71 @@ class SingleObjectDeleteView(ObjectNameMixin, DeleteExtraDataMixin, ViewPermissi
 
             return result
 
+    def get_context_data(self, **kwargs):
+        context = super(SingleObjectDeleteView, self).get_context_data(**kwargs)
+        context.update({'delete_view': True})
+        return context
+
+    def get_queryset(self):
+        try:
+            return super(SingleObjectDeleteView, self).get_queryset()
+        except ImproperlyConfigured:
+            self.queryset = self.get_object_list()
+            return super(SingleObjectDeleteView, self).get_queryset()
+
 
 class SingleObjectDetailView(ViewPermissionCheckMixin, ObjectPermissionCheckMixin, FormExtraKwargsMixin, ExtraContextMixin, ModelFormMixin, DetailView):
     template_name = 'appearance/generic_form.html'
+
+    def __init__(self, *args, **kwargs):
+        result = super(SingleObjectDetailView, self).__init__(*args, **kwargs)
+
+        if self.__class__.mro()[0].get_queryset != SingleObjectDetailView.get_queryset:
+            raise ImproperlyConfigured(
+                '%(cls)s is overloading the get_queryset method. Subclasses '
+                'should implement the get_object_list method instead. ' % {
+                    'cls': self.__class__.__name__
+                }
+            )
+
+        return result
 
     def get_context_data(self, **kwargs):
         context = super(SingleObjectDetailView, self).get_context_data(**kwargs)
         context.update({'read_only': True, 'form': self.get_form()})
         return context
 
+    def get_queryset(self):
+        try:
+            return super(SingleObjectDetailView, self).get_queryset()
+        except ImproperlyConfigured:
+            self.queryset = self.get_object_list()
+            return super(SingleObjectDetailView, self).get_queryset()
+
 
 class SingleObjectDownloadView(ViewPermissionCheckMixin, ObjectPermissionCheckMixin, VirtualDownloadView, SingleObjectMixin):
     TextIteratorIO = TextIteratorIO
     VirtualFile = VirtualFile
+
+    def __init__(self, *args, **kwargs):
+        result = super(SingleObjectDownloadView, self).__init__(*args, **kwargs)
+
+        if self.__class__.mro()[0].get_queryset != SingleObjectDownloadView.get_queryset:
+            raise ImproperlyConfigured(
+                '%(cls)s is overloading the get_queryset method. Subclasses '
+                'should implement the get_object_list method instead. ' % {
+                    'cls': self.__class__.__name__
+                }
+            )
+
+        return result
+
+    def get_queryset(self):
+        try:
+            return super(SingleObjectDownloadView, self).get_queryset()
+        except ImproperlyConfigured:
+            self.queryset = self.get_object_list()
+            return super(SingleObjectDownloadView, self).get_queryset()
 
 
 class SingleObjectEditView(ObjectNameMixin, ViewPermissionCheckMixin, ObjectPermissionCheckMixin, ExtraContextMixin, FormExtraKwargsMixin, RedirectionMixin, UpdateView):
