@@ -111,8 +111,9 @@ class AccessControlListManager(models.Manager):
             content_type = ContentType.objects.get_for_model(model=queryset.model)
             field_lookup = 'id__in'
             acl_filter = self.filter(
-                permissions=stored_permission, role__groups__user=user
-            ).values('id')
+                content_type=content_type, permissions=stored_permission,
+                role__groups__user=user
+            ).values('object_id')
             result.append(Q(**{field_lookup: acl_filter}))
 
             # Case 4: Original model, has an inherited related field
@@ -125,41 +126,22 @@ class AccessControlListManager(models.Manager):
             else:
                 inherited_acl_queries = self._get_acl_filters(
                     queryset=queryset, stored_permission=stored_permission,
-                    user=user, related_field_name=related_field_name
+                    related_field_name=related_field_name, user=user
                 )
                 result.extend(inherited_acl_queries)
 
         return result
 
-    def check_access(self, permissions, user, obj, related=None, raise_404=False):
+    def check_access(self, obj, permission, user, raise_404=False):
         warnings.warn(
             'check_access() is deprecated, use restrict_queryset() to '
             'produce a queryset from which to .get() the corresponding '
             'object in the local code.', InterfaceWarning
         )
 
-        try:
-            # permissions can be a single permission or a list of permissions
-            permission = permissions[0]
-        except TypeError:
-            permission = permissions
-        else:
-            warnings.warn(
-                'Passing multiple permissions via the `permissions` argument '
-                'is deprecated. Pass a single permission. Use multiple call '
-                'to check against multiple permissions.', InterfaceWarning
-            )
-
-        if related:
-            warnings.warn(
-                'Passing a related field name to check_access() is '
-                'deprecated. Register the related field using '
-                'common.classes.ModelPermission.', InterfaceWarning
-            )
-
         queryset = self.restrict_queryset(
             permission=permission, queryset=obj._meta.default_manager.all(),
-            user=user, related_field_name=related
+            user=user
         )
 
         if queryset.filter(pk=obj.pk).exists():
@@ -168,7 +150,7 @@ class AccessControlListManager(models.Manager):
             if raise_404:
                 raise Http404
             else:
-                return PermissionDenied
+                raise PermissionDenied
 
     def get_inherited_permissions(self, role, obj):
         try:
@@ -229,7 +211,7 @@ class AccessControlListManager(models.Manager):
             permission=permission, queryset=queryset, user=user
         )
 
-    def restrict_queryset(self, permission, queryset, user, related_field_name=None):
+    def restrict_queryset(self, permission, queryset, user):
         # `related_field_name` is left only for compatibility with check_access
         # once check_access() is removed the `related_field_name` argument
         # will be removed too.
@@ -237,13 +219,9 @@ class AccessControlListManager(models.Manager):
         # Check directly granted permission via a role
         try:
             Permission.check_user_permission(permission=permission, user=user)
-
-            Permission.check_permissions(
-                requester=user, permissions=(permission,)
-            )
         except PermissionDenied:
             acl_filters = self._get_acl_filters(
-                queryset=queryset, related_field_name=related_field_name,
+                queryset=queryset,
                 stored_permission=permission.stored_permission, user=user
             )
 

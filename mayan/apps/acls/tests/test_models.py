@@ -38,7 +38,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
     def test_check_access_without_permissions(self):
         with self.assertRaises(PermissionDenied):
             AccessControlList.objects.check_access(
-                obj=self.test_document_1, permissions=(permission_document_view,),
+                obj=self.test_document_1, permission=permission_document_view,
                 user=self._test_case_user
             )
 
@@ -58,7 +58,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
 
         try:
             AccessControlList.objects.check_access(
-                obj=self.test_document_1, permissions=(permission_document_view,),
+                obj=self.test_document_1, permission=permission_document_view,
                 user=self._test_case_user
             )
         except PermissionDenied:
@@ -85,26 +85,26 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
 
         try:
             AccessControlList.objects.check_access(
-                obj=self.test_document_1, permissions=(permission_document_view,),
+                obj=self.test_document_1, permission=permission_document_view,
                 user=self._test_case_user
             )
         except PermissionDenied:
             self.fail('PermissionDenied exception was not expected.')
 
-    def test_check_access_with_inherited_acl_and_local_acl(self):
-        acl = AccessControlList.objects.create(
+    def test_check_access_with_inherited_acl_and_direct_acl(self):
+        test_acl_1 = AccessControlList.objects.create(
             content_object=self.test_document_type_1, role=self._test_case_role
         )
-        acl.permissions.add(permission_document_view.stored_permission)
+        test_acl_1.permissions.add(permission_document_view.stored_permission)
 
-        acl = AccessControlList.objects.create(
+        test_acl_2 = AccessControlList.objects.create(
             content_object=self.test_document_3, role=self._test_case_role
         )
-        acl.permissions.add(permission_document_view.stored_permission)
+        test_acl_2.permissions.add(permission_document_view.stored_permission)
 
         try:
             AccessControlList.objects.check_access(
-                obj=self.test_document_3, permissions=(permission_document_view,),
+                obj=self.test_document_3, permission=permission_document_view,
                 user=self._test_case_user
             )
         except PermissionDenied:
