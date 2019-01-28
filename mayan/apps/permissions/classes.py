@@ -75,28 +75,6 @@ class Permission(object):
                 cls._permissions.values(), key=lambda x: x.namespace.name
             )
 
-    # Deprecated method
-    @classmethod
-    def check_permissions(cls, permissions, requester):
-        warnings.warn(
-            'The method .check_permissions() is deprecated. Use '
-            '.check_user_permission() instead.', InterfaceWarning
-        )
-
-        try:
-            for permission in permissions:
-                if permission.stored_permission.user_has_this(user=requester):
-                    return True
-        except TypeError:
-            # Not a list of permissions, just one
-            if permissions.stored_permission.user_has_this(user=requester):
-                return True
-
-        logger.debug(
-            'User "%s" does not have permissions "%s"', requester, permissions
-        )
-        raise PermissionDenied(_('Insufficient permissions.'))
-
     @classmethod
     def check_user_permission(cls, permission, user):
         if permission.stored_permission.user_has_this(user=user):
