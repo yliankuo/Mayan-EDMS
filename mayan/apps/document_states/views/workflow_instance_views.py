@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.mixins import ExternalObjectMixin
-from mayan.apps.common.views import FormView, SingleObjectListView
+from mayan.apps.common.generics import FormView, SingleObjectListView
 from mayan.apps.documents.models import Document
 
 from ..forms import WorkflowInstanceTransitionForm

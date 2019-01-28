@@ -17,7 +17,7 @@ from mayan.apps.checkouts.models import NewVersionBlock
 from mayan.apps.common import menu_facet
 from mayan.apps.common.mixins import ExternalObjectMixin, ListModeMixin
 from mayan.apps.common.models import SharedUploadedFile
-from mayan.apps.common.views import (
+from mayan.apps.common.generics import (
     ConfirmView, MultiFormView, SingleObjectCreateView, SingleObjectDeleteView,
     SingleObjectEditView, SingleObjectListView
 )
@@ -361,7 +361,7 @@ class UploadInteractiveView(UploadBaseView):
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_create, user=request.user,
+            permission=permission_document_create, user=request.user,
             obj=self.document_type
         )
 
@@ -541,7 +541,7 @@ class UploadInteractiveVersionView(UploadBaseView):
             )
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_new_version,
+            permission=permission_document_new_version,
             user=self.request.user, obj=self.document
         )
 

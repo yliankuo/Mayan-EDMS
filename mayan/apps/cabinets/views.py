@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 
 from mayan.apps.acls.models import AccessControlList
-from mayan.apps.common.views import (
+from mayan.apps.common.generics import (
     MultipleObjectFormActionView, SingleObjectCreateView,
     SingleObjectDeleteView, SingleObjectEditView, SingleObjectListView
 )
