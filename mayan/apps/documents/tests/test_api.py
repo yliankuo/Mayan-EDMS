@@ -11,10 +11,10 @@ from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..models import Document, DocumentType
 from ..permissions import (
-    permission_document_create, permission_document_delete,
-    permission_document_download, permission_document_edit,
-    permission_document_new_version, permission_document_properties_edit,
-    permission_document_restore, permission_document_trash,
+    permission_document_create, permission_document_download,
+    permission_document_edit, permission_document_new_version,
+    permission_document_properties_edit, permission_document_trash,
+    permission_trashed_document_delete, permission_trashed_document_restore,
     permission_document_type_create, permission_document_type_delete,
     permission_document_type_edit, permission_document_version_revert,
     permission_document_version_view, permission_document_view
@@ -61,7 +61,7 @@ class DocumentTypeAPITestCase(BaseAPITestCase):
     def _request_document_type_patch(self):
         return self.patch(
             viewname='rest_api:documenttype-detail', kwargs={
-                'document_type_pk': self.document_type.pk
+                'document_type_id': self.document_type.pk
             }, data={'label': TEST_DOCUMENT_TYPE_LABEL_EDITED}
         )
 
@@ -90,7 +90,7 @@ class DocumentTypeAPITestCase(BaseAPITestCase):
     def _request_document_type_put(self):
         return self.put(
             viewname='rest_api:documenttype-detail', kwargs={
-                'document_type_pk': self.document_type.pk
+                'document_type_id': self.document_type.pk
             }, data={'label': TEST_DOCUMENT_TYPE_LABEL_EDITED}
         )
 
@@ -119,7 +119,7 @@ class DocumentTypeAPITestCase(BaseAPITestCase):
     def _request_document_type_delete(self):
         return self.delete(
             viewname='rest_api:documenttype-detail', kwargs={
-                'document_type_pk': self.document_type.pk
+                'document_type_id': self.document_type.pk
             }
         )
 
@@ -207,7 +207,7 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
         with open(TEST_DOCUMENT_PATH, mode='rb') as file_descriptor:
             return self.post(
                 viewname='rest_api:document-version-list', kwargs={
-                    'document_pk': self.document.pk
+                    'document_id': self.document.pk
                 }, data={
                     'comment': '', 'file': file_descriptor,
                 }
@@ -247,8 +247,8 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_revert(self):
         return self.delete(
             viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': self.document.pk,
-                'document_version_pk': self.document.latest_version.pk
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk
             }
         )
 
@@ -275,7 +275,7 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_list(self):
         return self.get(
             viewname='rest_api:document-version-list',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_version_list_no_permission(self):
@@ -301,7 +301,7 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_download(self):
         return self.get(
             viewname='rest_api:document-download',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_download_no_permission(self):
@@ -329,8 +329,8 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_download(self):
         return self.get(
             viewname='rest_api:documentversion-download', kwargs={
-                'document_pk': self.document.pk,
-                'document_version_pk': self.document.latest_version.pk,
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk,
             }
         )
 
@@ -362,8 +362,8 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
         response = self.get(
             viewname='rest_api:documentversion-download', kwargs={
-                'document_pk': self.document.pk,
-                'document_version_pk': self.document.latest_version.pk,
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk,
             }, data={'preserve_extension': True}
         )
 
@@ -380,8 +380,8 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_edit_via_patch(self):
         return self.patch(
             viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': self.document.pk,
-                'document_version_pk': self.document.latest_version.pk,
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk,
             }, data={'comment': TEST_DOCUMENT_VERSION_COMMENT_EDITED}
         )
 
@@ -407,8 +407,8 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_version_edit_via_put(self):
         return self.put(
             viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': self.document.pk,
-                'document_version_pk': self.document.latest_version.pk,
+                'document_id': self.document.pk,
+                'document_version_id': self.document.latest_version.pk,
             }, data={'comment': TEST_DOCUMENT_VERSION_COMMENT_EDITED}
         )
 
@@ -434,7 +434,7 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_description_edit_via_patch(self):
         return self.patch(
             viewname='rest_api:document-detail',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={'description': TEST_DOCUMENT_DESCRIPTION_EDITED}
         )
 
@@ -459,7 +459,7 @@ class DocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_description_edit_via_put(self):
         return self.put(
             viewname='rest_api:document-detail',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={'description': TEST_DOCUMENT_DESCRIPTION_EDITED}
         )
 
@@ -491,8 +491,8 @@ class DocumentPageAPITestCase(DocumentTestMixin, BaseAPITestCase):
         page = self.document.pages.first()
         return self.get(
             viewname='rest_api:documentpage-image', kwargs={
-                'document_pk': page.document.pk,
-                'document_version_pk': page.document_version.pk, 'document_page_pk': page.pk
+                'document_id': page.document.pk,
+                'document_version_id': page.document_version.pk, 'document_page_id': page.pk
             }
         )
 
@@ -518,7 +518,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_move_to_trash(self):
         return self.delete(
             viewname='rest_api:document-detail',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_document_move_to_trash_no_permission(self):
@@ -540,7 +540,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_trashed_document_delete_view(self):
         return self.delete(
             viewname='rest_api:trasheddocument-detail',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_trashed_document_delete_from_trash_no_access(self):
@@ -554,7 +554,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_trashed_document_delete_from_trash_with_access(self):
         self.document = self.upload_document()
         self.document.delete()
-        self.grant_access(permission=permission_document_delete, obj=self.document)
+        self.grant_access(permission=permission_trashed_document_delete, obj=self.document)
         response = self._request_trashed_document_delete_view()
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Document.objects.count(), 0)
@@ -563,7 +563,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_trashed_document_detail_view(self):
         return self.get(
             viewname='rest_api:trasheddocument-detail',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_trashed_document_detail_view_no_access(self):
@@ -608,7 +608,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_trashed_document_restore_view(self):
         return self.post(
             viewname='rest_api:trasheddocument-restore',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_trashed_document_restore_no_access(self):
@@ -622,7 +622,7 @@ class TrashedDocumentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_trashed_document_restore_with_access(self):
         self.document = self.upload_document()
         self.document.delete()
-        self.grant_access(permission=permission_document_restore, obj=self.document)
+        self.grant_access(permission=permission_trashed_document_restore, obj=self.document)
         response = self._request_trashed_document_restore_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Document.trash.count(), 0)

@@ -3,15 +3,14 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (
     ConfirmView, SingleObjectDetailView, SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 
-from ..events import event_document_view
+from ..events import event_document_download, event_document_view
 from ..forms import DocumentVersionDownloadForm, DocumentVersionPreviewForm
 from ..models import Document, DocumentVersion
 from ..permissions import (
@@ -21,79 +20,22 @@ from ..permissions import (
 
 from .document_views import DocumentDownloadFormView, DocumentDownloadView
 
+__all__ = (
+    'DocumentVersionDownloadFormView', 'DocumentVersionDownloadView',
+    'DocumentVersionListView', 'DocumentVersionRevertView',
+    'DocumentVersionView'
+)
 logger = logging.getLogger(__name__)
-
-
-class DocumentVersionListView(SingleObjectListView):
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            obj=self.get_document(),
-            permissions=permission_document_version_view, user=request.user
-        )
-
-        self.get_document().add_as_recent_document_for_user(user=request.user)
-
-        return super(
-            DocumentVersionListView, self
-        ).dispatch(request, *args, **kwargs)
-
-    def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
-
-    def get_extra_context(self):
-        return {
-            'hide_object': True,
-            'list_as_items': True,
-            'object': self.get_document(),
-            'table_cell_container_classes': 'td-container-thumbnail',
-            'title': _('Versions of document: %s') % self.get_document(),
-        }
-
-    def get_object_list(self):
-        return self.get_document().versions.order_by('-timestamp')
-
-
-class DocumentVersionRevertView(ConfirmView):
-    object_permission = permission_document_version_revert
-
-    def get_extra_context(self):
-        return {
-            'message': _(
-                'All later version after this one will be deleted too.'
-            ),
-            'object': self.get_object().document,
-            'title': _('Revert to this version?'),
-        }
-
-    def get_object(self):
-        return get_object_or_404(
-            klass=DocumentVersion, pk=self.kwargs['document_version_pk']
-        )
-
-    def view_action(self):
-        try:
-            self.get_object().revert(_user=self.request.user)
-            messages.success(
-                request=self.request, message=_(
-                    'Document version reverted successfully'
-                )
-            )
-        except Exception as exception:
-            messages.error(
-                request=self.request,
-                message=_('Error reverting document version; %s') % exception
-            )
 
 
 class DocumentVersionDownloadFormView(DocumentDownloadFormView):
     form_class = DocumentVersionDownloadForm
     model = DocumentVersion
-    multiple_download_view = None
-    pk_url_kwarg = 'document_version_pk'
+    pk_url_kwarg = 'document_version_id'
     querystring_form_fields = (
         'compressed', 'zip_filename', 'preserve_extension'
     )
-    single_download_view = 'documents:document_version_download'
+    viewname = 'documents:document_version_download'
 
     def get_extra_context(self):
         result = super(
@@ -106,30 +48,26 @@ class DocumentVersionDownloadFormView(DocumentDownloadFormView):
 
         return result
 
-    def get_document_queryset(self):
-        id_list = self.request.GET.get(
-            'id_list', self.request.POST.get('id_list', '')
-        )
-
-        if not id_list:
-            id_list = self.kwargs['document_version_pk']
-
-        return self.model.objects.filter(
-            pk__in=id_list.split(',')
-        )
-
 
 class DocumentVersionDownloadView(DocumentDownloadView):
     model = DocumentVersion
     object_permission = permission_document_download
-    pk_url_kwarg = 'document_version_pk'
+    pk_url_kwarg = 'document_version_id'
+
+    @staticmethod
+    def commit_event(item, request):
+        # TODO: Improve by adding a document version download event
+        event_document_download.commit(
+            actor=request.user,
+            target=item.document
+        )
 
     @staticmethod
     def get_item_file(item):
         return item.file
 
     def get_encoding(self):
-        return self.get_object().encoding
+        return self.get_object_list().first().encoding
 
     def get_item_label(self, item):
         preserve_extension = self.request.GET.get(
@@ -143,13 +81,69 @@ class DocumentVersionDownloadView(DocumentDownloadView):
         return item.get_rendered_string(preserve_extension=preserve_extension)
 
     def get_mimetype(self):
-        return self.get_object().mimetype
+        return self.get_object_list().first().mimetype
+
+
+class DocumentVersionListView(ExternalObjectMixin, SingleObjectListView):
+    external_object_class = Document
+    external_object_permission = permission_document_version_view
+    external_object_pk_url_kwarg = 'document_id'
+
+    def get_document(self):
+        document = self.get_external_object()
+        document.add_as_recent_document_for_user(user=self.request.user)
+        return document
+
+    def get_extra_context(self):
+        return {
+            'hide_object': True,
+            'list_as_items': True,
+            'object': self.get_document(),
+            'table_cell_container_classes': 'td-container-thumbnail',
+            'title': _('Versions of document: %s') % self.get_document(),
+        }
+
+    def get_source_queryset(self):
+        return self.get_document().versions.order_by('-timestamp')
+
+
+class DocumentVersionRevertView(ExternalObjectMixin, ConfirmView):
+    external_object_class = DocumentVersion
+    external_object_permission = permission_document_version_revert
+    external_object_pk_url_kwarg = 'document_version_id'
+
+    def get_extra_context(self):
+        return {
+            'message': _(
+                'All later version after this one will be deleted too.'
+            ),
+            'object': self.get_object().document,
+            'title': _('Revert to this version?'),
+        }
+
+    def get_object(self):
+        return self.get_external_object()
+
+    def view_action(self):
+        try:
+            self.get_object().revert(_user=self.request.user)
+            messages.success(
+                message=_(
+                    'Document version reverted successfully'
+                ), request=self.request
+            )
+        except Exception as exception:
+            messages.error(
+                message=_('Error reverting document version; %s') % exception,
+                request=self.request
+            )
 
 
 class DocumentVersionView(SingleObjectDetailView):
     form_class = DocumentVersionPreviewForm
     model = DocumentVersion
     object_permission = permission_document_version_view
+    pk_url_kwarg = 'document_version_id'
 
     def dispatch(self, request, *args, **kwargs):
         result = super(

@@ -40,7 +40,9 @@ class DocumentPageManager(models.Manager):
         except DocumentVersion.DoesNotExist:
             raise self.model.DoesNotExist
 
-        return self.get(document_version__pk=document_version.pk, page_number=page_number)
+        return self.get(
+            document_version__id=document_version.pk, page_number=page_number
+        )
 
 
 class DocumentTypeManager(models.Manager):
@@ -61,13 +63,13 @@ class DocumentTypeManager(models.Manager):
                     'Document type: %s, has a deletion period delta of: %s',
                     document_type, delta
                 )
-                for document in document_type.deleted_documents.filter(deleted_date_time__lt=now() - delta):
+                for trashed_document in document_type.trashed_documents.filter(deleted_date_time__lt=now() - delta):
                     logger.info(
                         'Document "%s" with id: %d, trashed on: %s, exceded '
-                        'delete period', document, document.pk,
-                        document.deleted_date_time
+                        'delete period', trashed_document, trashed_document.pk,
+                        trashed_document.deleted_date_time
                     )
-                    document.delete()
+                    trashed_document.delete()
             else:
                 logger.info(
                     'Document type: %s, has a no retention delta', document_type
@@ -120,7 +122,7 @@ class DocumentVersionManager(models.Manager):
         except Document.DoesNotExist:
             raise self.model.DoesNotExist
 
-        return self.get(document__pk=document.pk, checksum=checksum)
+        return self.get(document__id=document.pk, checksum=checksum)
 
 
 class DuplicatedDocumentManager(models.Manager):
@@ -204,7 +206,7 @@ class FavoriteDocumentManager(models.Manager):
             except User.DoesNotExist:
                 raise self.model.DoesNotExist
 
-        return self.get(document__pk=document.pk, user__pk=user.pk)
+        return self.get(document__id=document.pk, user__id=user.pk)
 
     def get_for_user(self, user):
         Document = apps.get_model(
@@ -254,7 +256,7 @@ class RecentDocumentManager(models.Manager):
                 raise self.model.DoesNotExist
 
         return self.get(
-            document__pk=document.pk, user__pk=user.pk,
+            document__id=document.pk, user__id=user.pk,
             datetime_accessed=datetime_accessed
         )
 

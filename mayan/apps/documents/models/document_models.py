@@ -31,8 +31,8 @@ from ..signals import post_document_type_change
 from .document_type_models import DocumentType
 
 __all__ = (
-    'Document', 'DeletedDocument', 'DuplicatedDocument', 'FavoriteDocument',
-    'RecentDocument'
+    'Document', 'DuplicatedDocument', 'FavoriteDocument', 'RecentDocument',
+    'TrashedDocument'
 )
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class Document(models.Model):
     def get_absolute_url(self):
         return reverse(
             viewname='documents:document_preview',
-            kwargs={'document_pk': self.pk}
+            kwargs={'document_id': self.pk}
         )
 
     def get_api_image_url(self, *args, **kwargs):
@@ -279,13 +279,6 @@ class Document(models.Model):
             return DocumentPage.objects.none()
 
 
-class DeletedDocument(Document):
-    objects = TrashCanManager()
-
-    class Meta:
-        proxy = True
-
-
 @python_2_unicode_compatible
 class DuplicatedDocument(models.Model):
     document = models.ForeignKey(
@@ -316,9 +309,9 @@ class DuplicatedDocumentProxy(Document):
         verbose_name_plural = _('Duplicated documents')
 
     def get_duplicate_count(self, user):
-        queryset = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=user,
-            queryset=self.get_duplicates()
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view, queryset=self.get_duplicates(),
+            user=user
         )
         return queryset.count()
 
@@ -382,3 +375,10 @@ class RecentDocument(models.Model):
     def natural_key(self):
         return (self.datetime_accessed, self.document.natural_key(), self.user.natural_key())
     natural_key.dependencies = ['documents.Document', settings.AUTH_USER_MODEL]
+
+
+class TrashedDocument(Document):
+    objects = TrashCanManager()
+
+    class Meta:
+        proxy = True

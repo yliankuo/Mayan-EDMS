@@ -151,7 +151,7 @@ class DocumentVersion(models.Model):
     def get_absolute_url(self):
         return reverse(
             viewname='documents:document_version_view',
-            kwargs={'document_version_pk': self.pk}
+            kwargs={'document_version_id': self.pk}
         )
 
     def get_api_image_url(self, *args, **kwargs):
@@ -195,6 +195,7 @@ class DocumentVersion(models.Model):
                 filename, self.get_rendered_timestamp(), extension
             )
         else:
+            #TODO: use get_rendered_timestamp here
             return Template(
                 '{{ instance.document }} - {{ instance.timestamp }}'
             ).render(context=Context({'instance': self}))
@@ -204,6 +205,10 @@ class DocumentVersion(models.Model):
             context=Context({'instance': self})
         )
     get_rendered_timestamp.short_description = _('Date and time')
+
+    @property
+    def label(self):
+        return self.get_rendered_string()
 
     def natural_key(self):
         return (self.checksum, self.document.natural_key())
@@ -250,9 +255,19 @@ class DocumentVersion(models.Model):
             self.document, self
         )
 
-        event_document_version_revert.commit(actor=_user, target=self.document)
-        for version in self.document.versions.filter(timestamp__gt=self.timestamp):
-            version.delete()
+        try:
+            with transaction.atomic():
+                event_document_version_revert.commit(
+                    actor=_user, target=self.document
+                )
+                for version in self.document.versions.filter(timestamp__gt=self.timestamp):
+                    version.delete()
+        except Exception as exception:
+            logger.error(
+                'Error reverting document version for document "%s"; %s',
+                self.document, exception
+            )
+            raise
 
     def save(self, *args, **kwargs):
         """

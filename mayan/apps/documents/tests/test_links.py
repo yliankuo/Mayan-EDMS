@@ -4,14 +4,13 @@ import time
 
 from django.urls import reverse
 
-from mayan.apps.acls.models import AccessControlList
-
 from ..links import (
-    link_document_restore, link_document_version_download,
+    link_trashed_document_restore, link_document_version_download,
     link_document_version_revert
 )
+from ..models import TrashedDocument
 from ..permissions import (
-    permission_document_download, permission_document_restore,
+    permission_document_download, permission_trashed_document_restore,
     permission_document_version_revert
 )
 
@@ -26,15 +25,13 @@ class DocumentsLinksTestCase(GenericDocumentViewTestCase):
 
         self.assertTrue(self.document.versions.count(), 2)
 
-        self.login_user()
-
         self.add_test_view(test_object=self.document.versions.first())
         context = self.get_test_view()
         resolved_link = link_document_version_revert.resolve(context=context)
 
         self.assertEqual(resolved_link, None)
 
-    def test_document_version_revert_link_with_permission(self):
+    def test_document_version_revert_link_with_access(self):
         # Needed by MySQL as milliseconds value is not store in timestamp
         # field
         time.sleep(1.01)
@@ -44,13 +41,8 @@ class DocumentsLinksTestCase(GenericDocumentViewTestCase):
 
         self.assertTrue(self.document.versions.count(), 2)
 
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-        acl.permissions.add(
-            permission_document_version_revert.stored_permission
+        self.grant_access(
+            obj=self.document, permission=permission_document_version_revert
         )
 
         self.add_test_view(test_object=self.document.versions.first())
@@ -61,27 +53,22 @@ class DocumentsLinksTestCase(GenericDocumentViewTestCase):
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_version_revert',
-                args=(self.document.versions.first().pk,)
+                viewname='documents:document_version_revert',
+                kwargs={'document_version_id': self.document.versions.first().pk}
             )
         )
 
     def test_document_version_download_link_no_permission(self):
-        self.login_user()
-
         self.add_test_view(test_object=self.document.latest_version)
         context = self.get_test_view()
         resolved_link = link_document_version_download.resolve(context=context)
 
         self.assertEqual(resolved_link, None)
 
-    def test_document_version_download_link_with_permission(self):
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
+    def test_document_version_download_link_with_access(self):
+        self.grant_access(
+            obj=self.document, permission=permission_document_download
         )
-        acl.permissions.add(permission_document_download.stored_permission)
 
         self.add_test_view(test_object=self.document.latest_version)
         context = self.get_test_view()
@@ -91,45 +78,41 @@ class DocumentsLinksTestCase(GenericDocumentViewTestCase):
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_version_download_form',
-                args=(self.document.latest_version.pk,)
+                viewname='documents:document_version_download_form',
+                kwargs={'document_version_id': self.document.latest_version.pk}
             )
         )
 
 
 class DeletedDocumentsLinksTestCase(GenericDocumentViewTestCase):
+    def _request_trashed_document_restore_link(self):
+        self.add_test_view(
+            test_object=TrashedDocument.objects.get(pk=self.document.pk)
+        )
+        context = self.get_test_view()
+        return link_trashed_document_restore.resolve(context=context)
+
     def test_deleted_document_restore_link_no_permission(self):
         self.document.delete()
 
-        self.login_user()
-
-        self.add_test_view(test_object=self.document)
-        context = self.get_test_view()
-        resolved_link = link_document_restore.resolve(context=context)
+        resolved_link = self._request_trashed_document_restore_link()
 
         self.assertEqual(resolved_link, None)
 
-    def test_deleted_document_restore_link_with_permission(self):
+    def test_deleted_document_restore_link_with_access(self):
         self.document.delete()
 
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-        acl.permissions.add(
-            permission_document_restore.stored_permission
+        self.grant_access(
+            obj=self.document, permission=permission_trashed_document_restore
         )
 
-        self.add_test_view(test_object=self.document)
-        context = self.get_test_view()
-        resolved_link = link_document_restore.resolve(context=context)
+        resolved_link = self._request_trashed_document_restore_link()
 
         self.assertNotEqual(resolved_link, None)
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_restore',
-                args=(self.document.pk,)
+                viewname='documents:trashed_document_restore',
+                kwargs={'trashed_document_id': self.document.pk}
             )
         )

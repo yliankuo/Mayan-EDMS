@@ -3,10 +3,6 @@ from __future__ import unicode_literals
 from actstream.models import Action
 from django_downloadview import assert_download_response
 
-from mayan.apps.user_management.tests.literals import (
-    TEST_USER_PASSWORD, TEST_USER_USERNAME
-)
-
 from ..events import event_document_download, event_document_view
 from ..permissions import (
     permission_document_download, permission_document_view
@@ -21,38 +17,30 @@ TEST_TRANSFORMATION_ARGUMENT = 'degrees: 180'
 
 
 class DocumentEventsTestCase(GenericDocumentViewTestCase):
-    def test_document_download_event_no_permissions(self):
-        self.login(
-            username=TEST_USER_USERNAME, password=TEST_USER_PASSWORD
+    def _request_document_download_view(self):
+        return self.get(
+            viewname='documents:document_download',
+            kwargs={'document_id': self.document.pk}
         )
 
+    def test_document_download_event_no_permissions(self):
         Action.objects.all().delete()
 
-        response = self.get(
-            viewname='documents:document_download',
-            kwargs={'document_pk': self.document.pk}
-        )
+        response = self._request_document_download_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(list(Action.objects.any(obj=self.document)), [])
 
     def test_document_download_event_with_permissions(self):
-        self.login(
-            username=TEST_USER_USERNAME, password=TEST_USER_PASSWORD
-        )
-
         Action.objects.all().delete()
 
-        self.role.permissions.add(
-            permission_document_download.stored_permission
+        self.grant_access(
+            obj=self.document, permission=permission_document_download
         )
 
         self.expected_content_type = 'image/png; charset=utf-8'
 
-        response = self.get(
-            viewname='documents:document_download',
-            kwargs={'document_pk': self.document.pk}
-        )
+        response = self._request_document_download_view()
 
         # Download the file to close the file descriptor
         with self.document.open() as file_object:
@@ -65,40 +53,31 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
 
         self.assertEqual(event.verb, event_document_download.id)
         self.assertEqual(event.target, self.document)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)
+
+    def _request_document_preview_view(self):
+        return self.get(
+            viewname='documents:document_preview',
+            kwargs={'document_id': self.document.pk}
+        )
 
     def test_document_view_event_no_permissions(self):
-        self.login(
-            username=TEST_USER_USERNAME, password=TEST_USER_PASSWORD
-        )
-
         Action.objects.all().delete()
 
-        response = self.get(
-            viewname='documents:document_preview',
-            kwargs={'document_pk': self.document.pk}
-        )
+        response = self._request_document_preview_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(list(Action.objects.any(obj=self.document)), [])
 
-    def test_document_view_event_with_permissions(self):
-        self.login(
-            username=TEST_USER_USERNAME, password=TEST_USER_PASSWORD
-        )
-
+    def test_document_view_event_with_access(self):
         Action.objects.all().delete()
 
-        self.role.permissions.add(
-            permission_document_view.stored_permission
-        )
-        self.get(
-            viewname='documents:document_preview',
-            kwargs={'document_pk': self.document.pk}
-        )
+        self.grant_access(obj=self.document, permission=permission_document_view)
+        response = self._request_document_preview_view()
+        self.assertEqual(response.status_code, 200)
 
         event = Action.objects.any(obj=self.document).first()
 
         self.assertEqual(event.verb, event_document_view.id)
         self.assertEqual(event.target, self.document)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)

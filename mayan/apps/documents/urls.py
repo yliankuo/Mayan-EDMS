@@ -2,29 +2,34 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
+"""
 from .api_views import (
-    APIDeletedDocumentListView, APIDeletedDocumentRestoreView,
-    APIDeletedDocumentView, APIDocumentDownloadView, APIDocumentListView,
+    APITrashedDocumentListView, APITrashedDocumentRestoreView,
+    APITrashedDocumentView, APIDocumentDownloadView, APIDocumentListView,
     APIDocumentPageImageView, APIDocumentPageView,
     APIDocumentTypeDocumentListView, APIDocumentTypeListView,
     APIDocumentTypeView, APIDocumentVersionDownloadView,
     APIDocumentVersionPageListView, APIDocumentVersionsListView,
     APIDocumentVersionView, APIDocumentView, APIRecentDocumentListView
 )
+"""
+from .api_views import (
+    DocumentPageViewSet, DocumentTypeViewSet, DocumentVersionViewSet,
+    DocumentViewSet
+)
+
 from .views import (
-    ClearImageCacheView, DeletedDocumentDeleteManyView,
-    DeletedDocumentDeleteView, DeletedDocumentListView,
-    DocumentDocumentTypeEditView, DocumentDownloadFormView,
+    ClearImageCacheView, DocumentChangeTypeView, DocumentDownloadFormView,
     DocumentDownloadView, DocumentDuplicatesListView, DocumentEditView,
     DocumentListView, DocumentPageListView, DocumentPageNavigationFirst,
     DocumentPageNavigationLast, DocumentPageNavigationNext,
     DocumentPageNavigationPrevious, DocumentPageRotateLeftView,
     DocumentPageRotateRightView, DocumentPageView, DocumentPageViewResetView,
     DocumentPageZoomInView, DocumentPageZoomOutView, DocumentPreviewView,
-    DocumentPrint, DocumentRestoreManyView, DocumentRestoreView,
-    DocumentTransformationsClearView, DocumentTransformationsCloneView,
-    DocumentTrashManyView, DocumentTrashView, DocumentTypeCreateView,
-    DocumentTypeDeleteView, DocumentTypeDocumentListView, DocumentTypeEditView,
+    DocumentPrintView, DocumentTransformationsClearView,
+    DocumentTransformationsCloneView, DocumentTrashView,
+    DocumentTypeCreateView, DocumentTypeDeleteView,
+    DocumentTypeDocumentListView, DocumentTypeEditView,
     DocumentTypeFilenameCreateView, DocumentTypeFilenameDeleteView,
     DocumentTypeFilenameEditView, DocumentTypeFilenameListView,
     DocumentTypeListView, DocumentUpdatePageCountView,
@@ -33,12 +38,51 @@ from .views import (
     DocumentView, DuplicatedDocumentListView, EmptyTrashCanView,
     FavoriteAddView, FavoriteDocumentListView, FavoriteRemoveView,
     RecentAccessDocumentListView, RecentAddedDocumentListView,
-    ScanDuplicatedDocuments
+    ScanDuplicatedDocuments, TrashedDocumentDeleteView, TrashedDocumentListView,
+    TrashedDocumentRestoreView
+)
+
+urlpatterns_trashed_documents = (
+    url(
+        regex=r'^documents/(?P<document_id>\d+)/trash/$',
+        name='document_trash', view=DocumentTrashView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/trash/$', name='document_multiple_trash',
+        view=DocumentTrashView.as_view()
+    ),
+    url(
+        regex=r'^trashed_documents/$', name='trashed_document_list',
+        view=TrashedDocumentListView.as_view()
+    ),
+    url(
+        regex=r'^trashed_documents/(?P<trashed_document_id>\d+)/restore/$',
+        name='trashed_document_restore',
+        view=TrashedDocumentRestoreView.as_view()
+    ),
+    url(
+        regex=r'^trashed_documents/multiple/restore/$',
+        name='trashed_document_multiple_restore',
+        view=TrashedDocumentRestoreView.as_view()
+    ),
+    url(
+        regex=r'^trashed_documents/(?P<trashed_document_id>\d+)/delete/$',
+        name='trashed_document_delete', view=TrashedDocumentDeleteView.as_view()
+    ),
+    url(
+        regex=r'^trashed_documents/multiple/delete/$',
+        name='trashed_document_multiple_delete',
+        view=TrashedDocumentDeleteView.as_view()
+    ),
+    url(
+        regex=r'^trash/empty/$', name='trash_can_empty',
+        view=EmptyTrashCanView.as_view()
+    )
 )
 
 urlpatterns = [
     url(
-        regex=r'^documents/all/$', name='document_list',
+        regex=r'^documents/$', name='document_list',
         view=DocumentListView.as_view()
     ),
     url(
@@ -50,10 +94,8 @@ urlpatterns = [
         regex=r'^documents/recent_added/$', name='document_list_recent_added',
         view=RecentAddedDocumentListView.as_view()
     ),
-    url(
-        regex=r'^documents/deleted/$', name='document_list_deleted',
-        view=DeletedDocumentListView.as_view()
-    ),
+
+
     url(
         regex=r'^documents/duplicated/$', name='duplicated_document_list',
         view=DuplicatedDocumentListView.as_view()
@@ -63,20 +105,20 @@ urlpatterns = [
         view=FavoriteDocumentListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/preview/$',
+        regex=r'^documents/(?P<document_id>\d+)/preview/$',
         name='document_preview', view=DocumentPreviewView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/properties/$',
+        regex=r'^documents/(?P<document_id>\d+)/properties/$',
         name='document_properties', view=DocumentView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/duplicates/$',
+        regex=r'^documents/(?P<document_id>\d+)/duplicates/$',
         name='document_duplicates_list',
         view=DocumentDuplicatesListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/add_to_favorites/$',
+        regex=r'^documents/(?P<document_id>\d+)/add_to_favorites/$',
         name='document_add_to_favorites', view=FavoriteAddView.as_view()
     ),
     url(
@@ -85,7 +127,7 @@ urlpatterns = [
         view=FavoriteAddView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/remove_from_favorites/$',
+        regex=r'^documents/(?P<document_id>\d+)/remove_from_favorites/$',
         name='document_remove_from_favorites',
         view=FavoriteRemoveView.as_view()
     ),
@@ -95,50 +137,25 @@ urlpatterns = [
         view=FavoriteRemoveView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/restore/$',
-        name='document_restore', view=DocumentRestoreView.as_view()
-    ),
-    url(
-        regex=r'^documents/multiple/restore/$',
-        name='document_multiple_restore',
-        view=DocumentRestoreManyView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/delete/$',
-        name='document_delete', view=DeletedDocumentDeleteView.as_view()
-    ),
-    url(
-        regex=r'^documents/multiple/delete/$', name='document_multiple_delete',
-        view=DeletedDocumentDeleteManyView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/type/$',
-        name='document_document_type_edit',
-        view=DocumentDocumentTypeEditView.as_view()
+        regex=r'^documents/(?P<document_id>\d+)/type/$',
+        name='document_change_type',
+        view=DocumentChangeTypeView.as_view()
     ),
     url(
         regex=r'^documents/multiple/type/$',
-        name='document_multiple_document_type_edit',
-        view=DocumentDocumentTypeEditView.as_view()
+        name='document_multiple_change_type',
+        view=DocumentChangeTypeView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/trash/$',
-        name='document_trash', view=DocumentTrashView.as_view()
-    ),
-    url(
-        regex=r'^documents/multiple/trash/$', name='document_multiple_trash',
-        view=DocumentTrashManyView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/edit/$', name='document_edit',
+        regex=r'^documents/(?P<document_id>\d+)/edit/$', name='document_edit',
         view=DocumentEditView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/print/$',
-        name='document_print', view=DocumentPrint.as_view()
+        regex=r'^documents/(?P<document_id>\d+)/print/$',
+        name='document_print', view=DocumentPrintView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/reset_page_count/$',
+        regex=r'^documents/(?P<document_id>\d+)/reset_page_count/$',
         name='document_update_page_count',
         view=DocumentUpdatePageCountView.as_view()
     ),
@@ -148,11 +165,11 @@ urlpatterns = [
         view=DocumentUpdatePageCountView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/download/form/$',
+        regex=r'^documents/(?P<document_id>\d+)/download/form/$',
         name='document_download_form', view=DocumentDownloadFormView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/download/$',
+        regex=r'^documents/(?P<document_id>\d+)/download/$',
         name='document_download', view=DocumentDownloadView.as_view()
     ),
     url(
@@ -165,46 +182,46 @@ urlpatterns = [
         name='document_multiple_download', view=DocumentDownloadView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/clear_transformations/$',
+        regex=r'^documents/(?P<document_id>\d+)/transformations/clear/$',
         name='document_clear_transformations',
         view=DocumentTransformationsClearView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/clone_transformations/$',
+        regex=r'^documents/(?P<document_id>\d+)/transformations/clone/$',
         name='document_clone_transformations',
         view=DocumentTransformationsCloneView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/version/all/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/$',
         name='document_version_list',
         view=DocumentVersionListView.as_view()
     ),
     url(
-        regex=r'^documents/versions/(?P<document_version_pk>\d+)/download/form/$',
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/download/form/$',
         name='document_version_download_form',
         view=DocumentVersionDownloadFormView.as_view()
     ),
     url(
-        regex=r'^documents/versions/(?P<document_version_pk>\d+)/$',
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/$',
         name='document_version_view', view=DocumentVersionView.as_view()
     ),
     url(
-        regex=r'^documents/versions/(?P<document_version_pk>\d+)/download/$',
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/download/$',
         name='document_version_download',
         view=DocumentVersionDownloadView.as_view()
     ),
     url(
-        regex=r'^documents/versions/(?P<document_version_pk>\d+)/revert/$',
+        regex=r'^documents/versions/(?P<document_version_id>\d+)/revert/$',
         name='document_version_revert',
         view=DocumentVersionRevertView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/pages/$',
+        regex=r'^documents/(?P<document_id>\d+)/pages/$',
         name='document_pages',
         view=DocumentPageListView.as_view()
     ),
     url(
-        regex=r'^documents/multiple/clear_transformations/$',
+        regex=r'^documents/multiple/transformations/clear/$',
         name='document_multiple_clear_transformations',
         view=DocumentTransformationsClearView.as_view()
     ),
@@ -213,96 +230,92 @@ urlpatterns = [
         view=ClearImageCacheView.as_view()
     ),
     url(
-        regex=r'^trash_can/empty/$', name='trash_can_empty',
-        view=EmptyTrashCanView.as_view()
-    ),
-    url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/$',
         name='document_page_view', view=DocumentPageView.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/navigation/next/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/navigation/next/$',
         name='document_page_navigation_next',
         view=DocumentPageNavigationNext.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/navigation/previous/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/navigation/previous/$',
         name='document_page_navigation_previous',
         view=DocumentPageNavigationPrevious.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/navigation/first/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/navigation/first/$',
         name='document_page_navigation_first',
         view=DocumentPageNavigationFirst.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/navigation/last/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/navigation/last/$',
         name='document_page_navigation_last',
         view=DocumentPageNavigationLast.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/zoom/in/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/zoom/in/$',
         name='document_page_zoom_in', view=DocumentPageZoomInView.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/zoom/out/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/zoom/out/$',
         name='document_page_zoom_out', view=DocumentPageZoomOutView.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/rotate/left/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/rotate/left/$',
         name='document_page_rotate_left',
         view=DocumentPageRotateLeftView.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/rotate/right/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/rotate/right/$',
         name='document_page_rotate_right',
         view=DocumentPageRotateRightView.as_view()
     ),
     url(
-        regex=r'^pages/(?P<document_page_pk>\d+)/reset/$',
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/reset/$',
         name='document_page_view_reset',
         view=DocumentPageViewResetView.as_view()
     ),
 
     # Admin views
     url(
-        regex=r'^types/$', name='document_type_list',
+        regex=r'^documents_types/$', name='document_type_list',
         view=DocumentTypeListView.as_view()
     ),
     url(
-        regex=r'^types/create/$', name='document_type_create',
+        regex=r'^documents_types/create/$', name='document_type_create',
         view=DocumentTypeCreateView.as_view()
     ),
     url(
-        regex=r'^types/(?P<document_type_pk>\d+)/edit/$', name='document_type_edit',
-        view=DocumentTypeEditView.as_view()
+        regex=r'^documents_types/(?P<document_type_id>\d+)/edit/$',
+        name='document_type_edit', view=DocumentTypeEditView.as_view()
     ),
     url(
-        regex=r'^types/(?P<document_type_pk>\d+)/delete/$', name='document_type_delete',
-        view=DocumentTypeDeleteView.as_view()
+        regex=r'^documents_types/(?P<document_type_id>\d+)/delete/$',
+        name='document_type_delete', view=DocumentTypeDeleteView.as_view()
     ),
     url(
-        regex=r'^types/(?P<document_type_pk>\d+)/documents/$',
+        regex=r'^documents_types/(?P<document_type_id>\d+)/documents/$',
         name='document_type_document_list',
         view=DocumentTypeDocumentListView.as_view()
     ),
     url(
-        regex=r'^types/(?P<document_type_pk>\d+)/filenames/create/$',
-        name='document_type_filename_create',
-        view=DocumentTypeFilenameCreateView.as_view()
-    ),
-    url(
-        regex=r'^types/(?P<document_type_pk>\d+)/filenames/$',
+        regex=r'^documents_types/(?P<document_type_id>\d+)/filenames/$',
         name='document_type_filename_list',
         view=DocumentTypeFilenameListView.as_view()
     ),
     url(
-        regex=r'^types/filenames/(?P<filename_pk>\d+)/edit/$',
+        regex=r'^documents_types/(?P<document_type_id>\d+)/filenames/create/$',
+        name='document_type_filename_create',
+        view=DocumentTypeFilenameCreateView.as_view()
+    ),
+    url(
+        regex=r'^documents_types/filenames/(?P<filename_id>\d+)/edit/$',
         name='document_type_filename_edit',
         view=DocumentTypeFilenameEditView.as_view()
     ),
     url(
-        regex=r'^types/filenames/(?P<filename_pk>\d+)/delete/$',
+        regex=r'^documents_types/filenames/(?P<filename_id>\d+)/delete/$',
         name='document_type_filename_delete',
         view=DocumentTypeFilenameDeleteView.as_view()
     ),
@@ -316,17 +329,20 @@ urlpatterns = [
     ),
 ]
 
-api_urls = [
+urlpatterns.extend(urlpatterns_trashed_documents)
+
+api_urls = []
+"""
     url(
         regex=r'^document_types/$', name='documenttype-list',
         view=APIDocumentTypeListView.as_view()
     ),
     url(
-        regex=r'^document_types/(?P<document_type_pk>\d+)/$',
+        regex=r'^document_types/(?P<document_type_id>\d+)/$',
         name='documenttype-detail', view=APIDocumentTypeView.as_view()
     ),
     url(
-        regex=r'^document_types/(?P<document_type_pk>\d+)/documents/$',
+        regex=r'^document_types/(?P<document_type_id>\d+)/documents/$',
         name='documenttype-document-list',
         view=APIDocumentTypeDocumentListView.as_view()
     ),
@@ -335,30 +351,30 @@ api_urls = [
         view=APIDocumentListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/$', name='document-detail',
+        regex=r'^documents/(?P<document_id>\d+)/$', name='document-detail',
         view=APIDocumentView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/download/$',
+        regex=r'^documents/(?P<document_id>\d+)/download/$',
         name='document-download', view=APIDocumentDownloadView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/$',
         name='document-version-list',
         view=APIDocumentVersionsListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/(?P<document_version_pk>\d+)/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/$',
         name='documentversion-detail',
         view=APIDocumentVersionView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/(?P<document_version_pk>\d+)/pages/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages/$',
         name='documentversion-page-list',
         view=APIDocumentVersionPageListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/(?P<document_version_pk>\d+)/download/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/download/$',
         name='documentversion-download',
         view=APIDocumentVersionDownloadView.as_view()
     ),
@@ -367,24 +383,45 @@ api_urls = [
         view=APIRecentDocumentListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/(?P<document_version_pk>\d+)/pages/(?P<document_page_pk>\d+)$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages/(?P<document_page_id>\d+)$',
         name='documentpage-detail', view=APIDocumentPageView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/versions/(?P<document_version_pk>\d+)/pages/(?P<document_page_pk>\d+)/image/$',
+        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages/(?P<document_page_id>\d+)/image/$',
         name='documentpage-image', view=APIDocumentPageImageView.as_view()
     ),
     url(
         regex=r'^trashed_documents/$', name='trasheddocument-list',
-        view=APIDeletedDocumentListView.as_view()
+        view=APITrashedDocumentListView.as_view()
     ),
     url(
-        regex=r'^trashed_documents/(?P<document_pk>\d+)/$',
-        name='trasheddocument-detail', view=APIDeletedDocumentView.as_view()
+        regex=r'^trashed_documents/(?P<document_id>\d+)/$',
+        name='trasheddocument-detail', view=APITrashedDocumentView.as_view()
     ),
     url(
-        regex=r'^trashed_documents/(?P<document_pk>\d+)/restore/$',
+        regex=r'^trashed_documents/(?P<document_id>\d+)/restore/$',
         name='trasheddocument-restore',
-        view=APIDeletedDocumentRestoreView.as_view()
+        view=APITrashedDocumentRestoreView.as_view()
     ),
 ]
+"""
+
+
+api_router_entries = (
+    {
+        'prefix': r'documents', 'viewset': DocumentViewSet,
+        'basename': 'document'
+    },
+    {
+        'prefix': r'document_types', 'viewset': DocumentTypeViewSet,
+        'basename': 'document_type'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/versions',
+        'viewset': DocumentVersionViewSet, 'basename': 'document_version'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages',
+        'viewset': DocumentPageViewSet, 'basename': 'document_page'
+    },
+)

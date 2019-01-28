@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_control, patch_cache_control
 
 from django_downloadview import DownloadMixin, VirtualFile
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 
 from mayan.apps.acls.models import AccessControlList
@@ -17,12 +17,12 @@ from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
 from mayan.apps.rest_api.permissions import MayanPermission
 
 from .literals import DOCUMENT_IMAGE_TASK_TIMEOUT
-from .models import Document, DocumentType, RecentDocument
+from .models import Document, DocumentVersion, DocumentType, RecentDocument
 from .permissions import (
-    permission_document_create, permission_document_delete,
+    permission_document_create, permission_trashed_document_delete,
     permission_document_download, permission_document_edit,
     permission_document_new_version, permission_document_properties_edit,
-    permission_document_restore, permission_document_trash,
+    permission_trashed_document_restore, permission_document_trash,
     permission_document_type_create, permission_document_type_delete,
     permission_document_type_edit, permission_document_type_view,
     permission_document_version_revert, permission_document_version_view,
@@ -30,10 +30,11 @@ from .permissions import (
 )
 from .serializers import (
     DeletedDocumentSerializer, DocumentPageSerializer, DocumentSerializer,
-    DocumentTypeSerializer, DocumentVersionSerializer, NewDocumentSerializer,
-    NewDocumentVersionSerializer, RecentDocumentSerializer,
-    WritableDocumentSerializer, WritableDocumentTypeSerializer,
-    WritableDocumentVersionSerializer
+    DocumentTypeSerializer, DocumentVersionSerializer,# NewDocumentSerializer,
+    #NewDocumentVersionSerializer, RecentDocumentSerializer,
+    RecentDocumentSerializer,
+    #WritableDocumentSerializer, WritableDocumentTypeSerializer,
+    #WritableDocumentVersionSerializer
 )
 from .settings import settings_document_page_image_cache_time
 from .tasks import task_generate_document_page_image
@@ -41,12 +42,172 @@ from .tasks import task_generate_document_page_image
 logger = logging.getLogger(__name__)
 
 
+
+from rest_framework.decorators import action, detail_route
+from rest_framework.response import Response
+
+
+class DocumentViewSet(viewsets.ModelViewSet):
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'document_id'
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+
+    """
+    @action(
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_id',
+        url_name='document-version-list', url_path='document_versions'
+    )
+    def document_version_list(self, request, *args, **kwargs):
+        serializer = DocumentVersionSerializer(
+            instance=self.get_object().versions.all(), many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    """
+
+class DocumentPageViewSet(viewsets.ModelViewSet):
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'document_page_id'
+    serializer_class = DocumentPageSerializer
+
+    def get_queryset(self):
+        return get_object_or_404(
+            klass=DocumentVersion, document_id=self.kwargs['document_id'],
+            pk=self.kwargs['document_version_id']
+        ).pages.all()
+
+    @action(
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_page_id',
+        url_name='image', url_path='image'
+    )
+    @cache_control(private=True)
+    def document_page_image(self, request, *args, **kwargs):
+        """
+        asdasd
+        """
+        transformation_dict = {
+            'kwargs': {},
+            'name': {}
+        }
+        transformation_list = []
+
+        querystring = furl()
+        querystring.args.update(self.request.GET)
+        querystring.args.update(self.request.POST)
+
+        for key, value in querystring.args.items():
+            if key.startswith('transformation_'):
+                literal, index, element = key.split('_')
+                transformation_dict[element][index] = value
+
+        for order, identifier in transformation_dict['name'].items():
+            if order in transformation_dict['kwargs'].keys():
+                kwargs = {}
+                for kwargs_entry in transformation_dict['kwargs'][order].split(','):
+                    key, value = kwargs_entry.split(':')
+                    kwargs[key] = float(value)
+
+                transformation_list.append({
+                    'name': identifier,
+                    'kwargs': kwargs
+                })
+
+        width = request.GET.get('width')
+        height = request.GET.get('height')
+        zoom = request.GET.get('zoom')
+
+        if zoom:
+            zoom = int(zoom)
+
+        rotation = request.GET.get('rotation')
+
+        if rotation:
+            rotation = int(rotation)
+
+        task = task_generate_document_page_image.apply_async(
+            kwargs=dict(
+                document_page_id=self.get_object().pk, width=width,
+                height=height, zoom=zoom, rotation=rotation,
+                transformation_list=transformation_list
+            )
+        )
+
+        cache_filename = task.get(timeout=DOCUMENT_IMAGE_TASK_TIMEOUT)
+        with self.get_object().cache_partition.get_file(filename=cache_filename).open() as file_object:
+            response = HttpResponse(file_object.read(), content_type='image')
+            if '_hash' in request.GET:
+                patch_cache_control(
+                    response,
+                    max_age=settings_document_page_image_cache_time.value
+                )
+            return response
+
+
+    """
+    @action(
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_page_id',
+        url_name='document-page-list', url_path='document_pages'
+    )
+    def document_page_list(self, request, *args, **kwargs):
+        serializer = DocumentPageSerializer(
+            instance=self.get_object().versions.all(), many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    """
+
+class DocumentTypeViewSet(viewsets.ModelViewSet):
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'document_type_id'
+    queryset = DocumentType.objects.all()
+    serializer_class = DocumentTypeSerializer
+
+    @action(
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_type_id',
+        url_name='document-list', url_path='documents'
+    )
+    def document_list(self, request, *args, **kwargs):
+        serializer = DocumentSerializer(
+            instance=self.get_object().documents.all(), many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+
+class DocumentVersionViewSet(viewsets.ModelViewSet):
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'document_version_id'
+    serializer_class = DocumentVersionSerializer
+
+    """
+    @action(
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_version_id',
+        url_name='document-pages-list', url_path='document_pages'
+    )
+    def document_pages_list(self, request, *args, **kwargs):
+        serializer = DocumentPageSerializer(
+            instance=self.get_object().pages.all(), many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    """
+    def get_queryset(self):
+        return get_object_or_404(
+            klass=Document, pk=self.kwargs['document_id']
+        ).versions.all()
+
+
+'''
+
+
+
 class APIDeletedDocumentListView(generics.ListAPIView):
     """
     Returns a list of all the trashed documents.
     """
     filter_backends = (MayanObjectPermissionsFilter,)
-    lookup_url_kwarg = 'document_pk'
+    lookup_url_kwarg = 'document_id'
     mayan_object_permissions = {'GET': (permission_document_view,)}
     permission_classes = (MayanPermission,)
     queryset = Document.trash.all()
@@ -59,9 +220,9 @@ class APIDeletedDocumentView(generics.RetrieveDestroyAPIView):
     delete: Delete the trashed document.
     get: Retreive the details of the trashed document.
     """
-    lookup_url_kwarg = 'document_pk'
+    lookup_url_kwarg = 'document_id'
     mayan_object_permissions = {
-        'DELETE': (permission_document_delete,),
+        'DELETE': (permission_trashed_document_delete,),
         'GET': (permission_document_view,)
     }
     permission_classes = (MayanPermission,)
@@ -73,9 +234,9 @@ class APIDeletedDocumentRestoreView(generics.GenericAPIView):
     """
     post: Restore a trashed document.
     """
-    lookup_url_kwarg = 'document_pk'
+    lookup_url_kwarg = 'document_id'
     mayan_object_permissions = {
-        'POST': (permission_document_restore,)
+        'POST': (permission_trashed_document_restore,)
     }
     permission_classes = (MayanPermission,)
     queryset = Document.trash.all()
@@ -95,7 +256,7 @@ class APIDocumentDownloadView(DownloadMixin, generics.RetrieveAPIView):
     """
     get: Download the latest version of a document.
     """
-    lookup_url_kwarg = 'document_pk'
+    lookup_url_kwarg = 'document_id'
     mayan_object_permissions = {
         'GET': (permission_document_download,)
     }
@@ -146,7 +307,7 @@ class APIDocumentListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         AccessControlList.objects.check_access(
-            permissions=(permission_document_create,), user=self.request.user,
+            permission=permission_document_create,), user=self.request.user,
             obj=serializer.validated_data['document_type']
         )
         serializer.save(_user=self.request.user)
@@ -156,7 +317,7 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
     """
     get: Returns an image representation of the selected document.
     """
-    lookup_url_kwarg = 'document_page_pk'
+    lookup_url_kwarg = 'document_page_id'
 
     def get_document(self):
         if self.request.method == 'GET':
@@ -165,7 +326,7 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
             permission_required = permission_document_edit
 
         document = get_object_or_404(
-            klass=Document.passthrough, pk=self.kwargs['document_pk']
+            klass=Document.passthrough, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
@@ -175,7 +336,7 @@ class APIDocumentPageImageView(generics.RetrieveAPIView):
 
     def get_document_version(self):
         return get_object_or_404(
-            klass=self.get_document().versions.all(), pk=self.kwargs['document_version_pk']
+            klass=self.get_document().versions.all(), pk=self.kwargs['document_version_id']
         )
 
     def get_queryset(self):
@@ -253,7 +414,7 @@ class APIDocumentPageView(generics.RetrieveUpdateAPIView):
     patch: Edit the selected document page.
     put: Edit the selected document page.
     """
-    lookup_url_kwarg = 'document_page_pk'
+    lookup_url_kwarg = 'document_page_id'
     serializer_class = DocumentPageSerializer
 
     def get_document(self):
@@ -263,7 +424,7 @@ class APIDocumentPageView(generics.RetrieveUpdateAPIView):
             permission_required = permission_document_edit
 
         document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
@@ -274,7 +435,7 @@ class APIDocumentPageView(generics.RetrieveUpdateAPIView):
     def get_document_version(self):
         return get_object_or_404(
             klass=self.get_document().versions.all(),
-            pk=self.kwargs['document_version_pk']
+            pk=self.kwargs['document_version_id']
         )
 
     def get_queryset(self):
@@ -287,7 +448,7 @@ class APIDocumentTypeListView(generics.ListCreateAPIView):
     post: Create a new document type.
     """
     filter_backends = (MayanObjectPermissionsFilter,)
-    lookup_url_kwarg = 'document_type_pk'
+    lookup_url_kwarg = 'document_type_id'
     mayan_object_permissions = {'GET': (permission_document_type_view,)}
     mayan_view_permissions = {'POST': (permission_document_type_create,)}
     permission_classes = (MayanPermission,)
@@ -314,7 +475,7 @@ class APIDocumentTypeView(generics.RetrieveUpdateDestroyAPIView):
     patch: Edit the properties of the selected document type.
     put: Edit the properties of the selected document type.
     """
-    lookup_url_kwarg = 'document_type_pk'
+    lookup_url_kwarg = 'document_type_id'
     mayan_object_permissions = {
         'GET': (permission_document_type_view,),
         'PUT': (permission_document_type_edit,),
@@ -342,13 +503,13 @@ class APIDocumentTypeDocumentListView(generics.ListAPIView):
     Returns a list of all the documents of a particular document type.
     """
     filter_backends = (MayanObjectPermissionsFilter,)
-    lookup_url_kwarg = 'document_type_pk'
+    lookup_url_kwarg = 'document_type_id'
     mayan_object_permissions = {'GET': (permission_document_view,)}
     serializer_class = DocumentSerializer
 
     def get_queryset(self):
         document_type = get_object_or_404(
-            klass=DocumentType, pk=self.kwargs['document_type_pk']
+            klass=DocumentType, pk=self.kwargs['document_type_id']
         )
         AccessControlList.objects.check_access(
             permissions=permission_document_type_view, user=self.request.user,
@@ -362,15 +523,15 @@ class APIDocumentVersionDownloadView(DownloadMixin, generics.RetrieveAPIView):
     """
     get: Download a document version.
     """
-    lookup_url_kwarg = 'document_version_pk'
+    lookup_url_kwarg = 'document_version_id'
 
     def get_document(self):
         document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
-            permissions=(permission_document_download,), user=self.request.user,
+            permission=permission_document_download,), user=self.request.user,
             obj=document
         )
         return document
@@ -418,7 +579,7 @@ class APIDocumentView(generics.RetrieveUpdateDestroyAPIView):
     patch: Edit the properties of the selected document.
     put: Edit the properties of the selected document.
     """
-    lookup_url_kwarg = 'document_pk'
+    lookup_url_kwarg = 'document_id'
     mayan_object_permissions = {
         'GET': (permission_document_view,),
         'PUT': (permission_document_properties_edit,),
@@ -463,7 +624,7 @@ class APIDocumentVersionPageListView(generics.ListAPIView):
 
     def get_document(self):
         document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
@@ -474,7 +635,7 @@ class APIDocumentVersionPageListView(generics.ListAPIView):
     def get_document_version(self):
         return get_object_or_404(
             klass=self.get_document().versions.all(),
-            pk=self.kwargs['document_version_pk']
+            pk=self.kwargs['document_version_id']
         )
 
     def get_queryset(self):
@@ -490,7 +651,7 @@ class APIDocumentVersionsListView(generics.ListCreateAPIView):
     mayan_object_permissions = {
         'GET': (permission_document_version_view,),
     }
-    mayan_permission_attribute_check = 'document'
+    #mayan_permission_attribute_check = 'document'
     permission_classes = (MayanPermission,)
 
     def create(self, request, *args, **kwargs):
@@ -514,16 +675,16 @@ class APIDocumentVersionsListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         ).versions.all()
 
     def perform_create(self, serializer):
         document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
-            permissions=(permission_document_new_version,),
+            permission=permission_document_new_version,),
             user=self.request.user, obj=document
         )
         serializer.save(document=document, _user=self.request.user)
@@ -536,7 +697,7 @@ class APIDocumentVersionView(generics.RetrieveUpdateDestroyAPIView):
     patch: Edit the selected document version.
     put: Edit the selected document version.
     """
-    lookup_url_kwarg = 'document_version_pk'
+    lookup_url_kwarg = 'document_version_id'
 
     def get_document(self):
         if self.request.method == 'GET':
@@ -547,7 +708,7 @@ class APIDocumentVersionView(generics.RetrieveUpdateDestroyAPIView):
             permission_required = permission_document_edit
 
         document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
+            klass=Document, pk=self.kwargs['document_id']
         )
 
         AccessControlList.objects.check_access(
@@ -569,3 +730,4 @@ class APIDocumentVersionView(generics.RetrieveUpdateDestroyAPIView):
             return DocumentVersionSerializer
         else:
             return WritableDocumentVersionSerializer
+'''
