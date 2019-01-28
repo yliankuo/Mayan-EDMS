@@ -27,18 +27,19 @@ def get_cascade_condition(app_label, model_name, object_permission, view_permiss
 
         if view_permission:
             try:
-                Permission.check_permissions(
-                    requester=context.request.user,
-                    permissions=(view_permission,)
+                Permission.check_user_permission(
+                    permission=view_permission,
+                    user=context.request.user
                 )
             except PermissionDenied:
                 pass
             else:
                 return True
 
-        queryset = AccessControlList.objects.filter_by_access(
-            permission=object_permission, user=context.request.user,
-            queryset=Model.objects.all()
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=object_permission,
+            queryset=Model._meta.default_manager.all(),
+            user=context.request.user
         )
         return queryset.count() > 0
 
