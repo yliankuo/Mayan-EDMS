@@ -14,7 +14,6 @@ from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView, TemplateView
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.mixins import (
     ContentTypeViewMixin, ExternalObjectMixin
 )
@@ -24,12 +23,8 @@ from .forms import (
     LicenseForm, LocaleProfileForm, LocaleProfileForm_view,
     PackagesLicensesForm
 )
-from .generics import (  # NOQA
-    AssignRemoveView, ConfirmView, FormView, MultiFormView,
-    MultipleObjectConfirmActionView, MultipleObjectFormActionView, SimpleView,
-    SingleObjectCreateView, SingleObjectDeleteView, SingleObjectDetailView,
-    SingleObjectDownloadView, SingleObjectDynamicFormCreateView,
-    SingleObjectDynamicFormEditView, SingleObjectEditView, SingleObjectListView
+from .generics import (
+    ConfirmView, SimpleView, SingleObjectEditView, SingleObjectListView
 )
 from .icons import icon_object_error_list, icon_setup
 from .menus import menu_setup, menu_tools

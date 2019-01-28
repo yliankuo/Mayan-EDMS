@@ -21,7 +21,7 @@ class CommonViewTestCase(GenericViewTestCase):
 
     def _create_error_log_entry(self):
         ModelPermission.register(
-            model=get_user_model(), permissions=(permission_error_log_view,)
+            model=get_user_model(), permission=permission_error_log_view
         )
         ErrorLogEntry.objects.register(model=get_user_model())
 

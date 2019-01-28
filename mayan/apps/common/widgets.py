@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django import forms
 from django.template import Context, Template
 from django.utils.encoding import force_text
-from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from .icons import icon_fail as default_icon_fail
