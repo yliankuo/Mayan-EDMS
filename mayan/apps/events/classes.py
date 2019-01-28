@@ -113,7 +113,7 @@ class EventType(object):
                         if result.target:
                             try:
                                 AccessControlList.objects.check_access(
-                                    permissions=permission_events_view,
+                                    permission=permission_events_view,
                                     user=user, obj=result.target
                                 )
                             except PermissionDenied:
@@ -139,7 +139,7 @@ class EventType(object):
                         if relationship.exists():
                             try:
                                 AccessControlList.objects.check_access(
-                                    permissions=permission_events_view,
+                                    permission=permission_events_view,
                                     user=user, obj=result.target
                                 )
                             except PermissionDenied:
@@ -161,7 +161,7 @@ class EventType(object):
                         if relationship.exists():
                             try:
                                 AccessControlList.objects.check_access(
-                                    permissions=permission_events_view,
+                                    permission=permission_events_view,
                                     user=user, obj=result.action_object
                                 )
                             except PermissionDenied:
