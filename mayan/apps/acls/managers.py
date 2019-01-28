@@ -138,7 +138,6 @@ class AccessControlListManager(models.Manager):
             'produce a queryset from which to .get() the corresponding '
             'object in the local code.', InterfaceWarning
         )
-
         queryset = self.restrict_queryset(
             permission=permission, queryset=obj._meta.default_manager.all(),
             user=user
@@ -212,10 +211,6 @@ class AccessControlListManager(models.Manager):
         )
 
     def restrict_queryset(self, permission, queryset, user):
-        # `related_field_name` is left only for compatibility with check_access
-        # once check_access() is removed the `related_field_name` argument
-        # will be removed too.
-
         # Check directly granted permission via a role
         try:
             Permission.check_user_permission(permission=permission, user=user)
