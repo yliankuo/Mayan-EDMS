@@ -578,10 +578,6 @@ class SourceColumn(object):
         self.label = None
         self.views = views or []
         self.widget = widget
-        if not attribute and not func:
-            raise NavigationError(
-                'Must provide either an attribute or a function'
-            )
 
         self._calculate_label()
 
@@ -636,11 +632,13 @@ class SourceColumn(object):
 
         if self.attribute:
             result = resolve_attribute(
-                obj=context['object'], attribute=self.attribute,
-                kwargs=self.kwargs
+                attribute=self.attribute, kwargs=self.kwargs,
+                obj=context['object']
             )
         elif self.func:
             result = self.func(context=context, **self.kwargs)
+        else:
+            result = context['object']
 
         if self.widget:
             widget_instance = self.widget()
