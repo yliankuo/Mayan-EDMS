@@ -18,8 +18,8 @@ from .icons import icon_wizard_submit
 
 
 class WizardStep(object):
-    _registry = {}
     _deregistry = {}
+    _registry = {}
 
     @classmethod
     def deregister(cls, step):
