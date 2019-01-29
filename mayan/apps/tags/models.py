@@ -15,7 +15,6 @@ from .events import (
     event_tag_attach, event_tag_created, event_tag_edited, event_tag_remove
 )
 from .managers import DocumentTagManager
-from .widgets import widget_single_tag
 
 
 @python_2_unicode_compatible
@@ -56,23 +55,22 @@ class Tag(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            viewname='tags:tag_tagged_item_list', kwargs={'tag_pk': str(self.pk)}
+            viewname='tags:tag_tagged_item_list', kwargs={
+                'tag_id': self.pk
+            }
+        )
+
+    def get_documents(self, user):
+        """
+        Return a filtered queryset documents that have this tag attached.
+        """
+        return AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view, queryset=self.documents,
+            user=user
         )
 
     def get_document_count(self, user):
-        """
-        Return the numeric count of documents that have this tag attached.
-        The count if filtered by access.
-        """
-        queryset = AccessControlList.objects.filter_by_access(
-            permission_document_view, user, queryset=self.documents
-        )
-
-        return queryset.count()
-
-    def get_preview_widget(self):
-        return widget_single_tag(tag=self)
-    get_preview_widget.short_description = _('Preview')
+        return self.get_documents(user=user).count()
 
     def remove_from(self, document, user=None):
         """

@@ -23,16 +23,9 @@ class WizardStepTags(WizardStep):
         return Tag.objects.exists()
 
     @classmethod
-    def get_form_kwargs(self, wizard):
-        return {
-            'help_text': _('Tags to be attached.'),
-            'user': wizard.request.user
-        }
-
-    @classmethod
     def done(cls, wizard):
         result = {}
-        cleaned_data = wizard.get_cleaned_data_for_step(cls.name)
+        cleaned_data = wizard.get_cleaned_data_for_step(step=cls.name)
         if cleaned_data:
             result['tags'] = [
                 force_text(tag.pk) for tag in cleaned_data['tags']
@@ -41,12 +34,19 @@ class WizardStepTags(WizardStep):
         return result
 
     @classmethod
+    def get_form_kwargs(self, wizard):
+        return {
+            'help_text': _('Tags to be attached.'),
+            'user': wizard.request.user
+        }
+
+    @classmethod
     def step_post_upload_process(cls, document, querystring=None):
-        furl_instance = furl(querystring)
+        furl_instance = furl(args=querystring)
         Tag = apps.get_model(app_label='tags', model_name='Tag')
 
         for tag in Tag.objects.filter(pk__in=furl_instance.args.getlist('tags')):
             tag.documents.add(document)
 
 
-WizardStep.register(WizardStepTags)
+WizardStep.register(step=WizardStepTags)

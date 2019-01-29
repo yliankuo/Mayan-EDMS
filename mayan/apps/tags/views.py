@@ -9,19 +9,20 @@ from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _, ungettext
 
 from mayan.apps.acls.models import AccessControlList
-from mayan.apps.common.views import (
+from mayan.apps.common.generics import (
     MultipleObjectFormActionView, MultipleObjectConfirmActionView,
     SingleObjectCreateView, SingleObjectEditView, SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.models import Document
 from mayan.apps.documents.views import DocumentListView
 from mayan.apps.documents.permissions import permission_document_view
 
 from .forms import TagMultipleSelectionForm
 from .icons import (
-    icon_menu_tags, icon_tag_delete_submit, icon_tag_remove_submit
+    icon_menu_tags, icon_tag_delete_submit, icon_document_tag_multiple_remove_submit
 )
-from .links import link_tag_attach, link_tag_create
+from .links import link_document_tag_multiple_attach, link_tag_create
 from .models import Tag
 from .permissions import (
     permission_tag_attach, permission_tag_create, permission_tag_delete,
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 class TagAttachActionView(MultipleObjectFormActionView):
     form_class = TagMultipleSelectionForm
     model = Document
-    pk_url_kwarg = 'document_pk'
+    pk_url_kwarg = 'document_id'
     object_permission = permission_tag_attach
     success_message = _('Tag attach request performed on %(count)d document')
     success_message_plural = _(
@@ -42,7 +43,7 @@ class TagAttachActionView(MultipleObjectFormActionView):
     )
 
     def get_extra_context(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
 
         result = {
             'submit_label': _('Attach'),
@@ -66,7 +67,7 @@ class TagAttachActionView(MultipleObjectFormActionView):
         return result
 
     def get_form_extra_kwargs(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
         result = {
             'help_text': _('Tags to be attached.'),
             'permission': permission_tag_attach,
@@ -85,44 +86,45 @@ class TagAttachActionView(MultipleObjectFormActionView):
         return result
 
     def get_post_action_redirect(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
         if queryset.count() == 1:
             return reverse(
-                viewname='tags:document_tags', kwargs={
-                    'document_pk': queryset.first().pk
+                viewname='tags:document_tag_list', kwargs={
+                    'document_id': queryset.first().pk
                 }
             )
         else:
             return super(TagAttachActionView, self).get_post_action_redirect()
 
     def object_action(self, form, instance):
-        attached_tags = instance.get_tags()
+        attached_tags = instance.get_tags(
+            permission=permission_tag_attach, user=self.request.user
+        )
 
-        for tag in form.cleaned_data['tags']:
-            AccessControlList.objects.check_access(
-                obj=tag, permissions=permission_tag_attach,
-                user=self.request.user
-            )
+        tag_list = AccessControlList.objects.restrict_queryset(
+            permission=permission_tag_attach, queryset=form.cleaned_data['tags'],
+            user=self.request.user
+        )
 
+        for tag in tag_list:
             if tag in attached_tags:
                 messages.warning(
-                    self.request, _(
+                    message=_(
                         'Document "%(document)s" is already tagged as '
                         '"%(tag)s"'
                     ) % {
                         'document': instance, 'tag': tag
-                    }
+                    }, request=self.request
                 )
             else:
                 tag.attach_to(document=instance, user=self.request.user)
                 messages.success(
-                    self.request,
-                    _(
+                    message=_(
                         'Tag "%(tag)s" attached successfully to document '
                         '"%(document)s".'
                     ) % {
                         'document': instance, 'tag': tag
-                    }
+                    }, request=self.request
                 )
 
 
@@ -130,7 +132,7 @@ class TagCreateView(SingleObjectCreateView):
     extra_context = {'title': _('Create tag')}
     fields = ('label', 'color')
     model = Tag
-    post_action_redirect = reverse_lazy('tags:tag_list')
+    post_action_redirect = reverse_lazy(viewname='tags:tag_list')
     view_permission = permission_tag_create
 
     def get_save_extra_data(self):
@@ -139,8 +141,8 @@ class TagCreateView(SingleObjectCreateView):
 
 class TagDeleteActionView(MultipleObjectConfirmActionView):
     model = Tag
-    pk_url_kwarg = 'tag_pk'
-    post_action_redirect = reverse_lazy('tags:tag_list')
+    pk_url_kwarg = 'tag_id'
+    post_action_redirect = reverse_lazy(viewname='tags:tag_list')
     object_permission = permission_tag_delete
     success_message = _('Tag delete request performed on %(count)d tag')
     success_message_plural = _(
@@ -155,9 +157,9 @@ class TagDeleteActionView(MultipleObjectConfirmActionView):
             'submit_icon_class': icon_tag_delete_submit,
             'submit_label': _('Delete'),
             'title': ungettext(
-                'Delete the selected tag?',
-                'Delete the selected tags?',
-                queryset.count()
+                singular='Delete the selected tag?',
+                plural='Delete the selected tags?',
+                number=queryset.count()
             )
         }
 
@@ -175,13 +177,14 @@ class TagDeleteActionView(MultipleObjectConfirmActionView):
         try:
             instance.delete()
             messages.success(
-                self.request, _('Tag "%s" deleted successfully.') % instance
+                message=_('Tag "%s" deleted successfully.') % instance,
+                request=self.request
             )
         except Exception as exception:
             messages.error(
-                self.request, _('Error deleting tag "%(tag)s": %(error)s') % {
+                message=_('Error deleting tag "%(tag)s": %(error)s') % {
                     'tag': instance, 'error': exception
-                }
+                }, request=self.request
             )
 
 
@@ -189,9 +192,8 @@ class TagEditView(SingleObjectEditView):
     fields = ('label', 'color')
     model = Tag
     object_permission = permission_tag_edit
-    object_permission_raise_404 = True
-    pk_url_kwarg = 'tag_pk'
-    post_action_redirect = reverse_lazy('tags:tag_list')
+    pk_url_kwarg = 'tag_id'
+    post_action_redirect = reverse_lazy(viewname='tags:tag_list')
 
     def get_extra_context(self):
         return {
@@ -222,22 +224,24 @@ class TagListView(SingleObjectListView):
             'title': _('Tags'),
         }
 
-    def get_object_list(self):
-        return self.get_tag_queryset()
-
-    def get_tag_queryset(self):
+    def get_source_queryset(self):
+        #return self.get_tag_queryset()
         return Tag.objects.all()
 
+    #def get_tag_queryset(self):
+    #    return Tag.objects.all()
 
-class TagTaggedItemListView(DocumentListView):
-    def get_tag(self):
-        return get_object_or_404(klass=Tag, pk=self.kwargs['tag_pk'])
+
+class TagDocumentListView(ExternalObjectMixin, DocumentListView):
+    external_object_class = Tag
+    external_object_permission = permission_tag_view
+    external_object_pk_url_kwarg = 'tag_id'
 
     def get_document_queryset(self):
-        return self.get_tag().documents.all()
+        return self.get_tag().get_documents(user=self.request.user).all()
 
     def get_extra_context(self):
-        context = super(TagTaggedItemListView, self).get_extra_context()
+        context = super(TagDocumentListView, self).get_extra_context()
         context.update(
             {
                 'column_class': 'col-xs-12 col-sm-6 col-md-4 col-lg-3',
@@ -247,57 +251,56 @@ class TagTaggedItemListView(DocumentListView):
         )
         return context
 
+    def get_tag(self):
+        return self.get_external_object()
 
-class DocumentTagListView(TagListView):
-    def dispatch(self, request, *args, **kwargs):
-        self.document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_pk']
-        )
 
-        AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=self.document
-        )
-
-        return super(DocumentTagListView, self).dispatch(
-            request, *args, **kwargs
-        )
+class DocumentTagListView(ExternalObjectMixin, TagListView):
+    external_object_class = Document
+    external_object_permission = permission_tag_view
+    external_object_pk_url_kwarg = 'document_id'
 
     def get_extra_context(self):
         context = super(DocumentTagListView, self).get_extra_context()
         context.update(
             {
                 'hide_link': True,
-                'no_results_main_link': link_tag_attach.resolve(
+                'no_results_main_link': link_document_tag_multiple_attach.resolve(
                     context=RequestContext(
-                        self.request, {'object': self.document}
+                        self.request, {'object': self.get_external_object()}
                     )
                 ),
                 'no_results_title': _('Document has no tags attached'),
-                'object': self.document,
-                'title': _('Tags for document: %s') % self.document,
+                'object': self.get_external_object(),
+                'title': _(
+                    'Tags for document: %s'
+                ) % self.get_external_object(),
             }
         )
         return context
 
-    def get_tag_queryset(self):
-        return self.document.get_tags().all()
+    #def get_tag_queryset(self):
+    def get_source_queryset(self):
+        return self.get_external_object().get_tags(
+            permission=permission_tag_view, user=self.request.user
+        ).all()
 
 
 class TagRemoveActionView(MultipleObjectFormActionView):
     form_class = TagMultipleSelectionForm
     model = Document
     object_permission = permission_tag_remove
+    pk_url_kwarg = 'document_id'
     success_message = _('Tag remove request performed on %(count)d document')
     success_message_plural = _(
         'Tag remove request performed on %(count)d documents'
     )
 
     def get_extra_context(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
 
         result = {
-            'submit_icon_class': icon_tag_remove_submit,
+            'submit_icon_class': icon_document_tag_multiple_remove_submit,
             'submit_label': _('Remove'),
             'title': ungettext(
                 singular='Remove tags to %(count)d document',
@@ -321,7 +324,7 @@ class TagRemoveActionView(MultipleObjectFormActionView):
         return result
 
     def get_form_extra_kwargs(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
         result = {
             'help_text': _('Tags to be removed.'),
             'permission': permission_tag_remove,
@@ -338,41 +341,43 @@ class TagRemoveActionView(MultipleObjectFormActionView):
         return result
 
     def get_post_action_redirect(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
         if queryset.count() == 1:
             return reverse(
-                viewname='tags:document_tags', kwargs={
-                    'document_pk': queryset.first().pk
+                viewname='tags:document_tag_list', kwargs={
+                    'document_id': queryset.first().pk
                 }
             )
         else:
             return super(TagRemoveActionView, self).get_post_action_redirect()
 
     def object_action(self, form, instance):
-        attached_tags = instance.get_tags()
+        attached_tags = instance.get_tags(
+            permission=permission_tag_remove, user=self.request.user
+        )
 
-        for tag in form.cleaned_data['tags']:
-            AccessControlList.objects.check_access(
-                obj=tag, permissions=permission_tag_remove,
-                user=self.request.user
-            )
+        tag_list = AccessControlList.objects.restrict_queryset(
+            permission=permission_tag_remove,
+            queryset=form.cleaned_data['tags'],
+            user=self.request.user
+        )
 
+        for tag in tag_list:
             if tag not in attached_tags:
                 messages.warning(
-                    self.request, _(
+                    message=_(
                         'Document "%(document)s" wasn\'t tagged as "%(tag)s'
                     ) % {
                         'document': instance, 'tag': tag
-                    }
+                    }, request=self.request
                 )
             else:
                 tag.remove_from(document=instance, user=self.request.user)
                 messages.success(
-                    self.request,
-                    _(
+                    message=_(
                         'Tag "%(tag)s" removed successfully from document '
                         '"%(document)s".'
                     ) % {
                         'document': instance, 'tag': tag
-                    }
+                    }, request=self.request
                 )

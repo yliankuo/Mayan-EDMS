@@ -24,12 +24,13 @@ from .events import (
     event_tag_attach, event_tag_created, event_tag_edited, event_tag_remove
 )
 from .handlers import handler_index_document, handler_tag_pre_delete
+from .html_widgets import DocumentTagsWidget, TagWidget
 from .links import (
-    link_document_tag_list, link_multiple_documents_attach_tag,
-    link_multiple_documents_tag_remove,
-    link_single_document_multiple_tag_remove, link_tag_attach,
-    link_tag_create, link_tag_delete, link_tag_edit, link_tag_list,
-    link_tag_multiple_delete, link_tag_tagged_item_list
+    link_document_tag_list, link_document_multiple_tag_multiple_attach,
+    link_document_multiple_tag_multiple_remove,
+    link_document_tag_multiple_remove, link_document_tag_multiple_attach,
+    link_tag_create, link_tag_delete, link_tag_document_list, link_tag_edit,
+    link_tag_list, link_tag_multiple_delete
 )
 from .menus import menu_tags
 from .methods import method_get_tags
@@ -38,7 +39,6 @@ from .permissions import (
     permission_tag_remove, permission_tag_view
 )
 from .search import tag_search  # NOQA
-from .widgets import widget_document_tags
 
 
 class TagsApp(MayanAppConfig):
@@ -63,12 +63,10 @@ class TagsApp(MayanAppConfig):
             app_label='documents', model_name='DocumentPageSearchResult'
         )
 
-        DocumentTag = self.get_model('DocumentTag')
-        Tag = self.get_model('Tag')
+        DocumentTag = self.get_model(model_name='DocumentTag')
+        Tag = self.get_model(model_name='Tag')
 
         Document.add_to_class(name='get_tags', value=method_get_tags)
-
-        ModelAttribute(model=Document, name='get_tags')
 
         ModelEventType.register(
             model=Tag, event_types=(
@@ -78,10 +76,10 @@ class TagsApp(MayanAppConfig):
         )
 
         ModelField(
-            Document, name='tags__label'
+            model=Document, name='tags__label'
         )
         ModelField(
-            Document, name='tags__color'
+            model=Document, name='tags__color'
         )
 
         ModelPermission.register(
@@ -96,29 +94,31 @@ class TagsApp(MayanAppConfig):
                 permission_acl_edit, permission_acl_view,
                 permission_events_view, permission_tag_attach,
                 permission_tag_delete, permission_tag_edit,
-                permission_tag_remove, permission_tag_view,
+                permission_tag_remove, permission_tag_view
             )
         )
 
         SourceColumn(
             attribute='label', is_identifier=True, is_sortable=True,
-            source=DocumentTag,
+            source=DocumentTag
         )
         SourceColumn(
-            attribute='get_preview_widget', source=DocumentTag
-        )
-
-        SourceColumn(
-            func=lambda context: widget_document_tags(
-                document=context['object'], user=context['request'].user
-            ), label=_('Tags'), source=Document
+            label=_('Preview'), source=DocumentTag, widget=TagWidget
         )
 
         SourceColumn(
-            func=lambda context: widget_document_tags(
-                document=context['object'].document,
+            func=lambda context: context['object'].get_tags(
+                permission=permission_tag_view,
                 user=context['request'].user
-            ), label=_('Tags'), source=DocumentPageSearchResult
+            ), label=_('Tags'), source=Document, widget=DocumentTagsWidget
+        )
+
+        SourceColumn(
+            func=lambda context: context['object'].document.get_tag(
+                permission=permission_tag_view,
+                user=context['request'].user
+            ), label=_('Tags'), source=DocumentPageSearchResult,
+            widget=DocumentTagsWidget
         )
 
         SourceColumn(
@@ -126,12 +126,12 @@ class TagsApp(MayanAppConfig):
             source=Tag
         )
         SourceColumn(
-            attribute='get_preview_widget', source=Tag
+            label=_('Preview'), source=Tag, widget=TagWidget
         )
         SourceColumn(
             func=lambda context: context['object'].get_document_count(
                 user=context['request'].user
-            ), label=_('Documents'), source=Tag
+            ), include_label=True, label=_('Documents'), source=Tag
         )
 
         document_page_search.add_model_field(
@@ -147,19 +147,17 @@ class TagsApp(MayanAppConfig):
             links=(
                 link_acl_list, link_events_for_object,
                 link_object_event_types_user_subcriptions_list,
-                link_tag_tagged_item_list,
-            ),
-            sources=(Tag,)
+                link_tag_document_list,
+            ), sources=(Tag,)
         )
 
         menu_main.bind_links(links=(menu_tags,), position=98)
 
         menu_multi_item.bind_links(
             links=(
-                link_multiple_documents_attach_tag,
-                link_multiple_documents_tag_remove
-            ),
-            sources=(Document,)
+                link_document_multiple_tag_multiple_attach,
+                link_document_multiple_tag_multiple_remove
+            ), sources=(Document,)
         )
         menu_multi_item.bind_links(
             links=(link_tag_multiple_delete,), sources=(Tag,)
@@ -167,14 +165,14 @@ class TagsApp(MayanAppConfig):
         menu_object.bind_links(
             links=(
                 link_tag_edit, link_tag_delete
-            ),
-            sources=(Tag,)
+            ), sources=(Tag,)
         )
         menu_sidebar.bind_links(
-            links=(link_tag_attach, link_single_document_multiple_tag_remove),
-            sources=(
-                'tags:tag_attach', 'tags:document_tags',
-                'tags:single_document_multiple_tag_remove'
+            links=(
+                link_document_tag_multiple_attach, link_document_tag_multiple_remove
+            ), sources=(
+                'tags:document_tag_multiple_attach', 'tags:document_tag_list',
+                'tags:document_tag_multiple_remove'
             )
         )
         menu_tags.bind_links(
@@ -188,13 +186,11 @@ class TagsApp(MayanAppConfig):
         # Index update
 
         m2m_changed.connect(
-            handler_index_document,
             dispatch_uid='tags_handler_index_document',
-            sender=Tag.documents.through
+            receiver=handler_index_document, sender=Tag.documents.through
         )
 
         pre_delete.connect(
-            handler_tag_pre_delete,
             dispatch_uid='tags_handler_tag_pre_delete',
-            sender=Tag
+            receiver=handler_tag_pre_delete, sender=Tag
         )

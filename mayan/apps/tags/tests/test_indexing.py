@@ -11,9 +11,10 @@ from .literals import (
     TEST_TAG_COLOR, TEST_TAG_LABEL, TEST_TAG_INDEX_HAS_TAG,
     TEST_TAG_INDEX_NO_TAG, TEST_TAG_INDEX_NODE_TEMPLATE
 )
+from .mixins import TagTestMixin
 
 
-class TagSignalIndexingTestCase(DocumentTestMixin, BaseTestCase):
+class TagSignalIndexingTestCase(TagTestMixin, DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
 
     def test_tag_indexing(self):
@@ -27,7 +28,8 @@ class TagSignalIndexingTestCase(DocumentTestMixin, BaseTestCase):
             link_documents=True
         )
 
-        tag = Tag.objects.create(color=TEST_TAG_COLOR, label=TEST_TAG_LABEL)
+        self._create_test_tag()
+
         self.document = self.upload_document()
 
         self.assertTrue(
@@ -36,7 +38,7 @@ class TagSignalIndexingTestCase(DocumentTestMixin, BaseTestCase):
             ).documents.all()
         )
 
-        tag.documents.add(self.document)
+        self.test_tag.documents.add(self.document)
 
         self.assertTrue(
             self.document in IndexInstanceNode.objects.get(
@@ -44,7 +46,7 @@ class TagSignalIndexingTestCase(DocumentTestMixin, BaseTestCase):
             ).documents.all()
         )
 
-        tag.delete()
+        self.test_tag.delete()
 
         self.assertTrue(
             self.document in IndexInstanceNode.objects.get(
