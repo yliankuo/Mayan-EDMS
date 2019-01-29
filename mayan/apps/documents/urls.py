@@ -183,12 +183,12 @@ urlpatterns = [
     ),
     url(
         regex=r'^documents/(?P<document_id>\d+)/transformations/clear/$',
-        name='document_clear_transformations',
+        name='document_transformations_clear',
         view=DocumentTransformationsClearView.as_view()
     ),
     url(
         regex=r'^documents/(?P<document_id>\d+)/transformations/clone/$',
-        name='document_clone_transformations',
+        name='document_transformations_clone',
         view=DocumentTransformationsCloneView.as_view()
     ),
     url(
@@ -222,7 +222,7 @@ urlpatterns = [
     ),
     url(
         regex=r'^documents/multiple/transformations/clear/$',
-        name='document_multiple_clear_transformations',
+        name='document_multiple_transformations_clear',
         view=DocumentTransformationsClearView.as_view()
     ),
     url(

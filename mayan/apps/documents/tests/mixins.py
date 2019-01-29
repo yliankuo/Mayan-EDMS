@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import os
+import time
 
 from django.conf import settings
 
@@ -19,6 +20,7 @@ class DocumentTestMixin(object):
     auto_upload_document = True
     test_document_filename = TEST_SMALL_DOCUMENT_FILENAME
     test_document_path = None
+    use_document_stub = False
 
     def _create_document_type(self):
         self.document_type = DocumentType.objects.create(
@@ -30,6 +32,16 @@ class DocumentTestMixin(object):
         Alias for upload_document()
         """
         self.test_document = self.upload_document(*args, **kwargs)
+
+    def _create_document_version(self):
+        # Needed by MySQL as timestamp value doesn't include milliseconds
+        # resolution
+        time.sleep(1.01)
+
+        self._calculate_test_document_path()
+
+        with open(self.test_document_path, mode='rb') as file_object:
+            self.test_document.new_version(file_object=file_object)
 
     def _calculate_test_document_path(self):
         if not self.test_document_path:
@@ -46,6 +58,7 @@ class DocumentTestMixin(object):
 
             if self.auto_upload_document:
                 self.document = self.upload_document()
+                self.test_document = self.document
 
     def tearDown(self):
         for document_type in DocumentType.objects.all():
@@ -57,11 +70,17 @@ class DocumentTestMixin(object):
 
         document_type = document_type or self.document_type
 
-        with open(self.test_document_path, mode='rb') as file_object:
-            document = document_type.new_document(
-                file_object=file_object,
+        if self.use_document_stub:
+            document = document_type.documents.create(
                 label=filename or self.test_document_filename
             )
+        else:
+            with open(self.test_document_path, mode='rb') as file_object:
+                document = document_type.new_document(
+                    file_object=file_object,
+                    label=filename or self.test_document_filename
+                )
+
         return document
 
 

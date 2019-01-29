@@ -314,13 +314,13 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.document.pages.count(), page_count)
 
-    def _request_document_clear_transformations_view(self):
+    def _request_document_transformations_clear_view(self):
         return self.post(
-            viewname='documents:document_clear_transformations',
+            viewname='documents:document_transformations_clear',
             kwargs={'document_id': self.document.pk}
         )
 
-    def test_document_clear_transformations_view_no_permission(self):
+    def test_document_transformations_clear_view_no_permission(self):
         document_page = self.document.pages.first()
         content_type = ContentType.objects.get_for_model(document_page)
         transformation = Transformation.objects.create(
@@ -338,14 +338,14 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             obj=self.document, permission=permission_document_view
         )
 
-        response = self._request_document_clear_transformations_view()
+        response = self._request_document_transformations_clear_view()
         self.assertEqual(response.status_code, 302)
         self.assertQuerysetEqual(
             Transformation.objects.get_for_model(document_page),
             (repr(transformation),)
         )
 
-    def test_document_clear_transformations_view_with_access(self):
+    def test_document_transformations_clear_view_with_access(self):
         document_page = self.document.pages.first()
         content_type = ContentType.objects.get_for_model(document_page)
         transformation = Transformation.objects.create(
@@ -365,19 +365,19 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             obj=self.document, permission=permission_document_view
         )
 
-        response = self._request_document_clear_transformations_view()
+        response = self._request_document_transformations_clear_view()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             Transformation.objects.get_for_model(document_page).count(), 0
         )
 
-    def _request_document_multiple_clear_transformations(self):
+    def _request_document_multiple_transformations_clear(self):
         return self.post(
-            viewname='documents:document_multiple_clear_transformations',
+            viewname='documents:document_multiple_transformations_clear',
             data={'id_list': self.document.pk}
         )
 
-    def test_document_multiple_clear_transformations_view_no_permission(self):
+    def test_document_multiple_transformations_clear_view_no_permission(self):
         document_page = self.document.pages.first()
         content_type = ContentType.objects.get_for_model(document_page)
         transformation = Transformation.objects.create(
@@ -393,14 +393,14 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
 
         self.grant_permission(permission=permission_document_view)
 
-        response = self._request_document_multiple_clear_transformations()
+        response = self._request_document_multiple_transformations_clear()
         self.assertEqual(response.status_code, 302)
         self.assertQuerysetEqual(
             Transformation.objects.get_for_model(document_page),
             (repr(transformation),)
         )
 
-    def test_document_multiple_clear_transformations_view_with_access(self):
+    def test_document_multiple_transformations_clear_view_with_access(self):
         document_page = self.document.pages.first()
         content_type = ContentType.objects.get_for_model(document_page)
         transformation = Transformation.objects.create(
@@ -421,7 +421,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             obj=self.document, permission=permission_transformation_delete
         )
 
-        response = self._request_document_multiple_clear_transformations()
+        response = self._request_document_multiple_transformations_clear()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             Transformation.objects.get_for_model(document_page).count(), 0

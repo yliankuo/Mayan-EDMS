@@ -101,18 +101,6 @@ link_document_pages = Link(
 )
 
 # Actions
-link_document_clear_transformations = Link(
-    args='resolved_object.id', permission=permission_transformation_delete,
-    kwargs={'document_id': 'resolved_object.id'},
-    text=_('Clear transformations'),
-    view='documents:document_clear_transformations'
-)
-link_document_clone_transformations = Link(
-    permission=permission_transformation_edit,
-    kwargs={'document_id': 'resolved_object.id'},
-    text=_('Clone transformations'),
-    view='documents:document_clone_transformations'
-)
 link_document_favorites_add = Link(
     icon_class=icon_document_favorites_add,
     kwargs={'document_id': 'resolved_object.id'},
@@ -124,12 +112,6 @@ link_document_favorites_remove = Link(
     kwargs={'document_id': 'resolved_object.id'},
     permission=permission_document_view, text=_('Remove from favorites'),
     view='documents:document_remove_from_favorites'
-)
-link_document_trash = Link(
-    icon_class=icon_document_trash,
-    kwargs={'document_id': 'resolved_object.id'},
-    permission=permission_document_trash, tags='dangerous',
-    text=_('Move to trash'), view='documents:document_trash'
 )
 link_document_edit = Link(
     icon_class=icon_document_edit,
@@ -148,27 +130,10 @@ link_document_download = Link(
     permission=permission_document_download, text=_('Advanced download'),
     view='documents:document_download_form'
 )
-link_document_print = Link(
-    icon_class=icon_document_print,
-    kwargs={'document_id': 'resolved_object.id'},
-    permission=permission_document_print, text=_('Print'),
-    view='documents:document_print'
-)
-link_document_quick_download = Link(
-    permission=permission_document_download,
-    kwargs={'document_id': 'resolved_object.id'},
-    text=_('Quick download'), view='documents:document_download'
-)
-link_document_update_page_count = Link(
-    kwargs={'document_id': 'resolved_object.id'},
-    permission=permission_document_tools,
-    text=_('Recalculate page count'),
-    view='documents:document_update_page_count'
-)
-link_document_multiple_clear_transformations = Link(
+link_document_multiple_transformations_clear = Link(
     permission=permission_transformation_delete,
     text=_('Clear transformations'),
-    view='documents:document_multiple_clear_transformations'
+    view='documents:document_multiple_transformations_clear'
 )
 link_document_multiple_trash = Link(
     tags='dangerous', text=_('Move to trash'),
@@ -194,7 +159,41 @@ link_document_multiple_update_page_count = Link(
     text=_('Recalculate page count'),
     view='documents:document_multiple_update_page_count'
 )
-
+link_document_print = Link(
+    icon_class=icon_document_print,
+    kwargs={'document_id': 'resolved_object.id'},
+    permission=permission_document_print, text=_('Print'),
+    view='documents:document_print'
+)
+link_document_quick_download = Link(
+    permission=permission_document_download,
+    kwargs={'document_id': 'resolved_object.id'},
+    text=_('Quick download'), view='documents:document_download'
+)
+link_document_transformations_clear = Link(
+    permission=permission_transformation_delete,
+    kwargs={'document_id': 'resolved_object.id'},
+    text=_('Clear transformations'),
+    view='documents:document_transformations_clear'
+)
+link_document_transformations_clone = Link(
+    permission=permission_transformation_edit,
+    kwargs={'document_id': 'resolved_object.id'},
+    text=_('Clone transformations'),
+    view='documents:document_transformations_clone'
+)
+link_document_trash = Link(
+    icon_class=icon_document_trash,
+    kwargs={'document_id': 'resolved_object.id'},
+    permission=permission_document_trash, tags='dangerous',
+    text=_('Move to trash'), view='documents:document_trash'
+)
+link_document_update_page_count = Link(
+    kwargs={'document_id': 'resolved_object.id'},
+    permission=permission_document_tools,
+    text=_('Recalculate page count'),
+    view='documents:document_update_page_count'
+)
 link_trashed_document_delete = Link(
     icon_class=icon_trashed_document_delete,
     kwargs={'trashed_document_id': 'resolved_object.id'},
