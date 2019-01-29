@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 
 from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
 from mayan.apps.rest_api.permissions import MayanPermission
 
@@ -16,7 +17,7 @@ from .permissions import (
     permission_user_edit, permission_user_view
 )
 from .serializers import (
-    GroupSerializer, UserSerializer, UserGroupListSerializer
+    GroupSerializer, UserSerializer#, UserGroupListSerializer
 )
 
 
@@ -53,6 +54,7 @@ class APIGroupView(generics.RetrieveUpdateDestroyAPIView):
     patch: Partially edit the selected group.
     put: Edit the selected group.
     """
+    lookup_url_kwarg = 'group_pk'
     mayan_object_permissions = {
         'GET': (permission_group_view,),
         'PUT': (permission_group_edit,),
@@ -84,6 +86,7 @@ class APIUserView(generics.RetrieveUpdateDestroyAPIView):
     patch: Partially edit the selected user.
     put: Edit the selected user.
     """
+    lookup_url_kwarg = 'user_pk'
     mayan_object_permissions = {
         'GET': (permission_user_view,),
         'PUT': (permission_user_edit,),
@@ -95,16 +98,28 @@ class APIUserView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
 
-class APIUserGroupList(generics.ListCreateAPIView):
+class APIUserGroupList(ExternalObjectMixin, generics.ListCreateAPIView):
     """
     get: Returns a list of all the groups to which an user belongs.
     post: Add a user to a list of groups.
     """
+    external_object_pk_url_kwarg = 'user_pk'
+    filter_backends = (MayanObjectPermissionsFilter,)
     mayan_object_permissions = {
-        'GET': (permission_user_view,),
-        'POST': (permission_user_edit,)
+        'GET': (permission_group_view,),
+        'POST': (permission_group_edit,)
     }
-    permission_classes = (MayanPermission,)
+
+    def get_external_object_permission(self):
+        if self.request.method == 'POST':
+            return permission_user_edit
+        else:
+            return permission_user_view
+
+    def get_external_object_queryset(self):
+        return get_user_model().objects.exclude(is_staff=True).exclude(
+            is_superuser=True
+        )
 
     def get_serializer(self, *args, **kwargs):
         if not self.request:
@@ -113,10 +128,10 @@ class APIUserGroupList(generics.ListCreateAPIView):
         return super(APIUserGroupList, self).get_serializer(*args, **kwargs)
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method == 'POST':
+            return UserSerializer
+        else:
             return GroupSerializer
-        elif self.request.method == 'POST':
-            return UserGroupListSerializer
 
     def get_serializer_context(self):
         """
@@ -133,26 +148,10 @@ class APIUserGroupList(generics.ListCreateAPIView):
         return context
 
     def get_queryset(self):
-        user = self.get_user()
-
-        return AccessControlList.objects.filter_by_access(
-            permission_group_view, self.request.user,
-            queryset=user.groups.order_by('id')
-        )
+        return self.get_user().groups.order_by('id')
 
     def get_user(self):
-        if self.request.method == 'GET':
-            permission = permission_user_view
-        else:
-            permission = permission_user_edit
-
-        user = get_object_or_404(klass=get_user_model(), pk=self.kwargs['pk'])
-
-        AccessControlList.objects.check_access(
-            permissions=(permission,), user=self.request.user,
-            obj=user
-        )
-        return user
+        return self.get_external_object()
 
     def perform_create(self, serializer):
-        serializer.save(user=self.get_user(), _user=self.request.user)
+        return serializer.save(user=self.get_object(), _user=self.request.user)

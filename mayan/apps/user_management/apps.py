@@ -40,7 +40,7 @@ from .permissions import (
     permission_user_view
 )
 from .search import *  # NOQA
-from .utils import get_groups, get_users
+from .utils import lookup_get_groups, lookup_get_users
 
 
 class UserManagementApp(MayanAppConfig):
@@ -65,15 +65,15 @@ class UserManagementApp(MayanAppConfig):
 
         MetadataLookup(
             description=_('All the groups.'), name='groups',
-            value=get_groups
+            value=lookup_get_groups
         )
         MetadataLookup(
             description=_('All the users.'), name='users',
-            value=get_users
+            value=lookup_get_users
         )
 
         ModelEventType.register(
-            model=User, event_types=(event_user_edited,)
+            event_types=(event_user_edited,), model=User
         )
 
         ModelPermission.register(
@@ -129,7 +129,9 @@ class UserManagementApp(MayanAppConfig):
 
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_group_members,
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_group_members,
             ), sources=(Group,)
         )
 
@@ -138,8 +140,7 @@ class UserManagementApp(MayanAppConfig):
                 link_acl_list, link_events_for_object,
                 link_object_event_types_user_subcriptions_list,
                 link_user_groups,
-            ),
-            sources=(User,)
+            ), sources=(User,)
         )
 
         menu_multi_item.bind_links(
@@ -147,12 +148,10 @@ class UserManagementApp(MayanAppConfig):
             sources=('user_management:user_list',)
         )
         menu_object.bind_links(
-            links=(link_group_edit,),
-            sources=(Group,)
+            links=(link_group_edit,), sources=(Group,)
         )
         menu_object.bind_links(
-            links=(link_group_delete,), position=99,
-            sources=(Group,)
+            links=(link_group_delete,), position=99, sources=(Group,)
         )
         menu_object.bind_links(
             links=(

@@ -32,8 +32,7 @@ user_search.add_model_field(
 )
 
 group_search = SearchModel(
-    app_label='auth', model_name='Group',
-    permission=permission_group_view,
+    app_label='auth', model_name='Group', permission=permission_group_view,
     serializer_path='user_management.serializers.GroupSerializer'
 )
 

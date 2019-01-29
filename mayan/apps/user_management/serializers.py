@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 
 from mayan.apps.acls.models import AccessControlList
 
-from .permissions import permission_group_view
+from .permissions import permission_group_edit, permission_group_view
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -19,7 +19,10 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:group-detail'}
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'group_pk',
+                'view_name': 'rest_api:group-detail'
+            }
         }
         fields = ('id', 'name', 'url', 'users_count')
         model = Group
@@ -28,41 +31,13 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         return instance.user_set.count()
 
 
-class UserGroupListSerializer(serializers.Serializer):
-    group_pk_list = serializers.CharField(
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    groups = GroupSerializer(many=True, read_only=True, required=False)
+    groups_pk_list = serializers.CharField(
         help_text=_(
             'Comma separated list of group primary keys to assign this '
             'user to.'
-        )
-    )
-
-    def create(self, validated_data):
-        validated_data['user'].groups.clear()
-        try:
-            pk_list = validated_data['group_pk_list'].split(',')
-
-            for group in Group.objects.filter(pk__in=pk_list):
-                try:
-                    AccessControlList.objects.check_access(
-                        permissions=(permission_group_view,),
-                        user=self.context['request'].user, obj=group
-                    )
-                except PermissionDenied:
-                    pass
-                else:
-                    validated_data['user'].groups.add(group)
-        except Exception as exception:
-            raise ValidationError(exception)
-
-        return {'group_pk_list': validated_data['group_pk_list']}
-
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    groups = GroupSerializer(many=True, read_only=True)
-    groups_pk_list = serializers.CharField(
-        help_text=_(
-            'List of group primary keys to which to add the user.'
-        ), required=False
+        ), required=False, write_only=True
     )
     password = serializers.CharField(
         required=False, style={'input_type': 'password'}, write_only=True
@@ -70,7 +45,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:user-detail'}
+            'url': {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'user_pk',
+                'view_name': 'rest_api:user-detail'
+            }
         }
         fields = (
             'first_name', 'date_joined', 'email', 'groups', 'groups_pk_list',
@@ -81,13 +59,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('groups', 'is_active', 'last_login', 'date_joined')
         write_only_fields = ('password', 'group_pk_list')
 
-    def _add_groups(self, instance):
-        instance.groups.add(
-            *Group.objects.filter(pk__in=self.groups_pk_list.split(','))
+    def _add_groups(self, instance, groups_pk_list):
+        instance.groups.clear()
+
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_group_edit,
+            queryset=Group.objects.filter(pk__in=groups_pk_list.split(',')),
+            user=self.context['request'].user
         )
 
+        instance.groups.add(*queryset)
+
     def create(self, validated_data):
-        self.groups_pk_list = validated_data.pop('groups_pk_list', '')
+        groups_pk_list = validated_data.pop('groups_pk_list', '')
         password = validated_data.pop('password', None)
         instance = super(UserSerializer, self).create(validated_data)
 
@@ -95,13 +79,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             instance.set_password(password)
             instance.save()
 
-        if self.groups_pk_list:
-            self._add_groups(instance=instance)
+        if groups_pk_list:
+            self._add_groups(instance=instance, groups_pk_list=groups_pk_list)
 
         return instance
 
     def update(self, instance, validated_data):
-        self.groups_pk_list = validated_data.pop('groups_pk_list', '')
+        groups_pk_list = validated_data.pop('groups_pk_list', '')
 
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
@@ -109,9 +93,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
         instance = super(UserSerializer, self).update(instance, validated_data)
 
-        if self.groups_pk_list:
-            instance.groups.clear()
-            self._add_groups(instance=instance)
+        if groups_pk_list:
+            self._add_groups(instance=instance, groups_pk_list=groups_pk_list)
 
         return instance
 

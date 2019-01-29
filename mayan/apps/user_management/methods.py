@@ -4,4 +4,6 @@ from django.shortcuts import reverse
 
 
 def method_get_absolute_url(self):
-    return reverse(viewname='user_management:user_details', args=(self.pk,))
+    return reverse(
+        viewname='user_management:user_details', kwargs={'user_id': self.pk}
+    )

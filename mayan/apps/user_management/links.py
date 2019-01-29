@@ -38,24 +38,23 @@ link_group_create = Link(
     text=_('Create new group'), view='user_management:group_create'
 )
 link_group_delete = Link(
-    args='object.id', icon_class=icon_group_delete,
+    icon_class=icon_group_delete, kwargs={'group_id': 'object.pk'},
     permission=permission_group_delete, tags='dangerous',
-    text=_('Delete'), view='user_management:group_delete',
+    text=_('Delete'), view='user_management:group_delete'
 )
 link_group_edit = Link(
-    args='object.id', icon_class=icon_group_edit,
+    icon_class=icon_group_edit, kwargs={'group_id': 'object.pk'},
     permission=permission_group_edit, text=_('Edit'),
-    view='user_management:group_edit',
+    view='user_management:group_edit'
 )
 link_group_list = Link(
     icon_class=icon_group_list, permission=permission_group_view,
-    text=_('Groups'),
-    view='user_management:group_list'
+    text=_('Groups'), view='user_management:group_list'
 )
 link_group_members = Link(
-    args='object.id', icon_class=icon_group_members,
+    icon_class=icon_group_members, kwargs={'group_id': 'object.pk'},
     permission=permission_group_edit, text=_('Users'),
-    view='user_management:group_members',
+    view='user_management:group_members'
 )
 link_group_setup = Link(
     icon_class=icon_group_setup, permission=permission_group_view,
@@ -66,19 +65,19 @@ link_user_create = Link(
     text=_('Create new user'), view='user_management:user_create'
 )
 link_user_delete = Link(
-    args='object.id', icon_class=icon_user_delete,
+    icon_class=icon_user_delete, kwargs={'user_id': 'object.pk'},
     permission=permission_user_delete, tags='dangerous', text=_('Delete'),
-    view='user_management:user_delete',
+    view='user_management:user_delete'
 )
 link_user_edit = Link(
-    args='object.id', icon_class=icon_user_edit,
+    icon_class=icon_user_edit, kwargs={'user_id': 'object.pk'},
     permission=permission_user_edit, text=_('Edit'),
-    view='user_management:user_edit',
+    view='user_management:user_edit'
 )
 link_user_groups = Link(
-    args='object.id', condition=condition_is_not_superuser,
-    icon_class=icon_group, permission=permission_user_edit,
-    text=_('Groups'), view='user_management:user_groups',
+    condition=condition_is_not_superuser, icon_class=icon_group,
+    kwargs={'user_id': 'object.pk'}, permission=permission_user_edit,
+    text=_('Groups'), view='user_management:user_groups'
 )
 link_user_list = Link(
     icon_class=icon_user_list, permission=permission_user_view,
@@ -95,14 +94,14 @@ link_user_multiple_set_password = Link(
     view='user_management:user_multiple_set_password'
 )
 link_user_set_options = Link(
-    args='object.id', icon_class=icon_user_set_options,
+    icon_class=icon_user_set_options, kwargs={'user_id': 'object.pk'},
     permission=permission_user_edit, text=_('User options'),
-    view='user_management:user_options',
+    view='user_management:user_options'
 )
 link_user_set_password = Link(
-    args='object.id', icon_class=icon_user_set_password,
+    icon_class=icon_user_set_password, kwargs={'user_id': 'object.pk'},
     permission=permission_user_edit, text=_('Set password'),
-    view='user_management:user_set_password',
+    view='user_management:user_set_password'
 )
 link_user_setup = Link(
     icon_class=icon_user_setup, permission=permission_user_view,
