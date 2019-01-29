@@ -90,17 +90,17 @@ class SearchModel(object):
         except KeyError:
             raise KeyError(_('No search model matching the query'))
         if not hasattr(result, 'serializer'):
-            result.serializer = import_string(result.serializer_string)
+            result.serializer = import_string(result.serializer_path)
 
         return result
 
-    def __init__(self, app_label, model_name, serializer_string, label=None, permission=None):
+    def __init__(self, app_label, model_name, serializer_path, label=None, permission=None):
         self.app_label = app_label
         self.model_name = model_name
         self.search_fields = []
         self._model = None  # Lazy
         self._label = label
-        self.serializer_string = serializer_string
+        self.serializer_path = serializer_path
         self.permission = permission
         self.__class__._registry[self.get_full_name()] = self
 
