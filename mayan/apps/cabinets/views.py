@@ -96,7 +96,7 @@ class CabinetDetailView(DocumentListView):
     template_name = 'cabinets/cabinet_details.html'
 
     def get_document_queryset(self):
-        queryset = AccessControlList.objects.filter_by_access(
+        queryset = AccessControlList.objects.restrict_queryset(
             permission=permission_document_view,
             queryset=self.get_object().documents.all(),
             user=self.request.user

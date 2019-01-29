@@ -22,7 +22,7 @@ class IndexListForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(IndexListForm, self).__init__(*args, **kwargs)
-        queryset = AccessControlList.objects.filter_by_access(
+        queryset = AccessControlList.objects.restrict_queryset(
             permission=permission_document_indexing_rebuild,
             queryset=Index.objects.filter(enabled=True),
             user=user

@@ -287,7 +287,7 @@ class UserMailerTestView(FormView):
         )
 
     def get_queryset(self):
-        return AccessControlList.objects.filter_by_access(
+        return AccessControlList.objects.restrict_queryset(
             permission=permission_user_mailer_use,
             queryset=UserMailer.objects.all(), user=self.request.user
         )

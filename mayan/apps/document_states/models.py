@@ -493,7 +493,7 @@ class WorkflowInstance(models.Model):
                     If not ACL access to the workflow, filter transition
                     options by each transition ACL access
                     """
-                    queryset = AccessControlList.objects.filter_by_access(
+                    queryset = AccessControlList.objects.restrict_queryset(
                         permission=permission_workflow_transition,
                         user=_user, queryset=queryset
                     )

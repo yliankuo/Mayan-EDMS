@@ -44,7 +44,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
 
     def test_filtering_without_permissions(self):
         self.assertEqual(
-            AccessControlList.objects.filter_by_access(
+            AccessControlList.objects.restrict_queryset(
                 permission=permission_document_view,
                 queryset=Document.objects.all(), user=self._test_case_user,
             ).count(), 0
@@ -71,7 +71,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
         acl.permissions.add(permission_document_view.stored_permission)
 
         self.assertQuerysetEqual(
-            AccessControlList.objects.filter_by_access(
+            AccessControlList.objects.restrict_queryset(
                 permission=permission_document_view,
                 queryset=Document.objects.all(), user=self._test_case_user
             ), (repr(self.test_document_1),)
@@ -116,7 +116,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
         )
         acl.permissions.add(permission_document_view.stored_permission)
 
-        result = AccessControlList.objects.filter_by_access(
+        result = AccessControlList.objects.restrict_queryset(
             permission=permission_document_view, queryset=Document.objects.all(),
             user=self._test_case_user
         )
@@ -143,7 +143,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
         )
         acl.permissions.add(permission_document_view.stored_permission)
 
-        result = AccessControlList.objects.filter_by_access(
+        result = AccessControlList.objects.restrict_queryset(
             permission=permission_document_view, queryset=Document.objects.all(),
             user=self._test_case_user,
         )

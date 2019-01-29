@@ -102,7 +102,7 @@ class SetupIndexDocumentTypesView(AssignRemoveView):
         self.get_object().document_types.add(item)
 
     def get_document_queryset(self):
-        return AccessControlList.objects.filter_by_access(
+        return AccessControlList.objects.restrict_queryset(
             permission_document_view, queryset=DocumentType.objects.all(),
             user=self.request.user
         )

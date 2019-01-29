@@ -201,15 +201,6 @@ class AccessControlListManager(models.Manager):
 
         return acl
 
-    def filter_by_access(self, permission, queryset, user):
-        warnings.warn(
-            'filter_by_access() is deprecated, use restrict_queryset().',
-            InterfaceWarning
-        )
-        return self.restrict_queryset(
-            permission=permission, queryset=queryset, user=user
-        )
-
     def restrict_queryset(self, permission, queryset, user):
         # Check directly granted permission via a role
         try:
