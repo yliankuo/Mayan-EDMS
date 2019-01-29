@@ -284,7 +284,12 @@ class MultipleObjectMixin(SingleObjectMixin):
             return queryset
 
     def get_pk_list(self):
-        result = self.request.GET.get(self.pk_list_key)
+        # Accept pk_list even on POST request to allowing direct requests
+        # to the view bypassing the initial GET request to submit the form.
+        # Example: when the view is called from a test or a custom UI
+        result = self.request.GET.get(
+            self.pk_list_key, self.request.POST.get(self.pk_list_key)
+        )
 
         if result:
             return result.split(self.pk_list_separator)
@@ -316,7 +321,7 @@ class ObjectActionMixin(object):
     def view_action(self, form=None):
         self.action_count = 0
 
-        for instance in self.get_queryset():
+        for instance in self.get_object_list():
             try:
                 self.object_action(form=form, instance=instance)
             except PermissionDenied:
