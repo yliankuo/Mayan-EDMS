@@ -49,10 +49,10 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
             kwargs={'role_id': self.test_role.pk}
         )
 
-    def test_role_delete_view_no_access(self):
+    def test_role_delete_view_no_permission(self):
         self._create_test_role()
         response = self._request_role_delete_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Role.objects.count(), 2)
         self.assertTrue(
             TEST_ROLE_LABEL in Role.objects.values_list('label', flat=True)
@@ -76,11 +76,11 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
             }
         )
 
-    def test_role_edit_view_no_access(self):
+    def test_role_edit_view_no_permission(self):
         self._create_test_role()
         response = self._request_role_edit_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
         self.test_role.refresh_from_db()
         self.assertEqual(Role.objects.count(), 2)
@@ -100,7 +100,7 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
     def _request_role_list_view(self):
         return self.get(viewname='permissions:role_list')
 
-    def test_role_list_view_no_access(self):
+    def test_role_list_view_no_permission(self):
         self._create_test_role()
         response = self._request_role_list_view()
         self.assertEqual(response.status_code, 200)
@@ -141,7 +141,7 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
             kwargs={'role_id': self.test_role.pk}
         )
 
-    def test_role_groups_view_no_access(self):
+    def test_role_groups_view_no_permission(self):
         self._create_test_role()
         response = self._request_role_groups_view()
         self.assertEqual(response.status_code, 403)
@@ -158,7 +158,7 @@ class PermissionsViewsTestCase(GroupTestMixin, RoleTestMixin, GenericViewTestCas
             kwargs={'group_id': self.test_group.pk}
         )
 
-    def test_group_roles_view_no_access(self):
+    def test_group_roles_view_no_permission(self):
         self._create_test_group()
         response = self._request_group_roles_view()
         self.assertEqual(response.status_code, 403)

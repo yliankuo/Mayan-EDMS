@@ -18,12 +18,13 @@ from .permissions import (
 )
 
 link_document_send = Link(
-    args='resolved_object.pk', icon_class=icon_document_send,
+    icon_class=icon_document_send, kwargs={'document_id': 'resolved_object.pk'},
     permission=permission_mailing_send_document, text=_('Email document'),
     view='mailer:document_send'
 )
 link_document_send_link = Link(
-    args='resolved_object.pk', icon_class=icon_document_send_link,
+    icon_class=icon_document_send_link,
+    kwargs={'document_id': 'resolved_object.pk'},
     permission=permission_mailing_link, text=_('Email link'),
     view='mailer:document_send_link'
 )
@@ -46,17 +47,18 @@ link_user_mailer_create = Link(
     view='mailer:user_mailer_backend_selection'
 )
 link_user_mailer_delete = Link(
-    args='resolved_object.pk', icon_class=icon_user_mailer_delete,
+    icon_class=icon_user_mailer_delete,
+    kwargs={'mailer_id': 'resolved_object.pk'},
     permission=permission_user_mailer_delete, tags='dangerous',
     text=_('Delete'), view='mailer:user_mailer_delete'
 )
 link_user_mailer_edit = Link(
-    args='object.pk', icon_class=icon_user_mailer_edit,
+    icon_class=icon_user_mailer_edit, kwargs={'mailer_id': 'object.pk'},
     permission=permission_user_mailer_edit, text=_('Edit'),
     view='mailer:user_mailer_edit'
 )
 link_user_mailer_log_list = Link(
-    args='object.pk', permission=permission_user_mailer_view,
+    permission=permission_user_mailer_view, kwargs={'mailer_id': 'object.pk'},
     text=_('Log'), view='mailer:user_mailer_log'
 )
 link_user_mailer_list = Link(
@@ -70,7 +72,7 @@ link_user_mailer_setup = Link(
     text=_('Mailing profiles'), view='mailer:user_mailer_list'
 )
 link_user_mailer_test = Link(
-    args='object.pk', icon_class=icon_user_mailer_test,
+    icon_class=icon_user_mailer_test, kwargs={'mailer_id': 'object.pk'},
     permission=permission_user_mailer_use, text=_('Test'),
     view='mailer:user_mailer_test'
 )

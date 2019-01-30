@@ -56,7 +56,7 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
         )
 
         response = self._request_index_delete_view(index=index)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Index.objects.count(), 1)
 
     def test_index_delete_view_with_permission(self):
@@ -88,7 +88,7 @@ class IndexViewTestCase(GenericDocumentViewTestCase):
         )
 
         response = self._request_index_edit_view(index=index)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         index = Index.objects.get(pk=index.pk)
         self.assertEqual(index.label, TEST_INDEX_LABEL)
 

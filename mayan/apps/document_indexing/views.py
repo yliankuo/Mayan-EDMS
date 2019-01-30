@@ -103,8 +103,8 @@ class SetupIndexDocumentTypesView(AssignRemoveView):
 
     def get_document_queryset(self):
         return AccessControlList.objects.restrict_queryset(
-            permission_document_view, queryset=DocumentType.objects.all(),
-            user=self.request.user
+            permission=permission_document_view,
+            queryset=DocumentType.objects.all(), user=self.request.user
         )
 
     def get_extra_context(self):
@@ -153,7 +153,7 @@ class SetupIndexTreeTemplateListView(SingleObjectListView):
     def get_index(self):
         return get_object_or_404(klass=Index, pk=self.kwargs['index_pk'])
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_index().template_root.get_descendants(
             include_self=True
         )
@@ -166,7 +166,7 @@ class TemplateNodeCreateView(SingleObjectCreateView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
             obj=self.get_parent_node().index,
-            permissions=permission_document_indexing_edit, user=request.user
+            permission=permission_document_indexing_edit, user=request.user
         )
 
         return super(
@@ -254,7 +254,7 @@ class IndexListView(SingleObjectListView):
             'title': _('Indexes'),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         queryset = IndexInstance.objects.filter(enabled=True)
         return queryset.filter(
             node_templates__index_instance_nodes__isnull=False
@@ -271,7 +271,7 @@ class IndexInstanceNodeView(DocumentListView):
 
         AccessControlList.objects.check_access(
             obj=self.index_instance_node.index(),
-            permissions=permission_document_indexing_instance_view,
+            permission=permission_document_indexing_instance_view,
             user=request.user
         )
 
@@ -317,10 +317,10 @@ class IndexInstanceNodeView(DocumentListView):
 
         return context
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         if self.index_instance_node:
             if self.index_instance_node.index_template_node.link_documents:
-                return super(IndexInstanceNodeView, self).get_object_list()
+                return super(IndexInstanceNodeView, self).get_source_queryset()
             else:
                 self.object_permission = None
                 return self.index_instance_node.get_children().order_by(
@@ -339,7 +339,7 @@ class DocumentIndexNodeListView(SingleObjectListView):
 
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            obj=self.get_document(), permissions=permission_document_view,
+            obj=self.get_document(), permission=permission_document_view,
             user=request.user
         )
 
@@ -370,7 +370,7 @@ class DocumentIndexNodeListView(SingleObjectListView):
             ) % self.get_document(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return DocumentIndexInstanceNode.objects.get_for(
             document=self.get_document()
         )

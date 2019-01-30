@@ -80,7 +80,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             document_type=document_type_2
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
 
         self.assertEqual(
             Document.objects.get(pk=self.document.pk).document_type,
@@ -136,7 +136,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
             document_type=document_type_2
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
 
         self.assertEqual(
             Document.objects.first().document_type, self.document_type
@@ -300,7 +300,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
         self.assertEqual(self.document.pages.count(), 0)
 
         response = self._request_document_multiple_update_page_count_view()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(self.document.pages.count(), 0)
 
     def test_document_multiple_update_page_count_view_with_permission(self):
@@ -394,7 +394,7 @@ class DocumentsViewsTestCase(GenericDocumentViewTestCase):
         self.grant_permission(permission=permission_document_view)
 
         response = self._request_document_multiple_transformations_clear()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
         self.assertQuerysetEqual(
             Transformation.objects.get_for_model(document_page),
             (repr(transformation),)

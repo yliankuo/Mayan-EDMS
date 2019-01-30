@@ -37,13 +37,13 @@ class MailerTestMixin(object):
     def _request_user_mailer_delete(self):
         return self.post(
             viewname='mailer:user_mailer_delete',
-            kwargs={'mailer_pk': self.user_mailer.pk}
+            kwargs={'mailer_id': self.user_mailer.pk}
         )
 
     def _request_user_mailer_edit(self):
         return self.post(
             viewname='mailer:user_mailer_edit',
-            kwargs={'mailer_pk': self.user_mailer.pk},
+            kwargs={'mailer_id': self.user_mailer.pk},
             data={
                 'label': TEST_USER_MAILER_LABEL_EDITED
             }
@@ -55,7 +55,7 @@ class MailerTestMixin(object):
     def _request_user_mailer_test(self):
         return self.post(
             viewname='mailer:user_mailer_test',
-            kwargs={'mailer_pk': self.user_mailer.pk},
+            kwargs={'mailer_id': self.user_mailer.pk},
             data={
                 'email': getattr(
                     self, 'test_email_address', TEST_EMAIL_ADDRESS

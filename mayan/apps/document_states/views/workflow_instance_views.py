@@ -26,8 +26,8 @@ __all__ = (
 class DocumentWorkflowInstanceListView(SingleObjectListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_workflow_view, user=request.user,
-            obj=self.get_document()
+            obj=self.get_document(),  permission=permission_workflow_view,
+            user=request.user,
         )
 
         return super(
@@ -63,8 +63,8 @@ class DocumentWorkflowInstanceListView(SingleObjectListView):
 class WorkflowInstanceDetailView(SingleObjectListView):
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
-            permissions=permission_workflow_view, user=request.user,
-            obj=self.get_workflow_instance().document
+            obj=self.get_workflow_instance().document,
+            permission=permission_workflow_view, user=request.user
         )
 
         return super(

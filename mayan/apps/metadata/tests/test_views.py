@@ -163,7 +163,7 @@ class DocumentMetadataTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
         )
 
         response = self._request_post_document_document_metadata_remove_view()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
 
         self.assertEqual(len(self.document.metadata.all()), 1)
 

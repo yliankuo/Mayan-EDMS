@@ -14,12 +14,7 @@ from ..permissions import permission_acl_edit, permission_acl_view
 
 class ACLsLinksTestCase(GenericDocumentViewTestCase):
     def test_document_acl_create_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
+        self.grant_access(obj=self.document, permission=permission_acl_edit)
 
         self.add_test_view(test_object=self.document)
         context = self.get_test_view()
@@ -39,12 +34,7 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         )
 
     def test_document_acl_delete_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
+        self.grant_access(obj=self.document, permission=permission_acl_edit)
 
         self.add_test_view(test_object=acl)
         context = self.get_test_view()
@@ -53,16 +43,13 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_delete', kwargs={'acl_pk': acl.pk})
+            resolved_link.url, reverse(
+                viewname='acls:acl_delete', kwargs={'acl_id': acl.pk}
+            )
         )
 
     def test_document_acl_edit_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
+        self.grant_access(obj=self.document, permission=permission_acl_edit)
 
         self.add_test_view(test_object=acl)
         context = self.get_test_view()
@@ -71,16 +58,13 @@ class ACLsLinksTestCase(GenericDocumentViewTestCase):
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_permissions', kwargs={'acl_pk': acl.pk})
+            resolved_link.url, reverse(
+                viewname='acls:acl_permissions', kwargs={'acl_id': acl.pk}
+            )
         )
 
     def test_document_acl_list_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-
-        acl.permissions.add(permission_acl_view.stored_permission)
-        self.login_user()
+        self.grant_access(obj=self.document, permission=permission_acl_view)
 
         self.add_test_view(test_object=self.document)
         context = self.get_test_view()

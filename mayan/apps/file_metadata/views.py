@@ -54,7 +54,7 @@ class DocumentDriverListView(SingleObjectListView):
         )
         return document
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_object().latest_version.file_metadata_drivers.all()
 
 
@@ -84,7 +84,7 @@ class DocumentVersionDriverEntryFileMetadataListView(SingleObjectListView):
         )
         return document_version_driver_entry
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_object().entries.all()
 
 

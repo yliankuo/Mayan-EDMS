@@ -17,8 +17,6 @@ from .mixins import MetadataTestsMixin
 
 class MetadataTypeEventsTestCase(MetadataTestsMixin, GenericDocumentViewTestCase):
     def test_metadata_type_create_event_no_permissions(self):
-        self.login_user()
-
         Action.objects.all().delete()
 
         response = self._request_metadata_type_create_view()
@@ -26,8 +24,6 @@ class MetadataTypeEventsTestCase(MetadataTestsMixin, GenericDocumentViewTestCase
         self.assertEqual(Action.objects.count(), 0)
 
     def test_metadata_type_create_event_with_permissions(self):
-        self.login_user()
-
         Action.objects.all().delete()
 
         self.grant_permission(permission=permission_metadata_type_create)
@@ -47,18 +43,14 @@ class MetadataTypeEventsTestCase(MetadataTestsMixin, GenericDocumentViewTestCase
     def test_metadata_type_edit_event_no_permissions(self):
         self._create_metadata_type()
 
-        self.login_user()
-
         Action.objects.all().delete()
 
         response = self._request_metadata_type_edit_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Action.objects.count(), 0)
 
     def test_metadata_type_edit_event_with_access(self):
         self._create_metadata_type()
-
-        self.login_user()
 
         Action.objects.all().delete()
 

@@ -44,9 +44,9 @@ class LinkingApp(MayanAppConfig):
             app_label='documents', model_name='Document'
         )
 
-        ResolvedSmartLink = self.get_model('ResolvedSmartLink')
-        SmartLink = self.get_model('SmartLink')
-        SmartLinkCondition = self.get_model('SmartLinkCondition')
+        ResolvedSmartLink = self.get_model(model_name='ResolvedSmartLink')
+        SmartLink = self.get_model(model_name='SmartLink')
+        SmartLinkCondition = self.get_model(model_name='SmartLinkCondition')
 
         ModelPermission.register(
             model=SmartLink, permissions=(

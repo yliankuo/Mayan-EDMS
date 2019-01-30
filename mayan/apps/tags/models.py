@@ -55,7 +55,7 @@ class Tag(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            viewname='tags:tag_tagged_item_list', kwargs={
+            viewname='tags:tag_document_list', kwargs={
                 'tag_id': self.pk
             }
         )

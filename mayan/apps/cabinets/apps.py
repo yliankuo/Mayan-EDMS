@@ -75,9 +75,9 @@ class CabinetsApp(MayanAppConfig):
                 permission_cabinet_remove_document
             )
         )
-        ModelPermission.register_inheritance(
-            model=Cabinet, related='get_root',
-        )
+        #ModelPermission.register_inheritance(
+        #    model=Cabinet, related='get_root',
+        #)
 
         SourceColumn(
             func=lambda context: widget_document_cabinets(

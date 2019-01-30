@@ -64,7 +64,7 @@ class CabinetChildAddView(SingleObjectCreateView):
         cabinet = super(CabinetChildAddView, self).get_object(*args, **kwargs)
 
         AccessControlList.objects.check_access(
-            permissions=permission_cabinet_edit, obj=cabinet.get_root(),
+            obj=cabinet.get_root(), permission=permission_cabinet_edit,
             user=self.request.user, raise_404=True
         )
 
@@ -146,7 +146,7 @@ class CabinetDetailView(DocumentListView):
             permission_object = cabinet.get_root()
 
         AccessControlList.objects.check_access(
-            permissions=permission_cabinet_view, obj=permission_object,
+            obj=permission_object, permission=permission_cabinet_view,
             user=self.request.user, raise_404=True
         )
 
@@ -187,7 +187,7 @@ class CabinetListView(SingleObjectListView):
             'no_results_title': _('No cabinets available'),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         # Add explicit ordering of root nodes since the queryset returned
         # is not affected by the model's order Meta option.
         return Cabinet.objects.root_nodes().order_by('label')
@@ -200,8 +200,8 @@ class DocumentCabinetListView(CabinetListView):
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=self.document, raise_404=True
+            obj=self.document, permission=permission_document_view,
+            user=request.user, raise_404=True
         )
 
         return super(DocumentCabinetListView, self).dispatch(
@@ -227,7 +227,7 @@ class DocumentCabinetListView(CabinetListView):
             'title': _('Cabinets containing document: %s') % self.document,
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.document.get_cabinets().all()
 
 
@@ -295,7 +295,7 @@ class DocumentAddToCabinetView(MultipleObjectFormActionView):
 
         for cabinet in form.cleaned_data['cabinets']:
             AccessControlList.objects.check_access(
-                obj=cabinet, permissions=permission_cabinet_add_document,
+                obj=cabinet, permission=permission_cabinet_add_document,
                 user=self.request.user, raise_404=True
             )
             if cabinet in cabinet_membership:
@@ -383,7 +383,7 @@ class DocumentRemoveFromCabinetView(MultipleObjectFormActionView):
 
         for cabinet in form.cleaned_data['cabinets']:
             AccessControlList.objects.check_access(
-                obj=cabinet, permissions=permission_cabinet_remove_document,
+                obj=cabinet, permission=permission_cabinet_remove_document,
                 user=self.request.user, raise_404=True
             )
 

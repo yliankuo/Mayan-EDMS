@@ -51,7 +51,7 @@ class ResultsView(SearchModelMixin, SingleObjectListView):
                 query_string=self.request.GET
             )
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         self.search_model = self.get_search_model()
 
         if self.request.GET:

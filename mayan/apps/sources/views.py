@@ -146,7 +146,7 @@ class SourceEditView(SingleObjectEditView):
 
 
 class SourceListView(SingleObjectListView):
-    queryset = Source.objects.select_subclasses()
+    source_queryset = Source.objects.select_subclasses()
     view_permission = permission_sources_view
 
     def get_extra_context(self):
@@ -201,13 +201,13 @@ class SourceLogView(SingleObjectListView):
             'title': _('Log entries for source: %s') % self.get_source(),
         }
 
-    def get_object_list(self):
-        return self.get_source().logs.all()
-
     def get_source(self):
         return get_object_or_404(
             klass=Source.objects.select_subclasses(), pk=self.kwargs['source_id']
         )
+
+    def get_source_queryset(self):
+        return self.get_source().logs.all()
 
 
 class StagingFileDeleteView(ExternalObjectMixin, SingleObjectDeleteView):

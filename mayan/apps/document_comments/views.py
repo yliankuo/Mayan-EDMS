@@ -100,5 +100,5 @@ class DocumentCommentListView(ExternalObjectMixin, SingleObjectListView):
             'title': _('Comments for document: %s') % self.get_document(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_document().comments.all()

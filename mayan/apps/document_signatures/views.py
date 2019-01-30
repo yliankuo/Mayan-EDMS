@@ -217,7 +217,7 @@ class DocumentVersionSignatureDeleteView(SingleObjectDeleteView):
             kwargs={'document_version_id': self.get_object().document_version.pk}
         )
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return SignatureBaseModel.objects.select_subclasses()
 
 
@@ -236,7 +236,7 @@ class DocumentVersionSignatureDetailView(SingleObjectDetailView):
             ) % self.get_object(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return SignatureBaseModel.objects.select_subclasses()
 
 
@@ -251,7 +251,7 @@ class DocumentVersionSignatureDownloadView(SingleObjectDownloadView):
             signature.signature_file, name=force_text(signature)
         )
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return SignatureBaseModel.objects.select_subclasses()
 
 
@@ -297,7 +297,7 @@ class DocumentVersionSignatureListView(ExternalObjectMixin, SingleObjectListView
             ) % self.get_document_version(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_document_version().signatures.all()
 
 

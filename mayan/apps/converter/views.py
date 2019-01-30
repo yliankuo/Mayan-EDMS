@@ -37,8 +37,8 @@ class TransformationDeleteView(SingleObjectDeleteView):
         )
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_delete,
-            obj=self.transformation.content_object, user=request.user
+            obj=self.transformation.content_object,
+            permission=permission_transformation_delete, user=request.user
         )
 
         return super(TransformationDeleteView, self).dispatch(
@@ -93,8 +93,8 @@ class TransformationCreateView(SingleObjectCreateView):
             raise Http404
 
         AccessControlList.objects.check_access(
-            permissions=permission_transformation_create,
-            obj=self.content_object, user=request.user
+            obj=self.content_object, permission=permission_transformation_create,
+            user=request.user
         )
 
         return super(TransformationCreateView, self).dispatch(
@@ -149,7 +149,7 @@ class TransformationEditView(SingleObjectEditView):
 
         AccessControlList.objects.check_access(
             obj=self.transformation.content_object,
-            permissions=permission_transformation_edit, user=request.user
+            permission=permission_transformation_edit, user=request.user
         )
 
         return super(TransformationEditView, self).dispatch(
@@ -206,7 +206,7 @@ class TransformationListView(SingleObjectListView):
 
         AccessControlList.objects.check_access(
             obj=self.content_object,
-            permissions=permission_transformation_view,
+            permission=permission_transformation_view,
             user=request.user
         )
 
@@ -235,5 +235,5 @@ class TransformationListView(SingleObjectListView):
             'title': _('Transformations for: %s') % self.content_object,
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return Transformation.objects.get_for_model(obj=self.content_object)

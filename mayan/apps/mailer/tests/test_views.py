@@ -190,7 +190,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
     def _request_document_link_send(self):
         return self.post(
             viewname='mailer:document_send_link',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={
                 'email': getattr(
                     self, 'test_email_address', TEST_EMAIL_ADDRESS
@@ -202,7 +202,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
     def _request_document_send(self):
         return self.post(
             viewname='mailer:document_send',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={
                 'email': getattr(
                     self, 'test_email_address', TEST_EMAIL_ADDRESS
