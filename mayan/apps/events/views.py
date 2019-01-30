@@ -33,7 +33,7 @@ class EventListView(SingleObjectListView):
             'title': _('Events'),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return Action.objects.all()
 
 
@@ -121,7 +121,7 @@ class NotificationListView(SingleObjectListView):
             'title': _('Notifications'),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.request.user.notifications.all()
 
 
@@ -184,7 +184,7 @@ class ObjectEventListView(EventListView):
             klass=queryset, pk=self.kwargs['object_id']
         )
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return any_stream(self.get_object())
 
 
@@ -274,5 +274,5 @@ class VerbEventListView(SingleObjectListView):
             ) % EventType.get(name=self.kwargs['verb']),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return Action.objects.filter(verb=self.kwargs['verb'])

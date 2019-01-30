@@ -29,6 +29,7 @@ class EventsApp(MayanAppConfig):
 
     def ready(self):
         super(EventsApp, self).ready()
+
         Action = apps.get_model(app_label='actstream', model_name='Action')
         Notification = self.get_model(model_name='Notification')
         StoredEventType = self.get_model(model_name='StoredEventType')
