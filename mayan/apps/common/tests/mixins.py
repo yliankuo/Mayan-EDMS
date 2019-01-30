@@ -170,21 +170,25 @@ class RandomPrimaryKeyModelMonkeyPatchMixin(object):
         return primary_key
 
     def setUp(self):
-        original_save = models.Model.save
+        self.method_save_original = models.Model.save
 
-        def new_save(self, *args, **kwargs):
-            if self.pk:
-                return original_save(self, *args, **kwargs)
+        def method_save_new(instance, *args, **kwargs):
+            if instance.pk:
+                return self.method_save_original(instance, *args, **kwargs)
             else:
-                self.pk = RandomPrimaryKeyModelMonkeyPatchMixin.get_unique_primary_key(
-                    model=self._meta.model
+                instance.pk = RandomPrimaryKeyModelMonkeyPatchMixin.get_unique_primary_key(
+                    model=instance._meta.model
                 )
-                self.id = self.pk
+                instance.id = instance.pk
 
-                return self.save_base(force_insert=True)
+                return instance.save_base(force_insert=True)
 
-        setattr(models.Model, 'save', new_save)
+        setattr(models.Model, 'save', method_save_new)
         super(RandomPrimaryKeyModelMonkeyPatchMixin, self).setUp()
+
+    def tearDown(self):
+        models.Model.save = self.method_save_original
+        super(RandomPrimaryKeyModelMonkeyPatchMixin, self).tearDown()
 
 
 class TempfileCheckTestCaseMixin(object):
