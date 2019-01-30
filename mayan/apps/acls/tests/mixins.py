@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 
 from mayan.apps.permissions.tests.mixins import RoleTestCaseMixin
@@ -21,6 +22,30 @@ class ACLTestCaseMixin(RoleTestCaseMixin, UserTestCaseMixin):
                 'in order to enable the usage of ACLs in tests.'
             )
 
-        return AccessControlList.objects.grant(
+        self._test_case_acl = AccessControlList.objects.grant(
             obj=obj, permission=permission, role=self._test_case_role
         )
+
+
+class ACLTestMixin(object):
+    auto_create_test_role = True
+
+    def _create_test_acl(self):
+        self.test_acl = AccessControlList.objects.create(
+            content_object=self.test_object, role=self.test_role
+        )
+
+    def setUp(self):
+        super(ACLTestMixin, self).setUp()
+        if self.auto_create_test_role:
+            self._create_test_role()
+
+        self.test_object = self.document
+
+        content_type = ContentType.objects.get_for_model(self.test_object)
+
+        self.test_content_object_view_kwargs = {
+            'app_label': content_type.app_label,
+            'model': content_type.model,
+            'object_id': self.test_object.pk
+        }
