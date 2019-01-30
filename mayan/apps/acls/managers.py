@@ -61,8 +61,6 @@ class AccessControlListManager(models.Manager):
                     )
                 ).values('ct_fk_combination')
 
-                field_lookup = 'pk__in'
-
                 acl_filter = self.annotate(
                     ct_fk_combination=Concat(
                         'content_type', V('-'), 'object_id', output_field=CharField()
@@ -71,6 +69,8 @@ class AccessControlListManager(models.Manager):
                     permissions=stored_permission, role__groups__user=user,
                     ct_fk_combination__in=content_type_object_id_queryset
                 ).values('object_id')
+
+                field_lookup = 'object_id__in'
 
                 result.append(Q(**{field_lookup: acl_filter}))
             else:
