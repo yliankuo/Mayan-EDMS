@@ -322,7 +322,7 @@ class WorkflowStateActionListView(SingleObjectListView):
     def get_form_schema(self):
         return {'fields': self.get_class().fields}
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow_state().actions.all()
 
     def get_workflow_state(self):
@@ -380,7 +380,7 @@ class WorkflowStateCreateView(ExternalObjectMixin, SingleObjectCreateView):
     def get_instance_extra_data(self):
         return {'workflow': self.get_workflow()}
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow().states.all()
 
     def get_success_url(self):
@@ -457,7 +457,7 @@ class WorkflowStateListView(ExternalObjectMixin, SingleObjectListView):
             'title': _('States of workflow: %s') % self.get_workflow()
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow().states.all()
 
     def get_workflow(self):
@@ -488,7 +488,7 @@ class WorkflowTransitionCreateView(ExternalObjectMixin, SingleObjectCreateView):
     def get_instance_extra_data(self):
         return {'workflow': self.get_workflow()}
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow().transitions.all()
 
     def get_success_url(self):
@@ -575,7 +575,7 @@ class WorkflowTransitionListView(ExternalObjectMixin, SingleObjectListView):
             ) % self.get_workflow()
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow().transitions.all()
 
     def get_workflow(self):

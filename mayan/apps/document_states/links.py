@@ -5,16 +5,20 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.documents.icons import icon_document_type
 from mayan.apps.navigation import Link
 
+
 from .icons import (
     icon_document_workflow_instance_list, icon_tool_launch_all_workflows,
     icon_workflow_create, icon_workflow_delete, icon_workflow_edit,
-    icon_workflow_list, icon_workflow_preview, icon_workflow_state,
-    icon_workflow_state_action, icon_workflow_state_action_delete,
-    icon_workflow_state_action_edit, icon_workflow_state_action_list,
-    icon_workflow_state_action_selection, icon_workflow_state_create,
-    icon_workflow_state_delete, icon_workflow_state_edit,
-    icon_workflow_transition, icon_workflow_transition_create,
-    icon_workflow_transition_delete, icon_workflow_transition_edit
+    icon_workflow_list, icon_workflow_preview,
+    icon_workflow_runtime_proxy_document_list, icon_workflow_runtime_proxy_list,
+    icon_workflow_runtime_proxy_state_document_list,
+    icon_workflow_runtime_proxy_state_list, icon_workflow_state,
+    icon_workflow_state_action_delete, icon_workflow_state_action_edit,
+    icon_workflow_state_action_list, icon_workflow_state_action_selection,
+    icon_workflow_state_create, icon_workflow_state_delete,
+    icon_workflow_state_edit, icon_workflow_transition,
+    icon_workflow_transition_create, icon_workflow_transition_delete,
+    icon_workflow_transition_edit
 )
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
@@ -152,7 +156,7 @@ link_workflow_transition_edit = Link(
 )
 link_workflow_transition_list = Link(
     icon_class=icon_workflow_transition,
-    kwargs={'workflow_transition_id': 'resolved_object.pk'},
+    kwargs={'workflow_id': 'resolved_object.pk'},
     permission=permission_workflow_view, text=_('Transitions'),
     view='workflows:workflow_transition_list'
 )
@@ -165,20 +169,24 @@ link_workflow_transition_triggers = Link(
 # Workflow runtime proxies
 
 link_workflow_runtime_proxy_document_list = Link(
+    icon_class=icon_workflow_runtime_proxy_document_list,
     kwargs={'workflow_runtime_proxy_id': 'resolved_object.pk'},
     permission=permission_workflow_view, text=_('Workflow documents'),
     view='workflows:workflow_runtime_proxy_document_list'
 )
 link_workflow_runtime_proxy_list = Link(
-    icon_class=icon_workflow_list, permission=permission_workflow_view,
-    text=_('Workflows'), view='workflows:workflow_runtime_proxy_list'
+    icon_class=icon_workflow_runtime_proxy_list,
+    permission=permission_workflow_view, text=_('Workflows'),
+    view='workflows:workflow_runtime_proxy_list'
 )
 link_workflow_runtime_proxy_state_document_list = Link(
+    icon_class=icon_workflow_runtime_proxy_state_document_list,
     kwargs={'workflow_runtime_proxy_state_id': 'resolved_object.pk'},
     permission=permission_workflow_view, text=_('State documents'),
     view='workflows:workflow_runtime_proxy_state_document_list'
 )
 link_workflow_runtime_proxy_state_list = Link(
+    icon_class=icon_workflow_runtime_proxy_state_list,
     kwargs={'workflow_runtime_proxy_id': 'resolved_object.pk'},
     permission=permission_workflow_view, text=_('States'),
     view='workflows:workflow_runtime_proxy_state_list'

@@ -268,13 +268,13 @@ class DocumentStatesApp(MayanAppConfig):
                 link_workflow_instance_transition
             ), sources=(WorkflowInstance,)
         )
-        menu_object.bind_links(
+        menu_list_facet.bind_links(
             links=(
                 link_workflow_runtime_proxy_document_list,
                 link_workflow_runtime_proxy_state_list,
             ), sources=(WorkflowRuntimeProxy,)
         )
-        menu_object.bind_links(
+        menu_list_facet.bind_links(
             links=(
                 link_workflow_runtime_proxy_state_document_list,
             ), sources=(WorkflowStateRuntimeProxy,)

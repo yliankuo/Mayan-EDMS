@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 
@@ -71,14 +70,14 @@ class WorkflowRuntimeProxyListView(SingleObjectListView):
             'title': _('Workflows'),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return WorkflowRuntimeProxy.objects.all()
 
 
 class WorkflowRuntimeProxyStateDocumentListView(ExternalObjectMixin, DocumentListView):
-    external_object_class = WorkflowRuntimeProxy
+    external_object_class = WorkflowStateRuntimeProxy
     external_object_permission = permission_workflow_view
-    external_object_pk_url_kwarg = 'workflow_runtime_proxy_id'
+    external_object_pk_url_kwarg = 'workflow_runtime_proxy_state_id'
 
     def get_document_queryset(self):
         return self.get_workflow_state().get_documents()
@@ -106,15 +105,6 @@ class WorkflowRuntimeProxyStateDocumentListView(ExternalObjectMixin, DocumentLis
         return context
 
     def get_workflow_state(self):
-        workflow_state = get_object_or_404(
-            klass=WorkflowRuntimeProxyStateDocumentListView,
-            pk=self.kwargs['workflow_instance_state_id'],
-            workflow_pk=self.get_workflow()
-        )
-
-        return workflow_state
-
-    def get_workflow(self):
         return self.get_external_object()
 
 
@@ -142,7 +132,7 @@ class WorkflowRuntimeProxyStateListView(ExternalObjectMixin, SingleObjectListVie
             'title': _('States of workflow: %s') % self.get_workflow()
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return WorkflowStateRuntimeProxy.objects.filter(
             workflow=self.get_workflow()
         )

@@ -56,7 +56,7 @@ class DocumentWorkflowInstanceListView(SingleObjectListView):
             ) % self.get_document(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_document().workflows.all()
 
 
@@ -89,7 +89,7 @@ class WorkflowInstanceDetailView(SingleObjectListView):
             'workflow_instance': self.get_workflow_instance(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_workflow_instance().log_entries.order_by('-datetime')
 
     def get_workflow_instance(self):
