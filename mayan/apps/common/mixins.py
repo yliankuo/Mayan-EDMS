@@ -433,12 +433,12 @@ class RestrictedQuerysetMixin(object):
         queryset = self.get_source_queryset()
 
         if self.object_permission:
-            return AccessControlList.objects.restrict_queryset(
+            queryset = AccessControlList.objects.restrict_queryset(
                 permission=self.object_permission, queryset=queryset,
                 user=self.request.user
             )
-        else:
-            return queryset
+
+        return queryset
 
 
 class ViewPermissionCheckMixin(object):
