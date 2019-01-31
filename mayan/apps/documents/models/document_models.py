@@ -6,7 +6,7 @@ import uuid
 from django.apps import apps
 from django.conf import settings
 from django.core.files import File
-from django.db import models
+from django.db import models, transaction
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
@@ -227,15 +227,17 @@ class Document(models.Model):
         has_changed = self.document_type != document_type
 
         self.document_type = document_type
-        self.save()
-        if has_changed or force:
-            post_document_type_change.send(
-                sender=self.__class__, instance=self
-            )
 
-            event_document_type_change.commit(actor=_user, target=self)
-            if _user:
-                self.add_as_recent_document_for_user(user=_user)
+        with transaction.atomic():
+            self.save()
+            if has_changed or force:
+                post_document_type_change.send(
+                    sender=self.__class__, instance=self
+                )
+
+                event_document_type_change.commit(actor=_user, target=self)
+                if _user:
+                    self.add_as_recent_document_for_user(user=_user)
 
     @property
     def size(self):
