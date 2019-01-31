@@ -304,8 +304,12 @@ class ObjectActionMixin(object):
     Mixin that performs an user action to a queryset
     """
     error_message = 'Unable to perform operation on object %(instance)s.'
+    post_object_action_url = None
     success_message = 'Operation performed on %(count)d object.'
     success_message_plural = 'Operation performed on %(count)d objects.'
+
+    def get_post_object_action_url(self):
+        return self.post_object_action_url
 
     def get_success_message(self, count):
         return ungettext(
@@ -322,24 +326,27 @@ class ObjectActionMixin(object):
 
     def view_action(self, form=None):
         self.action_count = 0
+        self.action_id_list = []
 
         for instance in self.get_object_list():
             try:
                 self.object_action(form=form, instance=instance)
-            except PermissionDenied:
-                pass
-            except ActionError:
+            except Exception as exception:
                 messages.error(
-                    request=self.request,
-                    message=self.error_message % {'instance': instance}
+                    message=self.error_message % {
+                        'exception': exception, 'instance': instance
+                    }, request=self.request
                 )
             else:
                 self.action_count += 1
+                self.action_id_list.append(instance.pk)
 
         messages.success(
-            request=self.request,
-            message=self.get_success_message(count=self.action_count)
+            message=self.get_success_message(count=self.action_count),
+            request=self.request
         )
+
+        self.success_url = self.get_post_object_action_url()
 
 
 class ObjectNameMixin(object):
