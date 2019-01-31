@@ -12,8 +12,10 @@ from .literals import TEST_FIRST_TIME_LOGIN_TEXT, TEST_MOCK_VIEW_TEXT
 class AutoAdminViewCase(GenericViewTestCase):
     auto_create_group = False
     auto_create_users = False
+    auto_login_user = False
 
     def setUp(self):
+        super(AutoAdminViewCase, self).setUp()
         with mute_stdout():
             AutoAdminSingleton.objects.create_autoadmin()
 
