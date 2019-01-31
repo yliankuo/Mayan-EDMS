@@ -29,6 +29,6 @@ class BaseTestCase(RandomPrimaryKeyModelMonkeyPatchMixin, DatabaseConversionMixi
 class GenericViewTestCase(ClientMethodsTestCaseMixin, TestViewTestCaseMixin, BaseTestCase):
     """
     A generic view test case built on top of the base test case providing
-    single user test view to test object resolution and shorthand HTTP
-    method functions.
+    a single, user customizable view to test object resolution and shorthand
+    HTTP method functions.
     """
