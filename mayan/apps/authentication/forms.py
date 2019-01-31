@@ -23,8 +23,10 @@ class EmailAuthenticationForm(forms.Form):
     remember_me = forms.BooleanField(label=_('Remember me'), required=False)
 
     error_messages = {
-        'invalid_login': _('Please enter a correct email and password. '
-                           'Note that the password field is case-sensitive.'),
+        'invalid_login': _(
+            'Please enter a correct email and password. Note that the '
+            'password field is case-sensitive.'
+        ),
         'inactive': _('This account is inactive.'),
     }
 
@@ -56,8 +58,10 @@ class EmailAuthenticationForm(forms.Form):
         return self.cleaned_data
 
     def check_for_test_cookie(self):
-        warnings.warn('check_for_test_cookie is deprecated; ensure your login '
-                      'view is CSRF-protected.', DeprecationWarning)
+        warnings.warn(
+            'check_for_test_cookie is deprecated; ensure your login view '
+            'is CSRF-protected.', DeprecationWarning
+        )
 
     def get_user_id(self):
         if self.user_cache:
