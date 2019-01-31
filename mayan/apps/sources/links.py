@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
+
 from django.apps import apps
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,6 +25,8 @@ from .permissions import (
     permission_staging_file_delete
 )
 
+logger = logging.getLogger(__name__)
+
 
 def condition_check_document_creation_acls(context):
     AccessControlList = apps.get_model(
@@ -38,12 +42,13 @@ def condition_check_document_creation_acls(context):
     ).exists()
 
 
-def document_new_version_not_blocked(context):
-    NewVersionBlock = apps.get_model(
-        app_label='checkouts', model_name='NewVersionBlock'
-    )
-
-    return not NewVersionBlock.objects.is_blocked(context['object'])
+def condition_new_versions_allowed(context):
+    try:
+        context['object'].execute_pre_save_hooks()
+    except Exception as exception:
+        logger.debug('execute_pre_save_hooks raised and exception: %s', exception)
+    else:
+        return True
 
 
 link_document_create_multiple = Link(
@@ -120,7 +125,7 @@ link_staging_file_delete = Link(
     tags='dangerous', text=_('Delete'), view='sources:staging_file_delete'
 )
 link_upload_version = Link(
-    condition=document_new_version_not_blocked,
+    condition=condition_new_versions_allowed,
     kwargs={'document_pk': 'resolved_object.pk'},
     permission=permission_document_new_version, text=_('Upload new version'),
     view='sources:upload_version'

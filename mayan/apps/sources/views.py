@@ -351,8 +351,6 @@ class UploadBaseView(ListModeMixin, MultiFormView):
 
 class UploadInteractiveView(UploadBaseView):
     def dispatch(self, request, *args, **kwargs):
-        self.subtemplates_list = []
-
         self.document_type = get_object_or_404(
             klass=DocumentType,
             pk=self.request.GET.get(
@@ -361,8 +359,8 @@ class UploadInteractiveView(UploadBaseView):
         )
 
         AccessControlList.objects.check_access(
-            permission=permission_document_create, user=request.user,
-            obj=self.document_type
+            obj=self.document_type, permission=permission_document_create,
+            user=request.user
         )
 
         self.tab_links = UploadBaseView.get_active_tab_links()
@@ -521,29 +519,31 @@ class UploadInteractiveView(UploadBaseView):
 
 class UploadInteractiveVersionView(UploadBaseView):
     def dispatch(self, request, *args, **kwargs):
+        self.document = get_object_or_404(
+            klass=Document, pk=kwargs['document_id']
+        )
 
-        self.subtemplates_list = []
+        AccessControlList.objects.check_access(
+            obj=self.document, permission=permission_document_new_version,
+            user=self.request.user
+        )
 
-        self.document = get_object_or_404(klass=Document, pk=kwargs['document_id'])
-
-        # TODO: Try to remove this new version block check from here
-        if NewVersionBlock.objects.is_blocked(self.document):
+        try:
+            self.document.latest_version.execute_pre_save_hooks()
+        except Exception as exception:
             messages.error(
                 message=_(
-                    'Document "%s" is blocked from uploading new versions.'
-                ) % self.document, request=self.request
+                    'Unable to upload new versions for document '
+                    '"%(document)s". %(exception)s'
+                ) % {'document': self.document, 'exception': exception},
+                request=self.request
             )
             return HttpResponseRedirect(
                 redirect_to=reverse(
                     viewname='documents:document_version_list',
-                    kwargs={'document_version_id': self.document.pk}
+                    kwargs={'document_id': self.document.pk}
                 )
             )
-
-        AccessControlList.objects.check_access(
-            permission=permission_document_new_version,
-            user=self.request.user, obj=self.document
-        )
 
         self.tab_links = UploadBaseView.get_active_tab_links(self.document)
 
