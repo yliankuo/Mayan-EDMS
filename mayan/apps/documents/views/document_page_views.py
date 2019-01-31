@@ -6,7 +6,6 @@ from furl import furl
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import resolve_url
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
@@ -14,6 +13,7 @@ from django.views.generic import RedirectView
 
 from mayan.apps.common.generics import SimpleView, SingleObjectListView
 from mayan.apps.common.mixins import ExternalObjectMixin
+from mayan.apps.common.settings import setting_home_view
 from mayan.apps.common.utils import resolve
 from mayan.apps.converter.literals import DEFAULT_ROTATION, DEFAULT_ZOOM_LEVEL
 
@@ -104,7 +104,7 @@ class DocumentPageNavigationBase(ExternalObjectMixin, RedirectView):
             try:
                 previous_url = self.get_object().get_absolute_url()
             except AttributeError:
-                previous_url = resolve_url(settings.LOGIN_REDIRECT_URL)
+                previous_url = reverse(setting_home_view.value)
 
         parsed_url = furl(url=previous_url)
 

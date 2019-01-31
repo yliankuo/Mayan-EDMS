@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, resolve_url
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 from django.views.generic.detail import SingleObjectMixin
@@ -19,6 +20,7 @@ from .literals import (
     PK_LIST_SEPARATOR, TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST,
     TEXT_LIST_AS_ITEMS_PARAMETER, TEXT_LIST_AS_ITEMS_VARIABLE_NAME
 )
+from .settings import setting_home_view
 
 __all__ = (
     'DeleteExtraDataMixin', 'DynamicFormViewMixin', 'ExtraContextMixin',
@@ -367,14 +369,14 @@ class RedirectionMixin(object):
         self.next_url = self.request.POST.get(
             'next', self.request.GET.get(
                 'next', post_action_redirect if post_action_redirect else self.request.META.get(
-                    'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                    'HTTP_REFERER', reverse(setting_home_view.value)
                 )
             )
         )
         self.previous_url = self.request.POST.get(
             'previous', self.request.GET.get(
                 'previous', action_cancel_redirect if action_cancel_redirect else self.request.META.get(
-                    'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                    'HTTP_REFERER', reverse(setting_home_view.value)
                 )
             )
         )

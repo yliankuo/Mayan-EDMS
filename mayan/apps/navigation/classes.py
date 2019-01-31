@@ -10,10 +10,9 @@ from django.conf import settings
 from django.contrib.admin.utils import label_for_field
 from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 from django.db.models.constants import LOOKUP_SEP
-from django.shortcuts import resolve_url
 from django.template import VariableDoesNotExist, Variable
 from django.template.defaulttags import URLNode
-from django.urls import resolve
+from django.urls import reverse, resolve
 from django.utils.encoding import force_str, force_text
 from django.utils.translation import ugettext_lazy as _
 
@@ -22,6 +21,7 @@ from mayan.apps.common.literals import (
     TEXT_SORT_ORDER_CHOICE_ASCENDING, TEXT_SORT_ORDER_CHOICE_DESCENDING,
     TEXT_SORT_ORDER_PARAMETER, TEXT_SORT_ORDER_VARIABLE_NAME
 )
+from mayan.apps.common.settings import setting_home_view
 from mayan.apps.common.utils import resolve_attribute
 from mayan.apps.permissions import Permission
 
@@ -170,7 +170,7 @@ class Link(object):
             parsed_url = furl(
                 force_str(
                     request.get_full_path() or request.META.get(
-                        'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                        'HTTP_REFERER', reverse(setting_home_view.value)
                     )
                 )
             )
