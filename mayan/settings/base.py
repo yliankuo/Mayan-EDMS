@@ -16,7 +16,9 @@ import sys
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.smart_settings.literals import DJANGO_SETTINGS_LIST
+from mayan.apps.smart_settings.literals import (
+    DJANGO_SETTINGS_DEFAULTS, DJANGO_SETTINGS_LIST
+)
 from mayan.apps.smart_settings.utils import (
     get_environment_variables, read_configuration_file, yaml_loads
 )
@@ -50,7 +52,9 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = yaml_loads(os.environ.get('MAYAN_DEBUG', 'false'))
+DEBUG = yaml_loads(
+    os.environ.get('MAYAN_DEBUG', DJANGO_SETTINGS_DEFAULTS.get('DEBUG'))
+)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '[::1]']
 
@@ -249,10 +253,21 @@ TEST_RUNNER = 'mayan.apps.common.tests.runner.MayanTestRunner'
 # --------- Django -------------------
 
 LOGIN_URL = yaml_loads(
-    os.environ.get('MAYAN_LOGIN_URL', 'authentication:login_view')
+    os.environ.get(
+        'MAYAN_LOGIN_URL', DJANGO_SETTINGS_DEFAULTS.get('LOGIN_URL')
+    )
 )
 LOGIN_REDIRECT_URL = yaml_loads(
-    os.environ.get('MAYAN_LOGIN_REDIRECT_URL', 'common:root')
+    os.environ.get(
+        'MAYAN_LOGIN_REDIRECT_URL',
+        DJANGO_SETTINGS_DEFAULTS.get('LOGIN_REDIRECT_URL')
+    )
+)
+LOGOUT_REDIRECT_URL = yaml_loads(
+    os.environ.get(
+        'MAYAN_LOGOUT_REDIRECT_URL',
+        DJANGO_SETTINGS_DEFAULTS.get('LOGOUT_REDIRECT_URL')
+    )
 )
 INTERNAL_IPS = ('127.0.0.1',)
 
