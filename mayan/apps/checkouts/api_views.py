@@ -7,7 +7,7 @@ from mayan.apps.documents.permissions import permission_document_view
 
 from .models import DocumentCheckout
 from .permissions import (
-    permission_document_checkin, permission_document_checkin_override,
+    permission_document_check_in, permission_document_check_in_override,
     permission_document_checkout_detail_view
 )
 from .serializers import (
@@ -78,12 +78,12 @@ class APICheckedoutDocumentView(generics.RetrieveDestroyAPIView):
 
         if document.checkout_info().user == request.user:
             AccessControlList.objects.check_access(
-                permissions=permission_document_checkin, user=request.user,
+                permissions=permission_document_check_in, user=request.user,
                 obj=document
             )
         else:
             AccessControlList.objects.check_access(
-                permissions=permission_document_checkin_override,
+                permissions=permission_document_check_in_override,
                 user=request.user, obj=document
             )
 

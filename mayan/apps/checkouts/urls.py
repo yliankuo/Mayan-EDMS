@@ -4,26 +4,34 @@ from django.conf.urls import url
 
 from .api_views import APICheckedoutDocumentListView, APICheckedoutDocumentView
 from .views import (
-    CheckoutDetailView, CheckoutDocumentView, CheckoutListView,
-    DocumentCheckinView
+    DocumentCheckinView, DocumentCheckoutView, DocumentCheckoutDetailView,
+    DocumentCheckoutListView
 )
 
 urlpatterns = [
     url(
-        regex=r'^documents/$', name='checkout_list',
-        view=CheckoutListView.as_view()
+        regex=r'^documents/$', name='document_checkout_list',
+        view=DocumentCheckoutListView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/check/out/$',
-        name='checkout_document', view=CheckoutDocumentView.as_view()
+        regex=r'^documents/(?P<document_id>\d+)/check_in/$',
+        name='document_check_in', view=DocumentCheckinView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/check/in/$',
-        name='checkin_document', view=DocumentCheckinView.as_view()
+        regex=r'^documents/multiple/check_in/$',
+        name='document_multiple_check_in', view=DocumentCheckinView.as_view()
     ),
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/check/info/$',
-        name='checkout_info', view=CheckoutDetailView.as_view()
+        regex=r'^documents/(?P<document_id>\d+)/checkout/$',
+        name='document_checkout', view=DocumentCheckoutView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/checkout/$',
+        name='document_multiple_checkout', view=DocumentCheckoutView.as_view()
+    ),
+    url(
+        regex=r'^documents/(?P<document_id>\d+)/checkout/info/$',
+        name='document_checkout_info', view=DocumentCheckoutDetailView.as_view()
     ),
 ]
 
@@ -33,7 +41,7 @@ api_urls = [
         view=APICheckedoutDocumentListView.as_view()
     ),
     url(
-        regex=r'^checkouts/(?P<document_pk>[0-9]+)/checkout_info/$',
+        regex=r'^checkouts/(?P<document_id>\d+)/checkout_info/$',
         name='checkedout-document-view',
         view=APICheckedoutDocumentView.as_view()
     ),

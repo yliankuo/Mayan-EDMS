@@ -23,7 +23,7 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,
-            user=self.admin_user, block_new_version=True
+            user=self._test_case_user, block_new_version=True
         )
 
         self.assertTrue(self.document.is_checked_out())
@@ -33,29 +33,12 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
             )
         )
 
-    def test_version_creation_blocking(self):
-        expiration_datetime = now() + datetime.timedelta(days=1)
-
-        # Silence unrelated logging
-        logging.getLogger('mayan.apps.documents.models').setLevel(
-            level=logging.CRITICAL
-        )
-
-        DocumentCheckout.objects.checkout_document(
-            document=self.document, expiration_datetime=expiration_datetime,
-            user=self.admin_user, block_new_version=True
-        )
-
-        with self.assertRaises(NewDocumentVersionNotAllowed):
-            with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-                self.document.new_version(file_object=file_object)
-
     def test_checkin_in(self):
         expiration_datetime = now() + datetime.timedelta(days=1)
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,
-            user=self.admin_user, block_new_version=True
+            user=self._test_case_user, block_new_version=True
         )
 
         self.document.check_in()
@@ -72,13 +55,13 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,
-            user=self.admin_user, block_new_version=True
+            user=self._test_case_user, block_new_version=True
         )
 
         with self.assertRaises(DocumentAlreadyCheckedOut):
             DocumentCheckout.objects.checkout_document(
                 document=self.document,
-                expiration_datetime=expiration_datetime, user=self.admin_user,
+                expiration_datetime=expiration_datetime, user=self._test_case_user,
                 block_new_version=True
             )
 
@@ -91,7 +74,7 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
 
         DocumentCheckout.objects.checkout_document(
             document=self.document, expiration_datetime=expiration_datetime,
-            user=self.admin_user, block_new_version=True
+            user=self._test_case_user, block_new_version=True
         )
 
         time.sleep(.11)
@@ -99,18 +82,6 @@ class DocumentCheckoutTestCase(DocumentTestMixin, BaseTestCase):
         DocumentCheckout.objects.check_in_expired_check_outs()
 
         self.assertFalse(self.document.is_checked_out())
-
-    def test_blocking_new_versions(self):
-        # Silence unrelated logging
-        logging.getLogger('mayan.apps.documents.models').setLevel(
-            level=logging.CRITICAL
-        )
-
-        NewVersionBlock.objects.block(document=self.document)
-
-        with self.assertRaises(NewDocumentVersionNotAllowed):
-            with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-                self.document.new_version(file_object=file_object)
 
 
 class NewVersionBlockTestCase(DocumentTestMixin, BaseTestCase):
@@ -141,3 +112,32 @@ class NewVersionBlockTestCase(DocumentTestMixin, BaseTestCase):
         self.assertFalse(
             NewVersionBlock.objects.is_blocked(document=self.document)
         )
+
+    def test_blocking_new_versions(self):
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.documents.models').setLevel(
+            level=logging.CRITICAL
+        )
+
+        NewVersionBlock.objects.block(document=self.document)
+
+        with self.assertRaises(NewDocumentVersionNotAllowed):
+            with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
+                self.document.new_version(file_object=file_object)
+
+    def test_version_creation_blocking(self):
+        expiration_datetime = now() + datetime.timedelta(days=1)
+
+        # Silence unrelated logging
+        logging.getLogger('mayan.apps.documents.models').setLevel(
+            level=logging.CRITICAL
+        )
+
+        DocumentCheckout.objects.checkout_document(
+            document=self.document, expiration_datetime=expiration_datetime,
+            user=self._test_case_user, block_new_version=True
+        )
+
+        with self.assertRaises(NewDocumentVersionNotAllowed):
+            with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
+                self.document.new_version(file_object=file_object)

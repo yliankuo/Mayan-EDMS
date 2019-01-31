@@ -14,7 +14,7 @@ from .permissions import permission_document_checkout_detail_view
 class DashboardWidgetTotalCheckouts(DashboardWidgetNumeric):
     icon_class = icon_dashboard_checkouts
     label = _('Checkedout documents')
-    link = reverse_lazy(viewname='checkouts:checkout_list')
+    link = reverse_lazy(viewname='checkouts:document_checkout_list')
 
     def render(self, request):
         AccessControlList = apps.get_model(

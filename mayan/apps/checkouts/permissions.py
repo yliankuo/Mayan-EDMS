@@ -6,10 +6,10 @@ from mayan.apps.permissions import PermissionNamespace
 
 namespace = PermissionNamespace(label=_('Document checkout'), name='checkouts')
 
-permission_document_checkin = namespace.add_permission(
+permission_document_check_in = namespace.add_permission(
     label=_('Check in documents'), name='checkin_document'
 )
-permission_document_checkin_override = namespace.add_permission(
+permission_document_check_in_override = namespace.add_permission(
     label=_('Forcefully check in documents'), name='checkin_document_override'
 )
 permission_document_checkout = namespace.add_permission(
