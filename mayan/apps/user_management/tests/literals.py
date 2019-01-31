@@ -5,11 +5,11 @@ __all__ = (
     'TEST_USER_PASSWORD', 'TEST_USER_PASSWORD_EDITED', 'TEST_USER_USERNAME'
 )
 
-TEST_CASE_ADMIN_EMAIL = 'case_admin@example.com'
-TEST_CASE_ADMIN_PASSWORD = 'test case admin password'
-TEST_CASE_ADMIN_USERNAME = 'test_case_admin'
-
 TEST_CASE_GROUP_NAME = 'test case group'
+
+TEST_CASE_SUPERUSER_EMAIL = 'test_case_superuser@example.com'
+TEST_CASE_SUPERUSER_PASSWORD = 'test case superuser password'
+TEST_CASE_SUPERUSER_USERNAME = 'test_case_superuser'
 
 TEST_CASE_USER_EMAIL = 'test_case_user@example.com'
 TEST_CASE_USER_PASSWORD = 'test case user password'

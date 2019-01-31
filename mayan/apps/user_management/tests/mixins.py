@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
 from .literals import (
-    TEST_CASE_ADMIN_EMAIL, TEST_CASE_ADMIN_PASSWORD, TEST_CASE_ADMIN_USERNAME,
+    TEST_CASE_SUPERUSER_EMAIL, TEST_CASE_SUPERUSER_PASSWORD, TEST_CASE_SUPERUSER_USERNAME,
     TEST_CASE_GROUP_NAME, TEST_GROUP_NAME_EDITED, TEST_CASE_USER_EMAIL,
     TEST_CASE_USER_PASSWORD, TEST_CASE_USER_USERNAME, TEST_GROUP_NAME,
     TEST_USER_EMAIL, TEST_USER_USERNAME, TEST_USER_USERNAME_EDITED,
@@ -41,7 +41,7 @@ class UserTestCaseMixin(object):
             if self.auto_login_user:
                 self.login_user()
 
-        elif self.create_test_case_superuser:
+        if self.create_test_case_superuser:
             self._create_test_case_superuser()
 
             if self.auto_login_superuser:
@@ -56,8 +56,8 @@ class UserTestCaseMixin(object):
 
     def _create_test_case_superuser(self):
         self._test_case_superuser = get_user_model().objects.create_superuser(
-            username=TEST_CASE_ADMIN_USERNAME, email=TEST_CASE_ADMIN_EMAIL,
-            password=TEST_CASE_ADMIN_PASSWORD
+            username=TEST_CASE_SUPERUSER_USERNAME, email=TEST_CASE_SUPERUSER_EMAIL,
+            password=TEST_CASE_SUPERUSER_PASSWORD
         )
 
     def _create_test_case_user(self):
@@ -73,8 +73,8 @@ class UserTestCaseMixin(object):
 
     def login_superuser(self):
         self.login(
-            username=TEST_CASE_ADMIN_USERNAME,
-            password=TEST_CASE_ADMIN_PASSWORD
+            username=TEST_CASE_SUPERUSER_USERNAME,
+            password=TEST_CASE_SUPERUSER_PASSWORD
         )
 
     def login_user(self):
@@ -132,8 +132,8 @@ class GroupTestMixin(object):
 class UserTestMixin(object):
     def _create_test_superuser(self):
         self.test_superuser = get_user_model().objects.create_superuser(
-            username=TEST_CASE_ADMIN_USERNAME, email=TEST_CASE_ADMIN_EMAIL,
-            password=TEST_CASE_ADMIN_PASSWORD
+            username=TEST_CASE_SUPERUSER_USERNAME, email=TEST_CASE_SUPERUSER_EMAIL,
+            password=TEST_CASE_SUPERUSER_PASSWORD
         )
 
     def _create_test_user(self):
