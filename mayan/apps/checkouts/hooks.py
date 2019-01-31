@@ -9,5 +9,5 @@ def hook_is_new_version_allowed(document_version):
     )
 
     NewVersionBlock.objects.new_versions_allowed(
-        document_version=document_version.document
+        document=document_version.document
     )

@@ -22,6 +22,7 @@ from .events import (
     event_document_check_out, event_document_forceful_check_in
 )
 from .handlers import handler_check_new_version_creation
+from .hooks import hook_is_new_version_allowed
 from .links import (
     link_document_check_in, link_document_checkout, link_document_checkout_info,
     link_document_checkout_list, link_document_multiple_check_in,
@@ -68,6 +69,10 @@ class CheckoutsApp(MayanAppConfig):
         )
         Document.add_to_class(
             name='is_checked_out', value=method_is_checked_out
+        )
+
+        DocumentVersion.register_pre_save_hook(
+            func=hook_is_new_version_allowed
         )
 
         ModelEventType.register(

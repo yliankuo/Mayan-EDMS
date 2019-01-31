@@ -118,7 +118,7 @@ class NewVersionBlockManager(models.Manager):
         return self.filter(document=document).exists()
 
     def new_versions_allowed(self, document):
-        if self.filter(document=document).exist():
+        if self.filter(document=document).exists():
             raise NewDocumentVersionNotAllowed
 
     def unblock(self, document):
