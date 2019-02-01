@@ -80,6 +80,10 @@ class ExternalObjectMixin(object):
     external_object_pk_url_kwargs = None  # Usage: {'pk': 'pk'}
     external_object_queryset = None
 
+    def dispatch(self, *args, **kwargs):
+        self.external_object = self.get_external_object()
+        return super(ExternalObjectMixin, self).dispatch(*args, **kwargs)
+
     def get_pk_url_kwargs(self):
         pk_url_kwargs = {}
 
