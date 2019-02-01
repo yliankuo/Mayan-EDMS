@@ -13,7 +13,7 @@ from django.template import Context, Template
 from django.test.utils import ContextList
 from django.urls import clear_url_caches, reverse
 
-from ..settings import setting_temporary_directory
+from mayan.apps.storage.settings import setting_temporary_directory
 
 from .literals import TEST_VIEW_NAME, TEST_VIEW_URL
 from .utils import mute_stdout

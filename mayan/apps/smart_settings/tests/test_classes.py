@@ -8,7 +8,7 @@ from django.conf import settings
 
 from mayan.apps.common.settings import setting_paginate_by
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.common.utils import fs_cleanup, mkstemp
+from mayan.apps.storage.utils import fs_cleanup, mkstemp
 
 from .literals import TEST_SETTING_NAME, TEST_SETTING_VALUE
 

@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from mayan.apps.common.utils import get_storage_subclass
+from mayan.apps.storage.utils import get_storage_subclass
 
 from .settings import (
     setting_storage_backend, setting_storage_backend_arguments

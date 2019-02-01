@@ -9,7 +9,6 @@ from pathlib2 import Path
 from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.common.utils import mkdtemp
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.tests import (
     TEST_COMPRESSED_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL,
@@ -17,6 +16,7 @@ from mayan.apps.documents.tests import (
     TEST_NON_ASCII_DOCUMENT_PATH, DocumentTestMixin
 )
 from mayan.apps.metadata.models import MetadataType
+from mayan.apps.storage.utils import mkdtemp
 
 from ..literals import SOURCE_UNCOMPRESS_CHOICE_Y
 from ..models import POP3Email, WatchFolderSource, WebFormSource

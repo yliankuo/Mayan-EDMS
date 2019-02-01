@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import os
-import tempfile
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -75,13 +74,6 @@ setting_shared_storage = namespace.add_setting(
 setting_shared_storage_arguments = namespace.add_setting(
     global_name='COMMON_SHARED_STORAGE_ARGUMENTS',
     default={'location': os.path.join(settings.MEDIA_ROOT, 'shared_files')}
-)
-setting_temporary_directory = namespace.add_setting(
-    global_name='COMMON_TEMPORARY_DIRECTORY', default=tempfile.gettempdir(),
-    help_text=_(
-        'Temporary directory used site wide to store thumbnails, previews '
-        'and temporary files.'
-    )
 )
 
 namespace = Namespace(label=_('Django'), name='django')

@@ -227,6 +227,8 @@
 - Add a test mixin to generate random model primary keys.
 - Add support for checkout and check in multiple documents at
   the same time.
+- Move file and storage code to the storage app. The setting
+  COMMON_TEMPORARY_DIRECTORY is now STORAGE_TEMPORARY_DIRECTORY.
 
 3.1.9 (2018-11-01)
 ==================

@@ -15,7 +15,7 @@ from django.apps import apps
 from django.utils.encoding import force_bytes, force_text
 from django.utils.functional import cached_property
 
-from mayan.apps.common.utils import mkdtemp
+from mayan.apps.storage.utils import mkdtemp
 
 from .exceptions import DependenciesException
 

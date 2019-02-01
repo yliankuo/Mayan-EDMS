@@ -15,9 +15,9 @@ from mayan.apps.common.generics import (
     SingleObjectDetailView, SingleObjectDownloadView, SingleObjectListView
 )
 from mayan.apps.common.mixins import ExternalObjectMixin
-from mayan.apps.common.utils import TemporaryFile
 from mayan.apps.django_gpg.exceptions import NeedPassphrase, PassphraseError
 from mayan.apps.documents.models import DocumentVersion
+from mayan.apps.storage.utils import TemporaryFile
 
 from .forms import (
     DocumentVersionSignatureCreateForm, DocumentVersionSignatureDetailForm

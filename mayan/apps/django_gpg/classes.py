@@ -8,7 +8,7 @@ import gnupg
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.utils import mkdtemp
+from mayan.apps.storage.utils import mkdtemp
 
 
 class GPGBackend(object):

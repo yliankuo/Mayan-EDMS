@@ -14,36 +14,32 @@ from .literals import TEST_ERROR_LOG_ENTRY_RESULT
 
 class CommonViewTestCase(GenericViewTestCase):
     def test_about_view(self):
-        self.login_user()
-
         response = self.get('common:about_view')
         self.assertContains(response, text='About', status_code=200)
 
     def _create_error_log_entry(self):
         ModelPermission.register(
-            model=get_user_model(), permission=permission_error_log_view
+            model=get_user_model(), permissions=(permission_error_log_view,)
         )
         ErrorLogEntry.objects.register(model=get_user_model())
 
-        self.error_log_entry = self.user.error_logs.create(
+        self.error_log_entry = self._test_case_user.error_logs.create(
             result=TEST_ERROR_LOG_ENTRY_RESULT
         )
 
     def _request_object_error_log_list(self):
-        content_type = ContentType.objects.get_for_model(model=self.user)
+        content_type = ContentType.objects.get_for_model(model=self._test_case_user)
 
         return self.get(
             'common:object_error_list', kwargs={
                 'app_label': content_type.app_label,
                 'model': content_type.model,
-                'object_id': self.user.pk
+                'object_id': self._test_case_user.pk
             }, follow=True
         )
 
     def test_object_error_list_view_no_permissions(self):
             self._create_error_log_entry()
-
-            self.login_user()
 
             response = self._request_object_error_log_list()
 
@@ -55,9 +51,8 @@ class CommonViewTestCase(GenericViewTestCase):
     def test_object_error_list_view_with_access(self):
             self._create_error_log_entry()
 
-            self.login_user()
             self.grant_access(
-                obj=self.user, permission=permission_error_log_view
+                obj=self._test_case_user, permission=permission_error_log_view
             )
 
             response = self._request_object_error_log_list()

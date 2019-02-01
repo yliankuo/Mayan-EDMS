@@ -7,7 +7,7 @@ import sh
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.utils import fs_cleanup, mkstemp
+from mayan.apps.storage.utils import fs_cleanup, mkstemp
 
 from ..classes import FileMetadataDriver
 from ..settings import setting_drivers_arguments
