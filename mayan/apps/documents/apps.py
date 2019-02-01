@@ -344,14 +344,19 @@ class DocumentsApp(MayanAppConfig):
 
         # DuplicatedDocument
         SourceColumn(
+            attribute='label', is_absolute_url=True, is_identifier=True,
+            is_sortable=True, source=DuplicatedDocumentProxy
+        )
+        SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             ), label=_('Thumbnail'), source=DuplicatedDocumentProxy
         )
         SourceColumn(
             func=lambda context: context['object'].get_duplicate_count(
-                user=context['request'].user,
-            ), label=_('Duplicates'), source=DuplicatedDocumentProxy
+                user=context['request'].user
+            ), include_label=True, label=_('Duplicates'),
+            source=DuplicatedDocumentProxy
         )
 
         app.conf.beat_schedule.update(
