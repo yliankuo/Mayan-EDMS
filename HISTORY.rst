@@ -229,6 +229,10 @@
   the same time.
 - Move file and storage code to the storage app. The setting
   COMMON_TEMPORARY_DIRECTORY is now STORAGE_TEMPORARY_DIRECTORY.
+- To lower memory usage and reduce memory leaks, the entire
+  entire converter class is no longer cached and instead loaded
+  on demand. This allows the garbage collector to clear the memory
+  used.
 
 3.1.9 (2018-11-01)
 ==================

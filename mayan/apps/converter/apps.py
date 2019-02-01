@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.acls.classes import ModelPermission
 from mayan.apps.common import MayanAppConfig, menu_object, menu_sidebar
 from mayan.apps.navigation import SourceColumn
 
@@ -25,12 +25,20 @@ class ConverterApp(MayanAppConfig):
 
         Transformation = self.get_model(model_name='Transformation')
 
-        SourceColumn(attribute='order', source=Transformation)
-        SourceColumn(
-            source=Transformation, label=_('Transformation'),
-            func=lambda context: force_text(context['object'])
+        ModelPermission.register_inheritance(
+            model=Transformation, related='content_object'
         )
-        SourceColumn(attribute='arguments', source=Transformation)
+
+        SourceColumn(
+            attribute='order', include_label=True, source=Transformation
+        )
+        SourceColumn(
+            attribute='get_transformation_label', is_identifier=True,
+            source=Transformation
+        )
+        SourceColumn(
+            attribute='arguments', include_label=True, source=Transformation
+        )
 
         menu_object.bind_links(
             links=(link_transformation_edit, link_transformation_delete),

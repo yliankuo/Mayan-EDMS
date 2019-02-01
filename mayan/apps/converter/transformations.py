@@ -58,7 +58,6 @@ class BaseTransformation(object):
     def register(cls, transformation):
         cls._registry[transformation.name] = transformation
 
-
     def __init__(self, **kwargs):
         self.kwargs = {}
         for argument_name in self.arguments:

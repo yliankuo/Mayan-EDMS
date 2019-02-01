@@ -60,7 +60,11 @@ class Transformation(models.Model):
         verbose_name_plural = _('Transformations')
 
     def __str__(self):
+        return self.get_transformation_label()
+
+    def get_transformation_label(self):
         return self.get_name_display()
+    get_transformation_label.short_description = _('Name')
 
     def save(self, *args, **kwargs):
         if not self.order:
