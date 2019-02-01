@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common import MayanAppConfig, menu_object, menu_sidebar
+from mayan.apps.common import (
+    MayanAppConfig, menu_object, menu_secondary, menu_sidebar
+)
 from mayan.apps.navigation import SourceColumn
 
 from .classes import ModelPermission
@@ -35,7 +37,7 @@ class ACLsApp(MayanAppConfig):
         )
 
         menu_object.bind_links(
-            links=(link_acl_permissions, link_acl_delete),
+            links=(link_acl_permissions, link_acl_delete,),
             sources=(AccessControlList,)
         )
         menu_sidebar.bind_links(

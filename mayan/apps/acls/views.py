@@ -81,8 +81,12 @@ class ACLDeleteView(SingleObjectDeleteView):
     pk_url_kwarg = 'acl_id'
 
     def get_extra_context(self):
+        acl = self.get_object()
+
         return {
-            'object': self.get_object().content_object,
+            'acl': acl,
+            'object': acl.content_object,
+            'navigation_object_list': ('object', 'acl'),
             'title': _('Delete ACL: %s') % self.get_object(),
         }
 
@@ -187,12 +191,16 @@ class ACLPermissionsView(AssignRemoveView):
         )
 
     def get_extra_context(self):
+        acl = self.get_object()
+
         return {
-            'object': self.get_object().content_object,
+            'acl': acl,
+            'object': acl.content_object,
+            'navigation_object_list': ('object', 'acl'),
             'title': _('Role "%(role)s" permission\'s for "%(object)s"') % {
-                'role': self.get_object().role,
-                'object': self.get_object().content_object,
-            },
+                'role': acl.role,
+                'object': acl.content_object,
+            }
         }
 
     def get_granted_list(self):
