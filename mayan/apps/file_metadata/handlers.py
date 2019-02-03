@@ -12,7 +12,7 @@ def handler_initialize_new_document_type_settings(sender, instance, **kwargs):
 
     if kwargs['created']:
         DocumentTypeSettings.objects.create(
-            document_type=instance, auto_process=setting_auto_process.value
+            auto_process=setting_auto_process.value, document_type=instance
         )
 
 

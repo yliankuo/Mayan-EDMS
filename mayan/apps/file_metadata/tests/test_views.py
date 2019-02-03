@@ -14,10 +14,6 @@ from .literals import TEST_FILE_METADATA_KEY
 
 @override_settings(FILE_METADATA_AUTO_PROCESS=True)
 class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
-    def setUp(self):
-        super(FileMetadataViewsTestCase, self).setUp()
-        self.login_user()
-
     def _request_document_version_driver_list_view(self):
         return self.get(
             viewname='file_metadata:document_driver_list',
@@ -26,7 +22,7 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
 
     def test_document_version_driver_list_view_no_permission(self):
         response = self._request_document_version_driver_list_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_document_version_driver_list_view_with_access(self):
         self.grant_access(
@@ -46,12 +42,12 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
     def test_document_version_file_metadata_list_view_no_permission(self):
         response = self._request_document_version_file_metadata_list_view()
         self.assertNotContains(
-            response=response, text=TEST_FILE_METADATA_KEY, status_code=403
+            response=response, text=TEST_FILE_METADATA_KEY, status_code=404
         )
 
     def test_document_version_file_metadata_list_view_with_access(self):
         self.grant_access(
-            permission=permission_file_metadata_view, obj=self.document
+            obj=self.document, permission=permission_file_metadata_view
         )
         response = self._request_document_version_file_metadata_list_view()
         self.assertContains(
@@ -67,7 +63,7 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
     def test_document_submit_view_no_permission(self):
         self.document.latest_version.file_metadata_drivers.all().delete()
         response = self._request_document_submit_view()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(
             self.document.latest_version.file_metadata_drivers.count(), 0
         )
@@ -94,7 +90,7 @@ class FileMetadataViewsTestCase(GenericDocumentViewTestCase):
     def test_multiple_document_submit_view_no_permission(self):
         self.document.latest_version.file_metadata_drivers.all().delete()
         response = self._request_multiple_document_submit_view()
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(
             self.document.latest_version.file_metadata_drivers.count(), 0
         )
@@ -124,7 +120,7 @@ class DocumentTypeViewsTestCase(GenericDocumentViewTestCase):
 
     def test_document_type_settings_view_no_permission(self):
         response = self._request_document_type_settings_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_document_type_settings_view_with_access(self):
         self.grant_access(

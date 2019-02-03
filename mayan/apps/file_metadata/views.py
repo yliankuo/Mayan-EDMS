@@ -12,6 +12,7 @@ from mayan.apps.common.generics import (
     FormView, MultipleObjectConfirmActionView, SingleObjectEditView,
     SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
 from mayan.apps.documents.models import Document, DocumentType
 
@@ -23,7 +24,11 @@ from .permissions import (
 )
 
 
-class DocumentDriverListView(SingleObjectListView):
+class DocumentDriverListView(ExternalObjectMixin, SingleObjectListView):
+    external_object_class = Document
+    external_object_permission = permission_file_metadata_view
+    external_object_pk_url_kwarg = 'document_id'
+
     def get_extra_context(self):
         return {
             'hide_object': True,
@@ -38,54 +43,36 @@ class DocumentDriverListView(SingleObjectListView):
                 'reside in the database.'
             ),
             'no_results_title': _('No file metadata available.'),
-            'object': self.get_object(),
+            'object': self.external_object,
             'title': _(
                 'File metadata drivers for: %s'
-            ) % self.get_object(),
+            ) % self.external_object,
         }
 
-    def get_object(self):
-        document = get_object_or_404(
-            klass=Document, pk=self.kwargs['document_id']
-        )
-        AccessControlList.objects.check_access(
-            permissions=permission_file_metadata_view,
-            user=self.request.user, obj=document
-        )
-        return document
-
     def get_source_queryset(self):
-        return self.get_object().latest_version.file_metadata_drivers.all()
+        return self.external_object.latest_version.file_metadata_drivers.all()
 
 
-class DocumentVersionDriverEntryFileMetadataListView(SingleObjectListView):
+class DocumentVersionDriverEntryFileMetadataListView(ExternalObjectMixin, SingleObjectListView):
+    external_object_class = DocumentVersionDriverEntry
+    external_object_permission = permission_file_metadata_view
+    external_object_pk_url_kwarg = 'document_version_driver_id'
+
     def get_extra_context(self):
         return {
             'hide_object': True,
             'no_results_title': _('No file metadata available.'),
-            'object': self.get_object().document_version.document,
+            'object': self.external_object.document_version.document,
             'title': _(
                 'File metadata attribures for: %(document)s, for driver: %(driver)s'
             ) % {
-                'document': self.get_object().document_version.document,
-                'driver': self.get_object().driver
+                'document': self.external_object.document_version.document,
+                'driver': self.external_object.driver
             },
         }
 
-    def get_object(self):
-        document_version_driver_entry = get_object_or_404(
-            klass=DocumentVersionDriverEntry,
-            pk=self.kwargs['document_version_driver_id']
-        )
-        AccessControlList.objects.check_access(
-            obj=document_version_driver_entry.document_version,
-            permissions=permission_file_metadata_view,
-            user=self.request.user,
-        )
-        return document_version_driver_entry
-
     def get_source_queryset(self):
-        return self.get_object().entries.all()
+        return self.external_object.entries.all()
 
 
 class DocumentSubmitView(MultipleObjectConfirmActionView):
@@ -96,13 +83,13 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
     success_message_plural = '%(count)d documents submitted to the file metadata queue.'
 
     def get_extra_context(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
 
         result = {
             'title': ungettext(
-                'Submit the selected document to the file metadata queue?',
-                'Submit the selected documents to the file metadata queue?',
-                queryset.count()
+                singular='Submit the selected document to the file metadata queue?',
+                plural='Submit the selected documents to the file metadata queue?',
+                number=queryset.count()
             )
         }
 
@@ -112,26 +99,23 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
         instance.submit_for_file_metadata_processing()
 
 
-class DocumentTypeSettingsEditView(SingleObjectEditView):
+class DocumentTypeSettingsEditView(ExternalObjectMixin, SingleObjectEditView):
+    external_object_class = DocumentType
+    external_object_permission = permission_document_type_file_metadata_setup
+    external_object_pk_url_kwarg = 'document_type_id'
     fields = ('auto_process',)
-    object_permission = permission_document_type_file_metadata_setup
     post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
-
-    def get_document_type(self):
-        return get_object_or_404(
-            klass=DocumentType, pk=self.kwargs['document_type_id']
-        )
 
     def get_extra_context(self):
         return {
-            'object': self.get_document_type(),
+            'object': self.external_object,
             'title': _(
                 'Edit file metadata settings for document type: %s'
-            ) % self.get_document_type()
+            ) % self.external_object
         }
 
     def get_object(self, queryset=None):
-        return self.get_document_type().file_metadata_settings
+        return self.external_object.file_metadata_settings
 
 
 class DocumentTypeSubmitView(FormView):
