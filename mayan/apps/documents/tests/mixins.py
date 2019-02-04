@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import os
+import random
+import string
 import time
 
 from django.conf import settings
@@ -9,7 +11,7 @@ from ..models import DocumentType
 
 from .literals import (
     TEST_DOCUMENT_TYPE_LABEL, TEST_DOCUMENT_TYPE_QUICK_LABEL,
-    TEST_SMALL_DOCUMENT_FILENAME
+    TEST_DOCUMENT_TYPE_RANDOM_LABEL_LENGTH, TEST_SMALL_DOCUMENT_FILENAME
 )
 
 __all__ = ('DocumentTestMixin',)
@@ -22,10 +24,25 @@ class DocumentTestMixin(object):
     test_document_path = None
     use_document_stub = False
 
+    @staticmethod
+    def _get_random_alphanumeric_string(length):
+        return ''.join(
+            [random.choice(string.ascii_letters + string.digits) for _ in range(length)]
+        )
+
     def _create_document_type(self):
         self.document_type = DocumentType.objects.create(
             label=TEST_DOCUMENT_TYPE_LABEL
         )
+        self.test_document_type = self.document_type
+
+    def _create_document_type_random(self):
+        self.document_type = DocumentType.objects.create(
+            label=DocumentTestMixin._get_random_alphanumeric_string(
+                length=TEST_DOCUMENT_TYPE_RANDOM_LABEL_LENGTH
+            )
+        )
+        self.test_document_type = self.document_type
 
     def _create_document(self, *args, **kwargs):
         """
