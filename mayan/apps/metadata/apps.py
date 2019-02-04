@@ -48,8 +48,8 @@ from .links import (
 )
 from .methods import method_get_metadata
 from .permissions import (
-    permission_document_metadata_add, permission_document_metadata_edit,
-    permission_document_metadata_remove, permission_document_metadata_view,
+    permission_metadata_add, permission_metadata_edit,
+    permission_metadata_remove, permission_metadata_view,
     permission_metadata_type_delete, permission_metadata_type_edit,
     permission_metadata_type_view
 )
@@ -130,10 +130,10 @@ class MetadataApp(MayanAppConfig):
 
         ModelPermission.register(
             model=Document, permissions=(
-                permission_document_metadata_add,
-                permission_document_metadata_edit,
-                permission_document_metadata_remove,
-                permission_document_metadata_view,
+                permission_metadata_add,
+                permission_metadata_edit,
+                permission_metadata_remove,
+                permission_metadata_view,
             )
         )
         ModelPermission.register(

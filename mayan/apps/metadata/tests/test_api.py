@@ -11,8 +11,8 @@ from mayan.apps.rest_api.tests import BaseAPITestCase
 
 from ..models import DocumentTypeMetadataType, MetadataType
 from ..permissions import (
-    permission_document_metadata_add, permission_document_metadata_edit,
-    permission_document_metadata_remove, permission_document_metadata_view,
+    permission_metadata_add, permission_metadata_edit,
+    permission_metadata_remove, permission_metadata_view,
     permission_metadata_type_create, permission_metadata_type_delete,
     permission_metadata_type_edit, permission_metadata_type_view
 )
@@ -377,7 +377,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
         self.assertEqual(self.document.metadata.count(), 0)
 
     def test_document_metadata_create_view_with_access(self):
-        self.grant_access(permission=permission_document_metadata_add, obj=self.document)
+        self.grant_access(permission=permission_metadata_add, obj=self.document)
         response = self._request_document_metadata_create_view()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         document_metadata = self.document.metadata.first()
@@ -387,7 +387,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
 
     def test_document_metadata_create_duplicate_view(self):
         self._create_document_metadata()
-        self.grant_permission(permission=permission_document_metadata_add)
+        self.grant_permission(permission=permission_metadata_add)
         response = self._request_document_metadata_create_view()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(list(response.data.keys())[0], 'non_field_errors')
@@ -395,7 +395,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
     def test_document_metadata_create_invalid_lookup_value_view(self):
         self.metadata_type.lookup = 'invalid,lookup,values,on,purpose'
         self.metadata_type.save()
-        self.grant_permission(permission=permission_document_metadata_add)
+        self.grant_permission(permission=permission_metadata_add)
         response = self._request_document_metadata_create_view()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(list(response.data.keys())[0], 'non_field_errors')
@@ -418,7 +418,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
     def test_document_metadata_delete_view_with_access(self):
         self._create_document_metadata()
         self.grant_access(
-            permission=permission_document_metadata_remove, obj=self.document
+            permission=permission_metadata_remove, obj=self.document
         )
         response = self._request_document_metadata_delete_view()
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -438,7 +438,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
     def test_document_metadata_list_view_with_access(self):
         self._create_document_metadata()
         self.grant_access(
-            permission=permission_document_metadata_view, obj=self.document
+            permission=permission_metadata_view, obj=self.document
         )
         response = self._request_document_metadata_list_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -477,7 +477,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
     def test_document_metadata_patch_view_with_access(self):
         self._create_document_metadata()
         self.grant_access(
-            permission=permission_document_metadata_edit, obj=self.document
+            permission=permission_metadata_edit, obj=self.document
         )
         response = self._request_document_metadata_edit_view_via_patch()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -510,7 +510,7 @@ class DocumentMetadataAPITestCase(BaseAPITestCase):
     def test_document_metadata_put_view_with_access(self):
         self._create_document_metadata()
         self.grant_access(
-            permission=permission_document_metadata_edit, obj=self.document
+            permission=permission_metadata_edit, obj=self.document
         )
         response = self._request_document_metadata_edit_view_via_put()
         self.assertEqual(response.status_code, status.HTTP_200_OK)

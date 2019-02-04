@@ -38,7 +38,7 @@ class MetadataTypeEventsTestCase(MetadataTestsMixin, GenericDocumentViewTestCase
 
         self.assertEqual(event.verb, event_metadata_type_created.id)
         self.assertEqual(event.target, metadata_type)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)
 
     def test_metadata_type_edit_event_no_permissions(self):
         self._create_metadata_type()
@@ -66,4 +66,4 @@ class MetadataTypeEventsTestCase(MetadataTestsMixin, GenericDocumentViewTestCase
 
         self.assertEqual(event.verb, event_metadata_type_edited.id)
         self.assertEqual(event.target, self.metadata_type)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)

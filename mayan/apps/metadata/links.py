@@ -15,32 +15,32 @@ from .icons import (
     icon_metadata_type_edit, icon_metadata_type_list
 )
 from .permissions import (
-    permission_document_metadata_add, permission_document_metadata_edit,
-    permission_document_metadata_remove, permission_document_metadata_view,
+    permission_metadata_add, permission_metadata_edit,
+    permission_metadata_remove, permission_metadata_view,
     permission_metadata_type_create, permission_metadata_type_delete,
     permission_metadata_type_edit, permission_metadata_type_view
 )
 
 link_document_metadata_add = Link(
     icon_class=icon_document_metadata_add, kwargs={'document_id': 'object.pk'},
-    permission=permission_document_metadata_add, text=_('Add metadata'),
+    permission=permission_metadata_add, text=_('Add metadata'),
     view='metadata:document_metadata_add',
 )
 link_document_metadata_edit = Link(
     icon_class=icon_document_metadata_edit, kwargs={'document_id': 'object.pk'},
-    permission=permission_document_metadata_edit, text=_('Edit metadata'),
+    permission=permission_metadata_edit, text=_('Edit metadata'),
     view='metadata:document_metadata_edit'
 )
 link_document_metadata_remove = Link(
     icon_class=icon_document_metadata_remove,
     kwargs={'document_id': 'object.pk'},
-    permission=permission_document_metadata_remove,
+    permission=permission_metadata_remove,
     text=_('Remove metadata'), view='metadata:document_metadata_remove'
 )
 link_document_metadata_view = Link(
     icon_class=icon_document_metadata_view,
     kwargs={'document_id': 'resolved_object.pk'},
-    permission=permission_document_metadata_view, text=_('Metadata'),
+    permission=permission_metadata_view, text=_('Metadata'),
     view='metadata:document_metadata_view'
 )
 link_document_multiple_metadata_add = Link(
