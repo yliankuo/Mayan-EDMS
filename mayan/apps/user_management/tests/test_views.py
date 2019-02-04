@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from mayan.apps.common.tests import GenericViewTestCase
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 from mayan.apps.metadata.models import MetadataType
-from mayan.apps.metadata.permissions import permission_document_metadata_edit
+from mayan.apps.metadata.permissions import permission_metadata_edit
 from mayan.apps.metadata.tests.literals import (
     TEST_METADATA_TYPE_LABEL, TEST_METADATA_TYPE_NAME,
 )
@@ -388,7 +388,7 @@ class MetadataLookupIntegrationTestCase(GenericDocumentViewTestCase):
         self.metadata_type.save()
         self.document.metadata.create(metadata_type=self.metadata_type)
         self.grant_access(
-            obj=self.document, permission=permission_document_metadata_edit
+            obj=self.document, permission=permission_metadata_edit
         )
 
         response = self.get(
@@ -406,7 +406,7 @@ class MetadataLookupIntegrationTestCase(GenericDocumentViewTestCase):
         self.metadata_type.save()
         self.document.metadata.create(metadata_type=self.metadata_type)
         self.grant_access(
-            obj=self.document, permission=permission_document_metadata_edit
+            obj=self.document, permission=permission_metadata_edit
         )
 
         response = self.get(
