@@ -349,7 +349,11 @@ class ObjectActionMixin(object):
             request=self.request
         )
 
-        self.success_url = self.get_post_object_action_url()
+        # Allow get_post_object_action_url to override the redirect URL with a
+        # calculated URL after all objects are processed.
+        success_url = self.get_post_object_action_url()
+        if success_url:
+            self.success_url = success_url
 
 
 class ObjectNameMixin(object):
