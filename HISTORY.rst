@@ -233,6 +233,10 @@
   entire converter class is no longer cached and instead loaded
   on demand. This allows the garbage collector to clear the memory
   used.
+- Update the permission requirements for the index template
+  document type selection screen. The document type view
+  permission is now required in addition to the index
+  template edit permission.
 
 3.1.9 (2018-11-01)
 ==================

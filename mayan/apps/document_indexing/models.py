@@ -66,7 +66,7 @@ class Index(models.Model):
         try:
             return reverse(
                 viewname='indexing:index_instance_node_view',
-                kwargs={'index_instance_node_pk': self.instance_root.pk}
+                kwargs={'index_instance_node_id': self.instance_root.pk}
             )
         except IndexInstanceNode.DoesNotExist:
             return '#'
@@ -183,7 +183,7 @@ class IndexTemplateNode(MPTTModel):
     )
     index = models.ForeignKey(
         on_delete=models.CASCADE, related_name='node_templates', to=Index,
-        verbose_name=_('Index')
+        verbose_name=_('Index template')
     )
     expression = models.TextField(
         help_text=_(
@@ -356,7 +356,7 @@ class IndexInstanceNode(MPTTModel):
     def get_absolute_url(self):
         return reverse(
             viewname='indexing:index_instance_node_view',
-            kwargs={'index_instance_node_pk': self.pk}
+            kwargs={'index_instance_node_id': self.pk}
         )
 
     def get_children_count(self):

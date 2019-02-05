@@ -58,13 +58,13 @@ def task_index_document(self, document_id):
 
 
 @app.task(bind=True, default_retry_delay=RETRY_DELAY, ignore_result=True)
-def task_rebuild_index(self, index_id):
+def task_rebuild_index(self, index_template_id):
     Index = apps.get_model(
         app_label='document_indexing', model_name='Index'
     )
 
     try:
-        index = Index.objects.get(pk=index_id)
+        index = Index.objects.get(pk=index_template_id)
         index.rebuild()
     except LockError as exception:
         # This index is being rebuilt by another task, retry later
