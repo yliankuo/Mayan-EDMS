@@ -561,7 +561,12 @@ class SourceColumn(object):
 
         return final_result
 
-    def __init__(self, source, attribute=None, empty_value=None, func=None, include_label=False, is_absolute_url=False, is_identifier=False, is_sortable=False, kwargs=None, label=None, order=None, views=None, widget=None):
+    def __init__(
+        self, source, attribute=None, empty_value=None, func=None,
+        include_label=False, is_absolute_url=False, is_identifier=False,
+        is_sortable=False, kwargs=None, label=None, order=None, sort_field=None,
+        views=None, widget=None
+    ):
         self.source = source
         self._label = label
         self.attribute = attribute
@@ -576,6 +581,7 @@ class SourceColumn(object):
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
         self.label = None
+        self.sort_field = sort_field
         self.views = views or []
         self.widget = widget
 
@@ -603,6 +609,12 @@ class SourceColumn(object):
 
         self.label = self._label
 
+    def get_sort_field(self):
+        if self.sort_field:
+            return self.sort_field
+        else:
+            return self.attribute
+
     def get_sort_field_querystring(self, context):
         # We do this to get an mutable copy we can modify
         querystring = context.request.GET.copy()
@@ -612,7 +624,7 @@ class SourceColumn(object):
             TEXT_SORT_ORDER_VARIABLE_NAME, TEXT_SORT_ORDER_CHOICE_DESCENDING
         )
 
-        if previous_sort_field != self.attribute:
+        if previous_sort_field != self.get_sort_field():
             sort_order = TEXT_SORT_ORDER_CHOICE_ASCENDING
         else:
             if previous_sort_order == TEXT_SORT_ORDER_CHOICE_DESCENDING:
@@ -620,7 +632,7 @@ class SourceColumn(object):
             else:
                 sort_order = TEXT_SORT_ORDER_CHOICE_DESCENDING
 
-        querystring[TEXT_SORT_FIELD_PARAMETER] = self.attribute
+        querystring[TEXT_SORT_FIELD_PARAMETER] = self.get_sort_field()
         querystring[TEXT_SORT_ORDER_PARAMETER] = sort_order
 
         return '?{}'.format(querystring.urlencode())

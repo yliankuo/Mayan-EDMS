@@ -50,17 +50,19 @@
                                         <th>{% trans 'Identifier' %}</th>
                                     {% else %}
                                         {% get_source_columns source=object_list only_identifier=True as source_column %}
-                                        <th>
-                                            {% if source_column.is_sortable %}
-                                                <a href="{% get_sort_field_querystring column=source_column %}">{{ source_column.label }}
-                                                {% if source_column.attribute == sort_field %}
-                                                    {% if icon_sort %}{{ icon_sort.render }}{% endif %}
+                                        {% if source_column %}
+                                            <th>
+                                                {% if source_column.is_sortable %}
+                                                    <a href="{% get_sort_field_querystring column=source_column %}">{{ source_column.label }}
+                                                    {% if source_column.get_sort_field == sort_field %}
+                                                        {% if icon_sort %}{{ icon_sort.render }}{% endif %}
+                                                    {% endif %}
+                                                    </a>
+                                                {% else %}
+                                                    {{ source_column.label }}
                                                 {% endif %}
-                                                </a>
-                                            {% else %}
-                                                {{ source_column.label }}
-                                            {% endif %}
-                                        </th>
+                                            </th>
+                                        {% endif %}
                                     {% endif %}
 
                                     {% if not hide_columns %}
@@ -69,7 +71,7 @@
                                             <th>
                                                 {% if column.is_sortable %}
                                                     <a href="{% get_sort_field_querystring column=column %}">{{ column.label }}
-                                                    {% if column.attribute == sort_field %}
+                                                    {% if column.get_sort_field == sort_field %}
                                                         {% if icon_sort %}{{ icon_sort.render }}{% endif %}
                                                     {% endif %}
                                                     </a>
