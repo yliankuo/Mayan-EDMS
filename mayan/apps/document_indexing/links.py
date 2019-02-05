@@ -27,7 +27,7 @@ def condition_is_not_root_node(context):
 link_document_index_instance_list = Link(
     icon_class=icon_document_index_instance_list,
     kwargs={'document_id': 'resolved_object.pk'}, text=_('Indexes'),
-    view='indexing:document_index_instace_list',
+    view='indexing:document_index_instance_list',
 )
 link_index_instances_rebuild = Link(
     condition=get_cascade_condition(
