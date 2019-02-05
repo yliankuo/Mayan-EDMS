@@ -34,7 +34,7 @@ class CommentEventsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
         self.assertEqual(event.verb, event_document_comment_created.id)
         self.assertEqual(event.action_object, self.document)
         self.assertEqual(event.target, self.test_comment)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)
 
     def test_comment_deleted_event_no_permissions(self):
         self._create_comment()
@@ -58,4 +58,4 @@ class CommentEventsTestCase(CommentsTestMixin, GenericDocumentViewTestCase):
 
         self.assertEqual(event.verb, event_document_comment_deleted.id)
         self.assertEqual(event.target, self.document)
-        self.assertEqual(event.actor, self.user)
+        self.assertEqual(event.actor, self._test_case_user)

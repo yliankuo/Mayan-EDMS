@@ -26,18 +26,15 @@ class DocumentCommentCreateView(ExternalObjectMixin, SingleObjectCreateView):
     fields = ('comment',)
     model = Comment
 
-    def get_document(self):
-        return self.get_external_object()
-
     def get_extra_context(self):
         return {
-            'object': self.get_document(),
-            'title': _('Add comment to document: %s') % self.get_document(),
+            'object': self.external_object,
+            'title': _('Add comment to document: %s') % self.external_object,
         }
 
     def get_instance_extra_data(self):
         return {
-            'document': self.get_document(), 'user': self.request.user,
+            'document': self.external_object, 'user': self.request.user,
         }
 
     def get_post_action_redirect(self):
@@ -63,14 +60,14 @@ class DocumentCommentDeleteView(SingleObjectDeleteView):
 
     def get_extra_context(self):
         return {
-            'object': self.get_object().document,
-            'title': _('Delete comment: %s?') % self.get_object(),
+            'object': self.object.document,
+            'title': _('Delete comment: %s?') % self.object,
         }
 
     def get_post_action_redirect(self):
         return reverse(
             viewname='comments:comments_for_document', kwargs={
-                'document_id': self.get_object().document.pk
+                'document_id': self.object.document.pk
             }
         )
 
@@ -80,25 +77,22 @@ class DocumentCommentListView(ExternalObjectMixin, SingleObjectListView):
     external_object_permission = permission_comment_view
     external_object_pk_url_kwarg = 'document_id'
 
-    def get_document(self):
-        return self.get_external_object()
-
     def get_extra_context(self):
         return {
             'hide_link': True,
             'hide_object': True,
             'no_results_icon': icon_comments_for_document,
             'no_results_external_link': link_comment_add.resolve(
-                RequestContext(self.request, {'object': self.get_document()})
+                RequestContext(self.request, {'object': self.external_object})
             ),
             'no_results_text': _(
                 'Document comments are timestamped text entries from users. '
                 'They are great for collaboration.'
             ),
             'no_results_title': _('There are no comments'),
-            'object': self.get_document(),
-            'title': _('Comments for document: %s') % self.get_document(),
+            'object': self.external_object,
+            'title': _('Comments for document: %s') % self.external_object,
         }
 
     def get_source_queryset(self):
-        return self.get_document().comments.all()
+        return self.external_object.comments.all()

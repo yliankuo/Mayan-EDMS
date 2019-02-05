@@ -104,7 +104,7 @@ class DocumentPageNavigationBase(ExternalObjectMixin, RedirectView):
             try:
                 previous_url = self.get_object().get_absolute_url()
             except AttributeError:
-                previous_url = reverse(setting_home_view.value)
+                previous_url = reverse(viewname=setting_home_view.value)
 
         parsed_url = furl(url=previous_url)
 

@@ -225,11 +225,7 @@ class TagListView(SingleObjectListView):
         }
 
     def get_source_queryset(self):
-        #return self.get_tag_queryset()
         return Tag.objects.all()
-
-    #def get_tag_queryset(self):
-    #    return Tag.objects.all()
 
 
 class TagDocumentListView(ExternalObjectMixin, DocumentListView):
@@ -279,7 +275,6 @@ class DocumentTagListView(ExternalObjectMixin, TagListView):
         )
         return context
 
-    #def get_tag_queryset(self):
     def get_source_queryset(self):
         return self.get_external_object().get_tags(
             permission=permission_tag_view, user=self.request.user
