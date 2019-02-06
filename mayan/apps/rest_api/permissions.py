@@ -1,61 +1,34 @@
-from __future__ import absolute_import
-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
 
 from rest_framework.permissions import BasePermission
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.permissions import Permission
 
 
-class MayanPermission(BasePermission):
+class MayanViewSetPermission(BasePermission):
     def has_permission(self, request, view):
-        required_permission = getattr(
-            view, 'mayan_view_permissions', {}
-        ).get(request.method, None)
+        """
+        Block the API view by access using a permission.
+        Required the view_permission_map class attribute which is a dictionary
+        that matches a view actions ('create', 'destroy', etc) to a single
+        permission instance.
+        Example: view_permission_map = {
+            'update': permission_..._edit
+            'list': permission_..._view
+        }
+        """
+        view_permission_dictionary = getattr(view, 'view_permission_map', {})
+        view_permission = view_permission_dictionary.get(view.action, None)
 
-        if required_permission:
+        if view_permission:
             try:
-                Permission.check_permissions(
-                    requester=request.user, permissions=required_permission
+                Permission.check_user_permission(
+                    permission=view_permission, user=request.user
                 )
             except PermissionDenied:
                 return False
-            else:
-                return True
-        else:
-            return True
-
-    def has_object_permission(self, request, view, obj):
-        required_permission = getattr(
-            view, 'mayan_object_permissions', {}
-        ).get(request.method, None)
-
-        object_permissions_raise_404 = getattr(
-            view, 'mayan_object_permissions_raise_404', ()
-        )
-
-        if required_permission:
-            try:
-                if hasattr(view, 'mayan_permission_attribute_check'):
-                    AccessControlList.objects.check_access(
-                        permissions=required_permission,
-                        user=request.user, obj=obj,
-                        related=view.mayan_permission_attribute_check
-                    )
-                else:
-                    AccessControlList.objects.check_access(
-                        permissions=required_permission, user=request.user,
-                        obj=obj
-                    )
-            except PermissionDenied:
-                if request.method in object_permissions_raise_404:
-                    raise Http404
-                else:
-                    return False
             else:
                 return True
         else:

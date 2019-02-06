@@ -5,6 +5,8 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
+from rest_framework import routers
+
 from mayan.apps.common import MayanAppConfig, menu_tools
 
 from .links import (
@@ -21,7 +23,7 @@ class RESTAPIApp(MayanAppConfig):
 
     def ready(self):
         super(RESTAPIApp, self).ready()
-        from .urls import api_urls
+        from .urls import urlpatterns
 
         settings.STRONGHOLD_PUBLIC_URLS += (r'^/%s/.+$' % self.app_url,)
         menu_tools.bind_links(
@@ -29,8 +31,14 @@ class RESTAPIApp(MayanAppConfig):
                 link_api, link_api_documentation, link_api_documentation_redoc
             )
         )
+        router = routers.DefaultRouter()
 
         for app in apps.get_app_configs():
             if getattr(app, 'has_rest_api', False):
-                app_api_urls = import_string('{}.urls.api_urls'.format(app.name))
-                api_urls.extend(app_api_urls)
+                try:
+                    for entry in import_string('{}.urls.api_router_entries'.format(app.name)):
+                        router.register(**entry)
+                except ImportError:
+                    pass
+
+        urlpatterns.extend(router.urls)
