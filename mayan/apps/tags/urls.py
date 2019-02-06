@@ -2,10 +2,6 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-#from .api_views import (
-#    APIDocumentTagView, APIDocumentTagListView, APITagDocumentListView,
-#    APITagListView, APITagView
-#)
 from .api_views import DocumentTagViewSet, TagViewSet
 
 from .views import (
@@ -61,31 +57,10 @@ urlpatterns = [
     )
 ]
 
-
 api_router_entries = (
     {'prefix': r'tags', 'viewset': TagViewSet, 'basename': 'tag'},
     {
         'prefix': r'documents/(?P<document_id>\d+)/tags',
-        'viewset': DocumentTagViewSet, 'basename': 'document_tag'
+        'viewset': DocumentTagViewSet, 'basename': 'document-tag'
     },
 )
-
-"""
-    url(
-        regex=r'^tags/(?P<tag_pk>\d+)/documents/$',
-        name='tag-document-list', view=APITagDocumentListView.as_view(),
-    ),
-    url(
-        regex=r'^tags/(?P<tag_pk>\d+)/$', name='tag-detail',
-        view=APITagView.as_view()
-    ),
-    url(regex=r'^tags/$', name='tag-list', view=APITagListView.as_view()),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/tags/$',
-        name='document-tag-list', view=APIDocumentTagListView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/tags/(?P<tag_pk>[0-9]+)/$',
-        name='document-tag-detail', view=APIDocumentTagView.as_view()
-    ),
-"""

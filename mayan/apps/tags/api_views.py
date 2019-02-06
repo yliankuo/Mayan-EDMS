@@ -1,7 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-from rest_framework import generics, status
-from rest_framework.decorators import action
+from drf_yasg.utils import swagger_auto_schema
+
+from rest_framework import generics, serializers, status, routers, viewsets
+from rest_framework.decorators import action, detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -10,12 +12,7 @@ from mayan.apps.documents.api_views import DocumentViewSet
 from mayan.apps.documents.models import Document
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.serializers import DocumentSerializer
-from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
-from mayan.apps.rest_api.generics import (
-    ListAPIView, ListCreateAPIView, RetrieveDestroyAPIView,
-    RetrieveUpdateDestroyAPIView
-)
-from mayan.apps.rest_api.permissions import MayanPermission
+from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .models import Tag
 from .permissions import (
@@ -23,121 +20,84 @@ from .permissions import (
     permission_tag_edit, permission_tag_remove, permission_tag_view
 )
 from .serializers import (
-    DocumentTagAttachSerializer, DocumentTagSerializer, TagAttachSerializer,
-    TagRemoveSerializer, TagSerializer,
+    DocumentTagAttachSerializer, DocumentTagSerializer,
+    TagDocumentAttachRemoveSerializer,
+    TagSerializer,
+
 )
 
 
-
-from django.conf.urls import url, include
-from django.contrib.auth.models import User
-
-from rest_framework import routers, serializers, viewsets
-from rest_framework.decorators import detail_route
-from rest_framework.response import Response
-
-from drf_yasg.utils import swagger_auto_schema
-
-
-class TagViewSet(viewsets.ModelViewSet):
-    filter_backends = (MayanObjectPermissionsFilter,)
-    lookup_field = 'pk'
+class TagViewSet(MayanAPIModelViewSet):
     lookup_url_kwarg='tag_id'
-    permission_classes = (MayanPermission,)
+    object_permission_map = {
+        'destroy': permission_tag_delete,
+        'document_attach': permission_tag_attach,
+        'document_list': permission_tag_view,
+        'document_remove': permission_tag_remove,
+        'list': permission_tag_view,
+        'partial_update': permission_tag_edit,
+        'update': permission_tag_edit
+    }
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    view_permission_map = {
+        'create': permission_tag_create
+    }
 
-
-    #@swagger_auto_schema(operation_description='GET /articles/today/')
-    @swagger_auto_schema(
-        operation_description="partial_update description override", responses={200: TagAttachSerializer}
-    )
     @action(
-        detail=True, lookup_field='pk', lookup_url_kwarg='tag_id',
-        methods=('post',), serializer_class=TagAttachSerializer,
-        url_name='document-attach', url_path='attach'
+        detail=True, lookup_url_kwarg='tag_id', methods=('post',),
+        serializer_class=TagDocumentAttachRemoveSerializer,
+        url_name='document-attach', url_path='documents/attach'
     )
-    def attach(self, request, *args, **kwargs):
-        #print '!!! attach', args, kwargs#, self.context
-        #return Response({})
+    def document_attach(self, request, *args, **kwargs):
+        instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        #print '((((((((', serializer.validated_data
-        #self.perform_attach(serializer=serializer)
-        serializer.attach(instance=self.get_object())
+        serializer.attach(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers
         )
 
-    #def perform_attach(self, serializer):
-    #    #print '!!!!', serializer
-    #    serializer.attach(instance=self.get_object())
-
-    #def get_success_headers(self, data):
-    #    try:
-    #        return {'Location': str(data[api_settings.URL_FIELD_NAME])}
-    #    except (TypeError, KeyError):
-    #        return {}
-
     @action(
-        detail=True, lookup_field='pk', lookup_url_kwarg='tag_id',
-        url_name='document-list', url_path='documents'
+        detail=True, lookup_url_kwarg='tag_id',
+        serializer_class=DocumentSerializer, url_name='document-list',
+        url_path='documents'
     )
     def document_list(self, request, *args, **kwargs):
-        queryset = self.get_object().documents.all()
-
-        #TODO:Filter queryset
-        #queryset = self.filter_queryset(self.get_queryset())
-
+        queryset = self.get_object().get_documents(user=self.request.user)
         page = self.paginate_queryset(queryset)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request}
+        )
+
         if page is not None:
-            #serializer = self.get_serializer(page, many=True)
-            serializer = DocumentSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        #serializer = self.get_serializer(queryset, many=True)
-        serializer = DocumentSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
-
-
-        #serializer = DocumentSerializer(
-        #    instance=, many=True,
-        #    context={'request': request}
-        #)
-        #return Response(serializer.data)
-
 
     @action(
         detail=True, lookup_field='pk', lookup_url_kwarg='tag_id',
-        methods=('post',), serializer_class=TagRemoveSerializer,
-        url_name='document-remove', url_path='remove'
+        methods=('post',), serializer_class=TagDocumentAttachRemoveSerializer,
+        url_name='document-remove', url_path='documents/remove'
     )
-    def remove(self, request, *args, **kwargs):
-        #print '!!! attach', args, kwargs#, self.context
-        #return Response({})
+    def document_remove(self, request, *args, **kwargs):
+        instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        #print '((((((((', serializer.validated_data
-        #self.perform_attach(serializer=serializer)
-        serializer.remove(instance=self.get_object())
+        serializer.attach(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers
         )
-
-    #def get_serializer_class(self, *args, **kwargs):
-    #    #if self.action == 'attach':
-    #    print '!!!!get_serializer_class', args, kwargs
-    #    return TagAttachSerializer
-
 
 
 class DocumentTagViewSet(ExternalObjectMixin, viewsets.ReadOnlyModelViewSet):
     external_object_class = Document
     external_object_pk_url_kwarg = 'document_id'
     external_object_permission = permission_tag_view
-    lookup_field = 'pk'
+    #lookup_field = 'pk'
     object_permission = {
         'list': permission_document_view,
         'retrieve': permission_document_view
@@ -145,7 +105,8 @@ class DocumentTagViewSet(ExternalObjectMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = DocumentTagSerializer
 
     @action(
-        detail=True, lookup_field='pk', lookup_url_kwarg='document_id',
+        #detail=True, lookup_field='pk', lookup_url_kwarg='document_id',
+        detail=True, lookup_url_kwarg='document_id',
         methods=('post',), serializer_class=DocumentTagAttachSerializer,
         url_name='tag-attach', url_path='attach'
     )

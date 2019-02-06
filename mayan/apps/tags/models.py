@@ -65,7 +65,7 @@ class Tag(models.Model):
         Return a filtered queryset documents that have this tag attached.
         """
         return AccessControlList.objects.restrict_queryset(
-            permission=permission_document_view, queryset=self.documents,
+            permission=permission_document_view, queryset=self.documents.all(),
             user=user
         )
 
