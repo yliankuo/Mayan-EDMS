@@ -2,8 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from rest_framework import viewsets
 
-from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
-from mayan.apps.rest_api.permissions import MayanPermission
+from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .models import Message
 from .permissions import (
@@ -13,7 +12,7 @@ from .permissions import (
 from .serializers import MessageSerializer
 
 
-class APIMessageViewSet(viewsets.ModelViewSet):
+class APIMessageViewSet(MayanAPIModelViewSet):
     """
     create:
     Create a new message.
@@ -30,17 +29,16 @@ class APIMessageViewSet(viewsets.ModelViewSet):
     retrieve:
     Return the given message details.
     """
-    filter_backends = (MayanObjectPermissionsFilter,)
     lookup_url_kwarg = 'message_id'
-    object_permission = {
-        'DELETE': permission_message_delete,
-        'GET': permission_message_view,
-        'PATCH': permission_message_edit,
-        'PUT': permission_message_edit,
+    object_permission_map = {
+        'destroy': permission_message_delete,
+        'list': permission_message_view,
+        'partial_update': permission_message_edit,
+        'retrieve': permission_message_view,
+        'update': permission_message_edit,
     }
     queryset = Message.objects.all()
-    permission_classes = (MayanPermission,)
     serializer_class = MessageSerializer
-    view_permission = {
-        'POST': permission_message_create
+    view_permission_map = {
+        'create': permission_message_create
     }
