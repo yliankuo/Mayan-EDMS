@@ -15,17 +15,17 @@ urlpatterns = [
         name='document_send_link', view=MailDocumentLinkView.as_view()
     ),
     url(
-        regex=r'^documents/multiple/send/link/$',
-        name='document_multiple_send_link',
-        view=MailDocumentLinkView.as_view()
-    ),
-    url(
         regex=r'^documents/(?P<document_id>\d+)/send/$', name='document_send',
         view=MailDocumentView.as_view()
     ),
     url(
         regex=r'^documents/multiple/send/document/$',
         name='document_multiple_send', view=MailDocumentView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/send/link/$',
+        name='document_multiple_send_link',
+        view=MailDocumentLinkView.as_view()
     ),
     url(
         regex=r'^system_mailer/log/$', name='system_mailer_error_log',

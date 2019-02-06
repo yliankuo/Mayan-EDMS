@@ -14,6 +14,7 @@ from mayan.apps.common.generics import (
     SingleObjectDynamicFormCreateView, SingleObjectDynamicFormEditView,
     SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.models import Document
 
 from .classes import MailerBackend
@@ -33,15 +34,6 @@ from .permissions import (
 from .tasks import task_send_document
 
 
-class SystemMailerLogEntryListView(SingleObjectListView):
-    extra_context = {
-        'hide_object': True,
-        'title': _('Document mailing error log'),
-    }
-    model = LogEntry
-    view_permission = permission_view_error_log
-
-
 class MailDocumentView(MultipleObjectFormActionView):
     as_attachment = True
     form_class = DocumentMailForm
@@ -57,7 +49,7 @@ class MailDocumentView(MultipleObjectFormActionView):
     title_document = 'Email document: %s'
 
     def get_extra_context(self):
-        queryset = self.get_queryset()
+        queryset = self.get_object_list()
 
         result = {
             'submit_icon_class': icon_mail_document_submit,
@@ -114,6 +106,15 @@ class MailDocumentLinkView(MailDocumentView):
     title = 'Email document link'
     title_plural = 'Email document links'
     title_document = 'Email link for document: %s'
+
+
+class SystemMailerLogEntryListView(SingleObjectListView):
+    extra_context = {
+        'hide_object': True,
+        'title': _('Document mailing error log'),
+    }
+    model = LogEntry
+    view_permission = permission_view_error_log
 
 
 class UserMailerBackendSelectionView(FormView):
@@ -177,7 +178,7 @@ class UserMailingDeleteView(SingleObjectDeleteView):
 
     def get_extra_context(self):
         return {
-            'title': _('Delete mailing profile: %s') % self.get_object(),
+            'title': _('Delete mailing profile: %s') % self.object
         }
 
 
@@ -189,11 +190,11 @@ class UserMailingEditView(SingleObjectDynamicFormEditView):
 
     def get_extra_context(self):
         return {
-            'title': _('Edit mailing profile: %s') % self.get_object(),
+            'title': _('Edit mailing profile: %s') % self.object
         }
 
     def get_form_schema(self):
-        backend = self.get_object().get_backend()
+        backend = self.object.get_backend()
         result = {
             'fields': backend.fields,
             'widgets': getattr(backend, 'widgets', {})
@@ -248,16 +249,17 @@ class UserMailerListView(SingleObjectListView):
         return {'fields': self.get_backend().fields}
 
 
-class UserMailerTestView(FormView):
+class UserMailerTestView(ExternalObjectMixin, FormView):
+    external_object_class = UserMailer
+    external_object_permission = permission_user_mailer_use
+    external_object_pk_url_kwarg = 'mailer_id'
     form_class = UserMailerTestForm
 
     def form_valid(self, form):
-        obj = self.get_object()
-
         # Separate getting the object from executing the test method to avoid
         # catching PermissionDenied exception.
         try:
-            obj.test(to=form.cleaned_data['email'])
+            self.external_object.test(to=form.cleaned_data['email'])
         except Exception as exception:
             messages.error(
                 message=_(
@@ -276,18 +278,7 @@ class UserMailerTestView(FormView):
     def get_extra_context(self):
         return {
             'hide_object': True,
-            'object': self.get_object(),
+            'object': self.external_object,
             'submit_label': _('Test'),
-            'title': _('Test mailing profile: %s') % self.get_object(),
+            'title': _('Test mailing profile: %s') % self.external_object,
         }
-
-    def get_object(self):
-        return get_object_or_404(
-            klass=self.get_queryset(), pk=self.kwargs['mailer_id']
-        )
-
-    def get_queryset(self):
-        return AccessControlList.objects.restrict_queryset(
-            permission=permission_user_mailer_use,
-            queryset=UserMailer.objects.all(), user=self.request.user
-        )

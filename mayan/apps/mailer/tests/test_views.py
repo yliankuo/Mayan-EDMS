@@ -26,10 +26,6 @@ from .mixins import MailerTestMixin
 
 
 class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
-    def setUp(self):
-        super(MailerViewsTestCase, self).setUp()
-        self.login_user()
-
     def test_user_mailer_create_view_no_permissions(self):
         response = self._request_user_mailer_create()
 
@@ -216,10 +212,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         response = self._request_document_link_send()
 
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=200
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=200
+            response=response, text=self.document.label, status_code=404
         )
         self.assertEqual(len(mail.outbox), 0)
 
@@ -248,10 +244,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_link_send()
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=302
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=302
+            response=response, text=self.document.label, status_code=404
         )
 
         self.assertEqual(len(mail.outbox), 0)
@@ -278,10 +274,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_send()
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=200
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=200
+            response=response, text=self.document.label, status_code=404
         )
         self.assertEqual(len(mail.outbox), 0)
 
@@ -311,7 +307,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_send()
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=302
+            response=response, text=self.document.label, status_code=404
         )
 
         self.assertEqual(len(mail.outbox), 0)
