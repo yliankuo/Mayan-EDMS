@@ -13,7 +13,6 @@ from django.views.generic.detail import SingleObjectMixin
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.permissions import Permission
 
-from .exceptions import ActionError
 from .forms import DynamicForm
 from .literals import (
     PK_LIST_SEPARATOR, TEXT_CHOICE_ITEMS, TEXT_CHOICE_LIST,

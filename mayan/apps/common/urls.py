@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 from django.views.i18n import javascript_catalog, set_language
 
-from .api_views import APIContentTypeViewSet, APITemplateViewSet
+from .api_views import ContentTypeAPIViewSet, TemplateAPIViewSet
 from .views import (
     AboutView, CheckVersionView, CurrentUserLocaleProfileDetailsView,
     CurrentUserLocaleProfileEditView, FaviconRedirectView, HomeView,
@@ -67,11 +67,11 @@ urlpatterns += [
 
 api_router_entries = (
     {
-        'prefix': r'content_types', 'viewset': APIContentTypeViewSet,
-        'basename': 'content_type'
+        'prefix': r'content_types', 'viewset': ContentTypeAPIViewSet,
+        'basename': 'content-type'
     },
     {
-        'prefix': r'templates', 'viewset': APITemplateViewSet,
+        'prefix': r'templates', 'viewset': TemplateAPIViewSet,
         'basename': 'template'
     },
 )

@@ -9,7 +9,7 @@ from .classes import Template
 from .serializers import ContentTypeSerializer, TemplateSerializer
 
 
-class APIContentTypeViewSet(viewsets.ReadOnlyModelViewSet):
+class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
     """
     list:
     Return a list of all the available content types.
@@ -17,13 +17,12 @@ class APIContentTypeViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve:
     Return the given content type details.
     """
-    lookup_field = 'pk'
     lookup_url_kwarg = 'content_type_id'
     queryset = ContentType.objects.order_by('app_label', 'model')
     serializer_class = ContentTypeSerializer
 
 
-class APITemplateViewSet(viewsets.ReadOnlyModelViewSet):
+class TemplateAPIViewSet(viewsets.ReadOnlyModelViewSet):
     """
     list:
     Return a list of partial templates.
@@ -31,12 +30,12 @@ class APITemplateViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve:
     Return the given partial template details.
     """
-    lookup_url_kwarg = 'name'
+    lookup_url_kwarg = 'template_name'
     permission_classes = (IsAuthenticated,)
     serializer_class = TemplateSerializer
 
     def get_object(self):
-        return Template.get(name=self.kwargs['name']).render(
+        return Template.get(name=self.kwargs['template_name']).render(
             request=self.request
         )
 

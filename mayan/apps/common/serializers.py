@@ -9,8 +9,8 @@ class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         extra_kwargs = {
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'content_type_id',
-                'view_name': 'rest_api:content_type-detail'
+                'lookup_url_kwarg': 'content_type_id',
+                'view_name': 'rest_api:content-type-detail'
             }
         }
         fields = ('app_label', 'id', 'model', 'url')
@@ -22,6 +22,6 @@ class TemplateSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     html = serializers.CharField(read_only=True)
     url = serializers.HyperlinkedIdentityField(
-        lookup_field='name', lookup_url_kwarg='name',
+        lookup_field='name', lookup_url_kwarg='template_name',
         view_name='rest_api:template-detail'
     )
