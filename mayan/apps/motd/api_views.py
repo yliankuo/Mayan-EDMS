@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-from rest_framework import viewsets
-
 from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .models import Message
@@ -12,7 +10,7 @@ from .permissions import (
 from .serializers import MessageSerializer
 
 
-class APIMessageViewSet(MayanAPIModelViewSet):
+class MessageAPIViewSet(MayanAPIModelViewSet):
     """
     create:
     Create a new message.

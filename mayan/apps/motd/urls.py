@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import APIMessageViewSet
+from .api_views import MessageAPIViewSet
 from .views import (
     MessageCreateView, MessageDeleteView, MessageEditView, MessageListView
 )
@@ -27,5 +27,5 @@ urlpatterns = [
 ]
 
 api_router_entries = (
-    {'prefix': r'messages', 'viewset': APIMessageViewSet, 'basename': 'message'},
+    {'prefix': r'messages', 'viewset': MessageAPIViewSet, 'basename': 'message'},
 )
