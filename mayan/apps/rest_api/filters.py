@@ -17,6 +17,9 @@ class MayanViewSetObjectPermissionsFilter(BaseFilterBackend):
             'list': permission_..._view
         }
         """
+        if not request.user or not request.user.is_authenticated:
+            return queryset.none()
+
         object_permission_dictionary = getattr(view, 'object_permission_map', {})
         object_permission = object_permission_dictionary.get(
             view.action, None

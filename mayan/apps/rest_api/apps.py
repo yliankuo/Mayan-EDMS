@@ -36,9 +36,22 @@ class RESTAPIApp(MayanAppConfig):
         for app in apps.get_app_configs():
             if getattr(app, 'has_rest_api', False):
                 try:
-                    for entry in import_string('{}.urls.api_router_entries'.format(app.name)):
-                        router.register(**entry)
+                    app_api_router_entries = import_string(
+                        dotted_path='{}.urls.api_router_entries'.format(app.name)
+                    )
                 except ImportError:
                     pass
+                else:
+                    for entry in app_api_router_entries:
+                        router.register(**entry)
+
+                try:
+                    app_api_urlpatterns = import_string(
+                        dotted_path='{}.urls.api_urlpatterns'.format(app.name)
+                    )
+                except ImportError:
+                    pass
+                else:
+                    urlpatterns.extend(app_api_urlpatterns)
 
         urlpatterns.extend(router.urls)

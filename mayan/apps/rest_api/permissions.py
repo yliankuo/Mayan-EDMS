@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import PermissionDenied
 
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from mayan.apps.permissions import Permission
 
@@ -19,6 +19,9 @@ class MayanViewSetPermission(BasePermission):
             'list': permission_..._view
         }
         """
+        if not request.user or not request.user.is_authenticated:
+            return False
+
         view_permission_dictionary = getattr(view, 'view_permission_map', {})
         view_permission = view_permission_dictionary.get(view.action, None)
 
