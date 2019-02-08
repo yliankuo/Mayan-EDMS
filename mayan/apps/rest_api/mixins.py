@@ -35,22 +35,33 @@ class ExternalObjectListSerializerMixin(object):
         pk_field = self.get_external_object_list_option('pk_field')
         pk_list_field = self.get_external_object_list_option('pk_list_field')
 
-        if pk_field:
-            id_list = (self.validated_data.get(pk_field),)
-        elif pk_list_field:
-            id_list = self.validated_data.get(pk_list_field, '').split(',')
-        else:
+        if not pk_field and not pk_list_field:
             raise ImproperlyConfigured(
                 'ExternalObjectListSerializerMixin requires a '
-                'external_object_list__pk_field a '
+                'external_object_list_pk_field a '
                 'external_object_list_pk_list_field.'
             )
+
+
+        if pk_field:
+            pk_field_value = self.validated_data.get(pk_field)
+
+        if pk_list_field:
+            pk_list_field_value = self.validated_data.get(pk_list_field)
+
+        if pk_field_value:
+            id_list = (pk_field_value,)
+        elif pk_list_field_value:
+            id_list = pk_list_field_value or ''.split(',')
+        else:
+            id_list = ()
 
         return queryset.filter(pk__in=id_list)
 
     def get_external_object_list_option(self, option_name):
         return getattr(
-            self.external_object_list_options, 'external_object_list_{}'.format(option_name), None
+            self.external_object_list_options, 'external_object_list_{}'.format(option_name),
+            None
         )
 
     def get_external_object_list_queryset(self):
