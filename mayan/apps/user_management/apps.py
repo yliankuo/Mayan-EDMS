@@ -33,7 +33,10 @@ from .links import (
     link_user_set_password, link_user_setup, text_user_label,
     separator_user_label
 )
-from .methods import method_get_absolute_url
+from .methods import (
+    method_group_get_users, method_group_user_add, method_group_user_remove,
+    method_user_get_absolute_url, method_user_get_groups
+)
 from .permissions import (
     permission_group_delete, permission_group_edit,
     permission_group_view, permission_user_delete, permission_user_edit,
@@ -62,6 +65,14 @@ class UserManagementApp(MayanAppConfig):
             klass=get_user_model(),
             serializer_class='mayan.apps.user_management.serializers.UserSerializer'
         )
+
+        # Silence UnorderedObjectListWarning
+        # "Pagination may yield inconsistent result"
+        # Remove on Django 2.x
+        Group._meta.ordering = ('name',)
+        Group.add_to_class(name='get_users', value=method_group_get_users)
+        Group.add_to_class(name='user_add', value=method_group_user_add)
+        Group.add_to_class(name='user_remove', value=method_group_user_remove)
 
         MetadataLookup(
             description=_('All the groups.'), name='groups',
@@ -124,7 +135,10 @@ class UserManagementApp(MayanAppConfig):
         )
 
         User.add_to_class(
-            name='get_absolute_url', value=method_get_absolute_url
+            name='get_absolute_url', value=method_user_get_absolute_url
+        )
+        User.add_to_class(
+            name='get_groups', value=method_user_get_groups
         )
 
         menu_list_facet.bind_links(
