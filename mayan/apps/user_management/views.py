@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -21,10 +20,6 @@ from mayan.apps.common.generics import (
 )
 from mayan.apps.common.mixins import ExternalObjectMixin
 
-from .events import (
-    event_group_created, event_group_edited, event_user_created,
-    event_user_edited
-)
 from .forms import UserForm
 from .icons import icon_group_setup, icon_user_setup
 from .links import link_group_create, link_user_create
@@ -69,14 +64,6 @@ class GroupCreateView(SingleObjectCreateView):
     post_action_redirect = reverse_lazy(viewname='user_management:group_list')
     view_permission = permission_group_create
 
-    def form_valid(self, form):
-        with transaction.atomic():
-            result = super(GroupCreateView, self).form_valid(form=form)
-            event_group_created.commit(
-                actor=self.request.user, target=self.object
-            )
-        return result
-
 
 class GroupDeleteView(SingleObjectDeleteView):
     model = Group
@@ -97,14 +84,6 @@ class GroupEditView(SingleObjectEditView):
     object_permission = permission_group_edit
     pk_url_kwarg = 'group_id'
     post_action_redirect = reverse_lazy(viewname='user_management:group_list')
-
-    def form_valid(self, form):
-        with transaction.atomic():
-            result = super(GroupEditView, self).form_valid(form=form)
-            event_group_edited.commit(
-                actor=self.request.user, target=self.object
-            )
-        return result
 
     def get_extra_context(self):
         return {
@@ -205,12 +184,7 @@ class UserCreateView(SingleObjectCreateView):
     view_permission = permission_user_create
 
     def form_valid(self, form):
-        with transaction.atomic():
-            super(UserCreateView, self).form_valid(form=form)
-            event_user_created.commit(
-                actor=self.request.user, target=self.object
-            )
-
+        super(UserCreateView, self).form_valid(form=form)
         return HttpResponseRedirect(
             reverse(
                 viewname='user_management:user_set_password',
@@ -294,15 +268,6 @@ class UserEditView(SingleObjectEditView):
     source_queryset = get_user_model().objects.filter(
         is_superuser=False, is_staff=False
     )
-
-    def form_valid(self, form):
-        with transaction.atomic():
-            result = super(UserEditView, self).form_valid(form=form)
-            event_user_edited.commit(
-                actor=self.request.user, target=self.object
-            )
-
-        return result
 
     def get_extra_context(self):
         return {

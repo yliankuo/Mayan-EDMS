@@ -21,12 +21,14 @@ from .literals import (
     TEST_GROUP_NAME, TEST_GROUP_NAME_EDITED, TEST_USER_PASSWORD_EDITED,
     TEST_USER_USERNAME
 )
-from .mixins import GroupTestMixin, UserTestMixin
+from .mixins import (
+    GroupTestMixin, GroupViewTestMixin, UserTestMixin, UserViewTestMixin
+)
 
 TEST_USER_TO_DELETE_USERNAME = 'user_to_delete'
 
 
-class GroupViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
+class GroupViewsTestCase(GroupTestMixin, GroupViewTestMixin, UserTestMixin, GenericViewTestCase):
     def test_group_create_view_no_permission(self):
         response = self._request_test_group_create_view()
         self.assertEqual(response.status_code, 403)
@@ -136,7 +138,7 @@ class GroupViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
         )
 
 
-class UserViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
+class UserViewsTestCase(GroupTestMixin, UserTestMixin, UserViewTestMixin, GenericViewTestCase):
     def test_user_create_view_no_permission(self):
         user_count = get_user_model().objects.count()
 
@@ -343,7 +345,7 @@ class UserViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def _request_user_multiple_delete_view(self):
+    def _request_test_user_multiple_delete_view(self):
         return self.post(
             viewname='user_management:user_multiple_delete', data={
                 'id_list': self.test_user.pk
@@ -354,7 +356,7 @@ class UserViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
         self._create_test_user()
         user_count = get_user_model().objects.count()
 
-        response = self._request_user_multiple_delete_view()
+        response = self._request_test_user_multiple_delete_view()
         self.assertEqual(response.status_code, 404)
 
         self.assertEqual(get_user_model().objects.count(), user_count)
@@ -366,7 +368,7 @@ class UserViewsTestCase(GroupTestMixin, UserTestMixin, GenericViewTestCase):
         self.grant_access(
             obj=self.test_user, permission=permission_user_delete
         )
-        response = self._request_user_multiple_delete_view()
+        response = self._request_test_user_multiple_delete_view()
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(get_user_model().objects.count(), user_count - 1)

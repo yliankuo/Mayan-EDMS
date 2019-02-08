@@ -56,7 +56,7 @@ class GroupAPIViewSet(MayanAPIModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.user_add(instance=instance)
+        serializer.users_add(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers
@@ -89,7 +89,7 @@ class GroupAPIViewSet(MayanAPIModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.user_remove(instance=instance)
+        serializer.users_remove(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers
@@ -100,7 +100,9 @@ class UserAPIViewSet(MayanAPIModelViewSet):
     lookup_url_kwarg = 'user_id'
     object_permission_map = {
         'destroy': permission_user_delete,
-        'group-list': permission_user_view,
+        'group_add': permission_user_edit,
+        'group_list': permission_user_view,
+        'group_remove': permission_user_edit,
         'list': permission_user_view,
         'partial_update': permission_user_edit,
         'retrieve': permission_user_view,
@@ -115,13 +117,13 @@ class UserAPIViewSet(MayanAPIModelViewSet):
     @action(
         detail=True, lookup_url_kwarg='user_id', methods=('post',),
         serializer_class=UserGroupAddRemoveSerializer,
-        url_name='group-add', url_path='group/add'
+        url_name='group-add', url_path='groups/add'
     )
     def group_add(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.group_add(instance=instance)
+        serializer.groups_add(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers
@@ -154,7 +156,7 @@ class UserAPIViewSet(MayanAPIModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.group_remove(instance=instance)
+        serializer.groups_remove(instance=instance)
         headers = self.get_success_headers(data=serializer.data)
         return Response(
             serializer.data, status=status.HTTP_200_OK, headers=headers

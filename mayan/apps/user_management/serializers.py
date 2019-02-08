@@ -46,7 +46,7 @@ class GroupUserAddRemoveSerializer(ExternalObjectListSerializerMixin, serializer
             'Primary key of the user that will be added or removed.'
         ), required=False, write_only=True
     )
-    users_id_list = serializers.CharField(
+    user_id_list = serializers.CharField(
         help_text=_(
             'Comma separated list of user primary keys that will be added or '
             'removed.'
@@ -59,15 +59,17 @@ class GroupUserAddRemoveSerializer(ExternalObjectListSerializerMixin, serializer
         external_object_list_pk_field = 'user_id'
         external_object_list_pk_list_field = 'user_id_list'
 
-    def user_add(self, instance):
-        queryset = self.get_external_object_list()
-        for user in queryset:
-            instance.user_add(user=user, _user=self.context['request'].user)
+    def users_add(self, instance):
+        instance.users_add(
+            users=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
 
-    def user_remove(self, instance):
-        queryset = self.get_external_object_list()
-        for user in queryset:
-            instance.user_remove(user=user, _user=self.context['request'].user)
+    def users_remove(self, instance):
+        instance.users_remove(
+            users=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
 
 
 class UserGroupAddRemoveSerializer(ExternalObjectListSerializerMixin, serializers.Serializer):
@@ -76,7 +78,7 @@ class UserGroupAddRemoveSerializer(ExternalObjectListSerializerMixin, serializer
             'Primary key of the group that will be added or removed.'
         ), required=False, write_only=True
     )
-    groups_id_list = serializers.CharField(
+    group_id_list = serializers.CharField(
         help_text=_(
             'Comma separated list of group primary keys that will be added or '
             'removed.'
@@ -89,15 +91,17 @@ class UserGroupAddRemoveSerializer(ExternalObjectListSerializerMixin, serializer
         external_object_list_pk_field = 'group_id'
         external_object_list_pk_list_field = 'group_id_list'
 
-    def group_add(self, instance):
-        queryset = self.get_external_object_list()
-        for group in queryset:
-            instance.group_add(group=group, _group=self.context['request'].group)
+    def groups_add(self, instance):
+        instance.groups_add(
+            groups=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
 
-    def group_remove(self, instance):
-        queryset = self.get_external_object_list()
-        for group in queryset:
-            instance.group_remove(group=group, _group=self.context['request'].group)
+    def groups_remove(self, instance):
+        instance.groups_remove(
+            groups=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
