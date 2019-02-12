@@ -4,18 +4,45 @@ from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
-from mayan.apps.user_management.serializers import GroupSerializer
+from mayan.apps.rest_api.mixins import ExternalObjectListSerializerMixin
+from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
+from mayan.apps.user_management.permissions import permission_group_edit
 
 from .classes import Permission
 from .models import Role, StoredPermission
+
+
+class PermissionNamespaceSerializer(serializers.Serializer):
+    name = serializers.CharField(read_only=True)
+    label = serializers.CharField(read_only=True)
+    permissions_url = serializers.HyperlinkedIdentityField(
+        lookup_field='name',
+        lookup_url_kwarg='permission_namespace_name',
+        view_name='rest_api:permission_namespace-permission-list'
+    )
+    url = serializers.HyperlinkedIdentityField(
+        lookup_field='name',
+        lookup_url_kwarg='permission_namespace_name',
+        view_name='rest_api:permission_namespace-detail'
+    )
 
 
 class PermissionSerializer(serializers.Serializer):
     namespace = serializers.CharField(read_only=True)
     pk = serializers.CharField(read_only=True)
     label = serializers.CharField(read_only=True)
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'namespace.name', 'lookup_url_kwarg': 'permission_namespace_name',
+            },
+            {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'permission_name',
+            }
+        ),
+        view_name='rest_api:permission-detail'
+    )
 
     def to_representation(self, instance):
         if isinstance(instance, StoredPermission):
@@ -28,85 +55,85 @@ class PermissionSerializer(serializers.Serializer):
             )
 
 
+class RoleGroupAddRemoveSerializer(ExternalObjectListSerializerMixin, serializers.Serializer):
+    group_id_list = serializers.CharField(
+        help_text=_(
+            'Comma separated list of group primary keys that will be added or '
+            'removed.'
+        ), required=False, write_only=True
+    )
+
+    class Meta:
+        external_object_list_model = Group
+        external_object_list_permission = permission_group_edit
+        external_object_list_pk_list_field = 'group_id_list'
+
+    def groups_add(self, instance):
+        instance.groups_add(
+            queryset=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
+
+    def groups_remove(self, instance):
+        instance.groups_remove(
+            queryset=self.get_external_object_list(),
+            _user=self.context['request'].user
+        )
+
+
+class RolePermissionAddRemoveSerializer(ExternalObjectListSerializerMixin, serializers.Serializer):
+    permission_id_list = serializers.CharField(
+        help_text=_(
+            'Comma separated list of permission primary keys that will be added or '
+            'removed.'
+        ), required=False, write_only=True
+    )
+
+    class Meta:
+        external_object_list_model = Permission
+        external_object_list_pk_list_field = 'permission_id_list'
+
+    def permissions_add(self, instance):
+        instance.permissions.add(
+            *self.get_external_object_list()
+        )
+
+    def permissions_remove(self, instance):
+        instance.permissions.remove(
+            *self.get_external_object_list()
+        )
+
+
 class RoleSerializer(serializers.HyperlinkedModelSerializer):
-    groups = GroupSerializer(many=True, read_only=True)
-    permissions = PermissionSerializer(many=True, read_only=True)
+    group_add_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-group-add'
+    )
+    group_list_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-group-list'
+    )
+    group_remove_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-group-remove'
+    )
+    permission_add_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-permission-add'
+    )
+    permission_list_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-permission-list'
+    )
+    permission_remove_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='role_id', view_name='rest_api:role-permission-remove'
+    )
 
     class Meta:
         extra_kwargs = {
-            'url': {'view_name': 'rest_api:role-detail'},
+            'url': {
+                'lookup_url_kwarg': 'role_id',
+                'view_name': 'rest_api:role-detail'
+            }
         }
-        fields = ('groups', 'id', 'label', 'permissions', 'url')
+        fields = (
+            'id', 'label', 'url', 'group_add_url', 'group_list_url',
+            'group_remove_url', 'permission_add_url', 'permission_list_url',
+            'permission_remove_url'
+        )
         model = Role
-
-
-class WritableRoleSerializer(serializers.HyperlinkedModelSerializer):
-    groups_pk_list = serializers.CharField(
-        help_text=_(
-            'Comma separated list of groups primary keys to add to, or replace'
-            ' in this role.'
-        ), required=False
-    )
-
-    permissions_pk_list = serializers.CharField(
-        help_text=_(
-            'Comma separated list of permission primary keys to grant to this '
-            'role.'
-        ), required=False
-    )
-
-    class Meta:
-        fields = ('groups_pk_list', 'id', 'label', 'permissions_pk_list')
-        model = Role
-
-    def create(self, validated_data):
-        self.groups_pk_list = validated_data.pop('groups_pk_list', '')
-        self.permissions_pk_list = validated_data.pop(
-            'permissions_pk_list', ''
-        )
-
-        instance = super(WritableRoleSerializer, self).create(validated_data)
-
-        if self.groups_pk_list:
-            self._add_groups(instance=instance)
-
-        if self.permissions_pk_list:
-            self._add_permissions(instance=instance)
-
-        return instance
-
-    def _add_groups(self, instance):
-        instance.groups.add(
-            *Group.objects.filter(pk__in=self.groups_pk_list.split(','))
-        )
-
-    def _add_permissions(self, instance):
-        for pk in self.permissions_pk_list.split(','):
-            try:
-                stored_permission = Permission.get(pk=pk)
-                instance.permissions.add(stored_permission)
-                instance.save()
-            except KeyError:
-                raise ValidationError(_('No such permission: %s') % pk)
-
-    def update(self, instance, validated_data):
-        result = validated_data.copy()
-
-        self.groups_pk_list = validated_data.pop('groups_pk_list', '')
-        self.permissions_pk_list = validated_data.pop(
-            'permissions_pk_list', ''
-        )
-
-        result = super(WritableRoleSerializer, self).update(
-            instance, validated_data
-        )
-
-        if self.groups_pk_list:
-            instance.groups.clear()
-            self._add_groups(instance=instance)
-
-        if self.permissions_pk_list:
-            instance.permissions.clear()
-            self._add_permissions(instance=instance)
-
-        return result

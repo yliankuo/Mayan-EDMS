@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import APIPermissionList, APIRoleListView, APIRoleView
+from .api_views import (
+    PermissionNamespaceViewSet, PermissionViewSet, RoleAPIViewSet
+)
 from .views import (
     GroupRolesView, RoleCreateView, RoleDeleteView, RoleEditView,
     RoleGroupsView, RoleListView, RolePermissionsView
@@ -36,14 +38,14 @@ urlpatterns = [
     url(regex=r'^roles/list/$', name='role_list', view=RoleListView.as_view()),
 ]
 
-api_urls = [
-    url(
-        regex=r'^permissions/$', name='permission-list',
-        view=APIPermissionList.as_view(),
-    ),
-    url(regex=r'^roles/$', name='role-list', view=APIRoleListView.as_view()),
-    url(
-        regex=r'^roles/(?P<role_id>[0-9]+)/$', name='role-detail',
-        view=APIRoleView.as_view()
-    ),
-]
+api_router_entries = (
+    {
+        'prefix': r'permission_namespaces', 'viewset': PermissionNamespaceViewSet,
+        'basename': 'permission_namespace'
+    },
+    {
+        'prefix': r'permission_namespaces/(?P<permission_namespace_name>[^/.]+)/permissions',
+        'viewset': PermissionViewSet, 'basename': 'permission'
+    },
+    {'prefix': r'roles', 'viewset': RoleAPIViewSet, 'basename': 'role'},
+)

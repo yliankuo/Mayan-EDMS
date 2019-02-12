@@ -2,14 +2,11 @@ from __future__ import unicode_literals
 
 import itertools
 import logging
-import warnings
 
 from django.apps import apps
 from django.core.exceptions import PermissionDenied
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-
-from mayan.apps.common.warnings import InterfaceWarning
 
 from .exceptions import InvalidNamespace
 
@@ -48,6 +45,13 @@ class PermissionNamespace(object):
         permission = Permission(namespace=self, name=name, label=label)
         self.permissions.append(permission)
         return permission
+
+    def get_permissions(self):
+        result = {}
+        for permission in self.permissions:
+            result[permission.pk] = permission
+
+        return result
 
 
 @python_2_unicode_compatible

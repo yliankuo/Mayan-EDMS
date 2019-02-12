@@ -13,14 +13,20 @@ from mayan.apps.common import (
     menu_secondary, menu_setup
 )
 from mayan.apps.common.signals import perform_upgrade
+from mayan.apps.events import ModelEventType
+from mayan.apps.events.links import (
+    link_events_for_object, link_object_event_types_user_subcriptions_list
+)
 from mayan.apps.navigation import SourceColumn
 
+from .events import event_role_created, event_role_edited
 from .handlers import handler_purge_permissions
 from .links import (
     link_group_roles, link_permission_grant, link_permission_revoke,
     link_role_create, link_role_delete, link_role_edit, link_role_groups,
     link_role_list, link_role_permissions
 )
+from .methods import method_group_roles_add, method_group_roles_remove
 from .permissions import (
     permission_role_delete, permission_role_edit, permission_role_view
 )
@@ -37,9 +43,17 @@ class PermissionsApp(MayanAppConfig):
 
     def ready(self):
         super(PermissionsApp, self).ready()
+        from actstream import registry
 
         Role = self.get_model('Role')
         Group = apps.get_model(app_label='auth', model_name='Group')
+
+        Group.add_to_class(name='roles_add', value=method_group_roles_add)
+        Group.add_to_class(name='roles_remove', value=method_group_roles_remove)
+
+        ModelEventType.register(
+            event_types=(event_role_created, event_role_edited), model=Role
+        )
 
         ModelPermission.register(
             model=Role, permissions=(
@@ -53,7 +67,9 @@ class PermissionsApp(MayanAppConfig):
 
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_role_groups, link_role_permissions,
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_role_groups, link_role_permissions,
             ), sources=(Role,)
         )
         menu_list_facet.bind_links(
@@ -78,3 +94,5 @@ class PermissionsApp(MayanAppConfig):
             dispatch_uid='permissions_handler_purge_permissions',
             receiver=handler_purge_permissions
         )
+
+        registry.register(Role)

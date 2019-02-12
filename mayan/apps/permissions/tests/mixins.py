@@ -1,8 +1,25 @@
 from __future__ import unicode_literals
 
+from ..classes import PermissionNamespace
 from ..models import Role
 
-from .literals import TEST_CASE_ROLE_LABEL, TEST_ROLE_LABEL
+from .literals import (
+    TEST_CASE_ROLE_LABEL, TEST_PERMISSION_LABEL, TEST_PERMISSION_NAME,
+    TEST_PERMISSION_NAMESPACE_LABEL, TEST_PERMISSION_NAMESPACE_NAME,
+    TEST_ROLE_LABEL
+)
+
+
+class PermissionTestMixin(object):
+    def _create_test_permission(self):
+        self.test_permission_namespace = PermissionNamespace(
+            label=TEST_PERMISSION_NAMESPACE_LABEL,
+            name=TEST_PERMISSION_NAMESPACE_NAME
+        )
+        self.test_permission = self.test_permission_namespace.add_permission(
+            label=TEST_PERMISSION_LABEL,
+            name=TEST_PERMISSION_NAME
+        )
 
 
 class RoleTestCaseMixin(object):
