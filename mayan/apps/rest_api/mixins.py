@@ -42,12 +42,15 @@ class ExternalObjectListSerializerMixin(object):
                 'external_object_list_pk_list_field.'
             )
 
-
         if pk_field:
             pk_field_value = self.validated_data.get(pk_field)
+        else:
+            pk_field_value = None
 
         if pk_list_field:
             pk_list_field_value = self.validated_data.get(pk_list_field)
+        else:
+            pk_list_field = None
 
         if pk_field_value:
             id_list = (pk_field_value,)
