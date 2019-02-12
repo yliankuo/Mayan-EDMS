@@ -39,7 +39,9 @@ class ChoiceForm(forms.Form):
             }
         )
 
-    selection = forms.MultipleChoiceField(widget=DisableableSelectWidget())
+    selection = forms.MultipleChoiceField(
+        required=False, widget=DisableableSelectWidget()
+    )
 
 
 class FormOptions(object):

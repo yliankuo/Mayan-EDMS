@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import DetailView
@@ -19,12 +20,15 @@ from django.views.generic.list import ListView
 from django_downloadview import (
     TextIteratorIO, VirtualDownloadView, VirtualFile
 )
+
+from mayan.apps.acls.models import AccessControlList
+
 from pure_pagination.mixins import PaginationMixin
 
 from .forms import ChoiceForm
 from .icons import (
-    icon_assign_remove_add, icon_assign_remove_remove, icon_sort_down,
-    icon_sort_up
+    icon_add_all, icon_assign_remove_add, icon_assign_remove_remove,
+    icon_remove_all, icon_sort_down, icon_sort_up
 )
 from .literals import (
     TEXT_SORT_FIELD_PARAMETER, TEXT_SORT_FIELD_VARIABLE_NAME,
@@ -32,12 +36,13 @@ from .literals import (
     TEXT_SORT_ORDER_VARIABLE_NAME
 )
 from .mixins import (
-    DeleteExtraDataMixin, DynamicFormViewMixin, ExtraContextMixin,
-    FormExtraKwargsMixin, ListModeMixin, MultipleObjectMixin,
+    DeleteExtraDataMixin, DynamicFormViewMixin, ExternalObjectMixin,
+    ExtraContextMixin, FormExtraKwargsMixin, ListModeMixin, MultipleObjectMixin,
     ObjectActionMixin, ObjectNameMixin, RedirectionMixin,
     RestrictedQuerysetMixin, ViewPermissionCheckMixin
 )
 from .settings import setting_paginate_by
+from .utils import resolve
 
 __all__ = (
     'AssignRemoveView', 'ConfirmView', 'FormView',
@@ -275,6 +280,7 @@ class SingleObjectDownloadView(RestrictedQuerysetMixin, SingleObjectMixin, Downl
 class MultiFormView(DjangoFormView):
     prefix = None
     prefixes = {}
+    template_name = 'appearance/generic_form.html'
 
     def _create_form(self, form_name, klass):
         form_kwargs = self.get_form_kwargs(form_name)
@@ -284,6 +290,14 @@ class MultiFormView(DjangoFormView):
         else:
             form = klass(**form_kwargs)
         return form
+
+    def all_forms_valid(self, forms):
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+        form_classes = self.get_form_classes()
+        self.forms = self.get_forms(form_classes)
+        return super(MultiFormView, self).dispatch(request, *args, **kwargs)
 
     def forms_valid(self, forms):
         for form_name, form in forms.items():
@@ -297,11 +311,6 @@ class MultiFormView(DjangoFormView):
         return HttpResponseRedirect(redirect_to=self.get_success_url())
 
     def forms_invalid(self, forms):
-        return self.render_to_response(self.get_context_data(forms=forms))
-
-    def get(self, request, *args, **kwargs):
-        form_classes = self.get_form_classes()
-        forms = self.get_forms(form_classes)
         return self.render_to_response(self.get_context_data(forms=forms))
 
     def get_context_data(self, **kwargs):
@@ -328,7 +337,12 @@ class MultiFormView(DjangoFormView):
                 'files': self.request.FILES,
             })
 
+        kwargs.update(self.get_form_extra_kwargs(form_name=form_name) or {})
+
         return kwargs
+
+    def get_form_extra_kwargs(self, form_name):
+        return None
 
     def get_forms(self, form_classes):
         return dict(
@@ -350,13 +364,247 @@ class MultiFormView(DjangoFormView):
         return self.prefixes.get(form_name, self.prefix)
 
     def post(self, request, *args, **kwargs):
-        form_classes = self.get_form_classes()
-        forms = self.get_forms(form_classes)
-
-        if all([form.is_valid() for form in forms.values()]):
-            return self.forms_valid(forms=forms)
+        if all([form.is_valid() for form in self.forms.values()]):
+            return self.forms_valid(forms=self.forms)
         else:
-            return self.forms_invalid(forms=forms)
+            return self.forms_invalid(forms=self.forms)
+
+
+class AddRemoveView(ExternalObjectMixin, ExtraContextMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultiFormView):
+    form_classes = {'form_available': ChoiceForm, 'form_added': ChoiceForm}
+    grouped = False
+    list_added_help_text = _(
+        'Select entries to be removed. Hold Control to select multiple '
+        'entries. Once the selection is complete, click the button below '
+        'or double click the list to activate the action.'
+    )
+    list_available_help_text = _(
+        'Select entries to be added. Hold Control to select multiple '
+        'entries. Once the selection is complete, click the button below '
+        'or double click the list to activate the action.'
+    )
+
+    # Form titles
+    list_added_title = None
+    list_available_title = None
+
+    # Attributes to filter the object to which selections will be added or
+    # remove
+    main_object_model = None
+    main_object_permission = None
+    main_object_pk_url_kwarg = None
+    main_object_pk_url_kwargs = None
+    main_object_source_queryset = None
+
+    # Attributes to filter the queryset of the selection
+    secondary_object_model = None
+    secondary_object_permission = None
+    secondary_object_source_queryset = None
+
+    # Main object methods to use to add and remove selections
+    action_add_method = None
+    action_remove_method = None
+
+    # If a method is not specified, use this related field to add and remove
+    # selections
+    related_field = None
+
+    prefixes = {'form_available': 'available', 'form_added': 'added'}
+
+    def __init__(self, *args, **kwargs):
+        self.external_object_class = self.main_object_model
+        self.external_object_permission = self.main_object_permission
+        self.external_object_pk_url_kwarg = self.main_object_pk_url_kwarg
+        self.external_object_pk_url_kwargs = self.main_object_pk_url_kwargs
+        self.external_object_queryset = self.main_object_source_queryset
+
+        super(AddRemoveView, self).__init__(*args, **kwargs)
+
+    def action_add(self, queryset):
+        if self.action_add_method:
+            kwargs = {'queryset': queryset}
+            kwargs.update(self.get_action_add_extra_kwargs())
+            kwargs.update(self.get_actions_extra_kwargs())
+            getattr(self.main_object, self.action_add_method)(**kwargs)
+        elif self.related_field:
+            getattr(self.main_object, self.related_field).add(*queryset)
+        else:
+            raise ImproperlyConfigured(
+                'View %s must be called with either an action_add_method, a '
+                'related_field.' % self.__class__.__name__
+            )
+
+    def action_remove(self, queryset):
+        if self.action_remove_method:
+            kwargs = {'queryset': queryset}
+            kwargs.update(self.get_action_remove_extra_kwargs())
+            kwargs.update(self.get_actions_extra_kwargs())
+            getattr(self.main_object, self.action_remove_method)(**kwargs)
+        elif self.related_field:
+            getattr(self.main_object, self.related_field).remove(*queryset)
+        else:
+            raise ImproperlyConfigured(
+                'View %s must be called with either an action_remove_method, a '
+                'related_field.' % self.__class__.__name__
+            )
+
+    def dispatch(self, request, *args, **kwargs):
+        self.main_object = self.get_external_object()
+        result = super(AddRemoveView, self).dispatch(request=request, *args, **kwargs)
+        return result
+
+    def forms_valid(self, forms):
+        if 'available-add_all' in self.request.POST:
+            selection_add = self.get_secondary_object_list()
+        else:
+            selection_add = self.get_secondary_object_list().filter(
+                pk__in=forms['form_available'].cleaned_data['selection']
+            )
+
+        self.action_add(queryset=selection_add)
+
+        if 'added-remove_all' in self.request.POST:
+            selection_remove = self.get_secondary_object_list()
+        else:
+            selection_remove = self.get_secondary_object_list().filter(
+                pk__in=forms['form_added'].cleaned_data['selection']
+            )
+
+        self.action_remove(queryset=selection_remove)
+
+        return super(AddRemoveView, self).forms_valid(forms=forms)
+
+    def generate_choices(self, queryset):
+        for obj in queryset:
+            yield (obj.pk, force_text(obj))
+
+    def get_action_add_extra_kwargs(self):
+        # Keyword arguments to apply to the add method
+        return {}
+
+    def get_action_remove_extra_kwargs(self):
+        # Keyword arguments to apply to the remove method
+        return {}
+
+    def get_actions_extra_kwargs(self):
+        # Keyword arguments to apply to both the add and remove methods
+        return {}
+
+    def get_context_data(self, **kwargs):
+        # Use get_context_data to leave the get_extra_context for subclasses
+        context = super(AddRemoveView, self).get_context_data(**kwargs)
+        context.update(
+            {
+                'subtemplates_list': [
+                    {
+                        'name': 'appearance/generic_form_subtemplate.html',
+                        'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
+                        'context': {
+                            'extra_buttons': [
+                                {
+                                    'label': _('Add all'),
+                                    'icon_class': icon_add_all,
+                                    'name': 'add_all',
+                                }
+                            ],
+                            'form': self.forms['form_available'],
+                            'form_css_classes': 'form-hotkey-double-click',
+                            'hide_labels': True,
+                            'submit_icon_class': icon_assign_remove_add,
+                            'submit_label': _('Add'),
+                            'title': self.list_available_title or ' ',
+                        }
+                    },
+                    {
+                        'name': 'appearance/generic_form_subtemplate.html',
+                        'column_class': 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
+                        'context': {
+                            'extra_buttons': [
+                                {
+                                    'label': _('Remove all'),
+                                    'icon_class': icon_remove_all,
+                                    'name': 'remove_all',
+                                }
+                            ],
+                            'form': self.forms['form_added'],
+                            'form_css_classes': 'form-hotkey-double-click',
+                            'hide_labels': True,
+                            'submit_icon_class': icon_assign_remove_remove,
+                            'submit_label': _('Remove'),
+                            'title': self.list_added_title or ' ',
+                        }
+                    }
+                ]
+            }
+        )
+
+        return context
+
+    def get_disabled_choices(self):
+        return ()
+
+    def get_form_extra_kwargs(self, form_name):
+        if form_name == 'form_available':
+            return {
+                'choices': self.generate_choices(
+                    queryset=self.get_list_available_queryset()
+                ),
+                'help_text': self.get_list_available_help_text()
+            }
+        else:
+            return {
+                'choices': self.generate_choices(
+                    queryset=self.get_list_added_queryset()
+                ),
+                'disabled_choices': self.get_disabled_choices(),
+                'help_text': self.get_list_added_help_text()
+            }
+
+    def get_list_added_help_text(self):
+        return self.list_added_help_text
+
+    def get_list_added_queryset(self):
+        if not self.related_field:
+            raise ImproperlyConfigured(
+                'View %s must be called with either a related_field or '
+                'override .get_list_added_queryset().' % self.__class__.__name__
+            )
+
+        return self.get_secondary_object_list().filter(
+            pk__in=getattr(self.main_object, self.related_field).values('pk')
+        )
+
+    def get_list_available_help_text(self):
+        return self.list_available_help_text
+
+    def get_list_available_queryset(self):
+        return self.get_secondary_object_list().exclude(
+            pk__in=self.get_list_added_queryset().values('pk')
+        )
+
+    def get_secondary_object_list(self):
+        queryset = self.get_secondary_object_source_queryset()
+
+        if queryset is None:
+            queryset = self.secondary_object_model._meta.default_manager.all()
+
+        if self.secondary_object_permission:
+            return AccessControlList.objects.restrict_queryset(
+                permission=self.secondary_object_permission, queryset=queryset,
+                user=self.request.user
+            )
+        else:
+            return queryset
+
+    def get_secondary_object_source_queryset(self):
+        return self.secondary_object_source_queryset
+
+    def get_success_url(self):
+        # Redirect to the same view
+        return reverse(
+            viewname=self.request.resolver_match.view_name,
+            kwargs=self.request.resolver_match.kwargs
+        )
 
 
 class MultipleObjectFormActionView(ObjectActionMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultipleObjectMixin, FormExtraKwargsMixin, ExtraContextMixin, RedirectionMixin, DjangoFormView):
