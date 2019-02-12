@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -48,10 +48,12 @@ class Tag(models.Model):
         """
         Attach a tag to a document and commit the corresponding event.
         """
-        self.documents.add(document)
-        event_tag_attach.commit(
-            action_object=self, actor=user, target=document
-        )
+        with transaction.atomic():
+            for document in documents:
+                self.documents.add(document)
+                event_tag_attach.commit(
+                    action_object=self, actor=user, target=document
+                )
 
     def get_absolute_url(self):
         return reverse(
@@ -72,14 +74,16 @@ class Tag(models.Model):
     def get_document_count(self, user):
         return self.get_documents(user=user).count()
 
-    def remove_from(self, document, user=None):
+    def remove_from(self, documents, _user=None):
         """
         Remove a tag from a document and commit the corresponding event.
         """
-        self.documents.remove(document)
-        event_tag_remove.commit(
-            action_object=self, actor=user, target=document
-        )
+        with transaction.atomic():
+            for document in documents:
+                self.documents.remove(document)
+                event_tag_remove.commit(
+                    action_object=self, actor=user, target=document
+                )
 
     def save(self, *args, **kwargs):
         user = kwargs.pop('_user', None)
