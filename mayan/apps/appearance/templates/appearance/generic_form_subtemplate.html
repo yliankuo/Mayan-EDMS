@@ -90,6 +90,17 @@
                             <i class="fa fa-times"></i> {% if cancel_label %}{{ cancel_label }}{% else %}{% trans 'Cancel' %}{% endif %}
                           </a>
                     {% endif %}
+
+                    {% for button in extra_buttons %}
+                        <button class="btn btn-default" name="{% if form.prefix %}{{ form.prefix }}-{{ button.name }}{% else %}{{ button.name }}{% endif %}" type="submit">
+                            {% if button.icon_class %}
+                                {{ button.icon_class.render }}
+                            {% endif %}
+                            {% if button.label %}{{ button.label }}{% else %}{% if object %}{% trans 'Save' %}{% else %}{% trans 'Submit' %}{% endif %}{% endif %}
+                        </button>
+                    {% endfor %}
+
+
                 </div>
             {% endif %}
         {% endif %}
