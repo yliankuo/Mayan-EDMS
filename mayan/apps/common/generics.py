@@ -251,32 +251,6 @@ class MultipleObjectDownloadView(RestrictedQuerysetMixin, MultipleObjectMixin, D
             return super(MultipleObjectDownloadView, self).get_queryset()
 
 
-class SingleObjectDownloadView(RestrictedQuerysetMixin, SingleObjectMixin, DownloadViewBase):
-    """
-    View that provides a .get_object() method to download content from a
-    single object.
-    """
-    def __init__(self, *args, **kwargs):
-        result = super(SingleObjectDownloadView, self).__init__(*args, **kwargs)
-
-        if self.__class__.mro()[0].get_queryset != SingleObjectDownloadView.get_queryset:
-            raise ImproperlyConfigured(
-                '%(cls)s is overloading the get_queryset method. Subclasses '
-                'should implement the get_source_queryset method instead. ' % {
-                    'cls': self.__class__.__name__
-                }
-            )
-
-        return result
-
-    def get_queryset(self):
-        try:
-            return super(SingleObjectDownloadView, self).get_queryset()
-        except ImproperlyConfigured:
-            self.queryset = self.get_source_queryset()
-            return super(SingleObjectDownloadView, self).get_queryset()
-
-
 class MultiFormView(DjangoFormView):
     prefix = None
     prefixes = {}
@@ -607,7 +581,7 @@ class AddRemoveView(ExternalObjectMixin, ExtraContextMixin, ViewPermissionCheckM
         )
 
 
-class MultipleObjectFormActionView(ObjectActionMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultipleObjectMixin, FormExtraKwargsMixin, ExtraContextMixin, RedirectionMixin, DjangoFormView):
+class MultipleObjectFormActionView(ExtraContextMixin, ObjectActionMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultipleObjectMixin, FormExtraKwargsMixin, RedirectionMixin, DjangoFormView):
     """
     This view will present a form and upon receiving a POST request will
     perform an action on an object or queryset
@@ -639,7 +613,7 @@ class MultipleObjectFormActionView(ObjectActionMixin, ViewPermissionCheckMixin, 
             return super(MultipleObjectFormActionView, self).get_queryset()
 
 
-class MultipleObjectConfirmActionView(ObjectActionMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultipleObjectMixin, ExtraContextMixin, RedirectionMixin, TemplateView):
+class MultipleObjectConfirmActionView(ExtraContextMixin, ObjectActionMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultipleObjectMixin, RedirectionMixin, TemplateView):
     template_name = 'appearance/generic_confirm.html'
 
     def __init__(self, *args, **kwargs):
@@ -736,6 +710,32 @@ class SingleObjectCreateView(ObjectNameMixin, ViewPermissionCheckMixin, ExtraCon
 
     def get_error_message_duplicate(self):
         return self.error_message_duplicate
+
+
+class SingleObjectDownloadView(RestrictedQuerysetMixin, SingleObjectMixin, DownloadViewBase):
+    """
+    View that provides a .get_object() method to download content from a
+    single object.
+    """
+    def __init__(self, *args, **kwargs):
+        result = super(SingleObjectDownloadView, self).__init__(*args, **kwargs)
+
+        if self.__class__.mro()[0].get_queryset != SingleObjectDownloadView.get_queryset:
+            raise ImproperlyConfigured(
+                '%(cls)s is overloading the get_queryset method. Subclasses '
+                'should implement the get_source_queryset method instead. ' % {
+                    'cls': self.__class__.__name__
+                }
+            )
+
+        return result
+
+    def get_queryset(self):
+        try:
+            return super(SingleObjectDownloadView, self).get_queryset()
+        except ImproperlyConfigured:
+            self.queryset = self.get_source_queryset()
+            return super(SingleObjectDownloadView, self).get_queryset()
 
 
 class SingleObjectDynamicFormCreateView(DynamicFormViewMixin, SingleObjectCreateView):
