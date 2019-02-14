@@ -17,6 +17,7 @@ from mayan.apps.events import ModelEventType
 from mayan.apps.events.links import (
     link_events_for_object, link_object_event_types_user_subcriptions_list
 )
+from mayan.apps.events.permissions import permission_events_view
 from mayan.apps.navigation import SourceColumn
 
 from .events import event_role_created, event_role_edited
@@ -58,8 +59,8 @@ class PermissionsApp(MayanAppConfig):
         ModelPermission.register(
             model=Role, permissions=(
                 permission_acl_edit, permission_acl_view,
-                permission_role_delete, permission_role_edit,
-                permission_role_view
+                permission_events_view, permission_role_delete,
+                permission_role_edit, permission_role_view
             )
         )
 
