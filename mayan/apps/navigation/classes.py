@@ -216,6 +216,9 @@ class Menu(object):
         self.__class__._registry[name] = self
         self.non_sorted_sources = non_sorted_sources or []
 
+    def __repr__(self):
+        return '<Menu: {}>'.format(self.name)
+
     def _map_links_to_source(self, links, source, map_variable='bound_links', position=None):
         source_links = getattr(self, map_variable).setdefault(source, [])
 
@@ -278,6 +281,24 @@ class Menu(object):
         )
         return resolved_navigation_object_list
 
+    def get_result_position(self, item):
+        """
+        Method to help sort results by position.
+        """
+        if isinstance(item, ResolvedLink):
+            return self.link_positions.get(item.link, 0)
+        else:
+            return self.link_positions.get(item, 0)
+
+    def get_result_label(self, item):
+        """
+        Method to help sort results by label.
+        """
+        if isinstance(item, ResolvedLink):
+            return item.link.text
+        else:
+            return item.label
+
     def resolve(self, context, source=None, sort_results=False):
         if not self.check_condition(context=context):
             return []
@@ -339,7 +360,12 @@ class Menu(object):
                     pass
 
             if resolved_links:
-                result.append(resolved_links)
+                result.append(
+                    {
+                        'object': resolved_navigation_object,
+                        'links': resolved_links
+                    }
+                )
 
         resolved_links = []
         # View links
@@ -350,7 +376,12 @@ class Menu(object):
                     resolved_links.append(resolved_link)
 
         if resolved_links:
-            result.append(resolved_links)
+            result.append(
+                {
+                    'object': current_view_name,
+                    'links': resolved_links
+                }
+            )
 
         resolved_links = []
 
@@ -368,7 +399,12 @@ class Menu(object):
                         resolved_links.append(resolved_link)
 
         if resolved_links:
-            result.append(resolved_links)
+            result.append(
+                {
+                    'object': None,
+                    'links': resolved_links
+                }
+            )
 
         if result:
             unsorted_source = False
@@ -379,16 +415,15 @@ class Menu(object):
                         break
 
             if sort_results and not unsorted_source:
-                result[0] = sorted(
-                    result[0], key=lambda item: (
-                        item.link.text if isinstance(item, ResolvedLink) else item.label
+                for link_group in result:
+                    link_group['links'] = sorted(
+                        link_group['links'], key=self.get_result_label
                     )
-                )
             else:
-                # Sort links by position value passed during bind
-                result[0] = sorted(
-                    result[0], key=lambda item: (self.link_positions.get(item.link) or 0) if isinstance(item, ResolvedLink) else (self.link_positions.get(item) or 0)
-                )
+                for link_group in result:
+                    link_group['links'] = sorted(
+                        link_group['links'], key=self.get_result_position
+                    )
 
         return result
 
@@ -411,12 +446,15 @@ class Menu(object):
 
 class ResolvedLink(object):
     def __init__(self, link, current_view_name):
+        self.context = None
         self.current_view_name = current_view_name
         self.disabled = False
         self.link = link
-        self.url = '#'
-        self.context = None
         self.request = None
+        self.url = '#'
+
+    def __repr__(self):
+        return '<ResolvedLink: {}>'.format(self.url)
 
     @property
     def active(self):

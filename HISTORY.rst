@@ -237,6 +237,13 @@
   document type selection screen. The document type view
   permission is now required in addition to the index
   template edit permission.
+- Update the links display templates to show which object the
+  links belong to when there is more than one object.
+- Update the links display templates to show which menu
+  the links belong to when there is more than one menu.
+- Remove the sidebar menu and unify its links with the 
+  secondary menu.
+
 
 3.1.9 (2018-11-01)
 ==================

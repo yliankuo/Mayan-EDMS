@@ -52,6 +52,14 @@ def common_calculate_title(context):
 
 
 @register.simple_tag
+def common_get_object_verbose_name(obj):
+    try:
+        return obj._meta.verbose_name
+    except AttributeError:
+        return type(obj)
+
+
+@register.simple_tag
 def get_collections():
     return Collection.get_all()
 
