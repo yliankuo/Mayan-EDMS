@@ -236,41 +236,41 @@ class RootView(SimpleView):
     template_name = 'appearance/root.html'
 
 
-class SetupListView(TemplateView):
+class SetupListView(SimpleView):
     template_name = 'appearance/generic_list_horizontal.html'
 
-    def get_context_data(self, **kwargs):
-        data = super(SetupListView, self).get_context_data(**kwargs)
+    def get_extra_context(self):
         context = RequestContext(self.request)
         context['request'] = self.request
-        data.update(
-            {
-                'no_results_icon': icon_setup,
-                'no_results_label': _('No setup options available.'),
-                'no_results_text': _(
-                    'No results here means that don\'t have the required '
-                    'permissions to perform administrative task.'
-                ),
-                'resolved_links': menu_setup.resolve(context=context),
-                'title': _('Setup items'),
-            }
-        )
-        return data
+        return {
+            'no_results_icon': icon_setup,
+            'no_results_label': _('No setup options available.'),
+            'no_results_text': _(
+                'No results here means that don\'t have the required '
+                'permissions to perform administrative task.'
+            ),
+            'resolved_links': menu_setup.resolve(context=context),
+            'title': _('Setup'),
+            'subtitle': _(
+                'Here you can configure all aspects of the system.'
+            ),
+        }
 
 
 class ToolsListView(SimpleView):
     template_name = 'appearance/generic_list_horizontal.html'
 
-    def get_menu_links(self):
+    def get_extra_context(self):
         context = RequestContext(self.request)
         context['request'] = self.request
 
-        return menu_tools.resolve(context=context)
-
-    def get_extra_context(self):
         return {
-            'resolved_links': self.get_menu_links(),
+            'resolved_links': menu_tools.resolve(context=context),
             'title': _('Tools'),
+            'subtitle': _(
+                'These are programs are modules used to do maintenance in '
+                'the system.'
+            ),
         }
 
 
