@@ -2,12 +2,16 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common import (
-    MayanAppConfig, menu_object, menu_secondary, menu_sidebar
+from mayan.apps.common import MayanAppConfig, menu_object, menu_secondary
+from mayan.apps.events import ModelEventType
+from mayan.apps.events.links import (
+    link_events_for_object, link_object_event_types_user_subcriptions_list
 )
+from mayan.apps.events.permissions import permission_events_view
 from mayan.apps.navigation import SourceColumn
 
 from .classes import ModelPermission
+from .events import event_acl_created, event_acl_edited
 from .links import link_acl_create, link_acl_delete, link_acl_permissions
 
 
@@ -21,25 +25,33 @@ class ACLsApp(MayanAppConfig):
 
     def ready(self):
         super(ACLsApp, self).ready()
+        from actstream import registry
 
         AccessControlList = self.get_model(model_name='AccessControlList')
 
+        ModelEventType.register(
+            event_types=(event_acl_created, event_acl_edited),
+            model=AccessControlList
+        )
         ModelPermission.register_inheritance(
             model=AccessControlList, related='content_object',
         )
+
         SourceColumn(
             attribute='role', is_identifier=True, is_sortable=True,
             source=AccessControlList
         )
-        SourceColumn(
-            attribute='get_permission_titles', include_label=True,
-            source=AccessControlList
-        )
 
         menu_object.bind_links(
-            links=(link_acl_permissions, link_acl_delete,),
+            links=(
+                link_acl_permissions, link_acl_delete,
+                link_events_for_object,
+                link_object_event_types_user_subcriptions_list
+            ),
             sources=(AccessControlList,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_acl_create,), sources=('acls:acl_list',)
         )
+
+        registry.register(AccessControlList)

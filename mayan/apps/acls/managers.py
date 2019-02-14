@@ -151,7 +151,7 @@ class AccessControlListManager(models.Manager):
             else:
                 raise PermissionDenied
 
-    def get_inherited_permissions(self, role, obj):
+    def get_inherited_permissions(self, obj, role):
         try:
             instance = obj.first()
         except AttributeError:
@@ -177,11 +177,11 @@ class AccessControlListManager(models.Manager):
                 parent_object = return_related(
                     instance=instance, related_field=parent_accessor
                 )
-            content_type = ContentType.objects.get_for_model(parent_object)
+            content_type = ContentType.objects.get_for_model(model=parent_object)
             try:
                 return self.get(
-                    role=role, content_type=content_type,
-                    object_id=parent_object.pk
+                    content_type=content_type, object_id=parent_object.pk,
+                    role=role
                 ).permissions.all()
             except self.model.DoesNotExist:
                 return StoredPermission.objects.none()
