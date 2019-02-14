@@ -18,7 +18,7 @@ from .icons import (
     icon_workflow_state_create, icon_workflow_state_delete,
     icon_workflow_state_edit, icon_workflow_transition,
     icon_workflow_transition_create, icon_workflow_transition_delete,
-    icon_workflow_transition_edit
+    icon_workflow_transition_edit, icon_workflow_transition_triggers
 )
 from .permissions import (
     permission_workflow_create, permission_workflow_delete,
@@ -161,6 +161,7 @@ link_workflow_transition_list = Link(
     view='workflows:workflow_transition_list'
 )
 link_workflow_transition_triggers = Link(
+    icon_class=icon_workflow_transition_triggers,
     kwargs={'workflow_transition_id': 'resolved_object.pk'},
     permission=permission_workflow_edit, text=_('Transition triggers'),
     view='workflows:workflow_transition_triggers'
