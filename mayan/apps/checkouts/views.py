@@ -27,7 +27,7 @@ class DocumentCheckinView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_document_check_in
     pk_url_kwarg = 'document_id'
-    success_message = '%(count)d document checked in.'
+    success_message_singular = '%(count)d document checked in.'
     success_message_plural = '%(count)d documents checked in.'
 
     def get_extra_context(self):
@@ -76,7 +76,7 @@ class DocumentCheckoutView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_document_checkout
     pk_url_kwarg = 'document_id'
-    success_message = '%(count)d document checked out.'
+    success_message_singular = '%(count)d document checked out.'
     success_message_plural = '%(count)d documents checked out.'
 
     def get_extra_context(self):

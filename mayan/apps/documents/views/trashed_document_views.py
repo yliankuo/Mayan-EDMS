@@ -33,7 +33,7 @@ class DocumentTrashView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_document_trash
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         '%(count)d document moved to the trash.'
     )
     success_message_plural = _(
@@ -81,7 +81,7 @@ class TrashedDocumentDeleteView(MultipleObjectConfirmActionView):
     model = TrashedDocument
     object_permission = permission_trashed_document_delete
     pk_url_kwarg = 'trashed_document_id'
-    success_message = _(
+    success_message_singular = _(
         '%(count)d trashed document deleted.'
     )
     success_message_plural = _(
@@ -138,7 +138,7 @@ class TrashedDocumentRestoreView(MultipleObjectConfirmActionView):
     model = TrashedDocument
     object_permission = permission_trashed_document_restore
     pk_url_kwarg = 'trashed_document_id'
-    success_message = _(
+    success_message_singular = _(
         '%(count)d trashed document restored.'
     )
     success_message_plural = _(

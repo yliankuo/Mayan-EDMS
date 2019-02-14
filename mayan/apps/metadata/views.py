@@ -70,7 +70,7 @@ class DocumentMetadataAddView(DocumentMetadataSameTypeMixin, MultipleObjectFormA
     model = Document
     object_permission = permission_metadata_add
     pk_url_kwarg = 'document_id'
-    success_message = _('Metadata add request performed on %(count)d document')
+    success_message_singular = _('Metadata add request performed on %(count)d document')
     success_message_plural = _(
         'Metadata add request performed on %(count)d documents'
     )
@@ -202,7 +202,7 @@ class DocumentMetadataEditView(DocumentMetadataSameTypeMixin, MultipleObjectForm
     model = Document
     object_permission = permission_metadata_edit
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         'Metadata edit request performed on %(count)d document'
     )
     success_message_plural = _(
@@ -379,7 +379,7 @@ class DocumentMetadataRemoveView(DocumentMetadataSameTypeMixin, MultipleObjectFo
     model = Document
     object_permission = permission_metadata_remove
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         'Metadata remove request performed on %(count)d document'
     )
     success_message_plural = _(

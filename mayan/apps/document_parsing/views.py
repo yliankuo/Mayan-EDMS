@@ -105,7 +105,7 @@ class DocumentParsingErrorsListView(SingleObjectListView):
 class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_parse_document
-    success_message = _(
+    success_message_singular = _(
         '%(count)d document added to the parsing queue'
     )
     success_message_plural = _(

@@ -236,7 +236,7 @@ class DocumentAddToCabinetView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_cabinet_add_document
     pk_url_kwarg = 'document_pk'
-    success_message = _(
+    success_message_singular = _(
         'Add to cabinet request performed on %(count)d document'
     )
     success_message_plural = _(
@@ -326,7 +326,7 @@ class DocumentRemoveFromCabinetView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_cabinet_remove_document
     pk_url_kwarg = 'document_pk'
-    success_message = _(
+    success_message_singular = _(
         'Remove from cabinet request performed on %(count)d document'
     )
     success_message_plural = _(

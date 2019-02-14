@@ -105,7 +105,7 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_ocr_document
     pk_url_kwarg = 'document_id'
-    success_message = '%(count)d document submitted to the OCR queue.'
+    success_message_singular = '%(count)d document submitted to the OCR queue.'
     success_message_plural = '%(count)d documents submitted to the OCR queue.'
 
     def get_extra_context(self):

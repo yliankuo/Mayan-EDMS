@@ -40,7 +40,7 @@ class MailDocumentView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_mailing_send_document
     pk_url_kwarg = 'document_id'
-    success_message = _('%(count)d document queued for email delivery')
+    success_message_singular = _('%(count)d document queued for email delivery')
     success_message_plural = _(
         '%(count)d documents queued for email delivery'
     )
@@ -99,7 +99,7 @@ class MailDocumentView(MultipleObjectFormActionView):
 class MailDocumentLinkView(MailDocumentView):
     as_attachment = False
     object_permission = permission_mailing_link
-    success_message = _('%(count)d document link queued for email delivery')
+    success_message_singular = _('%(count)d document link queued for email delivery')
     success_message_plural = _(
         '%(count)d document links queued for email delivery'
     )

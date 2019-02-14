@@ -70,7 +70,7 @@ class DocumentChangeTypeView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_document_properties_edit
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         'Document type change request performed on %(count)d document'
     )
     success_message_plural = _(
@@ -379,7 +379,7 @@ class DocumentUpdatePageCountView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_document_tools
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         '%(count)d document queued for page count recalculation'
     )
     success_message_plural = _(
@@ -431,7 +431,7 @@ class DocumentTransformationsClearView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_transformation_delete
     pk_url_kwarg = 'document_id'
-    success_message = _(
+    success_message_singular = _(
         'Transformation clear request processed for %(count)d document'
     )
     success_message_plural = _(
@@ -660,7 +660,7 @@ class FavoriteDocumentListView(DocumentListView):
 class FavoriteAddView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_document_view
-    success_message = _(
+    success_message_singular = _(
         '%(count)d document added to favorites.'
     )
     success_message_plural = _(
@@ -690,7 +690,7 @@ class FavoriteRemoveView(MultipleObjectConfirmActionView):
     error_message = _('Document "%(instance)s" is not in favorites.')
     model = Document
     object_permission = permission_document_view
-    success_message = _(
+    success_message_singular = _(
         '%(count)d document removed from favorites.'
     )
     success_message_plural = _(
