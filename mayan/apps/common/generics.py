@@ -346,7 +346,6 @@ class MultiFormView(DjangoFormView):
 
 class AddRemoveView(ExternalObjectMixin, ExtraContextMixin, ViewPermissionCheckMixin, RestrictedQuerysetMixin, MultiFormView):
     form_classes = {'form_available': ChoiceForm, 'form_added': ChoiceForm}
-    grouped = False
     list_added_help_text = _(
         'Select entries to be removed. Hold Control to select multiple '
         'entries. Once the selection is complete, click the button below '
@@ -429,18 +428,18 @@ class AddRemoveView(ExternalObjectMixin, ExtraContextMixin, ViewPermissionCheckM
 
     def forms_valid(self, forms):
         if 'available-add_all' in self.request.POST:
-            selection_add = self.get_secondary_object_list()
+            selection_add = self.get_list_available_queryset()
         else:
-            selection_add = self.get_secondary_object_list().filter(
+            selection_add = self.get_list_available_queryset().filter(
                 pk__in=forms['form_available'].cleaned_data['selection']
             )
 
         self.action_add(queryset=selection_add)
 
         if 'added-remove_all' in self.request.POST:
-            selection_remove = self.get_secondary_object_list()
+            selection_remove = self.get_list_added_queryset()
         else:
-            selection_remove = self.get_secondary_object_list().filter(
+            selection_remove = self.get_list_added_queryset().filter(
                 pk__in=forms['form_added'].cleaned_data['selection']
             )
 
