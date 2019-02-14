@@ -10,7 +10,7 @@ from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_main, menu_object,
-    menu_secondary, menu_setup, menu_sidebar, menu_tools
+    menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.classes import ModelAttribute
 from mayan.apps.common.links import link_object_error_list
@@ -307,7 +307,7 @@ class DocumentStatesApp(MayanAppConfig):
             )
         )
         menu_setup.bind_links(links=(link_workflow_list,))
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_workflow_transition_create,
             ), sources=(
@@ -315,7 +315,7 @@ class DocumentStatesApp(MayanAppConfig):
                 'document_states:workflow_transition_list',
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_workflow_state_create,
             ), sources=(
