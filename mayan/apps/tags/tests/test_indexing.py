@@ -8,8 +8,7 @@ from mayan.apps.document_indexing.tests.literals import TEST_INDEX_LABEL
 from ..models import Tag
 
 from .literals import (
-    TEST_TAG_COLOR, TEST_TAG_LABEL, TEST_TAG_INDEX_HAS_TAG,
-    TEST_TAG_INDEX_NO_TAG, TEST_TAG_INDEX_NODE_TEMPLATE
+    TEST_TAG_INDEX_HAS_TAG, TEST_TAG_INDEX_NO_TAG, TEST_TAG_INDEX_NODE_TEMPLATE
 )
 from .mixins import TagTestMixin
 

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import GenericViewTestCase
-from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 
 from ..models import Tag
@@ -12,82 +11,88 @@ from ..permissions import (
     permission_tag_edit, permission_tag_remove, permission_tag_view
 )
 
-from .literals import (
-    TEST_TAG_COLOR, TEST_TAG_COLOR_EDITED, TEST_TAG_LABEL,
-    TEST_TAG_LABEL_EDITED
-)
 from .mixins import TagTestMixin, TagViewTestMixin
 
 
 class TagViewTestCase(TagViewTestMixin, TagTestMixin, GenericViewTestCase):
     def test_tag_create_view_no_permissions(self):
+        tag_count = Tag.objects.count()
+
         response = self._request_tag_create_view()
         self.assertEqual(response.status_code, 403)
 
-        self.assertEqual(Tag.objects.count(), 0)
+        self.assertEqual(tag_count, Tag.objects.count())
 
     def test_tag_create_view_with_permissions(self):
+        tag_count = Tag.objects.count()
+
         self.grant_permission(permission=permission_tag_create)
         response = self._request_tag_create_view()
         self.assertEqual(response.status_code, 302)
 
-        self.assertEqual(Tag.objects.count(), 1)
-        tag = Tag.objects.first()
-        self.assertEqual(tag.label, TEST_TAG_LABEL)
-        self.assertEqual(tag.color, TEST_TAG_COLOR)
+        self.assertEqual(tag_count + 1, Tag.objects.count())
 
     def test_tag_delete_view_no_permissions(self):
         self._create_test_tag()
+        tag_count = Tag.objects.count()
 
         response = self._request_tag_delete_view()
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(Tag.objects.count(), 1)
+
+        self.assertEqual(tag_count, Tag.objects.count())
 
     def test_tag_delete_view_with_access(self):
         self._create_test_tag()
+        tag_count = Tag.objects.count()
 
         self.grant_access(obj=self.test_tag, permission=permission_tag_delete)
 
         response = self._request_tag_delete_view()
         self.assertEqual(response.status_code, 302)
 
-        self.assertEqual(Tag.objects.count(), 0)
+        self.assertEqual(tag_count - 1, Tag.objects.count())
 
     def test_tag_multiple_delete_view_no_permissions(self):
         self._create_test_tag()
+        tag_count = Tag.objects.count()
 
         response = self._request_tag_multiple_delete_view()
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(Tag.objects.count(), 1)
+
+        self.assertEqual(tag_count, Tag.objects.count())
 
     def test_tag_multiple_delete_view_with_access(self):
         self._create_test_tag()
+        tag_count = Tag.objects.count()
 
         self.grant_access(obj=self.test_tag, permission=permission_tag_delete)
 
         response = self._request_tag_multiple_delete_view()
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(Tag.objects.count(), 0)
+
+        self.assertEqual(tag_count - 1, Tag.objects.count())
 
     def test_tag_edit_view_no_permissions(self):
         self._create_test_tag()
+        tag_label = self.test_tag.label
 
         response = self._request_tag_edit_view()
         self.assertEqual(response.status_code, 404)
-        tag = Tag.objects.get(pk=self.test_tag.pk)
-        self.assertEqual(tag.label, TEST_TAG_LABEL)
-        self.assertEqual(tag.color, TEST_TAG_COLOR)
+
+        self.test_tag.refresh_from_db()
+        self.assertEqual(tag_label, self.test_tag.label)
 
     def test_tag_edit_view_with_access(self):
         self._create_test_tag()
+        tag_label = self.test_tag.label
 
         self.grant_access(obj=self.test_tag, permission=permission_tag_edit)
 
         response = self._request_tag_edit_view()
         self.assertEqual(response.status_code, 302)
-        tag = Tag.objects.get(pk=self.test_tag.pk)
-        self.assertEqual(tag.label, TEST_TAG_LABEL_EDITED)
-        self.assertEqual(tag.color, TEST_TAG_COLOR_EDITED)
+
+        self.test_tag.refresh_from_db()
+        self.assertNotEqual(tag_label, self.test_tag.label)
 
 
 class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentViewTestCase):
@@ -96,7 +101,8 @@ class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentVi
 
         response = self._request_document_tag_multiple_attach_view()
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(self.test_document.tags.count(), 0)
+
+        self.assertTrue(self.test_tag not in self.test_document.tags.all())
 
     def test_document_tag_attach_view_with_document_access(self):
         self._create_test_tag()
@@ -113,7 +119,7 @@ class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentVi
             response=response, text=force_text(self.test_tag), status_code=200
         )
 
-        self.assertEqual(self.test_document.tags.count(), 0)
+        self.assertTrue(self.test_tag not in self.test_document.tags.all())
 
     def test_document_tag_attach_view_with_tag_access(self):
         self._create_test_tag()
@@ -122,7 +128,7 @@ class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentVi
         response = self._request_document_tag_multiple_attach_view()
         self.assertEqual(response.status_code, 404)
 
-        self.assertEqual(self.test_document.tags.count(), 0)
+        self.assertTrue(self.test_tag not in self.test_document.tags.all())
 
     def test_document_tag_attach_view_with_full_access(self):
         self._create_test_tag()
@@ -134,10 +140,7 @@ class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentVi
         response = self._request_document_tag_multiple_attach_view()
         self.assertEqual(response.status_code, 302)
 
-        self.assertQuerysetEqual(
-            self.test_document.tags.all(), (repr(self.test_tag),)
-        )
-
+        self.assertTrue(self.test_tag in self.test_document.tags.all())
 
     def test_document_single_tag_attach_view_with_full_access(self):
         """
@@ -178,10 +181,6 @@ class TagDocumentsViewTestCase(TagViewTestMixin, TagTestMixin, GenericDocumentVi
 
         response = self._request_document_multiple_tag_multiple_attach_view()
 
-        self.assertContains(
-            response=response, text=force_text(self.test_document),
-            status_code=200
-        )
         self.assertNotContains(
             response=response, text=force_text(self.test_tag), status_code=200
         )

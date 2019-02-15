@@ -23,7 +23,7 @@ class TagActionTestCase(ActionTestCase):
         self.assertEqual(list(self.tag.documents.all()), [self.document])
 
     def test_tag_remove_action(self):
-        self.tag.attach_to(document=self.document)
+        self.tag.documents.add(self.document)
 
         action = RemoveTagAction(form_data={'tags': Tag.objects.all()})
         action.execute(context={'document': self.document})
