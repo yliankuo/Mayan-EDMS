@@ -7,6 +7,7 @@ from rest_framework.reverse import reverse
 
 from mayan.apps.common.models import SharedUploadedFile
 from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
+from mayan.apps.rest_api.serializers import LazyExtraFieldsHyperlinkedModelSerializer
 
 from .models import (
     Document, DocumentPage, DocumentType, DocumentTypeFilename,
@@ -373,7 +374,44 @@ class DeletedDocumentSerializer(serializers.HyperlinkedModelSerializer):
         return instance.document_type.label
 
 
-class DocumentSerializer(serializers.HyperlinkedModelSerializer):
+class HyperlinkedField(serializers.Field):
+    """
+    Represents the instance, or a property on the instance, using hyperlinking.
+    """
+    read_only = True
+
+    def __init__(self, *args, **kwargs):
+        self.view_name = kwargs.pop('view_name', None)
+        # Optionally the format of the target hyperlink may be specified
+        self.format = kwargs.pop('format', None)
+        # Optionally specify arguments
+        self.view_args = kwargs.pop('view_args', None)
+
+        super(HyperlinkedField, self).__init__(*args, **kwargs)
+
+    def to_representation(self, value):
+        return 'qe'
+
+    def field_to_native(self, obj, field_name):
+        return 'qwe'
+        request = self.context.get('request', None)
+        format = self.context.get('format', None)
+        view_name = self.view_name
+
+        # By default use whatever format is given for the current context
+        # unless the target is a different type to the source.
+        if format and self.format and self.format != format:
+            format = self.format
+
+        try:
+            return reverse(view_name, args=self.view_args, request=request, format=format)
+        except NoReverseMatch:
+            pass
+
+        raise Exception('Could not resolve URL for field using view name "%s"' % view_name)
+
+
+class DocumentSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
     #document_type_url = serializers.HyperlinkedIdentityField(
     #    lookup_field='document_type_id', lookup_url_kwarg='document_type_id',
@@ -384,7 +422,6 @@ class DocumentSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field='pk', lookup_url_kwarg='document_id',
         view_name='rest_api:document_version-list'
     )
-    #view_name='rest_api:document_type-document-list'
 
     class Meta:
         extra_kwargs = {
