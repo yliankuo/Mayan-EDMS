@@ -14,8 +14,7 @@ from mayan.apps.acls.permissions import (
 )
 from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_facet, menu_list_facet, menu_main,
-    menu_multi_item, menu_object, menu_secondary, menu_setup, menu_sidebar,
-    menu_tools
+    menu_multi_item, menu_object, menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.classes import ModelField, Template
 from mayan.apps.common.signals import post_initial_setup
@@ -494,14 +493,14 @@ class DocumentsApp(MayanAppConfig):
                 'documents:document_type_list'
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_document_type_filename_create,),
             sources=(
                 DocumentTypeFilename, 'documents:document_type_filename_list',
                 'documents:document_type_filename_create'
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_trash_can_empty,),
             sources=(
                 'documents:trashed_document_list', 'documents:trash_can_empty'
