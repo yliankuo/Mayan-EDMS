@@ -6,7 +6,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_list_facet, menu_object, menu_secondary,
-    menu_setup, menu_sidebar
+    menu_setup, menu_secondary
 )
 from mayan.apps.common.signals import post_initial_setup, post_upgrade
 from mayan.apps.common.widgets import TwoStateWidget
@@ -171,7 +171,7 @@ class SourcesApp(MayanAppConfig):
             )
         )
         menu_setup.bind_links(links=(link_source_list,))
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_upload_version,),
             sources=(
                 'documents:document_version_list', 'documents:upload_version',

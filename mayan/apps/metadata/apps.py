@@ -13,7 +13,7 @@ from mayan.apps.acls.links import link_acl_list
 from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_multi_item, menu_object,
-    menu_secondary, menu_setup, menu_sidebar
+    menu_secondary, menu_setup, menu_secondary
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.common.widgets import TwoStateWidget
@@ -237,7 +237,7 @@ class MetadataApp(MayanAppConfig):
             )
         )
         menu_setup.bind_links(links=(link_metadata_type_list,))
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_document_metadata_add, link_document_metadata_edit,
                 link_document_metadata_remove

@@ -6,7 +6,7 @@ from mayan.apps.acls import ModelPermission
 from mayan.apps.acls.links import link_acl_list
 from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_object, menu_setup, menu_sidebar
+    MayanAppConfig, menu_facet, menu_object, menu_setup, menu_secondary
 )
 from mayan.apps.navigation import SourceColumn
 
@@ -80,7 +80,7 @@ class DjangoGPGApp(MayanAppConfig):
                 'django_gpg:key_upload', Key, KeyStub
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_key_query, link_key_upload),
             sources=(
                 'django_gpg:key_public_list', 'django_gpg:key_private_list',

@@ -10,7 +10,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_object, menu_sidebar, menu_tools
+    MayanAppConfig, menu_facet, menu_object, menu_secondary, menu_tools
 )
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
@@ -145,7 +145,7 @@ class DocumentSignaturesApp(MayanAppConfig):
                 link_document_version_signature_delete,
             ), sources=(SignatureBaseModel,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_document_version_signature_upload,
             ), sources=(DocumentVersion,)

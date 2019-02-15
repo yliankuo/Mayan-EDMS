@@ -9,7 +9,7 @@ from mayan.apps.acls.permissions import (
 )
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_main, menu_multi_item, menu_object,
-    menu_sidebar
+    menu_secondary
 )
 from mayan.apps.common.classes import ModelAttribute
 from mayan.apps.documents.search import document_page_search, document_search
@@ -123,7 +123,7 @@ class CabinetsApp(MayanAppConfig):
                 link_cabinet_delete
             ), sources=(Cabinet,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_document_cabinet_add, link_document_cabinet_remove),
             sources=(
                 'cabinets:document_cabinet_list',

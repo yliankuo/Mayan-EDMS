@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_object, menu_sidebar
+    MayanAppConfig, menu_facet, menu_object, menu_secondary
 )
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.events import ModelEventType
@@ -74,7 +74,7 @@ class DocumentCommentsApp(MayanAppConfig):
             field='comments__comment'
         )
 
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_comment_add,),
             sources=(
                 'comments:comments_for_document', 'comments:comment_add',
