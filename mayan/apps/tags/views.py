@@ -20,7 +20,8 @@ from mayan.apps.documents.permissions import permission_document_view
 
 from .forms import TagMultipleSelectionForm
 from .icons import (
-    icon_menu_tags, icon_tag_delete_submit, icon_document_tag_multiple_remove_submit
+    icon_document_tag_multiple_attach, icon_document_tag_multiple_remove,
+    icon_menu_tags, icon_tag_delete_submit
 )
 from .links import link_document_tag_multiple_attach, link_tag_create
 from .models import Tag
@@ -37,34 +38,24 @@ class TagAttachActionView(MultipleObjectFormActionView):
     model = Document
     pk_url_kwarg = 'document_id'
     object_permission = permission_tag_attach
-    success_message = _('Tag attach request performed on %(count)d document')
-    success_message_plural = _(
-        'Tag attach request performed on %(count)d documents'
+    success_message_single = _(
+        'Tag attach request performed on %(object)s.'
     )
+    success_message_singular = _(
+        'Tag attach request performed on %(count)d document.'
+    )
+    success_message_plural = _(
+        'Tag attach request performed on %(count)d documents.'
+    )
+    title_single = 'Attach tags to: %(object)s.'
+    title_singular = 'Attach tags to %(count)d document.'
+    title_plural = 'Attach tags to %(count)d documents.'
 
     def get_extra_context(self):
-        queryset = self.get_object_list()
-
-        result = {
+        return {
+            'submit_icon_class': icon_document_tag_multiple_attach,
             'submit_label': _('Attach'),
-            'title': ungettext(
-                singular='Attach tags to %(count)d document',
-                plural='Attach tags to %(count)d documents',
-                number=queryset.count()
-            ) % {
-                'count': queryset.count(),
-            }
         }
-
-        if queryset.count() == 1:
-            result.update(
-                {
-                    'object': queryset.first(),
-                    'title': _('Attach tags to document: %s') % queryset.first()
-                }
-            )
-
-        return result
 
     def get_form_extra_kwargs(self):
         queryset = self.get_object_list()
@@ -117,7 +108,8 @@ class TagAttachActionView(MultipleObjectFormActionView):
                     }, request=self.request
                 )
             else:
-                tag.attach_to(document=instance, user=self.request.user)
+                queryset = Document.objects.filter(pk=instance.pk)
+                tag.documents_attach(queryset=queryset, _user=self.request.user)
                 messages.success(
                     message=_(
                         'Tag "%(tag)s" attached successfully to document '
@@ -144,7 +136,7 @@ class TagDeleteActionView(MultipleObjectConfirmActionView):
     pk_url_kwarg = 'tag_id'
     post_action_redirect = reverse_lazy(viewname='tags:tag_list')
     object_permission = permission_tag_delete
-    success_message = _('Tag delete request performed on %(count)d tag')
+    success_message_singular = _('Tag delete request performed on %(count)d tag')
     success_message_plural = _(
         'Tag delete request performed on %(count)d tags'
     )
@@ -286,37 +278,24 @@ class TagRemoveActionView(MultipleObjectFormActionView):
     model = Document
     object_permission = permission_tag_remove
     pk_url_kwarg = 'document_id'
-    success_message = _('Tag remove request performed on %(count)d document')
+    success_message_single = _(
+        'Tag remove request performed on %(object)s.'
+    )
+    success_message_singular = _(
+        'Tag remove request performed on %(count)d document'
+    )
     success_message_plural = _(
         'Tag remove request performed on %(count)d documents'
     )
+    title_single = 'Remove tags from: %(object)s.'
+    title_singular = 'Remove tags from %(count)d document.'
+    title_plural = 'Remove tags from %(count)d documents.'
 
     def get_extra_context(self):
-        queryset = self.get_object_list()
-
-        result = {
-            'submit_icon_class': icon_document_tag_multiple_remove_submit,
+        return {
+            'submit_icon_class': icon_document_tag_multiple_remove,
             'submit_label': _('Remove'),
-            'title': ungettext(
-                singular='Remove tags to %(count)d document',
-                plural='Remove tags to %(count)d documents',
-                number=queryset.count()
-            ) % {
-                'count': queryset.count(),
-            }
         }
-
-        if queryset.count() == 1:
-            result.update(
-                {
-                    'object': queryset.first(),
-                    'title': _(
-                        'Remove tags from document: %s'
-                    ) % queryset.first()
-                }
-            )
-
-        return result
 
     def get_form_extra_kwargs(self):
         queryset = self.get_object_list()
@@ -367,7 +346,8 @@ class TagRemoveActionView(MultipleObjectFormActionView):
                     }, request=self.request
                 )
             else:
-                tag.remove_from(document=instance, user=self.request.user)
+                queryset = Document.objects.filter(pk=instance.pk)
+                tag.documents_remove(queryset=queryset, _user=self.request.user)
                 messages.success(
                     message=_(
                         'Tag "%(tag)s" removed successfully from document '
