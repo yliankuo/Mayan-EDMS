@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import DocumentTagViewSet, TagViewSet
+from .api_views import DocumentTagAPIViewSet, TagAPIViewSet
 
 from .views import (
     DocumentTagListView, TagAttachActionView, TagCreateView,
@@ -58,9 +58,15 @@ urlpatterns = [
 ]
 
 api_router_entries = (
-    {'prefix': r'tags', 'viewset': TagViewSet, 'basename': 'tag'},
+    {'prefix': r'tags', 'viewset': TagAPIViewSet, 'basename': 'tag'},
     {
-        'prefix': r'documents/(?P<document_id>\d+)/tags',
-        'viewset': DocumentTagViewSet, 'basename': 'document-tag'
-    },
+        'prefix': r'documents/(?P<document_id>\d+)',
+        'viewset': DocumentTagAPIViewSet, 'basename': 'document'
+    }
 )
+
+
+#    {
+#        'prefix': r'permission_namespaces/(?P<permission_namespace_name>[^/.]+)/permissions',
+#        'viewset': PermissionViewSet, 'basename': 'permission'
+#    },

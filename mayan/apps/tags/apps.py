@@ -9,7 +9,7 @@ from mayan.apps.acls.links import link_acl_list
 from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_object, menu_main,
-    menu_multi_item, menu_sidebar
+    menu_multi_item, menu_secondary
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_page_search, document_search
@@ -19,6 +19,8 @@ from mayan.apps.events.links import (
 )
 from mayan.apps.events.permissions import permission_events_view
 from mayan.apps.navigation import SourceColumn
+from mayan.apps.rest_api.fields import HyperlinkField
+from mayan.apps.rest_api.serializers import LazyExtraFieldsSerializerMixin
 
 from .events import (
     event_tag_attach, event_tag_created, event_tag_edited, event_tag_remove
@@ -33,7 +35,10 @@ from .links import (
     link_tag_list, link_tag_multiple_delete
 )
 from .menus import menu_tags
-from .methods import method_get_tags
+from .methods import (
+    method_document_tags_attach, method_document_get_tags,
+    method_document_tags_remove
+)
 from .permissions import (
     permission_tag_attach, permission_tag_delete, permission_tag_edit,
     permission_tag_remove, permission_tag_view
@@ -66,7 +71,9 @@ class TagsApp(MayanAppConfig):
         DocumentTag = self.get_model(model_name='DocumentTag')
         Tag = self.get_model(model_name='Tag')
 
-        Document.add_to_class(name='get_tags', value=method_get_tags)
+        Document.add_to_class(name='get_tags', value=method_document_get_tags)
+        Document.add_to_class(name='tags_attach', value=method_document_tags_attach)
+        Document.add_to_class(name='tags_remove', value=method_document_tags_remove)
 
         ModelEventType.register(
             model=Tag, event_types=(
@@ -167,7 +174,7 @@ class TagsApp(MayanAppConfig):
                 link_tag_edit, link_tag_delete
             ), sources=(Tag,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_document_tag_multiple_attach, link_document_tag_multiple_remove
             ), sources=(
@@ -193,4 +200,31 @@ class TagsApp(MayanAppConfig):
         pre_delete.connect(
             dispatch_uid='tags_handler_tag_pre_delete',
             receiver=handler_tag_pre_delete, sender=Tag
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_attach_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-attach'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_list_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-list'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_remove_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-remove'
+            )
         )
