@@ -14,9 +14,6 @@ icon_document_tag_multiple_remove = Icon(
     driver_name='fontawesome-dual', primary_symbol='tag',
     secondary_symbol='minus'
 )
-icon_document_tag_multiple_remove_submit = Icon(
-    driver_name='fontawesome', symbol='minus'
-)
 icon_menu_tags = Icon(driver_name='fontawesome', symbol='tags')
 icon_tag_create = Icon(
     driver_name='fontawesome-dual', primary_symbol='tag',
