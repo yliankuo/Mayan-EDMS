@@ -19,4 +19,5 @@ class TagMultipleSelectionForm(FilteredSelectionForm):
         allow_multiple = True
         field_name = 'tags'
         label = _('Tags')
+        required = False
         widget_attributes = {'class': 'select2-tags'}
