@@ -55,7 +55,7 @@ class ExternalObjectListSerializerMixin(object):
         if pk_field_value:
             id_list = (pk_field_value,)
         elif pk_list_field_value:
-            id_list = pk_list_field_value or ''.split(',')
+            id_list = (pk_list_field_value or '').split(',')
         else:
             id_list = ()
 
