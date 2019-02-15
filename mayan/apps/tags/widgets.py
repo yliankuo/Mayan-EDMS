@@ -1,12 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django import forms
-from django.apps import apps
-from django.template.loader import render_to_string
 from django.utils.html import conditional_escape
-from django.utils.safestring import mark_safe
-
-from .permissions import permission_tag_view
 
 
 class TagFormWidget(forms.SelectMultiple):
