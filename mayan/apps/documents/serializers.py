@@ -17,8 +17,7 @@ from .settings import setting_language
 from .tasks import task_upload_new_version
 
 
-class DocumentPageSerializer(serializers.HyperlinkedModelSerializer):
-    #document_versions_url = serializers.SerializerMethodField()
+class DocumentPageSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
     image_url = MultiKwargHyperlinkedIdentityField(
         view_kwargs=(
             {
@@ -33,7 +32,6 @@ class DocumentPageSerializer(serializers.HyperlinkedModelSerializer):
         ),
         view_name='rest_api:document_page-image'
     )
-    #url = serializers.SerializerMethodField()
     document_version_url = MultiKwargHyperlinkedIdentityField(
         view_kwargs=(
             {
@@ -62,36 +60,8 @@ class DocumentPageSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         fields = ('document_version_url', 'image_url', 'page_number', 'url')
-        #fields = ('document_version_url', 'page_number', 'url')
         model = DocumentPage
 
-    """
-    def get_document_versions_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentversion-detail', kwargs={
-                'document_id': instance.document.pk,
-                'document_version_id': instance.document_version.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def get_image_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentpage-image', kwargs={
-                'document_id': instance.document.pk,
-                'document_version_id': instance.document_version.pk,
-                'document_page_id': instance.pk,
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentpage-detail', kwargs={
-                'document_id': instance.document.pk,
-                'document_version_id': instance.document_version.pk,
-                'document_page_id': instance.pk,
-            }, request=self.context['request'], format=self.context['format']
-        )
-    """
 
 class DocumentTypeFilenameSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,8 +86,7 @@ class DocumentTypeSerializer(serializers.HyperlinkedModelSerializer):
         }
         fields = (
             'delete_time_period', 'delete_time_unit', 'documents_url',
-            #'delete_time_period', 'delete_time_unit',
-            #'documents_count', 'id', 'label', 'filenames', 'trash_time_period',
+            #'documents_count', 'filenames',
             'id', 'label', 'trash_time_period',
             'trash_time_unit', 'url'
         )
@@ -152,16 +121,13 @@ class WritableDocumentTypeSerializer(serializers.ModelSerializer):
         return obj.documents.count()
 """
 
-class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
-    #document_url = serializers.SerializerMethodField()
+class DocumentVersionSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
     #download_url = serializers.SerializerMethodField()
     document_url = serializers.HyperlinkedIdentityField(
         lookup_field='document_id', lookup_url_kwarg='document_id',
         view_name='rest_api:document-detail'
     )
-    #pages_url = serializers.SerializerMethodField()
-
-    pages_url = MultiKwargHyperlinkedIdentityField(
+    document_page_list_url = MultiKwargHyperlinkedIdentityField(
         view_kwargs=(
             {
                 'lookup_field': 'document_id', 'lookup_url_kwarg': 'document_id',
@@ -174,7 +140,6 @@ class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
     )
 
     size = serializers.SerializerMethodField()
-    #url = serializers.SerializerMethodField()
     url = MultiKwargHyperlinkedIdentityField(
         view_kwargs=(
             {
@@ -189,30 +154,12 @@ class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         extra_kwargs = {
-            #'document': {
-            #    'lookup_field': 'pk', 'lookup_url_kwarg': 'document_id',
-            #    'view_name': 'rest_api:document-detail'
-            #},
             'file': {'use_url': False},
-            #'url': {
-            #    'view_kwargs': (
-            #        {
-            #            'lookup_field': 'pk', 'lookup_url_kwarg': 'document_version_id',
-            #        },
-            #        {
-            #            'lookup_field': 'document__pk', 'lookup_url_kwarg': 'document_id',
-            #        },
-            #    ),
-            #    #'lookup_field': 'pk', 'lookup_url_kwarg': 'document_version_id',
-            #    'view_name': 'rest_api:document_version-detail'
-            #},
         }
         fields = (
-            #'checksum', 'comment', 'document_url', 'download_url', 'encoding',
+            # 'download_url',
             'checksum', 'comment', 'document_url', 'encoding',
-            #'checksum', 'comment', 'encoding',
-            'file', 'mimetype', 'pages_url', 'size', 'timestamp', 'url'
-            #'file', 'mimetype', 'size', 'timestamp', 'url'
+            'file', 'mimetype', 'document_page_list_url', 'size', 'timestamp', 'url'
         )
         model = DocumentVersion
         read_only_fields = ('document', 'file', 'size')
@@ -374,43 +321,6 @@ class DeletedDocumentSerializer(serializers.HyperlinkedModelSerializer):
         return instance.document_type.label
 
 
-class HyperlinkedField(serializers.Field):
-    """
-    Represents the instance, or a property on the instance, using hyperlinking.
-    """
-    read_only = True
-
-    def __init__(self, *args, **kwargs):
-        self.view_name = kwargs.pop('view_name', None)
-        # Optionally the format of the target hyperlink may be specified
-        self.format = kwargs.pop('format', None)
-        # Optionally specify arguments
-        self.view_args = kwargs.pop('view_args', None)
-
-        super(HyperlinkedField, self).__init__(*args, **kwargs)
-
-    def to_representation(self, value):
-        return 'qe'
-
-    def field_to_native(self, obj, field_name):
-        return 'qwe'
-        request = self.context.get('request', None)
-        format = self.context.get('format', None)
-        view_name = self.view_name
-
-        # By default use whatever format is given for the current context
-        # unless the target is a different type to the source.
-        if format and self.format and self.format != format:
-            format = self.format
-
-        try:
-            return reverse(view_name, args=self.view_args, request=request, format=format)
-        except NoReverseMatch:
-            pass
-
-        raise Exception('Could not resolve URL for field using view name "%s"' % view_name)
-
-
 class DocumentSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
     #document_type_url = serializers.HyperlinkedIdentityField(
@@ -418,7 +328,7 @@ class DocumentSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
     #    view_name='rest_api:document_type-detail'
     #)
     latest_version = DocumentVersionSerializer(many=False, read_only=True)
-    versions_url = serializers.HyperlinkedIdentityField(
+    document_version_list_url = serializers.HyperlinkedIdentityField(
         lookup_field='pk', lookup_url_kwarg='document_id',
         view_name='rest_api:document_version-list'
     )
@@ -436,9 +346,8 @@ class DocumentSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
         }
         fields = (
             'date_added', 'description', 'document_type', 'id', 'label',
-            #'date_added', 'description', 'document_type_url', 'id', 'label',
-            'language', 'latest_version', 'url', 'uuid', 'versions_url',
-            #'language', 'url', 'uuid', 'versions_url'
+            #'document_type_url',
+            'language', 'latest_version', 'url', 'uuid', 'document_version_list_url',
         )
         model = Document
         #read_only_fields = ('document_type', 'label')
