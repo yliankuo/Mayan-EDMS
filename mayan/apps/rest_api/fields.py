@@ -7,6 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from mayan.apps.common.utils import resolve_attribute
+
 
 class DynamicSerializerField(serializers.ReadOnlyField):
     serializers = {}
@@ -40,6 +42,7 @@ class HyperlinkField(serializers.Field):
 
     def __init__(self, view_name=None, **kwargs):
         kwargs['read_only'] = True
+        self.view_kwargs = kwargs.pop('view_kwargs', None)
 
         if view_name is not None:
             self.view_name = view_name
@@ -47,6 +50,7 @@ class HyperlinkField(serializers.Field):
         self.lookup_field = kwargs.pop('lookup_field', self.lookup_field)
         self.lookup_url_kwarg = kwargs.pop('lookup_url_kwarg', self.lookup_field)
         self.format = kwargs.pop('format', None)
+
         super(HyperlinkField, self).__init__(**kwargs)
 
     def get_attribute(self, instance):
@@ -56,7 +60,14 @@ class HyperlinkField(serializers.Field):
 
     def to_representation(self, value):
         kwargs = {}
-        kwargs[self.lookup_url_kwarg] = getattr(value, self.lookup_field)
+
+        if self.view_kwargs:
+            for item in self.view_kwargs:
+                kwargs[item['lookup_url_kwarg']] = resolve_attribute(
+                    obj=value, attribute=item['lookup_field']
+                )
+        else:
+            kwargs[self.lookup_url_kwarg] = getattr(value, self.lookup_field)
 
         return reverse(
             kwargs=kwargs, request=self.context.get('request'),
