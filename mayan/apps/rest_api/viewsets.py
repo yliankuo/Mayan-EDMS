@@ -4,20 +4,25 @@ from rest_framework import viewsets
 from rest_framework.settings import api_settings
 
 from .filters import MayanViewSetObjectPermissionsFilter
+from .mixins import SuccessHeadersMixin
 from .permissions import MayanViewSetPermission
 
 
-class MayanAPIGenericViewSet(viewsets.GenericViewSet):
+class MayanAPIGenericViewSet(SuccessHeadersMixin, viewsets.GenericViewSet):
     filter_backends = (MayanViewSetObjectPermissionsFilter,)
     permission_classes = (MayanViewSetPermission,)
 
-    def get_success_headers(self, data):
-        try:
-            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
-        except (TypeError, KeyError):
-            return {}
+
+class MayanAPIModelViewSet(SuccessHeadersMixin, viewsets.ModelViewSet):
+    filter_backends = (MayanViewSetObjectPermissionsFilter,)
+    permission_classes = (MayanViewSetPermission,)
 
 
-class MayanAPIModelViewSet(viewsets.ModelViewSet):
+class MayanAPIReadOnlyModelViewSet(SuccessHeadersMixin, viewsets.ReadOnlyModelViewSet):
+    filter_backends = (MayanViewSetObjectPermissionsFilter,)
+    permission_classes = (MayanViewSetPermission,)
+
+
+class MayanAPIViewSet(SuccessHeadersMixin, viewsets.GenericViewSet):
     filter_backends = (MayanViewSetObjectPermissionsFilter,)
     permission_classes = (MayanViewSetPermission,)

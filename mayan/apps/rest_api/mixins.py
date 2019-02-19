@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import ImproperlyConfigured
 
+from rest_framework.settings import api_settings
+
 from mayan.apps.acls.models import AccessControlList
 
 
@@ -82,3 +84,11 @@ class ExternalObjectListSerializerMixin(object):
             )
 
         return queryset
+
+
+class SuccessHeadersMixin(object):
+    def get_success_headers(self, data):
+        try:
+            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
+        except (TypeError, KeyError):
+            return {}
