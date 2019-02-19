@@ -13,8 +13,9 @@ from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 
 from mayan.apps.acls.models import AccessControlList
-from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
-from mayan.apps.rest_api.permissions import MayanPermission
+from mayan.apps.rest_api.viewsets import (
+    MayanAPIModelViewSet, MayanAPIReadOnlyModelViewSet
+)
 
 from .literals import DOCUMENT_IMAGE_TASK_TIMEOUT
 from .models import Document, DocumentVersion, DocumentType, RecentDocument
@@ -47,7 +48,7 @@ from rest_framework.decorators import action, detail_route
 from rest_framework.response import Response
 
 
-class DocumentViewSet(viewsets.ModelViewSet):
+class DocumentViewSet(MayanAPIModelViewSet):
     lookup_field = 'pk'
     lookup_url_kwarg = 'document_id'
     queryset = Document.objects.all()
@@ -66,7 +67,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     """
 
-class DocumentPageViewSet(viewsets.ModelViewSet):
+#class DocumentPageViewSet(MayanAPIModelViewSet):
+class DocumentPageViewSet(MayanAPIReadOnlyModelViewSet):
     lookup_field = 'pk'
     lookup_url_kwarg = 'document_page_id'
     serializer_class = DocumentPageSerializer
@@ -83,9 +85,6 @@ class DocumentPageViewSet(viewsets.ModelViewSet):
     )
     @cache_control(private=True)
     def document_page_image(self, request, *args, **kwargs):
-        """
-        asdasd
-        """
         transformation_dict = {
             'kwargs': {},
             'name': {}
@@ -157,7 +156,7 @@ class DocumentPageViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     """
 
-class DocumentTypeViewSet(viewsets.ModelViewSet):
+class DocumentTypeViewSet(MayanAPIModelViewSet):
     lookup_field = 'pk'
     lookup_url_kwarg = 'document_type_id'
     queryset = DocumentType.objects.all()
@@ -175,7 +174,7 @@ class DocumentTypeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class DocumentVersionViewSet(viewsets.ModelViewSet):
+class DocumentVersionViewSet(MayanAPIModelViewSet):
     lookup_field = 'pk'
     lookup_url_kwarg = 'document_version_id'
     serializer_class = DocumentVersionSerializer
