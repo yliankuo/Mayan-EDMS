@@ -75,6 +75,33 @@ class TagsApp(MayanAppConfig):
         Document.add_to_class(name='tags_attach', value=method_document_tags_attach)
         Document.add_to_class(name='tags_remove', value=method_document_tags_remove)
 
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_attach_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-attach'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_list_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-list'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='tag_remove_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-tag-remove'
+            )
+        )
+
         ModelEventType.register(
             model=Tag, event_types=(
                 event_tag_attach, event_tag_created, event_tag_edited,
@@ -200,31 +227,4 @@ class TagsApp(MayanAppConfig):
         pre_delete.connect(
             dispatch_uid='tags_handler_tag_pre_delete',
             receiver=handler_tag_pre_delete, sender=Tag
-        )
-
-        LazyExtraFieldsSerializerMixin.add_field(
-            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
-            field_name='tag_attach_url',
-            field=HyperlinkField(
-                lookup_url_kwarg='document_id',
-                view_name='rest_api:document-tag-attach'
-            )
-        )
-
-        LazyExtraFieldsSerializerMixin.add_field(
-            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
-            field_name='tag_list_url',
-            field=HyperlinkField(
-                lookup_url_kwarg='document_id',
-                view_name='rest_api:document-tag-list'
-            )
-        )
-
-        LazyExtraFieldsSerializerMixin.add_field(
-            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
-            field_name='tag_remove_url',
-            field=HyperlinkField(
-                lookup_url_kwarg='document_id',
-                view_name='rest_api:document-tag-remove'
-            )
         )

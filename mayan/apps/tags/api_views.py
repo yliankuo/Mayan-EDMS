@@ -104,7 +104,7 @@ class DocumentTagAPIViewSet(MayanAPIGenericViewSet):
     queryset = Document.objects.all()
 
     @action(
-        detail=False, lookup_url_kwarg='document_id', methods=('post',),
+        detail=True, lookup_url_kwarg='document_id', methods=('post',),
         serializer_class=DocumentTagAttachRemoveSerializer,
         url_name='tag-attach', url_path='tags/attach'
     )
@@ -119,7 +119,7 @@ class DocumentTagAPIViewSet(MayanAPIGenericViewSet):
         )
 
     @action(
-        detail=False, lookup_url_kwarg='document_id',
+        detail=True, lookup_url_kwarg='document_id',
         serializer_class=TagSerializer, url_name='tag-list',
         url_path='tags'
     )
@@ -139,7 +139,7 @@ class DocumentTagAPIViewSet(MayanAPIGenericViewSet):
         return Response(serializer.data)
 
     @action(
-        detail=False, lookup_field='pk', lookup_url_kwarg='document_id',
+        detail=True, lookup_field='pk', lookup_url_kwarg='document_id',
         methods=('post',), serializer_class=DocumentTagAttachRemoveSerializer,
         url_name='tag-remove', url_path='tags/remove'
     )

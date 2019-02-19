@@ -60,13 +60,7 @@ urlpatterns = [
 api_router_entries = (
     {'prefix': r'tags', 'viewset': TagAPIViewSet, 'basename': 'tag'},
     {
-        'prefix': r'documents/(?P<document_id>\d+)',
-        'viewset': DocumentTagAPIViewSet, 'basename': 'document'
+        'prefix': r'documents', 'viewset': DocumentTagAPIViewSet,
+        'basename': 'document'
     }
 )
-
-
-#    {
-#        'prefix': r'permission_namespaces/(?P<permission_namespace_name>[^/.]+)/permissions',
-#        'viewset': PermissionViewSet, 'basename': 'permission'
-#    },
