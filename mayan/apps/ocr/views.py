@@ -12,6 +12,7 @@ from mayan.apps.common.generics import (
     SingleObjectDownloadView, SingleObjectEditView, SingleObjectListView
 )
 from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
+from mayan.apps.documents.mixins import RecentDocumentMixin
 from mayan.apps.documents.models import Document, DocumentPage, DocumentType
 
 from .forms import DocumentPageOCRContentForm, DocumentOCRContentForm
@@ -23,18 +24,11 @@ from .permissions import (
 from .utils import get_document_content_iterator
 
 
-class DocumentOCRContentView(SingleObjectDetailView):
+class DocumentOCRContentView(RecentDocumentMixin, SingleObjectDetailView):
     form_class = DocumentOCRContentForm
     model = Document
     object_permission = permission_ocr_content_view
     pk_url_kwarg = 'document_id'
-
-    def dispatch(self, request, *args, **kwargs):
-        result = super(DocumentOCRContentView, self).dispatch(
-            request, *args, **kwargs
-        )
-        self.get_object().add_as_recent_document_for_user(user=request.user)
-        return result
 
     def get_extra_context(self):
         return {
@@ -45,17 +39,17 @@ class DocumentOCRContentView(SingleObjectDetailView):
         }
 
 
-class DocumentOCRDownloadView(SingleObjectDownloadView):
+class DocumentOCRDownloadView(RecentDocumentMixin, SingleObjectDownloadView):
     model = Document
     object_permission = permission_ocr_content_view
     pk_url_kwarg = 'document_id'
 
     def get_file(self):
         file_object = DocumentOCRDownloadView.TextIteratorIO(
-            iterator=get_document_content_iterator(document=self.get_object())
+            iterator=get_document_content_iterator(document=self.object)
         )
         return DocumentOCRDownloadView.VirtualFile(
-            file=file_object, name='{}-OCR'.format(self.get_object())
+            file=file_object, name='{}-OCR'.format(self.object)
         )
 
 
@@ -78,27 +72,21 @@ class DocumentOCRErrorsListView(SingleObjectListView):
         return self.get_document().latest_version.ocr_errors.all()
 
 
-class DocumentPageOCRContentView(SingleObjectDetailView):
+class DocumentPageOCRContentView(RecentDocumentMixin, SingleObjectDetailView):
     form_class = DocumentPageOCRContentForm
     model = DocumentPage
     object_permission = permission_ocr_content_view
     pk_url_kwarg = 'document_page_id'
 
-    def dispatch(self, request, *args, **kwargs):
-        result = super(DocumentPageOCRContentView, self).dispatch(
-            request, *args, **kwargs
-        )
-        self.get_object().document.add_as_recent_document_for_user(
-            user=request.user
-        )
-        return result
-
     def get_extra_context(self):
         return {
             'hide_labels': True,
-            'object': self.get_object(),
-            'title': _('OCR result for document page: %s') % self.get_object(),
+            'object': self.object,
+            'title': _('OCR result for document page: %s') % self.object,
         }
+
+    def get_recent_document(self):
+        return self.object.document
 
 
 class DocumentSubmitView(MultipleObjectConfirmActionView):

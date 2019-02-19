@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIDocumentOCRView, APIDocumentPageOCRContentView,
-    APIDocumentVersionOCRView
+    DocumentPageOCRAPIViewSet, DocumentOCRAPIViewSet,
+    DocumentVersionOCRAPIViewSet
 )
 from .views import (
     DocumentOCRContentView, DocumentOCRDownloadView,
@@ -55,20 +55,17 @@ urlpatterns = [
     )
 ]
 
-api_urls = [
-    url(
-        regex=r'^documents/(?P<document_id>\d+)/ocr/submit/$',
-        name='document-ocr-submit-view',
-        view=APIDocumentOCRView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/ocr/$',
-        name='document-version-ocr-submit-view',
-        view=APIDocumentVersionOCRView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages/(?P<document_page_id>\d+)/ocr/$',
-        name='document-page-ocr-content-view',
-        view=APIDocumentPageOCRContentView.as_view()
-    )
-]
+api_router_entries = (
+    {
+        'prefix': r'documents',
+        'viewset': DocumentOCRAPIViewSet, 'basename': 'document'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions',
+        'viewset': DocumentVersionOCRAPIViewSet, 'basename': 'document_version'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions/(?P<document_version_id>\d+)/document_pages',
+        'viewset': DocumentPageOCRAPIViewSet, 'basename': 'document_page-ocr'
+    }
+)
