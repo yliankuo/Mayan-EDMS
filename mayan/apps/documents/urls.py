@@ -417,11 +417,11 @@ api_router_entries = (
         'basename': 'document_type'
     },
     {
-        'prefix': r'documents/(?P<document_id>\d+)/versions',
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions',
         'viewset': DocumentVersionViewSet, 'basename': 'document_version'
     },
     {
-        'prefix': r'documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages',
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions/(?P<document_version_id>\d+)/document_pages',
         'viewset': DocumentPageViewSet, 'basename': 'document_page'
     },
 )
