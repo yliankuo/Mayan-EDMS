@@ -2,11 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import (
-    APIEventListView, APIEventTypeListView, APIEventTypeNamespaceDetailView,
-    APIEventTypeNamespaceEventTypeListView, APIEventTypeNamespaceListView,
-    APINotificationListView, APIObjectEventListView
-)
+from .api_views import EventTypeAPIViewSet, EventTypeNamespaceAPIViewSet
 from .views import (
     CurrentUserEventListView, EventListView, EventTypeSubscriptionListView,
     NotificationListView, NotificationMarkRead, NotificationMarkReadAll,
@@ -53,6 +49,21 @@ urlpatterns = [
     )
 ]
 
+
+api_router_entries = (
+    {
+        'prefix': r'event_type_namespaces', 'viewset': EventTypeNamespaceAPIViewSet,
+        'basename': 'event_type_namespace'
+    },
+    {
+        'prefix': r'event_type_namespaces/(?P<event_type_namespace_name>[^/.]+)/event_types',
+        'viewset': EventTypeAPIViewSet, 'basename': 'event_type'
+    },
+    #{'prefix': r'roles', 'viewset': RoleAPIViewSet, 'basename': 'role'},
+)
+
+
+'''
 api_urls = [
     url(
         regex=r'^event_type_namespaces/(?P<name>[-\w]+)/$',
@@ -82,3 +93,4 @@ api_urls = [
         name='object-event-list', view=APIObjectEventListView.as_view()
     )
 ]
+'''

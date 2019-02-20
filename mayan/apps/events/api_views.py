@@ -5,10 +5,11 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from actstream.models import Action, any_stream
-from rest_framework import generics
+from rest_framework import generics, viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from mayan.apps.acls.models import AccessControlList
-from mayan.apps.rest_api.permissions import MayanPermission
 
 from .classes import EventType, EventTypeNamespace
 from .models import Notification
@@ -19,6 +20,52 @@ from .serializers import (
 )
 
 
+
+class EventTypeNamespaceAPIViewSet(viewsets.ReadOnlyModelViewSet):
+    lookup_field = 'name'
+    lookup_url_kwarg = 'event_type_namespace_name'
+    serializer_class = EventTypeNamespaceSerializer
+
+    def get_object(self):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        return EventTypeNamespace.get(**filter_kwargs)
+
+    @action(
+        detail=True, serializer_class=EventTypeSerializer,
+        url_name='event_type-list', url_path='event_types'
+    )
+    def event_type_list(self, request, *args, **kwargs):
+        queryset = self.get_object().event_types
+        page = self.paginate_queryset(queryset)
+
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request}
+        )
+
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+
+        return Response(serializer.data)
+
+    def get_queryset(self):
+        return EventTypeNamespace.all()
+
+
+class EventTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
+    lookup_field = 'id'
+    lookup_url_kwarg = 'event_type_id'
+    lookup_value_regex = r'[\w\.]+'
+    serializer_class = EventTypeSerializer
+
+    def get_object(self):
+        namespace = EventTypeNamespace.get(name=self.kwargs['event_type_namespace_name'])
+        event_types = namespace.get_event_types()
+        return event_types.get(self.kwargs['event_type_id'])
+
+
+
+'''
 class APIObjectEventListView(generics.ListAPIView):
     """
     get: Return a list of events for the specified object.
@@ -49,88 +96,6 @@ class APIObjectEventListView(generics.ListAPIView):
         return any_stream(obj)
 
 
-class APIEventTypeNamespaceDetailView(generics.RetrieveAPIView):
-    """
-    get: Returns the details of an event type namespace.
-    """
-    serializer_class = EventTypeNamespaceSerializer
-
-    def get_object(self):
-        try:
-            return EventTypeNamespace.get(name=self.kwargs['name'])
-        except KeyError:
-            raise Http404
-
-
-class APIEventTypeNamespaceListView(generics.ListAPIView):
-    """
-    get: Returns a list of all the available event type namespaces.
-    """
-    serializer_class = EventTypeNamespaceSerializer
-    queryset = EventTypeNamespace.all()
-
-    def get_serializer_context(self):
-        return {
-            'format': self.format_kwarg,
-            'request': self.request,
-            'view': self
-        }
-
-
-class APIEventTypeNamespaceEventTypeListView(generics.ListAPIView):
-    """
-    get: Returns a list of all the available event types from a namespaces.
-    """
-    serializer_class = EventTypeSerializer
-
-    def get_queryset(self):
-        try:
-            return EventTypeNamespace.get(
-                name=self.kwargs['name']
-            ).get_event_types()
-        except KeyError:
-            raise Http404
-
-    def get_serializer_context(self):
-        return {
-            'format': self.format_kwarg,
-            'request': self.request,
-            'view': self
-        }
-
-
-class APIEventTypeListView(generics.ListAPIView):
-    """
-    get: Returns a list of all the available event types.
-    """
-    serializer_class = EventTypeSerializer
-    queryset = EventType.all()
-
-    def get_serializer_context(self):
-        return {
-            'format': self.format_kwarg,
-            'request': self.request,
-            'view': self
-        }
-
-
-class APIEventListView(generics.ListAPIView):
-    """
-    get: Returns a list of all the available events.
-    """
-    mayan_view_permissions = {'GET': (permission_events_view,)}
-    permission_classes = (MayanPermission,)
-    queryset = Action.objects.all()
-    serializer_class = EventSerializer
-
-    def get_serializer_context(self):
-        return {
-            'format': self.format_kwarg,
-            'request': self.request,
-            'view': self
-        }
-
-
 class APINotificationListView(generics.ListAPIView):
     """
     get: Return a list of notifications for the current user.
@@ -151,3 +116,4 @@ class APINotificationListView(generics.ListAPIView):
             queryset = queryset.filter(read=False)
 
         return queryset
+'''

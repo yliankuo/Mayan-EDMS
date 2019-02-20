@@ -4,10 +4,10 @@ from django.utils.six import string_types
 
 from actstream.models import Action
 from rest_framework import serializers
-from rest_framework.reverse import reverse
 
 from mayan.apps.common.serializers import ContentTypeSerializer
 from mayan.apps.rest_api.fields import DynamicSerializerField
+from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
 from mayan.apps.user_management.serializers import UserSerializer
 
 from .classes import EventType
@@ -17,33 +17,34 @@ from .models import Notification, StoredEventType
 class EventTypeNamespaceSerializer(serializers.Serializer):
     label = serializers.CharField()
     name = serializers.CharField()
-    url = serializers.SerializerMethodField()
-
-    event_types_url = serializers.HyperlinkedIdentityField(
+    event_type_list_url = serializers.HyperlinkedIdentityField(
         lookup_field='name',
-        view_name='rest_api:event-type-namespace-event-type-list',
+        lookup_url_kwarg='event_type_namespace_name',
+        view_name='rest_api:event_type_namespace-event_type-list'
     )
-
-    def get_url(self, instance):
-        return reverse(
-            'rest_api:event-type-namespace-detail', args=(
-                instance.name,
-            ), request=self.context['request'], format=self.context['format']
-        )
+    url = serializers.HyperlinkedIdentityField(
+        lookup_field='name',
+        lookup_url_kwarg='event_type_namespace_name',
+        view_name='rest_api:event_type_namespace-detail'
+    )
 
 
 class EventTypeSerializer(serializers.Serializer):
     label = serializers.CharField()
     name = serializers.CharField()
     id = serializers.CharField()
-    event_type_namespace_url = serializers.SerializerMethodField()
-
-    def get_event_type_namespace_url(self, instance):
-        return reverse(
-            'rest_api:event-type-namespace-detail', args=(
-                instance.namespace.name,
-            ), request=self.context['request'], format=self.context['format']
-        )
+    event_type_namespace = EventTypeNamespaceSerializer(source='namespace')
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'namespace.name', 'lookup_url_kwarg': 'event_type_namespace_name',
+            },
+            {
+                'lookup_field': 'id', 'lookup_url_kwarg': 'event_type_id',
+            }
+        ),
+        view_name='rest_api:event_type-detail'
+    )
 
     def to_representation(self, instance):
         if isinstance(instance, EventType):

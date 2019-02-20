@@ -45,7 +45,11 @@ class EventTypeNamespace(object):
         return event_type
 
     def get_event_types(self):
-        return EventType.sort(event_type_list=self.event_types)
+        result = {}
+        for event_type in self.event_types:
+            result[event_type.id] = event_type
+
+        return result
 
 
 @python_2_unicode_compatible
