@@ -18,7 +18,7 @@ class ExternalObjectListSerializerMixin(object):
         external_object_list_pk_list_field
 
     The source queryset can also be provided overriding the
-    .get_external_object_list() method.
+    .get_external_object_list_queryset() method.
     """
     def __init__(self, *args, **kwargs):
         super(ExternalObjectListSerializerMixin, self).__init__(*args, **kwargs)
