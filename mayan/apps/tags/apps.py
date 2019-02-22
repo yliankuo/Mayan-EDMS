@@ -19,7 +19,7 @@ from mayan.apps.events.links import (
 )
 from mayan.apps.events.permissions import permission_events_view
 from mayan.apps.navigation import SourceColumn
-from mayan.apps.rest_api.fields import HyperlinkField
+from mayan.apps.rest_api.fields import DynamicSerializerField, HyperlinkField
 from mayan.apps.rest_api.serializers import LazyExtraFieldsSerializerMixin
 
 from .events import (
@@ -74,6 +74,11 @@ class TagsApp(MayanAppConfig):
         Document.add_to_class(name='get_tags', value=method_document_get_tags)
         Document.add_to_class(name='tags_attach', value=method_document_tags_attach)
         Document.add_to_class(name='tags_remove', value=method_document_tags_remove)
+
+        DynamicSerializerField.add_serializer(
+            klass=Tag,
+            serializer_class='mayan.apps.tags.serializers.TagSerializer'
+        )
 
         LazyExtraFieldsSerializerMixin.add_field(
             dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
