@@ -22,7 +22,10 @@ from mayan.apps.metadata import MetadataLookup
 from mayan.apps.navigation import SourceColumn
 from mayan.apps.rest_api.fields import DynamicSerializerField
 
-from .events import event_user_edited
+from .events import (
+    event_group_created, event_group_edited, event_user_created,
+    event_user_edited
+)
 from .handlers import handler_initialize_new_user_options
 from .links import (
     link_current_user_details, link_current_user_edit, link_group_create,
@@ -87,7 +90,11 @@ class UserManagementApp(MayanAppConfig):
         )
 
         ModelEventType.register(
-            event_types=(event_user_edited,), model=User
+            event_types=(event_group_created, event_group_edited), model=Group
+        )
+
+        ModelEventType.register(
+            event_types=(event_user_created, event_user_edited), model=User
         )
 
         ModelPermission.register(

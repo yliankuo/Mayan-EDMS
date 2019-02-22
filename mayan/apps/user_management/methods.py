@@ -29,18 +29,18 @@ def get_method_group_save():
     group_save_original = Group.save
 
     def method_group_save(self, *args, **kwargs):
-        _group = kwargs.pop('_group', None)
+        _user = kwargs.pop('_user', None)
 
         with transaction.atomic():
             is_new = not self.pk
             group_save_original(self, *args, **kwargs)
             if is_new:
                 event_group_created.commit(
-                    actor=_group, target=self
+                    actor=_user, target=self
                 )
             else:
                 event_group_edited.commit(
-                    actor=_group, target=self
+                    actor=_user, target=self
                 )
 
     return method_group_save
