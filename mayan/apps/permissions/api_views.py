@@ -20,7 +20,7 @@ from .serializers import (
 )
 
 
-class PermissionNamespaceViewSet(viewsets.ReadOnlyModelViewSet):
+class PermissionNamespaceAPIViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'name'
     lookup_url_kwarg = 'permission_namespace_name'
     serializer_class = PermissionNamespaceSerializer
@@ -51,7 +51,7 @@ class PermissionNamespaceViewSet(viewsets.ReadOnlyModelViewSet):
         return PermissionNamespace.all()
 
 
-class PermissionViewSet(viewsets.ReadOnlyModelViewSet):
+class PermissionAPIViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'pk'
     lookup_url_kwarg = 'permission_name'
     lookup_value_regex = r'[\w\.]+'

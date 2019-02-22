@@ -16,7 +16,7 @@ from .models import Role, StoredPermission
 class PermissionNamespaceSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     label = serializers.CharField(read_only=True)
-    permissions_url = serializers.HyperlinkedIdentityField(
+    permission_list_url = serializers.HyperlinkedIdentityField(
         lookup_field='name',
         lookup_url_kwarg='permission_namespace_name',
         view_name='rest_api:permission_namespace-permission-list'
@@ -29,7 +29,7 @@ class PermissionNamespaceSerializer(serializers.Serializer):
 
 
 class PermissionSerializer(serializers.Serializer):
-    namespace = serializers.CharField(read_only=True)
+    permission_namespace = PermissionNamespaceSerializer(source='namespace')
     pk = serializers.CharField(read_only=True)
     label = serializers.CharField(read_only=True)
     url = MultiKwargHyperlinkedIdentityField(
