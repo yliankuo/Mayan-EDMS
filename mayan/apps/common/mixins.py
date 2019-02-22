@@ -29,10 +29,20 @@ __all__ = (
 
 
 class ContentTypeViewMixin(object):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model'
+    }
+
     def get_content_type(self):
         return get_object_or_404(
-            klass=ContentType, app_label=self.kwargs['app_label'],
-            model=self.kwargs['model']
+            klass=ContentType,
+            app_label=self.kwargs[
+                self.content_type_url_kw_args['app_label']
+            ],
+            model=self.kwargs[
+                self.content_type_url_kw_args['model']
+            ]
         )
 
 
