@@ -29,29 +29,6 @@ class MayanApp {
         }
     }
 
-    static mayanNotificationBadge (options, data) {
-        // Callback to add the notifications count inside a badge markup
-        var notifications = data[options.attributeName];
-
-        if (notifications > 0) {
-            // Save the original link text before adding the initial badge markup
-            if (!options.element.data('mn-saved-text')) {
-                options.element.data('mn-saved-text', options.element.html());
-            }
-
-            options.element.html(
-                options.element.data('mn-saved-text') + ' <span class="badge">' + notifications + '</span>'
-            );
-        } else {
-            if (options.element.data('mn-saved-text')) {
-                // If there is a saved original link text, restore it
-                options.element.html(
-                    options.element.data('mn-saved-text')
-                );
-            }
-        }
-    }
-
     static setupMultiItemActions () {
         $('body').on('change', '.check-all-slave', function () {
             MayanApp.countChecked();
@@ -93,35 +70,6 @@ class MayanApp {
     }
 
     // Instance methods
-
-    AJAXperiodicWorker (options) {
-        var app = this;
-
-        $.ajax({
-            complete: function() {
-                if (!options.app) {
-                    // Preserve the app reference between consecutive calls
-                    options.app = app;
-                }
-                setTimeout(options.app.AJAXperiodicWorker, options.interval, options);
-            },
-            success: function(data) {
-                if (options.callback) {
-                    // Convert the callback string to an actual function
-                    var callbackFunction = window;
-
-                    $.each(options.callback.split('.'), function (index, value) {
-                        callbackFunction = callbackFunction[value]
-                    });
-
-                    callbackFunction(options, data);
-                } else {
-                    options.element.text(data[options.attributeName]);
-                }
-            },
-            url: options.APIURL
-      });
-    }
 
     callbackAJAXSpinnerUpdate () {
         if (this.ajaxExecuting) {
@@ -223,7 +171,6 @@ class MayanApp {
     initialize () {
         var self = this;
 
-        this.setupAJAXPeriodicWorkers();
         this.setupAJAXSpinner();
         this.setupFormHotkeys();
         this.setupFullHeightResizing();
@@ -238,22 +185,6 @@ class MayanApp {
         });
         this.setupPanelSelection();
         partialNavigation.initialize();
-    }
-
-    setupAJAXPeriodicWorkers () {
-        var app = this;
-
-        $('a[data-apw-url]').each(function() {
-            var $this = $(this);
-
-            app.AJAXperiodicWorker({
-                attributeName: $this.data('apw-attribute'),
-                APIURL: $this.data('apw-url'),
-                callback: $this.data('apw-callback'),
-                element: $this,
-                interval: $this.data('apw-interval'),
-            });
-        });
     }
 
     setupAJAXSpinner () {
