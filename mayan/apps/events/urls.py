@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import EventTypeAPIViewSet, EventTypeNamespaceAPIViewSet
+from .api_views import (
+    EventTypeAPIViewSet, EventTypeNamespaceAPIViewSet, NotificationAPIViewSet,
+    ObjectEventAPIViewSet
+)
 from .views import (
     CurrentUserEventListView, EventListView, EventTypeSubscriptionListView,
     NotificationListView, NotificationMarkRead, NotificationMarkReadAll,
@@ -49,7 +52,6 @@ urlpatterns = [
     )
 ]
 
-
 api_router_entries = (
     {
         'prefix': r'event_type_namespaces', 'viewset': EventTypeNamespaceAPIViewSet,
@@ -59,38 +61,12 @@ api_router_entries = (
         'prefix': r'event_type_namespaces/(?P<event_type_namespace_name>[^/.]+)/event_types',
         'viewset': EventTypeAPIViewSet, 'basename': 'event_type'
     },
-    #{'prefix': r'roles', 'viewset': RoleAPIViewSet, 'basename': 'role'},
+    {
+        'prefix': r'apps/(?P<app_label>[^/.]+)/models/(?P<model_name>[^/.]+)/objects/(?P<object_id>\d+)/events',
+        'viewset': ObjectEventAPIViewSet, 'basename': 'object-event'
+    },
+    {
+        'prefix': r'notifications', 'viewset': NotificationAPIViewSet,
+        'basename': 'notification'
+    }
 )
-
-
-'''
-api_urls = [
-    url(
-        regex=r'^event_type_namespaces/(?P<name>[-\w]+)/$',
-        name='event-type-namespace-detail',
-        view=APIEventTypeNamespaceDetailView.as_view()
-    ),
-    url(
-        regex=r'^event_type_namespaces/(?P<name>[-\w]+)/event_types/$',
-        name='event-type-namespace-event-type-list',
-        view=APIEventTypeNamespaceEventTypeListView.as_view()
-    ),
-    url(
-        regex=r'^event_type_namespaces/$', name='event-type-namespace-list',
-        view=APIEventTypeNamespaceListView.as_view()
-    ),
-    url(
-        regex=r'^event_types/$', name='event-type-list',
-        view=APIEventTypeListView.as_view()
-    ),
-    url(regex=r'^events/$', name='event-list', view=APIEventListView.as_view()),
-    url(
-        regex=r'^notifications/$', name='notification-list',
-        view=APINotificationListView.as_view()
-    ),
-    url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/events/$',
-        name='object-event-list', view=APIObjectEventListView.as_view()
-    )
-]
-'''

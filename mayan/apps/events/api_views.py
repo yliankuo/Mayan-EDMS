@@ -1,24 +1,20 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.contrib.contenttypes.models import ContentType
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-
-from actstream.models import Action, any_stream
-from rest_framework import generics, viewsets
+from actstream.models import any_stream
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
+from mayan.apps.rest_api.viewsets import MayanAPIReadOnlyModelViewSet
 
-from .classes import EventType, EventTypeNamespace
+from .classes import EventTypeNamespace
 from .models import Notification
 from .permissions import permission_events_view
 from .serializers import (
     EventSerializer, EventTypeNamespaceSerializer, EventTypeSerializer,
     NotificationSerializer
 )
-
 
 
 class EventTypeNamespaceAPIViewSet(viewsets.ReadOnlyModelViewSet):
@@ -64,46 +60,12 @@ class EventTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
         return event_types.get(self.kwargs['event_type_id'])
 
 
-
-'''
-class APIObjectEventListView(generics.ListAPIView):
-    """
-    get: Return a list of events for the specified object.
-    """
-    serializer_class = EventSerializer
-
-    def get_object(self):
-        content_type = get_object_or_404(
-            klass=ContentType, app_label=self.kwargs['app_label'],
-            model=self.kwargs['model']
-        )
-
-        try:
-            return content_type.get_object_for_this_type(
-                pk=self.kwargs['object_id']
-            )
-        except content_type.model_class().DoesNotExist:
-            raise Http404
-
-    def get_queryset(self):
-        obj = self.get_object()
-
-        AccessControlList.objects.check_access(
-            permissions=permission_events_view, user=self.request.user,
-            obj=obj
-        )
-
-        return any_stream(obj)
-
-
-class APINotificationListView(generics.ListAPIView):
-    """
-    get: Return a list of notifications for the current user.
-    """
+class NotificationAPIViewSet(MayanAPIReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
 
     def get_queryset(self):
-        parameter_read = self.request.GET.get('read')
+        query_parameter = 'read'
+        parameter_read = self.request.GET.get(query_parameter)
 
         if self.request.user.is_authenticated:
             queryset = Notification.objects.filter(user=self.request.user)
@@ -116,4 +78,24 @@ class APINotificationListView(generics.ListAPIView):
             queryset = queryset.filter(read=False)
 
         return queryset
-'''
+
+
+class ObjectEventAPIViewSet(ContentTypeViewMixin, ExternalObjectMixin, MayanAPIReadOnlyModelViewSet):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model_name'
+    }
+
+    external_object_permission = permission_events_view
+    external_object_pk_url_kwarg = 'object_id'
+    serializer_class = EventSerializer
+
+    def get_external_object_queryset(self):
+        # Here we get a queryset the object model for which the event
+        # will be accessed.
+        return self.get_content_type().get_all_objects_for_this_type()
+
+    def get_queryset(self):
+        obj = self.get_external_object()
+
+        return any_stream(obj)

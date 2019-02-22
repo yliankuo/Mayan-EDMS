@@ -31,6 +31,13 @@ def get_kwargs_factory(variable_name):
     return get_kwargs
 
 
+def get_unread_notification_count(context):
+    Notification = apps.get_model(
+        app_label='events', model_name='Notification'
+    )
+    return Notification.objects.filter(user=context.request.user).filter(read=False).count()
+
+
 link_current_user_events = Link(
     icon_class=icon_events_list, text=_('My events'),
     view='events:current_user_events'
@@ -67,10 +74,7 @@ link_object_event_types_user_subcriptions_list = Link(
     view='events:object_event_types_user_subcriptions_list',
 )
 link_user_notifications_list = Link(
-    html_data={
-        'apw-attribute': 'count', 'apw-interval': '5000',
-        'apw-url': '/api/notifications/?read=False',
-        'apw-callback': 'MayanAppClass.mayanNotificationBadge'
-    }, icon_class=icon_user_notifications_list, text='',
+    badge_text=get_unread_notification_count,
+    icon_class=icon_user_notifications_list,
     view='events:user_notifications_list'
 )
