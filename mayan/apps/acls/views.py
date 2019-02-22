@@ -40,7 +40,7 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectCreat
     def get_external_object_queryset(self):
         # Here we get a queryset the object model for which an ACL will be
         # created.
-        return self.get_content_type().model_class().objects.all()
+        return self.get_content_type().get_all_objects_for_this_type()
 
     def get_extra_context(self):
         return {
@@ -106,7 +106,7 @@ class ACLListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListVie
     def get_external_object_queryset(self):
         # Here we get a queryset the object model for which an ACL will be
         # created.
-        return self.get_content_type().model_class().objects.all()
+        return self.get_content_type().get_all_objects_for_this_type()
 
     def get_extra_context(self):
         return {
