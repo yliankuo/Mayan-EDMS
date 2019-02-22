@@ -68,7 +68,7 @@ urlpatterns += [
 api_router_entries = (
     {
         'prefix': r'content_types', 'viewset': ContentTypeAPIViewSet,
-        'basename': 'content-type'
+        'basename': 'content_type'
     },
     {
         'prefix': r'templates', 'viewset': TemplateAPIViewSet,

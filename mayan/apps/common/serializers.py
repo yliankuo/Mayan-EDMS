@@ -10,7 +10,7 @@ class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'url': {
                 'lookup_url_kwarg': 'content_type_id',
-                'view_name': 'rest_api:content-type-detail'
+                'view_name': 'rest_api:content_type-detail'
             }
         }
         fields = ('app_label', 'id', 'model', 'url')

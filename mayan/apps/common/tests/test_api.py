@@ -13,7 +13,7 @@ class CommonAPITestCase(BaseAPITestCase):
     auto_login_user = False
 
     def test_content_type_list_view(self):
-        response = self.get(viewname='rest_api:content-type-list')
+        response = self.get(viewname='rest_api:content_type-list')
         self.assertEqual(response.status_code, 200)
 
     def _request_template_detail_view(self):
