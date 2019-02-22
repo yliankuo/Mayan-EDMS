@@ -199,7 +199,7 @@ class UserDeleteView(MultipleObjectConfirmActionView):
     source_queryset = get_user_model().objects.filter(
         is_superuser=False, is_staff=False
     )
-    success_message = _('User delete request performed on %(count)d user')
+    success_message_singular = _('User delete request performed on %(count)d user')
     success_message_plural = _(
         'User delete request performed on %(count)d users'
     )
@@ -287,16 +287,12 @@ class UserGroupsView(ExternalObjectMixin, AssignRemoveView):
     right_list_title = _('Groups joined')
 
     def add(self, item):
-        item.user_set.add(self.object)
-
-    def dispatch(self, *args, **kwargs):
-        self.object = self.get_object()
-        return super(UserGroupsView, self).dispatch(*args, **kwargs)
+        item.user_set.add(self.external_object)
 
     def get_extra_context(self):
         return {
-            'object': self.object,
-            'title': _('Groups of user: %s') % self.object
+            'object': self.external_object,
+            'title': _('Groups of user: %s') % self.external_object
         }
 
     def get_object(self):
@@ -305,7 +301,7 @@ class UserGroupsView(ExternalObjectMixin, AssignRemoveView):
     def left_list(self):
         queryset = AccessControlList.objects.restrict_queryset(
             permission=permission_group_edit,
-            queryset=Group.objects.exclude(user=self.object),
+            queryset=Group.objects.exclude(user=self.external_object),
             user=self.request.user
         )
         return AssignRemoveView.generate_choices(choices=queryset)
@@ -313,13 +309,13 @@ class UserGroupsView(ExternalObjectMixin, AssignRemoveView):
     def right_list(self):
         queryset = AccessControlList.objects.restrict_queryset(
             permission=permission_group_edit,
-            queryset=Group.objects.filter(user=self.object),
+            queryset=Group.objects.filter(user=self.external_object),
             user=self.request.user
         )
         return AssignRemoveView.generate_choices(choices=queryset)
 
     def remove(self, item):
-        item.user_set.remove(self.object)
+        item.user_set.remove(self.external_object)
 
 
 class UserListView(SingleObjectListView):
@@ -380,7 +376,7 @@ class UserSetPasswordView(MultipleObjectFormActionView):
     source_queryset = get_user_model().objects.filter(
         is_superuser=False, is_staff=False
     )
-    success_message = _('Password change request performed on %(count)d user')
+    success_message_singular = _('Password change request performed on %(count)d user')
     success_message_plural = _(
         'Password change request performed on %(count)d users'
     )
