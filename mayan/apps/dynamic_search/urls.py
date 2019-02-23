@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import APIAdvancedSearchView, APISearchModelList, APISearchView
+from .api_views import SearchModelAPIViewSet
 from .views import AdvancedSearchView, ResultsView, SearchAgainView, SearchView
 
 urlpatterns = [
@@ -24,17 +24,9 @@ urlpatterns = [
     )
 ]
 
-api_urls = [
-    url(
-        regex=r'^search_models/$', name='searchmodel-list',
-        view=APISearchModelList.as_view()
-    ),
-    url(
-        regex=r'^search/(?P<search_model>[\.\w]+)/$', name='search-view',
-        view=APISearchView.as_view()
-    ),
-    url(
-        regex=r'^search/advanced/(?P<search_model>[\.\w]+)/$',
-        name='advanced-search-view', view=APIAdvancedSearchView.as_view()
-    ),
-]
+api_router_entries = (
+    {
+        'prefix': r'search_models', 'viewset': SearchModelAPIViewSet,
+        'basename': 'search_model'
+    },
+)

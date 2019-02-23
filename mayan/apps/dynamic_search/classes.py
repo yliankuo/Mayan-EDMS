@@ -84,9 +84,9 @@ class SearchModel(object):
         return cls._registry
 
     @classmethod
-    def get(cls, full_name):
+    def get(cls, name):
         try:
-            result = cls._registry[full_name]
+            result = cls._registry[name]
         except KeyError:
             raise KeyError(_('No search model matching the query'))
         if not hasattr(result, 'serializer'):

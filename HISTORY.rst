@@ -244,7 +244,12 @@
 - Remove the sidebar menu and unify its links with the 
   secondary menu.
 - Increate the default maximum title lenght to 120 characters.
-
+- In the search API, the search function is now a service
+  of the search model resource.
+- The simple and advance search are now the same service. The
+  difference is determined by the URL query. A ?q= means a 
+  simple search. For advanced search pass the search model
+  fields in the URL query, example: ?q=document_type__label=
 
 3.1.9 (2018-11-01)
 ==================
