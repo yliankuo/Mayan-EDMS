@@ -17,6 +17,8 @@ from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.documents.signals import post_version_upload
 from mayan.apps.navigation import SourceColumn
+from mayan.apps.rest_api.fields import HyperlinkField
+from mayan.apps.rest_api.serializers import LazyExtraFieldsSerializerMixin
 from mayan.celery import app
 
 from .handlers import (
@@ -31,9 +33,9 @@ from .links import (
     link_error_list
 )
 from .methods import (
-    method_document_submit_for_parsing,
-    method_document_version_submit_for_parsing,
-    method_get_document_content, method_get_document_version_content
+    method_document_get_content, method_document_page_get_content,
+    method_document_submit_for_parsing, method_document_version_get_content,
+    method_document_version_submit_for_parsing
 )
 from .permissions import (
     permission_content_view, permission_document_type_parsing_setup,
@@ -79,14 +81,93 @@ class DocumentParsingApp(MayanAppConfig):
             value=method_document_submit_for_parsing
         )
         Document.add_to_class(
-            name='get_content', value=method_get_document_content
+            name='get_content', value=method_document_get_content
+        )
+        DocumentPage.add_to_class(
+            name='get_content', value=method_document_page_get_content
         )
         DocumentVersion.add_to_class(
-            name='get_content', value=method_get_document_version_content
+            name='get_content', value=method_document_version_get_content
         )
         DocumentVersion.add_to_class(
             name='submit_for_parsing',
             value=method_document_version_submit_for_parsing
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentPageSerializer',
+            field_name='parsing_content_url',
+            field=HyperlinkField(
+                view_kwargs=(
+                    {
+                        'lookup_field': 'document_version__document_id',
+                        'lookup_url_kwarg': 'document_id',
+                    },
+                    {
+                        'lookup_field': 'document_version_id',
+                        'lookup_url_kwarg': 'document_version_id',
+                    },
+                    {
+                        'lookup_field': 'pk',
+                        'lookup_url_kwarg': 'document_page_id',
+                    }
+                ),
+                view_name='rest_api:document_page-parsing-content'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='parsing_content_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-parsing-content'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='parsing_submit_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-parsing-submit'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentVersionSerializer',
+            field_name='parsing_submit_url',
+            field=HyperlinkField(
+                view_kwargs=(
+                    {
+                        'lookup_field': 'document_id',
+                        'lookup_url_kwarg': 'document_id',
+                    },
+                    {
+                        'lookup_field': 'pk',
+                        'lookup_url_kwarg': 'document_version_id',
+                    }
+                ),
+                view_name='rest_api:document_version-parsing-submit'
+            )
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentVersionSerializer',
+            field_name='parsing_content_url',
+            field=HyperlinkField(
+                view_kwargs=(
+                    {
+                        'lookup_field': 'document_id',
+                        'lookup_url_kwarg': 'document_id',
+                    },
+                    {
+                        'lookup_field': 'pk',
+                        'lookup_url_kwarg': 'document_version_id',
+                    }
+                ),
+                view_name='rest_api:document_version-parsing-content'
+            )
         )
 
         ModelAttribute(model=Document, name='get_content')

@@ -6,12 +6,12 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ungettext
 
 from mayan.apps.common.generics import (
     FormView, MultipleObjectConfirmActionView, SingleObjectDetailView,
     SingleObjectDownloadView, SingleObjectEditView, SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
 from mayan.apps.documents.models import Document, DocumentPage, DocumentType
 
@@ -42,7 +42,7 @@ class DocumentContentView(SingleObjectDetailView):
             'document': self.get_object(),
             'hide_labels': True,
             'object': self.get_object(),
-            'title': _('Content for document: %s') % self.get_object(),
+            'title': _('Content for document: %s.') % self.get_object(),
         }
 
 
@@ -79,7 +79,7 @@ class DocumentPageContentView(SingleObjectDetailView):
         return {
             'hide_labels': True,
             'object': self.get_object(),
-            'title': _('Content for document page: %s') % self.get_object(),
+            'title': _('Content for document page: %s.') % self.get_object(),
         }
 
 
@@ -94,7 +94,7 @@ class DocumentParsingErrorsListView(SingleObjectListView):
             'hide_object': True,
             'object': self.get_document(),
             'title': _(
-                'Parsing errors for document: %s'
+                'Parsing errors for document: %s.'
             ) % self.get_document(),
         }
 
@@ -105,57 +105,39 @@ class DocumentParsingErrorsListView(SingleObjectListView):
 class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_parse_document
+    pk_url_kwarg = 'document_id'
+    success_message_single = _(
+        'Document "%(object)s" added to the parsing queue.'
+    )
     success_message_singular = _(
-        '%(count)d document added to the parsing queue'
+        '%(count)d document added to the parsing queue.'
     )
     success_message_plural = _(
-        '%(count)d documents added to the parsing queue'
+        '%(count)d documents added to the parsing queue.'
     )
-
-    def get_extra_context(self):
-        queryset = self.get_queryset()
-
-        result = {
-            'title': ungettext(
-                singular='Submit %(count)d document to the parsing queue?',
-                plural='Submit %(count)d documents to the parsing queue',
-                number=queryset.count()
-            ) % {
-                'count': queryset.count(),
-            }
-        }
-
-        if queryset.count() == 1:
-            result.update(
-                {
-                    'object': queryset.first(),
-                    'title': _(
-                        'Submit document "%s" to the parsing queue'
-                    ) % queryset.first()
-                }
-            )
-
-        return result
+    title_single = _('Submit the document "%(object)s" to the parsing queue.')
+    title_singular = _('Submit %(count)d document to the parsing queue.')
+    title_plural = _('Submit %(count)d documents to the parsing queue.')
 
     def object_action(self, instance, form=None):
         instance.submit_for_parsing()
 
 
-class DocumentTypeSettingsEditView(SingleObjectEditView):
+class DocumentTypeSettingsEditView(ExternalObjectMixin, SingleObjectEditView):
+    external_object_class = DocumentType
+    external_object_permission = permission_document_type_parsing_setup
+    external_object_pk_url_kwarg = 'document_type_id'
     fields = ('auto_parsing',)
-    object_permission = permission_document_type_parsing_setup
     post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
 
     def get_document_type(self):
-        return get_object_or_404(
-            klass=DocumentType, pk=self.kwargs['document_type_id']
-        )
+        return self.external_object
 
     def get_extra_context(self):
         return {
             'object': self.get_document_type(),
             'title': _(
-                'Edit parsing settings for document type: %s'
+                'Edit parsing settings for document type: %s.'
             ) % self.get_document_type()
         }
 
@@ -165,7 +147,7 @@ class DocumentTypeSettingsEditView(SingleObjectEditView):
 
 class DocumentTypeSubmitView(FormView):
     extra_context = {
-        'title': _('Submit all documents of a type for parsing')
+        'title': _('Submit all documents of a type for parsing.')
     }
     form_class = DocumentTypeFilteredSelectForm
     post_action_redirect = reverse_lazy(viewname='common:tools_list')
@@ -198,7 +180,7 @@ class DocumentTypeSubmitView(FormView):
 class ParseErrorListView(SingleObjectListView):
     extra_context = {
         'hide_object': True,
-        'title': _('Parsing errors'),
+        'title': _('Parsing errors.'),
     }
     view_permission = permission_document_type_parsing_setup
 

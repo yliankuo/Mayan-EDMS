@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import APIDocumentPageContentView
+from .api_views import (
+    DocumentParsingAPIViewSet, DocumentPageParsingAPIViewSet,
+    DocumentVersionParsingAPIViewSet
+)
 from .views import (
     DocumentContentDownloadView, DocumentContentView, DocumentPageContentView,
     DocumentParsingErrorsListView, DocumentSubmitView,
@@ -51,10 +54,20 @@ urlpatterns = [
     )
 ]
 
-api_urls = [
-    url(
-        regex=r'^documents/(?P<document_id>\d+)/versions/(?P<document_version_id>\d+)/pages/(?P<document_page_id>\d+)/content/$',
-        view=APIDocumentPageContentView.as_view(),
-        name='document-page-content-view'
-    )
-]
+
+api_router_entries = (
+    {
+        'prefix': r'documents',
+        'viewset': DocumentParsingAPIViewSet, 'basename': 'document-parsing'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions',
+        'viewset': DocumentVersionParsingAPIViewSet,
+        'basename': 'document_version-parsing'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions/(?P<document_version_id>\d+)/document_pages',
+        'viewset': DocumentPageParsingAPIViewSet,
+        'basename': 'document_page-parsing'
+    },
+)
