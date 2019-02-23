@@ -4,6 +4,8 @@ import glob
 import os
 import random
 
+from furl import furl
+
 from django.conf import settings
 from django.conf.urls import url
 from django.core import management
@@ -24,59 +26,52 @@ if getattr(settings, 'COMMON_TEST_FILE_HANDLES', False):
 
 
 class ClientMethodsTestCaseMixin(object):
-    def delete(self, viewname=None, path=None, *args, **kwargs):
+    def _build_verb_kwargs(self, viewname=None, path=None, *args, **kwargs):
         data = kwargs.pop('data', {})
         follow = kwargs.pop('follow', False)
+        query = kwargs.pop('query', {})
 
         if viewname:
             path = reverse(viewname=viewname, *args, **kwargs)
 
+        path = furl(url=path)
+        path.args.update(query)
+
+        return {'follow': follow, 'data': data, 'path': path.tostr()}
+
+    def delete(self, viewname=None, path=None, *args, **kwargs):
         return self.client.delete(
-            path=path, data=data, follow=follow
+            **self._build_verb_kwargs(
+                path=path, viewname=viewname, *args, **kwargs
+            )
         )
 
     def get(self, viewname=None, path=None, *args, **kwargs):
-        data = kwargs.pop('data', {})
-        follow = kwargs.pop('follow', False)
-
-        if viewname:
-            path = reverse(viewname=viewname, *args, **kwargs)
-
         return self.client.get(
-            path=path, data=data, follow=follow
+            **self._build_verb_kwargs(
+                path=path, viewname=viewname, *args, **kwargs
+            )
         )
 
     def patch(self, viewname=None, path=None, *args, **kwargs):
-        data = kwargs.pop('data', {})
-        follow = kwargs.pop('follow', False)
-
-        if viewname:
-            path = reverse(viewname=viewname, *args, **kwargs)
-
         return self.client.patch(
-            path=path, data=data, follow=follow
+            **self._build_verb_kwargs(
+                path=path, viewname=viewname, *args, **kwargs
+            )
         )
 
     def post(self, viewname=None, path=None, *args, **kwargs):
-        data = kwargs.pop('data', {})
-        follow = kwargs.pop('follow', False)
-
-        if viewname:
-            path = reverse(viewname=viewname, *args, **kwargs)
-
         return self.client.post(
-            path=path, data=data, follow=follow
+            **self._build_verb_kwargs(
+                path=path, viewname=viewname, *args, **kwargs
+            )
         )
 
     def put(self, viewname=None, path=None, *args, **kwargs):
-        data = kwargs.pop('data', {})
-        follow = kwargs.pop('follow', False)
-
-        if viewname:
-            path = reverse(viewname=viewname, *args, **kwargs)
-
         return self.client.put(
-            path=path, data=data, follow=follow
+            **self._build_verb_kwargs(
+                path=path, viewname=viewname, *args, **kwargs
+            )
         )
 
 
