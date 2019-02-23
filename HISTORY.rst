@@ -243,6 +243,7 @@
   the links belong to when there is more than one menu.
 - Remove the sidebar menu and unify its links with the 
   secondary menu.
+- Increate the default maximum title lenght to 120 characters.
 
 
 3.1.9 (2018-11-01)
