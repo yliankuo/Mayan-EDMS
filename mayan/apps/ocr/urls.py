@@ -58,11 +58,11 @@ urlpatterns = [
 api_router_entries = (
     {
         'prefix': r'documents',
-        'viewset': DocumentOCRAPIViewSet, 'basename': 'document'
+        'viewset': DocumentOCRAPIViewSet, 'basename': 'document-ocr'
     },
     {
         'prefix': r'documents/(?P<document_id>\d+)/document_versions',
-        'viewset': DocumentVersionOCRAPIViewSet, 'basename': 'document_version'
+        'viewset': DocumentVersionOCRAPIViewSet, 'basename': 'document_version-ocr'
     },
     {
         'prefix': r'documents/(?P<document_id>\d+)/document_versions/(?P<document_version_id>\d+)/document_pages',

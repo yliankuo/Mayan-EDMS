@@ -79,7 +79,7 @@ class OCRViewsTestCase(GenericDocumentViewTestCase):
 
     def test_document_submit_view_with_access(self):
         self.grant_access(
-            permission=permission_ocr_document, obj=self.document
+            obj=self.document, permission=permission_ocr_document
         )
         self._request_document_submit_view()
         self.assertTrue(

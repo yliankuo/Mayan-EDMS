@@ -4,13 +4,13 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.utils.translation import ugettext_lazy as _, ungettext
+from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (
     FormView, MultipleObjectConfirmActionView, SingleObjectDetailView,
     SingleObjectDownloadView, SingleObjectEditView, SingleObjectListView
 )
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.documents.forms import DocumentTypeFilteredSelectForm
 from mayan.apps.documents.mixins import RecentDocumentMixin
 from mayan.apps.documents.models import Document, DocumentPage, DocumentType
@@ -35,7 +35,7 @@ class DocumentOCRContentView(RecentDocumentMixin, SingleObjectDetailView):
             'document': self.get_object(),
             'hide_labels': True,
             'object': self.get_object(),
-            'title': _('OCR result for document: %s') % self.get_object(),
+            'title': _('OCR result for document: %s.') % self.get_object(),
         }
 
 
@@ -65,7 +65,7 @@ class DocumentOCRErrorsListView(SingleObjectListView):
         return {
             'hide_object': True,
             'object': self.get_document(),
-            'title': _('OCR errors for document: %s') % self.get_document(),
+            'title': _('OCR errors for document: %s.') % self.get_document(),
         }
 
     def get_object_list(self):
@@ -82,7 +82,7 @@ class DocumentPageOCRContentView(RecentDocumentMixin, SingleObjectDetailView):
         return {
             'hide_labels': True,
             'object': self.object,
-            'title': _('OCR result for document page: %s') % self.object,
+            'title': _('OCR result for document page: %s.') % self.object,
         }
 
     def get_recent_document(self):
@@ -93,49 +93,34 @@ class DocumentSubmitView(MultipleObjectConfirmActionView):
     model = Document
     object_permission = permission_ocr_document
     pk_url_kwarg = 'document_id'
-    success_message_singular = '%(count)d document submitted to the OCR queue.'
-    success_message_plural = '%(count)d documents submitted to the OCR queue.'
-
-    def get_extra_context(self):
-        queryset = self.get_queryset()
-
-        result = {
-            'title': ungettext(
-                singular='Submit the selected document to the OCR queue?',
-                plural='Submit the selected documents to the OCR queue?',
-                number=queryset.count()
-            )
-        }
-
-        return result
+    success_message_single = _('Document "%(object)s" added to the OCR queue.')
+    success_message_singular = _('%(count)d document submitted to the OCR queue.')
+    success_message_plural = _('%(count)d documents submitted to the OCR queue.')
+    title_single = _('Submit the document "%(object)s" to the OCR queue.')
+    title_singular = _('Submit the selected document to the OCR queue.')
+    title_plural = _('Submit the selected documents to the OCR queue.')
 
     def object_action(self, form, instance):
         instance.submit_for_ocr()
 
 
-class DocumentTypeSettingsEditView(SingleObjectEditView):
+class DocumentTypeSettingsEditView(ExternalObjectMixin, SingleObjectEditView):
+    external_object_class = DocumentType
+    external_object_permission = permission_document_type_ocr_setup
+    external_object_pk_url_kwarg = 'document_type_id'
     fields = ('auto_ocr',)
-    object_permission = permission_document_type_ocr_setup
     post_action_redirect = reverse_lazy(
         viewname='documents:document_type_list'
     )
 
     def get_document_type(self):
-        queryset = AccessControlList.objects.restrict_queryset(
-            permission=permission_document_type_ocr_setup,
-            queryset=DocumentType.objects.all(),
-            user=self.request.user
-        )
-
-        return get_object_or_404(
-            klass=queryset, pk=self.kwargs['document_type_id']
-        )
+        return self.external_object
 
     def get_extra_context(self):
         return {
             'object': self.get_document_type(),
             'title': _(
-                'Edit OCR settings for document type: %s'
+                'Edit OCR settings for document type: %s.'
             ) % self.get_document_type()
         }
 
@@ -145,7 +130,7 @@ class DocumentTypeSettingsEditView(SingleObjectEditView):
 
 class DocumentTypeSubmitView(FormView):
     extra_context = {
-        'title': _('Submit all documents of a type for OCR')
+        'title': _('Submit all documents of a type for OCR.')
     }
     form_class = DocumentTypeFilteredSelectForm
     post_action_redirect = reverse_lazy(viewname='common:tools_list')
@@ -178,7 +163,7 @@ class DocumentTypeSubmitView(FormView):
 class EntryListView(SingleObjectListView):
     extra_context = {
         'hide_object': True,
-        'title': _('OCR errors'),
+        'title': _('OCR errors.'),
     }
     view_permission = permission_document_type_ocr_setup
 

@@ -12,7 +12,7 @@ from ..permissions import (
 from .literals import TEST_DOCUMENT_CONTENT
 
 
-class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
+class OCRSubmitAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_ocr_submit_view(self):
         return self.post(
             viewname='rest_api:document-ocr-submit',
@@ -28,7 +28,7 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
     #TODO: mock OCR here
     def test_submit_document_with_access(self):
         self.grant_access(
-            permission=permission_ocr_document, obj=self.document
+            obj=self.document, permission=permission_ocr_document
         )
         response = self._request_document_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -52,13 +52,15 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
 
     def test_submit_document_version_with_access(self):
         self.grant_access(
-            permission=permission_ocr_document, obj=self.document
+            obj=self.document, permission=permission_ocr_document
         )
         response = self._request_document_version_ocr_submit_view()
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
 
         self.assertTrue(hasattr(self.document.pages.first(), 'ocr_content'))
 
+
+class OCRContentAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_document_content_view(self):
         return self.get(
             viewname='rest_api:document-ocr-content',
@@ -68,13 +70,14 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
         )
 
     def test_get_document_content_no_permission(self):
+        self.document.submit_for_ocr()
         response = self._request_document_content_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_document_content_with_access(self):
         self.document.submit_for_ocr()
         self.grant_access(
-            permission=permission_ocr_content_view, obj=self.document
+            obj=self.document, permission=permission_ocr_content_view
         )
 
         response = self._request_document_content_view()
@@ -95,14 +98,15 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
             }
         )
 
-    def test_get_document_version_page_content_no_permission(self):
+    def test_get_document_page_content_no_permission(self):
+        self.document.submit_for_ocr()
         response = self._request_document_page_content_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_document_version_page_content_with_access(self):
+    def test_get_document_page_content_with_access(self):
         self.document.submit_for_ocr()
         self.grant_access(
-            permission=permission_ocr_content_view, obj=self.document
+            obj=self.document, permission=permission_ocr_content_view
         )
 
         response = self._request_document_page_content_view()
@@ -122,14 +126,15 @@ class OCRAPITestCase(DocumentTestMixin, BaseAPITestCase):
             }
         )
 
-    def test_get_document_version_version_content_no_permission(self):
+    def test_get_document_version_content_no_permission(self):
+        self.document.submit_for_ocr()
         response = self._request_document_version_content_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_document_version_version_content_with_access(self):
+    def test_get_document_version_content_with_access(self):
         self.document.submit_for_ocr()
         self.grant_access(
-            permission=permission_ocr_content_view, obj=self.document
+            obj=self.document, permission=permission_ocr_content_view
         )
 
         response = self._request_document_version_content_view()

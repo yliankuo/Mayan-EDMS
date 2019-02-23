@@ -43,7 +43,8 @@ def method_document_page_get_ocr_content(self):
         page_content = self.ocr_content.content
     except DocumentPageOCRContent.DoesNotExist:
         return ''
-    return page_content
+    else:
+        return page_content
 
 
 def method_document_version_get_ocr_content(self):
