@@ -2,8 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 from actstream.models import any_stream
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
 from mayan.apps.rest_api.viewsets import MayanAPIReadOnlyModelViewSet
