@@ -72,6 +72,9 @@ class RoleAPIViewSet(MayanAPIModelViewSet):
         'group_remove': permission_role_edit,
         'list': permission_role_view,
         'partial_update': permission_role_edit,
+        'permission_add': permission_role_edit,
+        'permission_list': permission_role_view,
+        'permission_remove': permission_role_edit,
         'retrieve': permission_role_view,
         'update': permission_role_edit,
     }

@@ -326,3 +326,95 @@ class RoleGroupAPITestCase(GroupTestMixin, RoleTestMixin, BaseAPITestCase):
 
         self.test_role.refresh_from_db()
         self.assertTrue(self.test_group not in self.test_role.groups.all())
+
+
+class RolePermissionAPITestCase(PermissionTestMixin, RoleTestMixin, BaseAPITestCase):
+    def _request_role_permission_list_api_view(self):
+        return self.get(
+            viewname='rest_api:role-permission-list',
+            kwargs={'role_id': self.test_role.pk}
+        )
+
+    def _request_role_permission_add_api_view(self):
+        return self.post(
+            viewname='rest_api:role-permission-add',
+            kwargs={'role_id': self.test_role.pk},
+            data={'permission_id_list': '{}'.format(self.test_permission.pk)}
+        )
+
+    def _request_role_permission_remove_api_view(self):
+        return self.post(
+            viewname='rest_api:role-permission-remove',
+            kwargs={'role_id': self.test_role.pk},
+            data={'permission_id_list': '{}'.format(self.test_permission.pk)}
+        )
+
+    def _setup_role_permission_list(self):
+        self._create_test_permission()
+        self._create_test_role()
+        self.test_role.grant(permission=self.test_permission)
+
+    def test_role_permission_list_api_view_no_permission(self):
+        self._setup_role_permission_list()
+
+        response = self._request_role_permission_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_role_permission_list_api_view_with_access(self):
+        self._setup_role_permission_list()
+
+        self.grant_access(obj=self.test_role, permission=permission_role_view)
+        response = self._request_role_permission_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+
+    def _setup_role_permission_add(self):
+        self._create_test_permission()
+        self._create_test_role()
+
+    def test_role_permission_add_api_view_no_permission(self):
+        self._setup_role_permission_add()
+
+        response = self._request_role_permission_add_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_role.refresh_from_db()
+        self.assertTrue(self.test_permission not in self.test_role.permissions.all())
+
+    def test_role_permission_add_api_view_with_access(self):
+        self._setup_role_permission_add()
+
+        self.grant_access(obj=self.test_role, permission=permission_role_edit)
+        response = self._request_role_permission_add_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_role.refresh_from_db()
+        self.assertTrue(
+            self.test_permission.stored_permission in self.test_role.permissions.all()
+        )
+
+    def _setup_role_permission_remove(self):
+        self._create_test_permission()
+        self._create_test_role()
+        self.test_role.grant(permission=self.test_permission)
+
+    def test_role_permission_remove_api_view_no_permission(self):
+        self._setup_role_permission_remove()
+
+        response = self._request_role_permission_remove_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_role.refresh_from_db()
+        self.assertTrue(
+            self.test_permission.stored_permission in self.test_role.permissions.all()
+        )
+
+    def test_role_permission_remove_api_view_with_access(self):
+        self._setup_role_permission_remove()
+
+        self.grant_access(obj=self.test_role, permission=permission_role_edit)
+        response = self._request_role_permission_remove_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_role.refresh_from_db()
+        self.assertTrue(self.test_permission not in self.test_role.permissions.all())

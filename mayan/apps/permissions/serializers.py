@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from mayan.apps.rest_api.mixins import ExternalObjectListSerializerMixin
 from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
@@ -86,21 +87,43 @@ class RolePermissionAddRemoveSerializer(ExternalObjectListSerializerMixin, seria
         help_text=_(
             'Comma separated list of permission primary keys that will be added or '
             'removed.'
-        ), required=False, write_only=True
+        ), label=_('Permission ID list'), required=False, write_only=True
     )
 
     class Meta:
         external_object_list_model = Permission
         external_object_list_pk_list_field = 'permission_id_list'
+        external_object_list_pk_type = None
+
+    def filter_queryset(self, id_list, queryset):
+        result = []
+        for pk in id_list:
+            try:
+                result.append(Permission.get(pk=pk))
+            except KeyError:
+                raise ValidationError(
+                    {
+                        'permission_id_list': [
+                            'Permission "{}" not found.'.format(pk)
+                        ]
+                    }, code='invalid'
+                )
+
+        return result
+
+    def get_external_object_list_queryset(self):
+        return Permission.all()
 
     def permissions_add(self, instance):
-        instance.permissions.add(
-            *self.get_external_object_list()
+        instance.permissions_add(
+            queryset=self.get_external_object_list(),
+            _user=self.context['request'].user
         )
 
     def permissions_remove(self, instance):
-        instance.permissions.remove(
-            *self.get_external_object_list()
+        instance.permissions_remove(
+            queryset=self.get_external_object_list(),
+            _user=self.context['request'].user
         )
 
 
