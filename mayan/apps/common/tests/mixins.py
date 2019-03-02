@@ -239,11 +239,24 @@ class TestModelTestMixin(object):
         class Meta:
             pass
 
+        def save(instance, *args, **kwargs):
+            if instance.pk:
+                return models.Model.self(instance, *args, **kwargs)
+            else:
+                instance.pk = RandomPrimaryKeyModelMonkeyPatchMixin.get_unique_primary_key(
+                    model=instance._meta.model
+                )
+                instance.id = instance.pk
+
+                return instance.save_base(force_insert=True)
+
         if options is not None:
             for key, value in options.items():
                 setattr(Meta, key, value)
 
-        attrs = {'__module__': self.__class__.__module__, 'Meta': Meta}
+        attrs = {
+            '__module__': self.__class__.__module__, 'save': save, 'Meta': Meta
+        }
 
         if fields:
             attrs.update(fields)
