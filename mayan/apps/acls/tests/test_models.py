@@ -129,7 +129,6 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
 
         # Since document_1 and document_2 are of document_type_1
         # they are the only ones that should be returned
-
         self.assertTrue(self.test_document_1 in result)
         self.assertTrue(self.test_document_2 in result)
         self.assertTrue(self.test_document_3 not in result)
@@ -230,9 +229,6 @@ class InheritedPermissionTestCase(TestModelTestMixin, PermissionTestMixin, RoleT
 
         self.assertTrue(self.test_permission.stored_permission in queryset)
 
-        #self._delete_test_model(model_name='TestModelParent')
-        #elf._delete_test_model(model_name='TestModelChild')
-
     def test_retrieve_inherited_related_grandparent_parent_child_permission(self):
         self._create_test_permission()
 
@@ -291,7 +287,3 @@ class InheritedPermissionTestCase(TestModelTestMixin, PermissionTestMixin, RoleT
         )
 
         self.assertTrue(self.test_permission.stored_permission in queryset)
-
-        #self._delete_test_model(model_name='TestModelGrandParent')
-        #self._delete_test_model(model_name='TestModelParent')
-        #self._delete_test_model(model_name='TestModelChild')

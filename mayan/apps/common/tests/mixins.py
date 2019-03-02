@@ -259,6 +259,11 @@ class TestModelTestMixin(object):
 
         self.__class__._test_models.append(model_name)
 
+    def _create_test_object(self, model_name='TestModel', **kwargs):
+        TestModel = getattr(self, model_name)
+
+        self.test_object = TestModel.objects.create(**kwargs)
+
     def _delete_test_model(self, model_name='TestModel'):
         TestModel = getattr(self, model_name)
 

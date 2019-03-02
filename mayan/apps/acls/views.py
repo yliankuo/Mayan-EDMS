@@ -58,7 +58,7 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectCreat
                 pk__in=self.get_external_object().acls.values('role')
             ),
             'widget_attributes': {'class': 'select2'},
-            '_user': self.request.user
+            'user': self.request.user
         }
 
     def get_instance_extra_data(self):
@@ -174,12 +174,10 @@ class ACLPermissionsView(AddRemoveView):
 
     def get_disabled_choices(self):
         """
-        Get permissions from a parent's ACLs. We return a list since that is
-        what the form widget's can process.
+        Get permissions from a parent's ACLs or directly granted to the role.
+        We return a list since that is what the form widget's can process.
         """
-        return self.main_object.get_inherited_permissions().values_list(
-            'pk', flat=True
-        )
+        return self.main_object.get_inherited_permissions().values_list('pk', flat=True)
 
     def get_extra_context(self):
         return {
@@ -195,9 +193,10 @@ class ACLPermissionsView(AddRemoveView):
     def get_list_added_help_text(self):
         if self.main_object.get_inherited_permissions():
             return _(
-                'Disabled permissions are inherited from a parent object and '
-                'can\'t be removed from this view, they need to be removed '
-                'from the parent object\'s ACL view.'
+                'Disabled permissions are inherited from a parent object or '
+                'directly granted to the role and can\'t be removed from this '
+                'view. Inherited permissions need to be removed from the '
+                'parent object\'s ACL or from them role via the Setup menu.'
             )
 
     def get_list_added_queryset(self):
@@ -210,9 +209,10 @@ class ACLPermissionsView(AddRemoveView):
         remove from the parent first to enable the choice in the form,
         remove it from the ACL and then re-add it to the parent ACL.
         """
-        queryset = super(ACLPermissionsView, self).get_list_added_queryset()
+        queryset_acl = super(ACLPermissionsView, self).get_list_added_queryset()
+
         return (
-            queryset | self.main_object.get_inherited_permissions()
+            queryset_acl | self.main_object.get_inherited_permissions()
         ).distinct()
 
     def get_secondary_object_source_queryset(self):
