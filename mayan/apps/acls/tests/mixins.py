@@ -40,12 +40,11 @@ class ACLTestMixin(object):
         if self.auto_create_test_role:
             self._create_test_role()
 
-        self.test_object = self.document
-
-        content_type = ContentType.objects.get_for_model(self.test_object)
+    def _inject_test_object_content_type(self):
+        self.test_object_content_type = ContentType.objects.get_for_model(self.test_object)
 
         self.test_content_object_view_kwargs = {
-            'app_label': content_type.app_label,
-            'model': content_type.model,
+            'app_label': self.test_object_content_type.app_label,
+            'model_name': self.test_object_content_type.model,
             'object_id': self.test_object.pk
         }

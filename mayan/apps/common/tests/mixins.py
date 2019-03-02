@@ -6,14 +6,17 @@ import random
 
 from furl import furl
 
+from django.apps import apps
 from django.conf import settings
 from django.conf.urls import url
 from django.core import management
+from django.db import connection
 from django.db import models
 from django.http import HttpResponse
 from django.template import Context, Template
 from django.test.utils import ContextList
 from django.urls import clear_url_caches, reverse
+from django.utils.encoding import force_bytes
 
 from mayan.apps.storage.settings import setting_temporary_directory
 
@@ -227,6 +230,58 @@ class TempfileCheckTestCaseMixin(object):
                 )
             )
         super(TempfileCheckTestCaseMixin, self).tearDown()
+
+
+class TestModelTestMixin(object):
+    _test_models = []
+
+    def _create_test_model(self, fields=None, model_name='TestModel', options=None):
+        class Meta:
+            pass
+
+        if options is not None:
+            for key, value in options.items():
+                setattr(Meta, key, value)
+
+        attrs = {'__module__': self.__class__.__module__, 'Meta': Meta}
+
+        if fields:
+            attrs.update(fields)
+
+        TestModel = type(
+            force_bytes(model_name), (models.Model,), attrs
+        )
+
+        setattr(self, model_name, TestModel)
+
+        with connection.schema_editor() as schema_editor:
+            schema_editor.create_model(model=TestModel)
+
+        self.__class__._test_models.append(model_name)
+
+    def _create_test_object(self, model_name='TestModel', **kwargs):
+        TestModel = getattr(self, model_name)
+
+        self.test_object = TestModel.objects.create(**kwargs)
+
+    def _delete_test_model(self, model_name='TestModel'):
+        TestModel = getattr(self, model_name)
+
+        with connection.schema_editor() as schema_editor:
+            schema_editor.delete_model(model=TestModel)
+
+        del TestModel._meta.app_config.models[model_name.lower()]
+        apps.clear_cache()
+
+    def _delete_test_models(self):
+        for test_model in self.__class__._test_models:
+            self._delete_test_model(model_name=test_model)
+
+        self.__class__._test_models = []
+
+    def tearDown(self):
+        self._delete_test_models()
+        super(TestModelTestMixin, self).tearDown()
 
 
 class TestViewTestCaseMixin(object):

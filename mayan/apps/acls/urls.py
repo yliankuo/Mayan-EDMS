@@ -2,10 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import (
-    APIObjectACLListView, APIObjectACLPermissionListView,
-    APIObjectACLPermissionView, APIObjectACLView
-)
+from .api_views import ObjectACLAPIViewSet
 from .views import (
     ACLCreateView, ACLDeleteView, ACLListView, ACLPermissionsView
 )
@@ -29,6 +26,14 @@ urlpatterns = [
     ),
 ]
 
+api_router_entries = (
+    {
+        'prefix': r'apps/(?P<app_label>[^/.]+)/models/(?P<model_name>[^/.]+)/objects/(?P<object_id>[^/.]+)/acls',
+        'viewset': ObjectACLAPIViewSet, 'basename': 'object-acl'
+    },
+)
+
+'''
 api_urls = [
     url(
         regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/$',
@@ -49,3 +54,4 @@ api_urls = [
         view=APIObjectACLPermissionView.as_view()
     ),
 ]
+'''
