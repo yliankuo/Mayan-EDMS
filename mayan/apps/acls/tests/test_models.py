@@ -1,15 +1,21 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.core.exceptions import PermissionDenied
+from django.db import models
 
 from mayan.apps.common.tests import BaseTestCase
+from mayan.apps.common.tests.mixins import TestModelTestMixin
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import (
     DocumentTestMixin, TEST_DOCUMENT_TYPE_2_LABEL, TEST_DOCUMENT_TYPE_LABEL
 )
+from mayan.apps.permissions.tests.mixins import PermissionTestMixin, RoleTestMixin
 
+from ..classes import ModelPermission
 from ..models import AccessControlList
+
+from .mixins import ACLTestMixin
 
 
 class PermissionTestCase(DocumentTestMixin, BaseTestCase):
@@ -150,3 +156,142 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
         self.assertTrue(self.test_document_1 in result)
         self.assertTrue(self.test_document_2 in result)
         self.assertTrue(self.test_document_3 in result)
+
+
+class InheritedPermissionTestCase(TestModelTestMixin, PermissionTestMixin, RoleTestMixin, ACLTestMixin, BaseTestCase):
+    def test_retrieve_inherited_role_permission_not_model_applicable(self):
+        self._create_test_model()
+        self.test_object = self.TestModel.objects.create()
+        self._create_test_acl()
+        self._create_test_permission()
+
+        self.test_role.grant(permission=self.test_permission)
+
+        queryset = AccessControlList.objects.get_inherited_permissions(
+            obj=self.test_object, role=self.test_role
+        )
+        self.assertTrue(self.test_permission.stored_permission not in queryset)
+
+    def test_retrieve_inherited_role_permission_model_applicable(self):
+        self._create_test_model()
+        self.test_object = self.TestModel.objects.create()
+        self._create_test_acl()
+        self._create_test_permission()
+
+        ModelPermission.register(
+            model=self.test_object._meta.model, permissions=(
+                self.test_permission,
+            )
+        )
+        self.test_role.grant(permission=self.test_permission)
+
+        queryset = AccessControlList.objects.get_inherited_permissions(
+            obj=self.test_object, role=self.test_role
+        )
+        self.assertTrue(self.test_permission.stored_permission in queryset)
+
+    def test_retrieve_inherited_related_parent_child_permission(self):
+        self._create_test_permission()
+
+        self._create_test_model(model_name='TestModelParent')
+        self._create_test_model(
+            fields={
+                'parent': models.ForeignKey(
+                    on_delete=models.CASCADE, related_name='children',
+                    to='TestModelParent',
+                )
+            }, model_name='TestModelChild'
+        )
+
+        ModelPermission.register(
+            model=self.TestModelParent, permissions=(
+                self.test_permission,
+            )
+        )
+        ModelPermission.register(
+            model=self.TestModelChild, permissions=(
+                self.test_permission,
+            )
+        )
+        ModelPermission.register_inheritance(
+            model=self.TestModelChild, related='parent',
+        )
+
+        parent = self.TestModelParent.objects.create()
+        child = self.TestModelChild.objects.create(parent=parent)
+
+        AccessControlList.objects.grant(
+            obj=parent, permission=self.test_permission, role=self.test_role
+        )
+
+        queryset = AccessControlList.objects.get_inherited_permissions(
+            obj=child, role=self.test_role
+        )
+
+        self.assertTrue(self.test_permission.stored_permission in queryset)
+
+        #self._delete_test_model(model_name='TestModelParent')
+        #elf._delete_test_model(model_name='TestModelChild')
+
+    def test_retrieve_inherited_related_grandparent_parent_child_permission(self):
+        self._create_test_permission()
+
+        self._create_test_model(model_name='TestModelGrandParent')
+        self._create_test_model(
+            fields={
+                'parent': models.ForeignKey(
+                    on_delete=models.CASCADE, related_name='children',
+                    to='TestModelGrandParent',
+                )
+            }, model_name='TestModelParent'
+        )
+        self._create_test_model(
+            fields={
+                'parent': models.ForeignKey(
+                    on_delete=models.CASCADE, related_name='children',
+                    to='TestModelParent',
+                )
+            }, model_name='TestModelChild'
+        )
+
+        ModelPermission.register(
+            model=self.TestModelGrandParent, permissions=(
+                self.test_permission,
+            )
+        )
+        ModelPermission.register(
+            model=self.TestModelParent, permissions=(
+                self.test_permission,
+            )
+        )
+        ModelPermission.register(
+            model=self.TestModelChild, permissions=(
+                self.test_permission,
+            )
+        )
+
+        ModelPermission.register_inheritance(
+            model=self.TestModelChild, related='parent',
+        )
+        ModelPermission.register_inheritance(
+            model=self.TestModelParent, related='parent',
+        )
+
+        grandparent = self.TestModelGrandParent.objects.create()
+        parent = self.TestModelParent.objects.create(parent=grandparent)
+        child = self.TestModelChild.objects.create(parent=parent)
+
+        AccessControlList.objects.grant(
+            obj=grandparent, permission=self.test_permission,
+            role=self.test_role
+        )
+
+        queryset = AccessControlList.objects.get_inherited_permissions(
+            obj=child, role=self.test_role
+        )
+
+        self.assertTrue(self.test_permission.stored_permission in queryset)
+
+        #self._delete_test_model(model_name='TestModelGrandParent')
+        #self._delete_test_model(model_name='TestModelParent')
+        #self._delete_test_model(model_name='TestModelChild')

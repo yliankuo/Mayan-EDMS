@@ -40,20 +40,10 @@ class ModelPermission(object):
             app_label='permissions', model_name='StoredPermission'
         )
 
-        permissions = []
-
-        class_permissions = cls.get_for_class(klass=type(instance))
-
-        if class_permissions:
-            permissions.extend(class_permissions)
-
-        proxy = cls._proxies.get(type(instance))
-
-        if proxy:
-            permissions.extend(cls._registry.get(proxy))
+        permissions = cls.get_for_class(klass=type(instance))
 
         pks = [
-            permission.stored_permission.pk for permission in set(permissions)
+            permission.stored_permission.pk for permission in permissions
         ]
         return StoredPermission.objects.filter(pk__in=pks)
 

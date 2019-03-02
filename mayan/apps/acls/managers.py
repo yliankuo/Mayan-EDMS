@@ -40,9 +40,9 @@ class AccessControlListManager(models.Manager):
         # 2: Related field
         # 3: Related field that is Generic Foreign Key
         # 4: No related field, but has an inherited related field, solved by
-        # 5: Inherited field of a related field
         # recursion, branches to #2 or #3.
-        # Not addressed yet
+        # 5: Inherited field of a related field
+        # -- Not addressed yet --
         # 6: Inherited field of a related field that is Generic Foreign Key
         result = []
 
@@ -152,41 +152,56 @@ class AccessControlListManager(models.Manager):
                 raise PermissionDenied
 
     def get_inherited_permissions(self, obj, role):
-        try:
-            instance = obj.first()
-        except AttributeError:
-            instance = obj
-        else:
-            if not instance:
-                return StoredPermission.objects.none()
+        queryset = self._get_inherited_object_permissions(obj=obj, role=role)
+
+        queryset = queryset | role.permissions.all()
+
+        # Filter the permissions to the ones that apply to the model
+        queryset = ModelPermission.get_for_instance(
+            instance=obj
+        ).filter(
+            pk__in=queryset
+        )
+
+        return queryset
+
+    def _get_inherited_object_permissions(self, obj, role):
+        queryset = StoredPermission.objects.none()
+
+        if not obj:
+            return queryset
 
         try:
             parent_accessor = ModelPermission.get_inheritance(
-                model=type(instance)
+                model=type(obj)
             )
         except KeyError:
-            return StoredPermission.objects.none()
+            pass
         else:
             try:
                 parent_object = resolve_attribute(
-                    obj=instance, attribute=parent_accessor
+                    obj=obj, attribute=parent_accessor
                 )
             except AttributeError:
                 # Parent accessor is not an attribute, try it as a related
                 # field.
                 parent_object = return_related(
-                    instance=instance, related_field=parent_accessor
+                    instance=obj, related_field=parent_accessor
                 )
             content_type = ContentType.objects.get_for_model(model=parent_object)
             try:
-                return self.get(
+                queryset = queryset | self.get(
                     content_type=content_type, object_id=parent_object.pk,
                     role=role
                 ).permissions.all()
             except self.model.DoesNotExist:
-                return StoredPermission.objects.none()
+                pass
 
-    def grant(self, permission, role, obj):
+            queryset = queryset | self._get_inherited_object_permissions(obj=parent_object, role=role)
+
+        return queryset
+
+    def grant(self, obj, permission, role):
         class_permissions = ModelPermission.get_for_class(klass=obj.__class__)
         if permission not in class_permissions:
             raise PermissionNotValidForClass
@@ -224,7 +239,7 @@ class AccessControlListManager(models.Manager):
             # is staff. Return the entire queryset.
             return queryset
 
-    def revoke(self, permission, role, obj):
+    def revoke(self, obj, permission, role):
         content_type = ContentType.objects.get_for_model(model=obj)
         acl, created = self.get_or_create(
             content_type=content_type, object_id=obj.pk,
