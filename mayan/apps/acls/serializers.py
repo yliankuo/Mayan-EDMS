@@ -1,30 +1,19 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.reverse import reverse
 
 from mayan.apps.common.serializers import ContentTypeSerializer
-from mayan.apps.permissions import Permission
-from mayan.apps.permissions.models import Role, StoredPermission
+from mayan.apps.permissions.models import Role
 from mayan.apps.permissions.permissions import permission_role_edit
-from mayan.apps.permissions.serializers import (
-    PermissionSerializer, RoleSerializer
-)
-from mayan.apps.rest_api.mixins import (
-    ExternalObjectListSerializerMixin, ExternalObjectSerializerMixin
-)
+from mayan.apps.permissions.serializers import RoleSerializer
+from mayan.apps.rest_api.mixins import ExternalObjectSerializerMixin
 from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
 
 from .models import AccessControlList
 
 
-#TODO: Inherited permissions
 class AccessControlListSerializer(ExternalObjectSerializerMixin, serializers.ModelSerializer):
     content_type = ContentTypeSerializer(read_only=True)
     role = RoleSerializer(read_only=True)

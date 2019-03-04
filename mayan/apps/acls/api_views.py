@@ -1,21 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404
-
-from rest_framework import generics, status, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
-from mayan.apps.rest_api.viewsets import (
-    MayanAPIGenericViewSet, MayanAPIModelViewSet, MayanAPIReadOnlyModelViewSet
-)
 from mayan.apps.permissions.serializers import (
     PermissionSerializer, RolePermissionAddRemoveSerializer
 )
+from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
-from .models import AccessControlList
 from .permissions import permission_acl_edit, permission_acl_view
 from .serializers import AccessControlListSerializer
 
@@ -57,8 +51,7 @@ class ObjectACLAPIViewSet(ContentTypeViewMixin, ExternalObjectMixin, MayanAPIMod
         return self.get_content_type().get_all_objects_for_this_type()
 
     def get_queryset(self):
-        obj = self.get_external_object()
-        return obj.acls.all()
+        return self.get_external_object().acls.all()
 
     @action(
         detail=True, lookup_url_kwarg='acl_id', methods=('post',),

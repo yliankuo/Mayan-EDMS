@@ -32,26 +32,3 @@ api_router_entries = (
         'viewset': ObjectACLAPIViewSet, 'basename': 'object-acl'
     },
 )
-
-'''
-api_urls = [
-    url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/$',
-        name='accesscontrollist-list', view=APIObjectACLListView.as_view()
-    ),
-    url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_id>\d+)/$',
-        name='accesscontrollist-detail', view=APIObjectACLView.as_view()
-    ),
-    url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_id>\d+)/permissions/$',
-        name='accesscontrollist-permission-list',
-        view=APIObjectACLPermissionListView.as_view()
-    ),
-    url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/acls/(?P<acl_id>\d+)/permissions/(?P<permission_id>\d+)/$',
-        name='accesscontrollist-permission-detail',
-        view=APIObjectACLPermissionView.as_view()
-    ),
-]
-'''
