@@ -4,13 +4,11 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.common.tests.mixins import TestModelTestMixin
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.tests import (
     DocumentTestMixin, TEST_DOCUMENT_TYPE_2_LABEL, TEST_DOCUMENT_TYPE_LABEL
 )
-from mayan.apps.permissions.tests.mixins import PermissionTestMixin, RoleTestMixin
 
 from ..classes import ModelPermission
 from ..models import AccessControlList
@@ -157,7 +155,7 @@ class PermissionTestCase(DocumentTestMixin, BaseTestCase):
         self.assertTrue(self.test_document_3 in result)
 
 
-class InheritedPermissionTestCase(TestModelTestMixin, PermissionTestMixin, RoleTestMixin, ACLTestMixin, BaseTestCase):
+class InheritedPermissionTestCase(ACLTestMixin, BaseTestCase):
     def test_retrieve_inherited_role_permission_not_model_applicable(self):
         self._create_test_model()
         self.test_object = self.TestModel.objects.create()

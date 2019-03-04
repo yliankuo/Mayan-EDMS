@@ -27,6 +27,10 @@ logger = logging.getLogger(__name__)
 
 
 class ACLCreateView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectCreateView):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model_name'
+    }
     external_object_permission = permission_acl_edit
     external_object_pk_url_kwarg = 'object_id'
     form_class = ACLCreateForm
@@ -93,13 +97,17 @@ class ACLDeleteView(SingleObjectDeleteView):
         return reverse(
             'acls:acl_list', kwargs={
                 'app_label': instance.content_type.app_label,
-                'model': instance.content_type.model,
+                'model_name': instance.content_type.model,
                 'object_id': instance.object_id
             }
         )
 
 
 class ACLListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListView):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model_name'
+    }
     external_object_permission = permission_acl_view
     external_object_pk_url_kwarg = 'object_id'
 

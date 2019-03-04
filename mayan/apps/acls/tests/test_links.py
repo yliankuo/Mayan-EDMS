@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.urls import reverse
 
-from mayan.apps.documents.tests import GenericDocumentViewTestCase
+from mayan.apps.common.tests import GenericViewTestCase
 
 from ..links import (
     link_acl_create, link_acl_delete, link_acl_list, link_acl_permissions
@@ -12,8 +12,12 @@ from ..permissions import permission_acl_edit, permission_acl_view
 from .mixins import ACLTestMixin
 
 
-class ACLsLinksTestCase(ACLTestMixin, GenericDocumentViewTestCase):
+class AccessControlListLinksTestCase(ACLTestMixin, GenericViewTestCase):
     auto_create_test_role = False
+
+    def setUp(self):
+        super(AccessControlListLinksTestCase, self).setUp()
+        self._setup_test_object()
 
     def test_object_acl_create_link(self):
         self.grant_access(obj=self.test_object, permission=permission_acl_edit)

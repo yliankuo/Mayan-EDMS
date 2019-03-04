@@ -2,38 +2,20 @@ from __future__ import absolute_import, unicode_literals
 
 from rest_framework import status
 
-from mayan.apps.common.tests.mixins import TestModelTestMixin
-from mayan.apps.permissions.tests.mixins import PermissionTestMixin, RoleTestMixin
 from mayan.apps.rest_api.tests import BaseAPITestCase
 
-from ..classes import ModelPermission
 from ..models import AccessControlList
 from ..permissions import permission_acl_edit, permission_acl_view
 
 from .mixins import ACLTestMixin
 
 
-class ACLAPITestCase(ACLTestMixin, RoleTestMixin, PermissionTestMixin, TestModelTestMixin, BaseAPITestCase):
+class ACLAPITestCase(ACLTestMixin, BaseAPITestCase):
     def setUp(self):
         super(ACLAPITestCase, self).setUp()
-
-        self._create_test_model()
-        self._create_test_object()
-        ModelPermission.register(
-            model=self.test_object._meta.model, permissions=(
-                permission_acl_edit, permission_acl_view,
-            )
-        )
-
-        self._create_test_permission()
+        self._setup_test_object()
         self._create_test_acl()
-        ModelPermission.register(
-            model=self.test_object._meta.model, permissions=(
-                self.test_permission,
-            )
-        )
         self.test_acl.permissions.add(self.test_permission.stored_permission)
-        self._inject_test_object_content_type()
 
     def _request_object_acl_list_api_view(self):
         return self.get(

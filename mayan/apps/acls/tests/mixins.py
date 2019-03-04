@@ -3,10 +3,15 @@ from __future__ import unicode_literals
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 
-from mayan.apps.permissions.tests.mixins import RoleTestCaseMixin
+from mayan.apps.common.tests.mixins import TestModelTestMixin
+from mayan.apps.permissions.tests.mixins import (
+    PermissionTestMixin, RoleTestCaseMixin, RoleTestMixin
+)
 from mayan.apps.user_management.tests.mixins import UserTestCaseMixin
 
+from ..classes import ModelPermission
 from ..models import AccessControlList
+from ..permissions import permission_acl_edit, permission_acl_view
 
 
 class ACLTestCaseMixin(RoleTestCaseMixin, UserTestCaseMixin):
@@ -27,7 +32,7 @@ class ACLTestCaseMixin(RoleTestCaseMixin, UserTestCaseMixin):
         )
 
 
-class ACLTestMixin(object):
+class ACLTestMixin(PermissionTestMixin, RoleTestMixin, TestModelTestMixin):
     auto_create_test_role = True
 
     def _create_test_acl(self):
@@ -48,3 +53,21 @@ class ACLTestMixin(object):
             'model_name': self.test_object_content_type.model,
             'object_id': self.test_object.pk
         }
+
+    def _setup_test_object(self):
+        self._create_test_model()
+        self._create_test_object()
+        ModelPermission.register(
+            model=self.test_object._meta.model, permissions=(
+                permission_acl_edit, permission_acl_view,
+            )
+        )
+
+        self._create_test_permission()
+        ModelPermission.register(
+            model=self.test_object._meta.model, permissions=(
+                self.test_permission,
+            )
+        )
+
+        self._inject_test_object_content_type()

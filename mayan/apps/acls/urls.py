@@ -9,11 +9,11 @@ from .views import (
 
 urlpatterns = [
     url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/create/$',
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model_name>[-\w]+)/(?P<object_id>\d+)/create/$',
         name='acl_create', view=ACLCreateView.as_view()
     ),
     url(
-        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model>[-\w]+)/(?P<object_id>\d+)/list/$',
+        regex=r'^objects/(?P<app_label>[-\w]+)/(?P<model_name>[-\w]+)/(?P<object_id>\d+)/list/$',
         name='acl_list', view=ACLListView.as_view()
     ),
     url(
