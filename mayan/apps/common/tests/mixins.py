@@ -9,6 +9,7 @@ from furl import furl
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import url
+from django.contrib.contenttypes.models import ContentType
 from django.core import management
 from django.db import connection
 from django.db import models
@@ -271,6 +272,8 @@ class TestModelTestMixin(object):
             schema_editor.create_model(model=TestModel)
 
         self.__class__._test_models.append(model_name)
+        apps.clear_cache()
+        ContentType.objects.clear_cache()
 
     def _create_test_object(self, model_name='TestModel', **kwargs):
         TestModel = getattr(self, model_name)
@@ -285,6 +288,7 @@ class TestModelTestMixin(object):
 
         del TestModel._meta.app_config.models[model_name.lower()]
         apps.clear_cache()
+        ContentType.objects.clear_cache()
 
     def _delete_test_models(self):
         for test_model in self.__class__._test_models:
