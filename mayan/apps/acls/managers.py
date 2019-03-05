@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import operator
 import warnings
 
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -76,9 +77,6 @@ class AccessControlListManager(models.Manager):
             else:
                 # Case 2: Related field of a single type, single ContentType,
                 # multiple object id
-                related_field = get_related_field(
-                    model=queryset.model, related_field_name=related_field_name
-                )
                 content_type = ContentType.objects.get_for_model(
                     model=related_field.related_model
                 )
@@ -94,18 +92,23 @@ class AccessControlListManager(models.Manager):
                 # TODO: OR for document pages, version, doc, and types
                 # TODO: AND for new cabinet levels ACLs
                 try:
-                    related_field_model_related_field_name = ModelPermission.get_inheritance(
+                    related_field_model_related_fields = ModelPermission.get_inheritances(
                         model=related_field.related_model
                     )
                 except KeyError:
                     pass
                 else:
-                    related_field_name = '{}__{}'.format(related_field_name, related_field_model_related_field_name)
-                    related_field_inherited_acl_queries = self._get_acl_filters(
-                        queryset=queryset, stored_permission=stored_permission,
-                        user=user, related_field_name=related_field_name
-                    )
-                    result.extend(related_field_inherited_acl_queries)
+                    relation_result = []
+                    for related_field_model_related_field_name in related_field_model_related_fields:
+                        related_field_name = '{}__{}'.format(related_field_name, related_field_model_related_field_name)
+                        related_field_inherited_acl_queries = self._get_acl_filters(
+                            queryset=queryset, stored_permission=stored_permission,
+                            user=user, related_field_name=related_field_name
+                        )
+
+                        relation_result.append(reduce(operator.and_, related_field_inherited_acl_queries))
+
+                    result.append(reduce(operator.or_, relation_result))
         else:
             # Case 1: Original model, single ContentType, multiple object id
             content_type = ContentType.objects.get_for_model(model=queryset.model)
@@ -118,17 +121,22 @@ class AccessControlListManager(models.Manager):
 
             # Case 4: Original model, has an inherited related field
             try:
-                related_field_name = ModelPermission.get_inheritance(
+                related_fields = ModelPermission.get_inheritances(
                     model=queryset.model
                 )
             except KeyError:
                 pass
             else:
-                inherited_acl_queries = self._get_acl_filters(
-                    queryset=queryset, stored_permission=stored_permission,
-                    related_field_name=related_field_name, user=user
-                )
-                result.extend(inherited_acl_queries)
+                relation_result = []
+
+                for related_field_name in related_fields:
+                    inherited_acl_queries = self._get_acl_filters(
+                        queryset=queryset, stored_permission=stored_permission,
+                        related_field_name=related_field_name, user=user
+                    )
+                    relation_result.append(reduce(operator.and_, inherited_acl_queries))
+
+                result.append(reduce(operator.or_, relation_result))
 
         return result
 
@@ -172,32 +180,35 @@ class AccessControlListManager(models.Manager):
             return queryset
 
         try:
-            parent_accessor = ModelPermission.get_inheritance(
+            related_fields = ModelPermission.get_inheritances(
                 model=type(obj)
             )
         except KeyError:
             pass
         else:
-            try:
-                parent_object = resolve_attribute(
-                    obj=obj, attribute=parent_accessor
-                )
-            except AttributeError:
-                # Parent accessor is not an attribute, try it as a related
-                # field.
-                parent_object = return_related(
-                    instance=obj, related_field=parent_accessor
-                )
-            content_type = ContentType.objects.get_for_model(model=parent_object)
-            try:
-                queryset = queryset | self.get(
-                    content_type=content_type, object_id=parent_object.pk,
-                    role=role
-                ).permissions.all()
-            except self.model.DoesNotExist:
-                pass
+            for related_field_name in related_fields:
+                try:
+                    parent_object = resolve_attribute(
+                        obj=obj, attribute=related_field_name
+                    )
+                except AttributeError:
+                    # Parent accessor is not an attribute, try it as a related
+                    # field.
+                    parent_object = return_related(
+                        instance=obj, related_field=related_field_name
+                    )
+                content_type = ContentType.objects.get_for_model(model=parent_object)
+                try:
+                    queryset = queryset | self.get(
+                        content_type=content_type, object_id=parent_object.pk,
+                        role=role
+                    ).permissions.all()
+                except self.model.DoesNotExist:
+                    pass
 
-            queryset = queryset | self._get_inherited_object_permissions(obj=parent_object, role=role)
+                queryset = queryset | self._get_inherited_object_permissions(
+                    obj=parent_object, role=role
+                )
 
         return queryset
 
@@ -215,6 +226,18 @@ class AccessControlListManager(models.Manager):
         acl.permissions.add(permission.stored_permission)
 
         return acl
+
+    def restrict_queryset_by_accesses(self, operator, permissions, queryset, user):
+        result = []
+
+        for permission in permissions:
+            result.append(
+                self.restrict_queryset(
+                    permission=permission, queryset=queryset, user=user
+                )
+            )
+
+        return reduce(operator, result)
 
     def restrict_queryset(self, permission, queryset, user):
         # Check directly granted permission via a role

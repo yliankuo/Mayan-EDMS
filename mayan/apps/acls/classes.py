@@ -48,7 +48,7 @@ class ModelPermission(object):
         return StoredPermission.objects.filter(pk__in=pks)
 
     @classmethod
-    def get_inheritance(cls, model):
+    def get_inheritances(cls, model):
         return cls._inheritances[model]
 
     @classmethod
@@ -69,7 +69,8 @@ class ModelPermission(object):
 
     @classmethod
     def register_inheritance(cls, model, related):
-        cls._inheritances[model] = related
+        cls._inheritances.setdefault(model, [])
+        cls._inheritances[model].append(related)
 
     @classmethod
     def register_proxy(cls, source, model):

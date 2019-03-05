@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import operator
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -31,6 +32,11 @@ class AccessControlList(models.Model):
     * Role - Custom role that is being granted a permission. Roles are created
     in the Setup menu.
     """
+    # Multiple inheritance operator types
+    OPERATOR_AND = operator.and_
+    OPERATOR_OR = operator.or_
+    operator_default = OPERATOR_AND
+
     content_type = models.ForeignKey(
         on_delete=models.CASCADE, related_name='object_content_type',
         to=ContentType

@@ -285,3 +285,117 @@ class InheritedPermissionTestCase(ACLTestMixin, BaseTestCase):
         )
 
         self.assertTrue(self.test_permission.stored_permission in queryset)
+
+
+class MultipleAccessTestCase(ACLTestMixin, BaseTestCase):
+    def setUp(self):
+        super(MultipleAccessTestCase, self).setUp()
+        self._create_test_permission()
+        self._create_test_permission_2()
+
+        self._create_test_model(model_name='TestModelParent1')
+        self._create_test_model(model_name='TestModelParent2')
+        self._create_test_model(
+            fields={
+                'parent_1': models.ForeignKey(
+                    on_delete=models.CASCADE, related_name='children1',
+                    to='TestModelParent1',
+                ),
+                'parent_2': models.ForeignKey(
+                    on_delete=models.CASCADE, related_name='children2',
+                    to='TestModelParent2',
+                )
+            }, model_name='TestModelChild'
+        )
+
+        ModelPermission.register(
+            model=self.TestModelParent1, permissions=(
+                self.test_permission,
+            )
+        )
+        ModelPermission.register(
+            model=self.TestModelParent2, permissions=(
+                self.test_permission_2,
+            )
+        )
+
+        self.test_object_parent_1 = self.TestModelParent1.objects.create()
+        self.test_object_parent_2 = self.TestModelParent2.objects.create()
+        self.test_object_child = self.TestModelChild.objects.create(
+            parent_1=self.test_object_parent_1, parent_2=self.test_object_parent_2
+        )
+
+        ModelPermission.register_inheritance(
+            model=self.TestModelChild, related='parent_1'
+        )
+        ModelPermission.register_inheritance(
+            model=self.TestModelChild, related='parent_2'
+        )
+
+    def test_restrict_queryset_and_operator_first_permission(self):
+        self.grant_access(obj=self.test_object_parent_1, permission=self.test_permission)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_AND,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child not in queryset)
+
+    def test_restrict_queryset_and_operator_second_permission(self):
+        self.grant_access(obj=self.test_object_parent_2, permission=self.test_permission_2)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_AND,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child not in queryset)
+
+    def test_restrict_queryset_and_operator_both_permissions(self):
+        self.grant_access(obj=self.test_object_parent_1, permission=self.test_permission)
+        self.grant_access(obj=self.test_object_parent_2, permission=self.test_permission_2)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_AND,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child in queryset)
+
+    def test_restrict_queryset_or_operator_first_permission(self):
+        self.grant_access(obj=self.test_object_parent_1, permission=self.test_permission)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_OR,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child in queryset)
+
+    def test_restrict_queryset_or_operator_second_permission(self):
+        self.grant_access(obj=self.test_object_parent_2, permission=self.test_permission_2)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_OR,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child in queryset)
+
+    def test_restrict_queryset_or_operator_both_permissions(self):
+        self.grant_access(obj=self.test_object_parent_1, permission=self.test_permission)
+        self.grant_access(obj=self.test_object_parent_2, permission=self.test_permission_2)
+
+        queryset = AccessControlList.objects.restrict_queryset_by_accesses(
+            operator=AccessControlList.OPERATOR_OR,
+            permissions=(self.test_permission, self.test_permission_2),
+            queryset=self.TestModelChild.objects.all(),
+            user=self._test_case_user
+        )
+        self.assertTrue(self.test_object_child in queryset)
