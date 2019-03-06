@@ -4,9 +4,10 @@ from ..classes import PermissionNamespace
 from ..models import Role
 
 from .literals import (
-    TEST_CASE_ROLE_LABEL, TEST_PERMISSION_LABEL, TEST_PERMISSION_NAME,
-    TEST_PERMISSION_NAMESPACE_LABEL, TEST_PERMISSION_NAMESPACE_NAME,
-    TEST_ROLE_LABEL
+    TEST_CASE_ROLE_LABEL, TEST_PERMISSION_LABEL, TEST_PERMISSION_LABEL_2,
+    TEST_PERMISSION_NAME, TEST_PERMISSION_NAME_2, TEST_PERMISSION_NAMESPACE_LABEL,
+    TEST_PERMISSION_NAMESPACE_LABEL_2, TEST_PERMISSION_NAMESPACE_NAME,
+    TEST_PERMISSION_NAMESPACE_NAME_2, TEST_ROLE_LABEL
 )
 
 
@@ -19,6 +20,16 @@ class PermissionTestMixin(object):
         self.test_permission = self.test_permission_namespace.add_permission(
             label=TEST_PERMISSION_LABEL,
             name=TEST_PERMISSION_NAME
+        )
+
+    def _create_test_permission_2(self):
+        self.test_permission_namespace_2 = PermissionNamespace(
+            label=TEST_PERMISSION_NAMESPACE_LABEL_2,
+            name=TEST_PERMISSION_NAMESPACE_NAME_2
+        )
+        self.test_permission_2 = self.test_permission_namespace_2.add_permission(
+            label=TEST_PERMISSION_LABEL_2,
+            name=TEST_PERMISSION_NAME_2
         )
 
 
