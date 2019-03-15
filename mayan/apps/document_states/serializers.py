@@ -26,23 +26,18 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
     #transitions = WorkflowTransitionSerializer(many=True, required=False)
 
     class Meta:
-        #extra_kwargs = {
-        #    'url': {'view_name': 'rest_api:workflow-detail'},
-        #}
+        extra_kwargs = {
+            'url': {
+                'lookup_url_kwarg': 'workflow_id',
+                'view_name': 'rest_api:workflow-detail'
+            },
+        }
         fields = (
-            #'document_types_url', 'image_url', 'id', 'internal_name', 'label',
-            'id', 'internal_name', 'label',
-            #'states', 'transitions', 'url'
-            #'states', 'transitions', 'url'
+            #'document_types_url', 'image_url',
+            'id', 'internal_name', 'label', 'url'
+            #'states', 'transitions',
         )
         model = Workflow
-
-    #def get_image_url(self, instance):
-    #    return reverse(
-    #        viewname='rest_api:workflow-image', kwargs={
-    #            'workflow_pk': instance.pk
-    #        }, request=self.context['request'], format=self.context['format']
-    #    )
 
 """
 

@@ -93,10 +93,9 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
 
         self.assertEqual(Workflow.objects.count(), 0)
 
-
     def _request_workflow_detail_api_view(self):
         return self.get(
-            api_viewname='rest_api:workflow-detail',  kwargs={
+            viewname='rest_api:workflow-detail',  kwargs={
                 'workflow_id': self.test_workflow.pk,
             }
         )
@@ -110,6 +109,7 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         self.assertFalse('label' in response.json())
 
     def test_workflow_detail_api_view_with_access(self):
+        self.expected_content_type = None
         self._create_test_workflow()
         self.grant_access(
             obj=self.test_workflow, permission=permission_workflow_view
@@ -118,8 +118,6 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         response = self._request_workflow_detail_api_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['label'], self.test_workflow.label)
-
-
 
     def _request_workflow_edit_patch_api_view(self):
         return self.patch(
@@ -199,6 +197,27 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
             self.test_workflow.internal_name, test_workflow.internal_name
         )
 
+    def _request_workflow_list_api_view(self):
+        return self.get(viewname='rest_api:workflow-list')
+
+    def test_workflow_list_api_view_no_permission(self):
+        self._create_test_workflow()
+
+        response = self._request_workflow_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 0)
+
+    def test_workflow_list_api_view_with_access(self):
+        self._create_test_workflow()
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_view
+        )
+
+        response = self._request_workflow_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json()['results'][0]['label'], self.test_workflow.label
+        )
 
 
     """
@@ -352,44 +371,6 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         response = self._request_workflow_document_type_list_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['results'][0]['label'], self.document_type.label)
-
-    def _request_workflow_list_view(self):
-        return self.get(viewname='rest_api:workflow-list')
-
-    def test_workflow_list_view_no_access(self):
-        self._create_test_workflow()
-        response = self._request_workflow_list_view()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['count'], 0)
-
-    def test_workflow_list_view_with_access(self):
-        self._create_test_workflow()
-        self.grant_access(permission=permission_workflow_view, obj=self.workflow)
-        response = self._request_workflow_list_view()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'][0]['label'], self.workflow.label)
-
-
-    def _request_workflow_edit_view_via_put(self):
-        return self.put(
-            viewname='rest_api:workflow-detail', args=(self.workflow.pk,),
-            data={'label': TEST_WORKFLOW_LABEL_EDITED}
-        )
-
-    def test_workflow_put_view_no_access(self):
-        self._create_test_workflow()
-        response = self._request_workflow_edit_view_via_put()
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.workflow.refresh_from_db()
-        self.assertEqual(self.workflow.label, TEST_WORKFLOW_LABEL)
-
-    def test_workflow_put_view_with_access(self):
-        self._create_test_workflow()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
-        response = self._request_workflow_edit_view_via_put()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.workflow.refresh_from_db()
-        self.assertEqual(self.workflow.label, TEST_WORKFLOW_LABEL_EDITED)
 
     def _request_document_type_workflow_list_view(self):
         return self.get(
