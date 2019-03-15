@@ -14,7 +14,7 @@ from .mixins import (
 )
 
 
-class BaseTestCase(RandomPrimaryKeyModelMonkeyPatchMixin, DatabaseConversionMixin, ACLTestCaseMixin, ContentTypeCheckMixin, OpenFileCheckTestCaseMixin, TempfileCheckTestCaseMixin, TestCase):
+class BaseTestCase(RandomPrimaryKeyModelMonkeyPatchMixin, DatabaseConversionMixin, ACLTestCaseMixin, OpenFileCheckTestCaseMixin, TempfileCheckTestCaseMixin, TestCase):
     """
     This is the most basic test case class any test in the project should use.
     """
@@ -26,7 +26,7 @@ class BaseTestCase(RandomPrimaryKeyModelMonkeyPatchMixin, DatabaseConversionMixi
         Permission.invalidate_cache()
 
 
-class GenericViewTestCase(ClientMethodsTestCaseMixin, TestViewTestCaseMixin, BaseTestCase):
+class GenericViewTestCase(ClientMethodsTestCaseMixin, ContentTypeCheckMixin, TestViewTestCaseMixin, BaseTestCase):
     """
     A generic view test case built on top of the base test case providing
     a single, user customizable view to test object resolution and shorthand

@@ -90,13 +90,14 @@ class ContentTypeCheckMixin(object):
             def request(self, *args, **kwargs):
                 response = super(CustomClient, self).request(*args, **kwargs)
 
-                content_type = response._headers['content-type'][1]
-                test_instance.assertEqual(
-                    content_type, test_instance.expected_content_type,
-                    msg='Unexpected response content type: {}, expected: {}.'.format(
-                        content_type, test_instance.expected_content_type
+                content_type = response._headers.get('content-type', [None, ''])[1]
+                if test_instance.expected_content_type:
+                    test_instance.assertEqual(
+                        content_type, test_instance.expected_content_type,
+                        msg='Unexpected response content type: {}, expected: {}.'.format(
+                            content_type, test_instance.expected_content_type
+                        )
                     )
-                )
 
                 return response
 
