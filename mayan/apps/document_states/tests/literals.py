@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 TEST_INDEX_LABEL = 'test workflow index'
 
 TEST_WORKFLOW_LABEL = 'test workflow label'
-TEST_WORKFLOW_INTERNAL_NAME = 'test_workflow_name'
 TEST_WORKFLOW_LABEL_EDITED = 'test workflow label edited'
+TEST_WORKFLOW_INTERNAL_NAME = 'test_workflow_name'
+TEST_WORKFLOW_INTERNAL_NAME_EDITED = 'test_workflow_name_edited'
 TEST_WORKFLOW_INITIAL_STATE_LABEL = 'test initial state'
 TEST_WORKFLOW_INITIAL_STATE_COMPLETION = 33
 TEST_WORKFLOW_INSTANCE_LOG_ENTRY_COMMENT = 'test workflow instance log entry comment'

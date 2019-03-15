@@ -9,8 +9,7 @@ from rest_framework import generics
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_type_view
-from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
-from mayan.apps.rest_api.permissions import MayanPermission
+from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .literals import WORKFLOW_IMAGE_TASK_TIMEOUT
 from .models import Workflow
@@ -19,17 +18,35 @@ from .permissions import (
     permission_workflow_edit, permission_workflow_view
 )
 from .serializers import (
-    NewWorkflowDocumentTypeSerializer, WorkflowDocumentTypeSerializer,
-    WorkflowInstanceLogEntrySerializer, WorkflowInstanceSerializer,
-    WorkflowSerializer, WorkflowStateSerializer, WorkflowTransitionSerializer,
-    WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
-    WritableWorkflowTransitionSerializer
+    WorkflowSerializer
+
+    #NewWorkflowDocumentTypeSerializer, WorkflowDocumentTypeSerializer,
+    #WorkflowInstanceLogEntrySerializer, WorkflowInstanceSerializer,
+    #, WorkflowStateSerializer, WorkflowTransitionSerializer,
+    #WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
+    #WritableWorkflowTransitionSerializer
 )
 from .settings import settings_workflow_image_cache_time
 from .storages import storage_workflowimagecache
 from .tasks import task_generate_workflow_image
 
 
+class WorkflowAPIViewSet(MayanAPIModelViewSet):
+    lookup_url_kwarg = 'workflow_id'
+    object_permission_map = {
+        'destroy': permission_workflow_delete,
+        'list': permission_workflow_view,
+        'partial_update': permission_workflow_edit,
+        'retrieve': permission_workflow_view,
+        'update': permission_workflow_edit,
+    }
+    queryset = Workflow.objects.all()
+    serializer_class = WorkflowSerializer
+    view_permission_map = {
+        'create': permission_workflow_create
+    }
+
+'''
 class APIDocumentTypeWorkflowListView(generics.ListAPIView):
     """
     get: Returns a list of all the document type workflows.
@@ -566,3 +583,4 @@ class APIWorkflowInstanceLogEntryListView(generics.ListCreateAPIView):
         )
 
         return workflow
+'''

@@ -17,6 +17,35 @@ from .models import (
 )
 
 
+class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
+    #document_types_url = serializers.HyperlinkedIdentityField(
+    #    view_name='rest_api:workflow-document-type-list'
+    #)
+    #image_url = serializers.SerializerMethodField()
+    #states = WorkflowStateSerializer(many=True, required=False)
+    #transitions = WorkflowTransitionSerializer(many=True, required=False)
+
+    class Meta:
+        #extra_kwargs = {
+        #    'url': {'view_name': 'rest_api:workflow-detail'},
+        #}
+        fields = (
+            #'document_types_url', 'image_url', 'id', 'internal_name', 'label',
+            'id', 'internal_name', 'label',
+            #'states', 'transitions', 'url'
+            #'states', 'transitions', 'url'
+        )
+        model = Workflow
+
+    #def get_image_url(self, instance):
+    #    return reverse(
+    #        viewname='rest_api:workflow-image', kwargs={
+    #            'workflow_pk': instance.pk
+    #        }, request=self.context['request'], format=self.context['format']
+    #    )
+
+"""
+
 class NewWorkflowDocumentTypeSerializer(serializers.Serializer):
     document_type_pk = serializers.IntegerField(
         help_text=_('Primary key of the document type to be added.')
@@ -170,30 +199,6 @@ class WritableWorkflowTransitionSerializer(serializers.ModelSerializer):
         )
 
 
-class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
-    document_types_url = serializers.HyperlinkedIdentityField(
-        view_name='rest_api:workflow-document-type-list'
-    )
-    image_url = serializers.SerializerMethodField()
-    states = WorkflowStateSerializer(many=True, required=False)
-    transitions = WorkflowTransitionSerializer(many=True, required=False)
-
-    class Meta:
-        extra_kwargs = {
-            'url': {'view_name': 'rest_api:workflow-detail'},
-        }
-        fields = (
-            'document_types_url', 'image_url', 'id', 'internal_name', 'label',
-            'states', 'transitions', 'url'
-        )
-        model = Workflow
-
-    def get_image_url(self, instance):
-        return reverse(
-            viewname='rest_api:workflow-image', kwargs={
-                'workflow_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
 
 
 class WorkflowInstanceLogEntrySerializer(serializers.ModelSerializer):
@@ -360,3 +365,4 @@ class WritableWorkflowInstanceLogEntrySerializer(serializers.ModelSerializer):
             raise ValidationError(exception)
 
         return attrs
+"""
