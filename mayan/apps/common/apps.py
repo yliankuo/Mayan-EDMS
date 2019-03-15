@@ -4,6 +4,8 @@ import logging
 import os
 import warnings
 from datetime import timedelta
+import sys
+import traceback
 
 from kombu import Exchange, Queue
 
@@ -75,6 +77,8 @@ class MayanAppConfig(apps.AppConfig):
                     'Import time error when running AppConfig.ready() of app '
                     '"%s".', self.name
                 )
+                exc_info = sys.exc_info()
+                traceback.print_exception(*exc_info)
                 raise exception
 
 
