@@ -5,158 +5,149 @@ from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.reverse import reverse
+from rest_framework.settings import api_settings
 
+from mayan.apps.documents.models import DocumentType
+from mayan.apps.documents.permissions import permission_document_type_edit
 from mayan.apps.documents.serializers import (
     DocumentSerializer, DocumentTypeSerializer
 )
+from mayan.apps.rest_api.mixins import ExternalObjectListSerializerMixin
+from mayan.apps.rest_api.relations import (
+    FilteredPrimaryKeyRelatedField, MultiKwargHyperlinkedIdentityField
+)
 
 from .models import DocumentMetadata, DocumentTypeMetadataType, MetadataType
+from .permissions import permission_metadata_add
 
 
 class MetadataTypeSerializer(serializers.HyperlinkedModelSerializer):
+    document_type_relation_add_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='metadata_type_id', view_name='rest_api:metadata_type-document_type_relation-add'
+    )
+    document_type_relation_list_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='metadata_type_id', view_name='rest_api:metadata_type-document_type_relation-list'
+    )
+    document_type_relation_remove_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='metadata_type_id', view_name='rest_api:metadata_type-document_type_relation-remove'
+    )
+
     class Meta:
         extra_kwargs = {
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'metadata_type_pk',
-                'view_name': 'rest_api:metadatatype-detail'
+                'lookup_url_kwarg': 'metadata_type_id',
+                'view_name': 'rest_api:metadata_type-detail'
             },
         }
         fields = (
-            'default', 'id', 'label', 'lookup', 'name', 'parser', 'url',
-            'validation'
+            'default', 'document_type_relation_add_url', 'document_type_relation_list_url',
+            'document_type_relation_remove_url', 'id', 'label', 'lookup', 'name',
+            'parser', 'url', 'validation'
         )
         model = MetadataType
 
 
-class DocumentTypeMetadataTypeSerializer(serializers.HyperlinkedModelSerializer):
+class MetadataTypeDocumentTypeRelationSerializer(serializers.HyperlinkedModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
-    metadata_type = MetadataTypeSerializer(read_only=True)
-    url = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ('document_type', 'id', 'metadata_type', 'required', 'url')
-        model = DocumentTypeMetadataType
-
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documenttypemetadatatype-detail', kwargs={
-                'document_type_pk': instance.document_type.pk, 'metadata_type': instance.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-
-class NewDocumentTypeMetadataTypeSerializer(serializers.ModelSerializer):
-    metadata_type_pk = serializers.IntegerField(
-        help_text=_('Primary key of the metadata type to be added.'),
-        write_only=True
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'metadata_type_id',
+                'lookup_url_kwarg': 'metadata_type_id',
+            },
+            {
+                'lookup_field': 'pk',
+                'lookup_url_kwarg': 'metadata_type_document_type_relation_id',
+            }
+        ),
+        view_name='rest_api:metadata_type-document_type_relation-detail'
     )
-    url = serializers.SerializerMethodField()
 
     class Meta:
-        fields = (
-            'id', 'metadata_type_pk', 'required', 'url'
-        )
+        fields = ('document_type', 'id', 'required', 'url')
         model = DocumentTypeMetadataType
 
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documenttypemetadatatype-detail', kwargs={
-                'document_type': instance.document_type.pk, 'metadata_type': instance.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
 
-    def validate(self, attrs):
-        attrs['document_type'] = self.context['document_type']
-        attrs['metadata_type'] = MetadataType.objects.get(
-            pk=attrs.pop('metadata_type_pk')
-        )
-
-        instance = DocumentTypeMetadataType(**attrs)
-        try:
-            instance.full_clean()
-        except DjangoValidationError as exception:
-            raise ValidationError(exception)
-
-        return attrs
-
-
-class WritableDocumentTypeMetadataTypeSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField()
+class MetadataTypeDocumentTypeRelationAddRemoveSerializer(ExternalObjectListSerializerMixin, serializers.Serializer):
+    document_type_id_list = serializers.CharField(
+        help_text=_(
+            'Comma separated list of document type primary keys that will be '
+            'added or removed.'
+        ), label=_('Document Type ID list'), required=False, write_only=True
+    )
+    required = serializers.BooleanField(
+        label=_('Required'), required=False, write_only=True
+    )
 
     class Meta:
-        fields = (
-            'id', 'required', 'url'
-        )
-        model = DocumentTypeMetadataType
+        external_object_list_model = DocumentType
+        external_object_list_permission = permission_document_type_edit
+        external_object_list_pk_list_field = 'document_type_id_list'
 
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documenttypemetadatatype-detail', kwargs={
-                'document_type_pk': instance.document_type.pk,
-                'metadata_type': instance.pk
-            }, request=self.context['request'], format=self.context['format']
+    def document_type_relations_add(self, instance):
+        instance.document_types_add(
+            queryset=self.get_external_object_list(),
+            required=self.validated_data['required'],
+            _user=self.context['request'].user
+        )
+
+    def document_type_relations_remove(self, instance):
+        instance.document_types_remove(
+            queryset=self.get_external_object_list(),
+            _user=self.context['request'].user
         )
 
 
 class DocumentMetadataSerializer(serializers.HyperlinkedModelSerializer):
     document = DocumentSerializer(read_only=True)
     metadata_type = MetadataTypeSerializer(read_only=True)
-    url = serializers.SerializerMethodField()
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'document_id',
+                'lookup_url_kwarg': 'document_id',
+            },
+            {
+                'lookup_field': 'pk',
+                'lookup_url_kwarg': 'document_metadata_id',
+            }
+        ),
+        view_name='rest_api:document-metadata-detail'
+    )
 
     class Meta:
         fields = ('document', 'id', 'metadata_type', 'url', 'value')
         model = DocumentMetadata
-        read_only_fields = ('document', 'metadata_type',)
-
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentmetadata-detail', kwargs={
-                'document_pk': instance.document.pk, 'metadata_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def validate(self, attrs):
-        self.instance.value = attrs['value']
-
-        try:
-            self.instance.full_clean()
-        except DjangoValidationError as exception:
-            raise ValidationError(exception)
-
-        return attrs
 
 
-class NewDocumentMetadataSerializer(serializers.ModelSerializer):
-    metadata_type_pk = serializers.IntegerField(
-        help_text=_(
-            'Primary key of the metadata type to be added to the document.'
-        ),
+class DocumentMetadataAddSerializer(DocumentMetadataSerializer):
+    metadata_type = FilteredPrimaryKeyRelatedField(
+        source_model=MetadataType, source_permission=permission_metadata_add,
         write_only=True
     )
-    url = serializers.SerializerMethodField()
 
-    class Meta:
-        fields = ('id', 'metadata_type_pk', 'url', 'value')
-        model = DocumentMetadata
+    class Meta(DocumentMetadataSerializer.Meta):
+        read_only_fields = ('document',)
 
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentmetadata-detail', kwargs={
-                'document_pk': instance.document.pk, 'metadata_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
+    def create(self, validated_data):
+        validated_data['document'] = self.context['document']
+
+        return super(DocumentMetadataAddSerializer, self).create(
+            validated_data=validated_data
         )
 
     def validate(self, attrs):
         attrs['document'] = self.context['document']
-        attrs['metadata_type'] = MetadataType.objects.get(
-            pk=attrs.pop('metadata_type_pk')
-        )
 
         instance = DocumentMetadata(**attrs)
+
         try:
             instance.full_clean()
         except DjangoValidationError as exception:
-            raise ValidationError(exception)
+            raise ValidationError(
+                {
+                    api_settings.NON_FIELD_ERRORS_KEY: exception.messages
+                }, code='invalid'
+            )
 
         return attrs

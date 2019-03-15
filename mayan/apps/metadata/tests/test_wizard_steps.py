@@ -31,7 +31,7 @@ class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewT
 
         self.document.delete()
 
-        self.document_type.metadata.create(
+        self.document_type.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=True
         )
 

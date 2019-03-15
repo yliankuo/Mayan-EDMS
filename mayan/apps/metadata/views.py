@@ -564,7 +564,7 @@ class MetadataTypeListView(SingleObjectListView):
         return MetadataType.objects.all()
 
 
-class SetupDocumentTypeMetadataTypes(ExternalObjectMixin, FormView):
+class DocumentTypeMetadataTypes(ExternalObjectMixin, FormView):
     external_object_class = DocumentType
     external_object_permission = permission_metadata_type_edit
     external_object_pk_url_kwarg = 'document_type_id'
@@ -590,7 +590,7 @@ class SetupDocumentTypeMetadataTypes(ExternalObjectMixin, FormView):
             )
 
         return super(
-            SetupDocumentTypeMetadataTypes, self
+            DocumentTypeMetadataTypes, self
         ).form_valid(form=form)
 
     def get_extra_context(self):
@@ -640,7 +640,7 @@ class SetupDocumentTypeMetadataTypes(ExternalObjectMixin, FormView):
         return reverse(viewname='documents:document_type_list')
 
 
-class SetupMetadataTypesDocumentTypes(SetupDocumentTypeMetadataTypes):
+class MetadataTypesDocumentTypes(DocumentTypeMetadataTypes):
     external_object_class = MetadataType
     external_object_permission = permission_metadata_type_edit
     external_object_pk_url_kwarg = 'metadata_type_id'
@@ -651,10 +651,10 @@ class SetupMetadataTypesDocumentTypes(SetupDocumentTypeMetadataTypes):
     def get_extra_context(self):
         return {
             'form_display_mode_table': True,
-            'object': self.get_object(),
+            'object': self.external_object,
             'title': _(
                 'Document types for metadata type: %s'
-            ) % self.get_object()
+            ) % self.external_object,
         }
 
     def get_initial(self):

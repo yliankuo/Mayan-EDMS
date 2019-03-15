@@ -1,11 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
-from rest_framework.reverse import reverse
 
 
 class LazyExtraFieldsSerializerMixin(object):

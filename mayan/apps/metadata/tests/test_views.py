@@ -34,7 +34,9 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
     def setUp(self):
         super(DocumentMetadataViewTestCase, self).setUp()
         self._create_metadata_type()
-        self.document_type.metadata.create(metadata_type=self.metadata_type)
+        self.document_type.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
 
     def _request_document_metadata_add_get_view(self):
         return self.get(
@@ -76,7 +78,9 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
         )
 
         self._create_document_type_random()
-        self.test_document_type.metadata.create(metadata_type=self.metadata_type)
+        self.test_document_type.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
         self._create_document()
         self.grant_access(
             obj=self.test_document, permission=permission_metadata_add
@@ -94,7 +98,9 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
         )
 
         self._create_document_type_random()
-        self.test_document_type.metadata.create(metadata_type=self.metadata_type)
+        self.test_document_type.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
         self._create_document()
         self.grant_access(
             obj=self.test_document, permission=permission_metadata_add
@@ -112,7 +118,9 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
         )
 
         self._create_document_type_random()
-        self.test_document_type.metadata.create(metadata_type=self.metadata_type)
+        self.test_document_type.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
         self._create_document()
         self.id_list.append(self.test_document.pk)
         self.grant_access(
@@ -159,7 +167,7 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
             name=TEST_METADATA_TYPE_NAME_2, label=TEST_METADATA_TYPE_LABEL_2
         )
 
-        document_metadata_2 = document_type_2.metadata.create(
+        document_metadata_2 = document_type_2.metadata_type_relations.create(
             metadata_type=metadata_type_2, required=True
         )
 
@@ -400,7 +408,7 @@ class DocumentMetadataViewTestCase(MetadataTestsMixin, GenericDocumentViewTestCa
             name=TEST_METADATA_TYPE_NAME_2, label=TEST_METADATA_TYPE_LABEL_2
         )
 
-        self.document_type.metadata.create(
+        self.document_type.metadata_type_relations.create(
             metadata_type=metadata_type_2
         )
 
@@ -540,7 +548,7 @@ class MetadataTypeViewViewTestCase(DocumentTestMixin, MetadataTestsMixin, Generi
 
         self.document_type.refresh_from_db()
 
-        self.assertEqual(self.document_type.metadata.count(), 0)
+        self.assertEqual(self.document_type.metadata_type_relations.count(), 0)
 
     def test_metadata_type_relationship_view_with_document_type_access(self):
         self._create_metadata_type()
@@ -556,7 +564,7 @@ class MetadataTypeViewViewTestCase(DocumentTestMixin, MetadataTestsMixin, Generi
 
         self.document_type.refresh_from_db()
 
-        self.assertEqual(self.document_type.metadata.count(), 0)
+        self.assertEqual(self.document_type.metadata_type_relations.count(), 0)
 
     def test_metadata_type_relationship_view_with_metadata_type_access(self):
         self._create_metadata_type()
@@ -573,7 +581,7 @@ class MetadataTypeViewViewTestCase(DocumentTestMixin, MetadataTestsMixin, Generi
 
         self.document_type.refresh_from_db()
 
-        self.assertEqual(self.document_type.metadata.count(), 0)
+        self.assertEqual(self.document_type.metadata_type_relations.count(), 0)
 
     def test_metadata_type_relationship_view_with_metadata_type_and_document_type_access(self):
         self._create_metadata_type()
@@ -594,8 +602,9 @@ class MetadataTypeViewViewTestCase(DocumentTestMixin, MetadataTestsMixin, Generi
         self.document_type.refresh_from_db()
 
         self.assertQuerysetEqual(
-            qs=self.document_type.metadata.values('metadata_type', 'required'),
-            values=[
+            qs=self.document_type.metadata_type_relations.values(
+                'metadata_type', 'required'
+            ), values=[
                 {
                     'metadata_type': self.metadata_type.pk,
                     'required': True,

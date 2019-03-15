@@ -13,7 +13,7 @@ from mayan.apps.acls.links import link_acl_list
 from mayan.apps.acls.permissions import permission_acl_edit, permission_acl_view
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_multi_item, menu_object,
-    menu_secondary, menu_setup, menu_secondary
+    menu_secondary, menu_setup
 )
 from mayan.apps.common.classes import ModelAttribute, ModelField
 from mayan.apps.common.widgets import TwoStateWidget
@@ -26,6 +26,8 @@ from mayan.apps.events.links import (
 from mayan.apps.events.permissions import permission_events_view
 from mayan.celery import app
 from mayan.apps.navigation import SourceColumn
+from mayan.apps.rest_api.fields import HyperlinkField
+from mayan.apps.rest_api.serializers import LazyExtraFieldsSerializerMixin
 
 from .events import (
     event_document_metadata_added, event_document_metadata_edited,
@@ -80,17 +82,24 @@ class MetadataApp(MayanAppConfig):
         DocumentPageSearchResult = apps.get_model(
             app_label='documents', model_name='DocumentPageSearchResult'
         )
-
         DocumentType = apps.get_model(
             app_label='documents', model_name='DocumentType'
         )
-
         DocumentMetadata = self.get_model('DocumentMetadata')
         DocumentTypeMetadataType = self.get_model('DocumentTypeMetadataType')
         MetadataType = self.get_model('MetadataType')
 
         Document.add_to_class(
             name='get_metadata', value=method_get_metadata
+        )
+
+        LazyExtraFieldsSerializerMixin.add_field(
+            dotted_path='mayan.apps.documents.serializers.DocumentSerializer',
+            field_name='metadata_list_url',
+            field=HyperlinkField(
+                lookup_url_kwarg='document_id',
+                view_name='rest_api:document-metadata-list'
+            )
         )
 
         ModelAttribute(model=Document, name='get_metadata')
@@ -140,8 +149,23 @@ class MetadataApp(MayanAppConfig):
             model=MetadataType, permissions=(
                 permission_acl_edit, permission_acl_view,
                 permission_events_view, permission_metadata_type_delete,
+                permission_metadata_add, permission_metadata_edit,
+                permission_metadata_remove, permission_metadata_view,
                 permission_metadata_type_edit, permission_metadata_type_view
             )
+        )
+
+        ModelPermission.register_inheritance(
+            model=DocumentMetadata, related='document',
+        )
+        ModelPermission.register_inheritance(
+            model=DocumentMetadata, related='metadata_type',
+        )
+        ModelPermission.register_inheritance(
+            model=DocumentTypeMetadataType, related='document_type',
+        )
+        ModelPermission.register_inheritance(
+            model=DocumentTypeMetadataType, related='metadata_type',
         )
 
         SourceColumn(

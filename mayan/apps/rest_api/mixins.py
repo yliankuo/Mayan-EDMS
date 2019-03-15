@@ -3,9 +3,23 @@ from __future__ import absolute_import, unicode_literals
 from django.core.exceptions import ImproperlyConfigured
 
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.settings import api_settings
 
 from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import ExternalObjectMixin
+
+
+class ExternalObjectAPIViewSetMixin(ExternalObjectMixin):
+    """Override get_external_object to use REST API get_object_or_404"""
+    def dispatch(self, *args, **kwargs):
+        return super(ExternalObjectMixin, self).dispatch(*args, **kwargs)
+
+    def get_external_object(self):
+        return get_object_or_404(
+            queryset=self.get_external_object_queryset_filtered(),
+            **self.get_pk_url_kwargs()
+        )
 
 
 class ExternalObjectListSerializerMixin(object):
@@ -127,6 +141,7 @@ class ExternalObjectSerializerMixin(object):
         external_object_permission
         external_object_queryset
         external_object_pk_field
+        external_object_pk_type
     The source queryset can also be provided overriding the
     .get_external_object_queryset() method.
     """
@@ -157,7 +172,19 @@ class ExternalObjectSerializerMixin(object):
         else:
             pk_field_value = None
 
+        pk_type = self.get_external_object_option('pk_type')
+
         if pk_field_value:
+            if pk_type:
+                try:
+                    pk_field_value = pk_type(pk_field_value)
+                except Exception as exception:
+                    raise ValidationError(
+                        {
+                            pk_field: [exception]
+                        }, code='invalid'
+                    )
+
             try:
                 return queryset.get(pk=pk_field_value)
             except Exception as exception:

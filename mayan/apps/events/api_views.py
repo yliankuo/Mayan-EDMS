@@ -5,7 +5,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
+from mayan.apps.common.mixins import ContentTypeViewMixin
+from mayan.apps.rest_api.mixins import ExternalObjectAPIViewSetMixin
 from mayan.apps.rest_api.viewsets import MayanAPIReadOnlyModelViewSet
 
 from .classes import EventTypeNamespace
@@ -80,7 +81,7 @@ class NotificationAPIViewSet(MayanAPIReadOnlyModelViewSet):
         return queryset
 
 
-class ObjectEventAPIViewSet(ContentTypeViewMixin, ExternalObjectMixin, MayanAPIReadOnlyModelViewSet):
+class ObjectEventAPIViewSet(ContentTypeViewMixin, ExternalObjectAPIViewSetMixin, MayanAPIReadOnlyModelViewSet):
     content_type_url_kw_args = {
         'app_label': 'app_label',
         'model': 'model_name'

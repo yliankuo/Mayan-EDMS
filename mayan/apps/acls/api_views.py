@@ -8,13 +8,14 @@ from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
 from mayan.apps.permissions.serializers import (
     PermissionSerializer, RolePermissionAddRemoveSerializer
 )
+from mayan.apps.rest_api.mixins import ExternalObjectAPIViewSetMixin
 from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .permissions import permission_acl_edit, permission_acl_view
 from .serializers import AccessControlListSerializer
 
 
-class ObjectACLAPIViewSet(ContentTypeViewMixin, ExternalObjectMixin, MayanAPIModelViewSet):
+class ObjectACLAPIViewSet(ContentTypeViewMixin, ExternalObjectAPIViewSetMixin, MayanAPIModelViewSet):
     content_type_url_kw_args = {
         'app_label': 'app_label',
         'model': 'model_name'

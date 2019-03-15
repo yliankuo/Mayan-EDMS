@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from rest_framework import viewsets
-from rest_framework.settings import api_settings
+from rest_framework import mixins, viewsets
 
 from .filters import MayanViewSetObjectPermissionsFilter
 from .mixins import SuccessHeadersMixin
@@ -24,5 +23,15 @@ class MayanAPIReadOnlyModelViewSet(SuccessHeadersMixin, viewsets.ReadOnlyModelVi
 
 
 class MayanAPIViewSet(SuccessHeadersMixin, viewsets.GenericViewSet):
+    filter_backends = (MayanViewSetObjectPermissionsFilter,)
+    permission_classes = (MayanViewSetPermission,)
+
+
+class MayanRetrieveUpdateAPIViewSet(SuccessHeadersMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    filter_backends = (MayanViewSetObjectPermissionsFilter,)
+    permission_classes = (MayanViewSetPermission,)
+
+
+class MayanRetrieveUpdateDestroyAPIViewSet(mixins.DestroyModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     filter_backends = (MayanViewSetObjectPermissionsFilter,)
     permission_classes = (MayanViewSetPermission,)

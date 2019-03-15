@@ -198,12 +198,12 @@ class DocumentTypeMetadataTypeRelationshipForm(forms.Form):
             self.fields['relationship_type'].initial = self.initial_relationship_type
 
     def get_relationship(self):
-        return self.initial['document_type'].metadata.filter(
+        return self.initial['document_type'].metadata_type_relations.filter(
             metadata_type=self.initial['metadata_type']
         )
 
     def get_relationship_choices(self):
-        return self.initial['document_type'].metadata.filter(
+        return self.initial['document_type'].metadata_type_relations.filter(
             metadata_type=self.initial['metadata_type']
         )
 
