@@ -9,6 +9,7 @@ from rest_framework.reverse import reverse
 
 from mayan.apps.documents.models import DocumentType
 from mayan.apps.documents.serializers import DocumentTypeSerializer
+from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
 from mayan.apps.user_management.serializers import UserSerializer
 
 from .models import (
@@ -22,8 +23,11 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
     #    view_name='rest_api:workflow-document-type-list'
     #)
     #image_url = serializers.SerializerMethodField()
-    #states = WorkflowStateSerializer(many=True, required=False)
     #transitions = WorkflowTransitionSerializer(many=True, required=False)
+    state_list_url = serializers.HyperlinkedIdentityField(
+        lookup_url_kwarg='workflow_id',
+        view_name='rest_api:workflow-state-list'
+    )
 
     class Meta:
         extra_kwargs = {
@@ -34,13 +38,40 @@ class WorkflowSerializer(serializers.HyperlinkedModelSerializer):
         }
         fields = (
             #'document_types_url', 'image_url',
-            'id', 'internal_name', 'label', 'url'
-            #'states', 'transitions',
+            'id', 'internal_name', 'label', 'state_list_url', 'url'
+            #'transitions',
         )
         model = Workflow
 
-"""
 
+class WorkflowStateSerializer(serializers.HyperlinkedModelSerializer):
+    workflow = WorkflowSerializer(read_only=True)
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'workflow_id',
+                'lookup_url_kwarg': 'workflow_id',
+            },
+            {
+                'lookup_field': 'pk',
+                'lookup_url_kwarg': 'workflow_state_id',
+            }
+        ),
+        view_name='rest_api:workflow-state-detail'
+    )
+
+    class Meta:
+        fields = (
+            'completion', 'id', 'initial', 'label', 'url', 'workflow'
+        )
+        model = WorkflowState
+
+    def create(self, validated_data):
+        validated_data['workflow'] = self.context['workflow']
+        return super(WorkflowStateSerializer, self).create(validated_data)
+
+
+"""
 class NewWorkflowDocumentTypeSerializer(serializers.Serializer):
     document_type_pk = serializers.IntegerField(
         help_text=_('Primary key of the document type to be added.')
@@ -78,33 +109,6 @@ class WorkflowDocumentTypeSerializer(DocumentTypeSerializer):
         )
 
 
-class WorkflowStateSerializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.SerializerMethodField()
-    workflow_url = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = (
-            'completion', 'id', 'initial', 'label', 'url', 'workflow_url',
-        )
-        model = WorkflowState
-
-    def create(self, validated_data):
-        validated_data['workflow'] = self.context['workflow']
-        return super(WorkflowStateSerializer, self).create(validated_data)
-
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:workflowstate-detail', kwargs={
-                'workflow_pk': instance.workflow.pk, 'workflow_state_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def get_workflow_url(self, instance):
-        return reverse(
-            viewname='rest_api:workflow-detail', kwargs={
-                'workflow_pk': instance.workflow.pk,
-            }, request=self.context['request'], format=self.context['format']
-        )
 
 
 class WorkflowTransitionSerializer(serializers.HyperlinkedModelSerializer):

@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import WorkflowAPIViewSet
+from .api_views import (
+    WorkflowAPIViewSet,
+    WorkflowStateAPIViewSet
+)
 from .views import (
     DocumentWorkflowInstanceListView, ToolLaunchAllWorkflows,
     WorkflowCreateView, WorkflowDeleteView, WorkflowDocumentTypesView,
@@ -179,15 +182,15 @@ api_router_entries = (
         'prefix': r'workflows', 'viewset': WorkflowAPIViewSet,
         'basename': 'workflow'
     },
+    {
+        'prefix': r'workflows/(?P<workflow_id>[^/.]+)/states',
+        'viewset': WorkflowStateAPIViewSet, 'basename': 'workflow-state'
+    }
     #{
     #    'prefix': r'metadata_types/(?P<metadata_type_id>[^/.]+)/document_type_relations',
     #    'viewset': MetadataTypeDocumentTypeRelationAPIViewSet,
     #    'basename': 'metadata_type-document_type_relation'
     #},
-    #{
-    #    'prefix': r'documents/(?P<document_id>[^/.]+)/metadata',
-    #    'viewset': DocumentMetadataAPIViewSet, 'basename': 'document-metadata'
-    #}
 )
 
 '''

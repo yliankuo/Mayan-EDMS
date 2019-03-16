@@ -26,14 +26,10 @@ from .literals import (
     TEST_WORKFLOW_STATE_LABEL, TEST_WORKFLOW_STATE_LABEL_EDITED,
     TEST_WORKFLOW_TRANSITION_LABEL, TEST_WORKFLOW_TRANSITION_LABEL_EDITED
 )
+from .mixins import WorkflowTestMixin
 
 
-
-
-class WorkflowAPIViewTestCase(BaseAPITestCase):
-    #def setUp(self):
-    #    super(WorkflowAPIViewTestCase, self).setUp()
-
+class WorkflowAPIViewTestCase(WorkflowTestMixin, BaseAPITestCase):
     def _request_workflow_create_api_view(self):
         return self.post(
             viewname='rest_api:workflow-list', data={
@@ -58,12 +54,6 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         )
 
         self.assertEqual(Workflow.objects.count(), 1)
-
-    def _create_test_workflow(self):
-        self.test_workflow = Workflow.objects.create(
-            label=TEST_WORKFLOW_LABEL,
-            internal_name=TEST_WORKFLOW_INTERNAL_NAME
-        )
 
     def _request_workflow_delete_api_view(self):
         return self.delete(
@@ -217,6 +207,196 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response.json()['results'][0]['label'], self.test_workflow.label
+        )
+
+
+class WorkflowStateAPIViewTestCase(WorkflowTestMixin, BaseAPITestCase):
+    def setUp(self):
+        super(WorkflowStateAPIViewTestCase, self).setUp()
+        self._create_test_workflow()
+
+    def _request_workflow_state_create_api_view(self):
+        return self.post(
+            viewname='rest_api:workflow-state-list',
+            kwargs={'workflow_id': self.test_workflow.pk}, data={
+                'completion': TEST_WORKFLOW_STATE_COMPLETION,
+                'label': TEST_WORKFLOW_STATE_LABEL
+            }
+        )
+
+    def test_workflow_state_create_api_view_no_access(self):
+        response = self._request_workflow_state_create_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(self.test_workflow.states.count(), 0)
+
+    def test_workflow_state_create_api_view_with_permission(self):
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_state_create_api_view()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.data['label'], TEST_WORKFLOW_STATE_LABEL
+        )
+
+        self.assertEqual(self.test_workflow.states.count(), 1)
+
+    def _request_workflow_state_delete_api_view(self):
+        return self.delete(
+            viewname='rest_api:workflow-state-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_state_id': self.test_workflow_state.pk
+            }
+        )
+
+    def test_workflow_state_delete_api_view_no_access(self):
+        self._create_test_workflow_state()
+        workflow_state_count = self.test_workflow.states.count()
+
+        response = self._request_workflow_state_delete_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(
+            workflow_state_count, self.test_workflow.states.count()
+        )
+
+    def test_workflow_state_delete_view_with_access(self):
+        self.expected_content_type = None
+
+        self._create_test_workflow_state()
+        workflow_state_count = self.test_workflow.states.count()
+        self.grant_access(obj=self.test_workflow, permission=permission_workflow_edit)
+
+        response = self._request_workflow_state_delete_api_view()
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertNotEqual(
+            workflow_state_count, self.test_workflow.states.count()
+        )
+
+    def _request_workflow_state_detail_api_view(self):
+        return self.get(
+            viewname='rest_api:workflow-state-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_state_id': self.test_workflow_state.pk
+            }
+        )
+
+    def test_workflow_state_detail_api_view_no_access(self):
+        self._create_test_workflow_state()
+
+        response = self._request_workflow_state_detail_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse('label' in response.json())
+
+    def test_workflow_state_detail_api_view_with_access(self):
+        self._create_test_workflow_state()
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_view
+        )
+
+        response = self._request_workflow_state_detail_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json()['label'], TEST_WORKFLOW_STATE_LABEL
+        )
+
+    def _request_workflow_state_edit_patch_api_view(self):
+        return self.patch(
+            viewname='rest_api:workflow-state-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_state_id': self.test_workflow_state.pk
+            }, data={'label': TEST_WORKFLOW_STATE_LABEL_EDITED}
+        )
+
+    def test_workflow_state_edit_patch_api_view_no_access(self):
+        self._create_test_workflow_state()
+        test_workflow_state = copy.copy(self.test_workflow_state)
+
+        response = self._request_workflow_state_edit_patch_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_workflow_state.refresh_from_db()
+        self.assertEqual(
+            test_workflow_state.label, self.test_workflow_state.label
+        )
+
+    def test_workflow_state_edit_patch_api_view_with_access(self):
+        self._create_test_workflow_state()
+        test_workflow_state = copy.copy(self.test_workflow_state)
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_state_edit_patch_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_workflow_state.refresh_from_db()
+        self.assertNotEqual(
+            test_workflow_state.label, self.test_workflow_state.label
+        )
+
+    def _request_workflow_state_edit_put_api_view(self):
+        return self.put(
+            viewname='rest_api:workflow-state-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_state_id': self.test_workflow_state.pk
+            }, data={'label': TEST_WORKFLOW_STATE_LABEL_EDITED}
+        )
+
+    def test_workflow_state_edit_put_api_view_no_access(self):
+        self._create_test_workflow_state()
+        test_workflow_state = copy.copy(self.test_workflow_state)
+
+        response = self._request_workflow_state_edit_put_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_workflow_state.refresh_from_db()
+        self.assertEqual(
+            test_workflow_state.label, self.test_workflow_state.label
+        )
+
+    def test_workflow_state_edit_put_api_view_with_access(self):
+        self._create_test_workflow_state()
+        test_workflow_state = copy.copy(self.test_workflow_state)
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_state_edit_put_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_workflow_state.refresh_from_db()
+        self.assertNotEqual(
+            test_workflow_state.label, self.test_workflow_state.label
+        )
+
+    def _request_workflow_state_list_api_view(self):
+        return self.get(
+            viewname='rest_api:workflow-state-list', kwargs={
+                'workflow_id': self.test_workflow.pk
+            }
+        )
+
+    def test_workflow_state_list_api_view_no_access(self):
+        self._create_test_workflow_state()
+
+        response = self._request_workflow_state_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse('label' in response.data)
+
+    def test_workflow_state_list_api_view_with_access(self):
+        self._create_test_workflow_state()
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_view
+        )
+
+        response = self._request_workflow_state_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data['results'][0]['label'], self.test_workflow_state.label
         )
 
 
@@ -415,179 +595,6 @@ class WorkflowAPIViewTestCase(BaseAPITestCase):
         self.assertEqual(response.data['results'][0]['label'], self.workflow.label)
 
 
-class WorkflowStatesAPITestCase(BaseAPITestCase):
-    def setUp(self):
-        super(WorkflowStatesAPITestCase, self).setUp()
-        self.login_user()
-
-        self.document_type = DocumentType.objects.create(
-            label=TEST_DOCUMENT_TYPE_LABEL
-        )
-
-        with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-            self.document = self.document_type.new_document(
-                file_object=file_object
-            )
-
-    def tearDown(self):
-        if hasattr(self, 'document_type'):
-            self.document_type.delete()
-        super(WorkflowStatesAPITestCase, self).tearDown()
-
-    def _create_workflow(self):
-        self.workflow = Workflow.objects.create(
-            label=TEST_WORKFLOW_LABEL,
-            internal_name=TEST_WORKFLOW_INTERNAL_NAME
-        )
-
-    def _create_workflow_state(self):
-        self._create_workflow()
-        self.workflow_state = self.workflow.states.create(
-            completion=TEST_WORKFLOW_STATE_COMPLETION,
-            label=TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def _request_workflow_state_create_view(self):
-        return self.post(
-            viewname='rest_api:workflowstate-list',
-            args=(self.workflow.pk,), data={
-                'completion': TEST_WORKFLOW_STATE_COMPLETION,
-                'label': TEST_WORKFLOW_STATE_LABEL
-            }
-        )
-
-    def test_workflow_state_create_view_no_access(self):
-        self._create_workflow()
-        response = self._request_workflow_state_create_view()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.workflow.refresh_from_db()
-        self.assertEqual(self.workflow.states.count(), 0)
-
-    def test_workflow_state_create_view_with_access(self):
-        self._create_workflow()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
-        response = self._request_workflow_state_create_view()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.workflow.refresh_from_db()
-        self.assertEqual(
-            self.workflow.states.first().label, TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def _request_workflow_state_delete_view(self):
-        return self.delete(
-            viewname='rest_api:workflowstate-detail',
-            args=(self.workflow.pk, self.workflow_state.pk)
-        )
-
-    def test_workflow_state_delete_view_no_access(self):
-        self._create_workflow_state()
-        response = self._request_workflow_state_delete_view()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.workflow.refresh_from_db()
-        self.assertEqual(self.workflow.states.count(), 1)
-
-    def test_workflow_state_delete_view_with_access(self):
-        self._create_workflow_state()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
-        response = self._request_workflow_state_delete_view()
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.workflow.refresh_from_db()
-        self.assertEqual(self.workflow.states.count(), 0)
-
-    def _request_workflow_state_detail_view(self):
-        return self.get(
-            viewname='rest_api:workflowstate-detail',
-            args=(self.workflow.pk, self.workflow_state.pk)
-        )
-
-    def test_workflow_state_detail_view_no_access(self):
-        self._create_workflow_state()
-        response = self._request_workflow_state_detail_view()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse('label' in response.data)
-
-    def test_workflow_state_detail_view_with_access(self):
-        self._create_workflow_state()
-        self.grant_access(permission=permission_workflow_view, obj=self.workflow)
-        response = self._request_workflow_state_detail_view()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data['label'], TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def _request_workflow_state_list_view(self):
-        return self.get(
-            viewname='rest_api:workflowstate-list', args=(self.workflow.pk,),
-        )
-
-    def test_workflow_state_list_view_no_access(self):
-        self._create_workflow_state()
-        response = self._request_workflow_state_list_view()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse('label' in response.data)
-
-    def test_workflow_state_list_view_with_access(self):
-        self._create_workflow_state()
-        self.grant_access(permission=permission_workflow_view, obj=self.workflow)
-        response = self._request_workflow_state_list_view()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data['results'][0]['label'], TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def _request_workflow_state_edit_view_via_patch(self):
-        return self.patch(
-            viewname='rest_api:workflowstate-detail',
-            args=(self.workflow.pk, self.workflow_state.pk), data={
-                'label': TEST_WORKFLOW_STATE_LABEL_EDITED
-            }
-        )
-
-    def test_workflow_state_edit_view_via_patch_no_access(self):
-        self._create_workflow_state()
-        response = self._request_workflow_state_edit_view_via_patch()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.workflow_state.refresh_from_db()
-        self.assertEqual(
-            self.workflow_state.label, TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def test_workflow_state_edit_view_via_patch_with_access(self):
-        self._create_workflow_state()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
-        response = self._request_workflow_state_edit_view_via_patch()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.workflow_state.refresh_from_db()
-        self.assertEqual(
-            self.workflow_state.label, TEST_WORKFLOW_STATE_LABEL_EDITED
-        )
-
-    def _request_workflow_state_edit_view_via_put(self):
-        return self.put(
-            viewname='rest_api:workflowstate-detail',
-            args=(self.workflow.pk, self.workflow_state.pk), data={
-                'label': TEST_WORKFLOW_STATE_LABEL_EDITED
-            }
-        )
-
-    def test_workflow_state_edit_view_via_put_no_access(self):
-        self._create_workflow_state()
-        response = self._request_workflow_state_edit_view_via_put()
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.workflow_state.refresh_from_db()
-        self.assertEqual(
-            self.workflow_state.label, TEST_WORKFLOW_STATE_LABEL
-        )
-
-    def test_workflow_state_edit_view_via_put_with_access(self):
-        self._create_workflow_state()
-        self.grant_access(permission=permission_workflow_edit, obj=self.workflow)
-        response = self._request_workflow_state_edit_view_via_put()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.workflow_state.refresh_from_db()
-        self.assertEqual(
-            self.workflow_state.label, TEST_WORKFLOW_STATE_LABEL_EDITED
-        )
 
 
 class WorkflowTransitionsAPITestCase(BaseAPITestCase):

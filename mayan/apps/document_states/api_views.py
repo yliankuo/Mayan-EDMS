@@ -9,6 +9,7 @@ from rest_framework import generics
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_type_view
+from mayan.apps.rest_api.mixins import ExternalObjectAPIViewSetMixin
 from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .literals import WORKFLOW_IMAGE_TASK_TIMEOUT
@@ -18,13 +19,7 @@ from .permissions import (
     permission_workflow_edit, permission_workflow_view
 )
 from .serializers import (
-    WorkflowSerializer
-
-    #NewWorkflowDocumentTypeSerializer, WorkflowDocumentTypeSerializer,
-    #WorkflowInstanceLogEntrySerializer, WorkflowInstanceSerializer,
-    #, WorkflowStateSerializer, WorkflowTransitionSerializer,
-    #WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
-    #WritableWorkflowTransitionSerializer
+    WorkflowSerializer, WorkflowStateSerializer
 )
 from .settings import settings_workflow_image_cache_time
 from .storages import storage_workflowimagecache
@@ -45,6 +40,39 @@ class WorkflowAPIViewSet(MayanAPIModelViewSet):
     view_permission_map = {
         'create': permission_workflow_create
     }
+
+
+class WorkflowStateAPIViewSet(ExternalObjectAPIViewSetMixin, MayanAPIModelViewSet):
+    external_object_class = Workflow
+    external_object_pk_url_kwarg = 'workflow_id'
+    lookup_url_kwarg = 'workflow_state_id'
+    serializer_class = WorkflowStateSerializer
+
+    def get_external_object_permission(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        elif action in ['create', 'destroy', 'partial_update', 'update']:
+            return permission_workflow_edit
+        else:
+            return permission_workflow_view
+
+    def get_queryset(self):
+        return self.get_external_object().states.all()
+
+    def get_serializer_context(self):
+        context = super(WorkflowStateAPIViewSet, self).get_serializer_context()
+        if self.kwargs:
+            context.update(
+                {
+                    'workflow': self.get_external_object(),
+                }
+            )
+
+        return context
+
+
+
 
 '''
 class APIDocumentTypeWorkflowListView(generics.ListAPIView):
