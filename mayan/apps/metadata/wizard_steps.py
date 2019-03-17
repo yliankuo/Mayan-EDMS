@@ -26,7 +26,7 @@ class WizardStepMetadata(WizardStep):
         document_type = cleaned_data.get('document_type')
 
         if document_type:
-            return document_type.metadata.exists()
+            return document_type.metadata_type_relations.exists()
 
     @classmethod
     def get_form_initial(cls, wizard):
@@ -35,7 +35,7 @@ class WizardStepMetadata(WizardStep):
         step_data = wizard.get_cleaned_data_for_step(WizardStepDocumentType.name)
         if step_data:
             document_type = step_data['document_type']
-            for document_type_metadata_type in document_type.metadata.all():
+            for document_type_metadata_type in document_type.metadata_type_relations.all():
                 initial.append(
                     {
                         'document_type': document_type,
