@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    WorkflowAPIViewSet,
-    WorkflowStateAPIViewSet
+    WorkflowAPIViewSet, WorkflowStateAPIViewSet,
+    WorkflowTransitionAPIViewSet
 )
 from .views import (
     DocumentWorkflowInstanceListView, ToolLaunchAllWorkflows,
@@ -185,6 +185,11 @@ api_router_entries = (
     {
         'prefix': r'workflows/(?P<workflow_id>[^/.]+)/states',
         'viewset': WorkflowStateAPIViewSet, 'basename': 'workflow-state'
+    },
+    {
+        'prefix': r'workflows/(?P<workflow_id>[^/.]+)/transitions',
+        'viewset': WorkflowTransitionAPIViewSet,
+        'basename': 'workflow-transition'
     }
     #{
     #    'prefix': r'metadata_types/(?P<metadata_type_id>[^/.]+)/document_type_relations',

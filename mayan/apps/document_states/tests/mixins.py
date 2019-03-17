@@ -25,26 +25,27 @@ class WorkflowTestMixin(object):
 
     def _create_test_workflow_states(self):
         self.test_workflow_initial_state = WorkflowState.objects.create(
-            workflow=self.workflow, label=TEST_WORKFLOW_INITIAL_STATE_LABEL,
+            workflow=self.test_workflow, label=TEST_WORKFLOW_INITIAL_STATE_LABEL,
             completion=TEST_WORKFLOW_INITIAL_STATE_COMPLETION, initial=True
         )
         self.test_workflow_state = WorkflowState.objects.create(
-            workflow=self.workflow, label=TEST_WORKFLOW_STATE_LABEL,
+            workflow=self.test_workflow, label=TEST_WORKFLOW_STATE_LABEL,
             completion=TEST_WORKFLOW_STATE_COMPLETION
         )
 
     def _create_test_workflow_transition(self):
+        self._create_test_workflow_states()
         self.test_workflow_transition = WorkflowTransition.objects.create(
-            workflow=self.workflow, label=TEST_WORKFLOW_TRANSITION_LABEL,
-            origin_state=self.workflow_initial_state,
-            destination_state=self.workflow_state
+            workflow=self.test_workflow, label=TEST_WORKFLOW_TRANSITION_LABEL,
+            origin_state=self.test_workflow_initial_state,
+            destination_state=self.test_workflow_state
         )
 
     def _create_test_workflow_transitions(self):
         self.workflow_transition = WorkflowTransition.objects.create(
-            workflow=self.workflow, label=TEST_WORKFLOW_TRANSITION_LABEL,
-            origin_state=self.workflow_initial_state,
-            destination_state=self.workflow_state
+            workflow=self.test_workflow, label=TEST_WORKFLOW_TRANSITION_LABEL,
+            origin_state=self.test_workflow_initial_state,
+            destination_state=self.test_workflow_state
         )
 
         self.workflow_transition_2 = WorkflowTransition.objects.create(

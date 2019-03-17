@@ -19,7 +19,8 @@ from .permissions import (
     permission_workflow_edit, permission_workflow_view
 )
 from .serializers import (
-    WorkflowSerializer, WorkflowStateSerializer
+    WorkflowSerializer, WorkflowStateSerializer,
+    WorkflowTransitionSerializer, WorkflowTransitionWritableSerializer
 )
 from .settings import settings_workflow_image_cache_time
 from .storages import storage_workflowimagecache
@@ -72,6 +73,42 @@ class WorkflowStateAPIViewSet(ExternalObjectAPIViewSetMixin, MayanAPIModelViewSe
         return context
 
 
+class WorkflowTransitionAPIViewSet(ExternalObjectAPIViewSetMixin, MayanAPIModelViewSet):
+    external_object_class = Workflow
+    external_object_pk_url_kwarg = 'workflow_id'
+    lookup_url_kwarg = 'workflow_transition_id'
+
+    def get_external_object_permission(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        elif action in ['create', 'destroy', 'partial_update', 'update']:
+            return permission_workflow_edit
+        else:
+            return permission_workflow_view
+
+    def get_queryset(self):
+        return self.get_external_object().transitions.all()
+
+    def get_serializer_class(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        if action in ['create', 'partial_update', 'update']:
+            return WorkflowTransitionWritableSerializer
+        else:
+            return WorkflowTransitionSerializer
+
+    def get_serializer_context(self):
+        context = super(WorkflowTransitionAPIViewSet, self).get_serializer_context()
+        if self.kwargs:
+            context.update(
+                {
+                    'workflow': self.get_external_object(),
+                }
+            )
+
+        return context
 
 
 '''

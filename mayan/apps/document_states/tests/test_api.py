@@ -400,9 +400,203 @@ class WorkflowStateAPIViewTestCase(WorkflowTestMixin, BaseAPITestCase):
         )
 
 
+class WorkflowTransitionAPIViewTestCase(WorkflowTestMixin, BaseAPITestCase):
+    def setUp(self):
+        super(WorkflowTransitionAPIViewTestCase, self).setUp()
+        self._create_test_workflow()
+
+    def _request_workflow_transition_create_api_view(self):
+        self._create_test_workflow_states()
+        return self.post(
+            viewname='rest_api:workflow-transition-list',
+            kwargs={'workflow_id': self.test_workflow.pk}, data={
+                'label': TEST_WORKFLOW_TRANSITION_LABEL,
+                'origin_state': self.test_workflow_initial_state.pk,
+                'destination_state': self.test_workflow_state.pk
+            }
+        )
+
+    def test_workflow_transition_create_api_view_no_access(self):
+        response = self._request_workflow_transition_create_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(self.test_workflow.transitions.count(), 0)
+
+    def test_workflow_transition_create_api_view_with_permission(self):
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_transition_create_api_view()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.data['label'], TEST_WORKFLOW_TRANSITION_LABEL
+        )
+
+        self.assertEqual(self.test_workflow.transitions.count(), 1)
+
+    def _request_workflow_transition_delete_api_view(self):
+        return self.delete(
+            viewname='rest_api:workflow-transition-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_transition_id': self.test_workflow_transition.pk
+            }
+        )
+
+    def test_workflow_transition_delete_api_view_no_access(self):
+        self._create_test_workflow_transition()
+        workflow_transition_count = self.test_workflow.transitions.count()
+
+        response = self._request_workflow_transition_delete_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.assertEqual(
+            workflow_transition_count, self.test_workflow.transitions.count()
+        )
+
+    def test_workflow_transition_delete_view_with_access(self):
+        self.expected_content_type = None
+
+        self._create_test_workflow_transition()
+        workflow_transition_count = self.test_workflow.transitions.count()
+        self.grant_access(obj=self.test_workflow, permission=permission_workflow_edit)
+
+        response = self._request_workflow_transition_delete_api_view()
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertNotEqual(
+            workflow_transition_count, self.test_workflow.transitions.count()
+        )
+
+    def _request_workflow_transition_detail_api_view(self):
+        return self.get(
+            viewname='rest_api:workflow-transition-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_transition_id': self.test_workflow_transition.pk
+            }
+        )
+
+    def test_workflow_transition_detail_api_view_no_access(self):
+        self._create_test_workflow_transition()
+
+        response = self._request_workflow_transition_detail_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse('label' in response.json())
+
+    def test_workflow_transition_detail_api_view_with_access(self):
+        self._create_test_workflow_transition()
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_view
+        )
+
+        response = self._request_workflow_transition_detail_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json()['label'], TEST_WORKFLOW_TRANSITION_LABEL
+        )
+
+    def _request_workflow_transition_edit_patch_api_view(self):
+        return self.patch(
+            viewname='rest_api:workflow-transition-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_transition_id': self.test_workflow_transition.pk
+            }, data={'label': TEST_WORKFLOW_TRANSITION_LABEL_EDITED}
+        )
+
+    def test_workflow_transition_edit_patch_api_view_no_access(self):
+        self._create_test_workflow_transition()
+        test_workflow_transition = copy.copy(self.test_workflow_transition)
+
+        response = self._request_workflow_transition_edit_patch_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_workflow_transition.refresh_from_db()
+        self.assertEqual(
+            test_workflow_transition.label, self.test_workflow_transition.label
+        )
+
+    def test_workflow_transition_edit_patch_api_view_with_access(self):
+        self._create_test_workflow_transition()
+        test_workflow_transition = copy.copy(self.test_workflow_transition)
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_transition_edit_patch_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_workflow_transition.refresh_from_db()
+        self.assertNotEqual(
+            test_workflow_transition.label, self.test_workflow_transition.label
+        )
+
+    def _request_workflow_transition_edit_put_api_view(self):
+        return self.put(
+            viewname='rest_api:workflow-transition-detail', kwargs={
+                'workflow_id': self.test_workflow.pk,
+                'workflow_transition_id': self.test_workflow_transition.pk
+            }, data={
+                'label': TEST_WORKFLOW_TRANSITION_LABEL_EDITED,
+                'origin_state': self.test_workflow_initial_state.pk,
+                'destination_state': self.test_workflow_state.pk
+            }
+        )
+
+    def test_workflow_transition_edit_put_api_view_no_access(self):
+        self._create_test_workflow_transition()
+        test_workflow_transition = copy.copy(self.test_workflow_transition)
+
+        response = self._request_workflow_transition_edit_put_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.test_workflow_transition.refresh_from_db()
+        self.assertEqual(
+            test_workflow_transition.label, self.test_workflow_transition.label
+        )
+
+    def test_workflow_transition_edit_put_api_view_with_access(self):
+        self._create_test_workflow_transition()
+        test_workflow_transition = copy.copy(self.test_workflow_transition)
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_edit
+        )
+
+        response = self._request_workflow_transition_edit_put_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.test_workflow_transition.refresh_from_db()
+        self.assertNotEqual(
+            test_workflow_transition.label, self.test_workflow_transition.label
+        )
+
+    def _request_workflow_transition_list_api_view(self):
+        return self.get(
+            viewname='rest_api:workflow-transition-list', kwargs={
+                'workflow_id': self.test_workflow.pk
+            }
+        )
+
+    def test_workflow_transition_list_api_view_no_access(self):
+        self._create_test_workflow_transition()
+
+        response = self._request_workflow_transition_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse('label' in response.data)
+
+    def test_workflow_transition_list_api_view_with_access(self):
+        self._create_test_workflow_transition()
+        self.grant_access(
+            obj=self.test_workflow, permission=permission_workflow_view
+        )
+
+        response = self._request_workflow_transition_list_api_view()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data['results'][0]['label'], self.test_workflow_transition.label
+        )
+
+
     """
-
-
     def _request_workflow_create_view_with_document_type(self):
         return self.post(
             viewname='rest_api:workflow-list', data={
