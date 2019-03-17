@@ -16,6 +16,7 @@ class FilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         self.source_model = kwargs.pop('source_model', None)
         self.source_permission = kwargs.pop('source_permission', None)
         self.source_queryset = kwargs.pop('source_queryset', None)
+        self.source_queryset_method = kwargs.pop('source_queryset_method', None)
         super(FilteredPrimaryKeyRelatedField, self).__init__(**kwargs)
 
     def get_queryset(self):
@@ -31,9 +32,17 @@ class FilteredPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
                 # Ensure queryset is re-evaluated whenever used.
                 queryset = queryset.all()
         else:
-            raise ImproperlyConfigured(
-                'Need to provide a source_model or a source_queryset'
+            method_name = self.source_queryset_method or 'get_{}_queryset'.format(
+                self.field_name
             )
+            try:
+                queryset = getattr(self.parent, method_name)()
+            except AttributeError:
+                raise ImproperlyConfigured(
+                    'Need to provide a source_model, a '
+                    'source_queryset, a source_queryset_method, or '
+                    'a method named "%s".' % method_name
+                )
 
         assert 'request' in self.context, (
             "`%s` requires the request in the serializer"
