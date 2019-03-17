@@ -51,6 +51,8 @@ class ACLAPITestCase(ACLTestMixin, BaseAPITestCase):
         )
 
     def test_object_acl_delete_api_view_with_access(self):
+        self.expected_content_type = None
+
         self.grant_access(obj=self.test_object, permission=permission_acl_edit)
         response = self._request_acl_delete_api_view()
 
