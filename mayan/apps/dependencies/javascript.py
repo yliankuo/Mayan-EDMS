@@ -142,11 +142,11 @@ class NPMPackage(object):
 
 class NPMRegistry(object):
     def __init__(self, url=None, cache_path=None, module_directory=None, package_filename=None, lock_filename=None):
-        self.url = url or self.DEFAULT_REGISTRY_URL
+        self.url = url or DEFAULT_REGISTRY_URL
         self.cache_path = cache_path or mkdtemp()
-        self.module_directory = module_directory or self.DEFAULT_MODULE_DIRECTORY
-        self.package_file = package_filename or self.DEFAULT_PACKAGE_FILENAME
-        self.lock_filename = lock_filename or self.DEFAULT_LOCK_FILENAME
+        self.module_directory = module_directory or DEFAULT_MODULE_DIRECTORY
+        self.package_file = package_filename or DEFAULT_PACKAGE_FILENAME
+        self.lock_filename = lock_filename or DEFAULT_LOCK_FILENAME
 
     def _install_package(self, name, version):
         package = NPMPackage(registry=self, name=name, version=version)
