@@ -1,15 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
-from rest_framework.reverse import reverse
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.documents.models import Document
-from mayan.apps.documents.serializers import DocumentSerializer
 from mayan.apps.rest_api.mixins import ExternalObjectListSerializerMixin
 
 from .models import Tag
@@ -64,7 +59,7 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
         }
         fields = (
             'color', 'document_attach_url', 'document_list_url',
-            'document_remove_url','label', 'id', 'url'
+            'document_remove_url', 'label', 'id', 'url'
         )
         model = Tag
 

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from mayan.apps.common.mixins import ContentTypeViewMixin, ExternalObjectMixin
+from mayan.apps.common.mixins import ContentTypeViewMixin
 from mayan.apps.permissions.serializers import (
     PermissionSerializer, RolePermissionAddRemoveSerializer
 )

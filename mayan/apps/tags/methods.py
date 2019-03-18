@@ -5,7 +5,6 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 
 from .events import event_tag_attach, event_tag_remove
-from .permissions import permission_tag_view
 
 
 def method_document_tags_attach(self, queryset, _user=None):

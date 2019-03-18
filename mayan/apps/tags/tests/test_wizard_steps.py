@@ -10,9 +10,7 @@ from mayan.apps.sources.tests.literals import (
     TEST_SOURCE_LABEL, TEST_SOURCE_UNCOMPRESS_N
 )
 
-from ..models import Tag
 
-from .literals import TEST_TAG_COLOR, TEST_TAG_LABEL
 from .mixins import TagTestMixin
 
 

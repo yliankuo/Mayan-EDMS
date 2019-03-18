@@ -6,7 +6,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_list_facet, menu_object, menu_secondary,
-    menu_setup, menu_secondary
+    menu_setup
 )
 from mayan.apps.common.signals import post_initial_setup, post_upgrade
 from mayan.apps.common.widgets import TwoStateWidget

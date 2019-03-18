@@ -13,7 +13,6 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
-from mayan.apps.checkouts.models import NewVersionBlock
 from mayan.apps.common import menu_facet
 from mayan.apps.common.mixins import ExternalObjectMixin, ListModeMixin
 from mayan.apps.common.models import SharedUploadedFile

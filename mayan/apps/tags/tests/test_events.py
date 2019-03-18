@@ -10,6 +10,7 @@ from ..permissions import permission_tag_create, permission_tag_edit
 
 from .mixins import TagTestMixin
 
+
 #TODO: Add tests for event_tag_remove and event_tag_attach
 class TagEventsTestCase(TagTestMixin, GenericDocumentViewTestCase):
     def setUp(self):

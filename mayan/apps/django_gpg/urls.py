@@ -45,7 +45,6 @@ urlpatterns = [
     )
 ]
 
-
 api_router_entries = (
     {'prefix': r'keys', 'viewset': KeyAPIViewSet, 'basename': 'key'},
 )

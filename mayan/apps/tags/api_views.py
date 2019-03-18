@@ -1,16 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
-from drf_yasg.utils import swagger_auto_schema
-
-from rest_framework import generics, serializers, status, routers, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from mayan.apps.common.mixins import ExternalObjectMixin
-from mayan.apps.documents.api_views import DocumentViewSet
 from mayan.apps.documents.models import Document
-from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.serializers import DocumentSerializer
 from mayan.apps.rest_api.viewsets import (
     MayanAPIGenericViewSet, MayanAPIModelViewSet
@@ -28,7 +22,7 @@ from .serializers import (
 
 
 class TagAPIViewSet(MayanAPIModelViewSet):
-    lookup_url_kwarg='tag_id'
+    lookup_url_kwarg = 'tag_id'
     object_permission_map = {
         'destroy': permission_tag_delete,
         'document_attach': permission_tag_attach,
@@ -93,9 +87,8 @@ class TagAPIViewSet(MayanAPIModelViewSet):
         )
 
 
-
 class DocumentTagAPIViewSet(MayanAPIGenericViewSet):
-    lookup_url_kwarg='document_id'
+    lookup_url_kwarg = 'document_id'
     object_permission_map = {
         'tag_attach': permission_tag_attach,
         'tag_list': permission_tag_view,
