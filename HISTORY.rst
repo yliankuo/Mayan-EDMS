@@ -250,6 +250,9 @@
   difference is determined by the URL query. A ?q= means a 
   simple search. For advanced search pass the search model
   fields in the URL query, example: ?q=document_type__label=
+- Remove django-mathfilters from requirements. These tags
+  are provided by default by Jinja2 template engine
+  (http://jinja.pocoo.org/docs/2.10/templates/#math).
 
 3.1.9 (2018-11-01)
 ==================
