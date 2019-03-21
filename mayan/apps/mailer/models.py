@@ -12,6 +12,7 @@ from django.utils.html import strip_tags
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
+from .events import event_email_sent
 from .managers import UserMailerManager
 from .utils import split_recipient_list
 
@@ -127,7 +128,7 @@ class UserMailer(models.Model):
 
         return super(UserMailer, self).save(*args, **kwargs)
 
-    def send(self, to, subject='', body='', attachments=None):
+    def send(self, to, subject='', body='', attachments=None, _user=None):
         """
         Send a simple email. There is no document or template knowledge.
         attachments is a list of dictionaries with the keys:
@@ -160,8 +161,11 @@ class UserMailer(models.Model):
                 self.error_log.create(message=exception)
             else:
                 self.error_log.all().delete()
+                event_email_sent.commit(
+                    actor=_user, target=self, #action_object=self.document_type
+                )
 
-    def send_document(self, document, to, subject='', body='', as_attachment=False):
+    def send_document(self, document, to, subject='', body='', as_attachment=False, _user=None):
         """
         Send a document using this user mailing profile.
         """
@@ -192,7 +196,7 @@ class UserMailer(models.Model):
 
         return self.send(
             attachments=attachments, body=body_html_content,
-            subject=subject_text, to=to,
+            subject=subject_text, to=to, user=user
         )
 
     def test(self, to):

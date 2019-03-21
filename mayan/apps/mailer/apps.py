@@ -15,10 +15,16 @@ from mayan.apps.common import (
     menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.widgets import TwoStateWidget
+from mayan.apps.events import ModelEventType
+from mayan.apps.events.links import (
+    link_events_for_object, link_object_event_types_user_subcriptions_list
+)
+from mayan.apps.events.permissions import permission_events_view
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
 
 from .classes import MailerBackend
+from .events import event_email_sent
 from .links import (
     link_document_multiple_send, link_document_multiple_send_link,
     link_document_send, link_document_send_link, link_system_mailer_error_log,
@@ -43,6 +49,7 @@ class MailerApp(MayanAppConfig):
 
     def ready(self):
         super(MailerApp, self).ready()
+        from actstream import registry
 
         Document = apps.get_model(
             app_label='documents', model_name='Document'
@@ -52,6 +59,25 @@ class MailerApp(MayanAppConfig):
         UserMailer = self.get_model(model_name='UserMailer')
 
         MailerBackend.initialize()
+
+        ModelEventType.register(
+            model=UserMailer, event_types=(event_email_sent,)
+        )
+
+        ModelPermission.register(
+            model=Document, permissions=(
+                permission_mailing_link, permission_mailing_send_document
+            )
+        )
+
+        ModelPermission.register(
+            model=UserMailer, permissions=(
+                permission_acl_edit, permission_acl_view,
+                permission_events_view, permission_user_mailer_delete,
+                permission_user_mailer_edit, permission_user_mailer_view,
+                permission_user_mailer_use
+            )
+        )
 
         SourceColumn(attribute='datetime', source=LogEntry)
         SourceColumn(attribute='message', source=LogEntry)
@@ -63,20 +89,6 @@ class MailerApp(MayanAppConfig):
             attribute='enabled', source=UserMailer, widget=TwoStateWidget
         )
         SourceColumn(attribute='backend_label', source=UserMailer)
-
-        ModelPermission.register(
-            model=Document, permissions=(
-                permission_mailing_link, permission_mailing_send_document
-            )
-        )
-
-        ModelPermission.register(
-            model=UserMailer, permissions=(
-                permission_acl_edit, permission_acl_view,
-                permission_user_mailer_delete, permission_user_mailer_edit,
-                permission_user_mailer_view, permission_user_mailer_use
-            )
-        )
 
         app.conf.task_queues.append(
             Queue('mailing', Exchange('mailing'), routing_key='mailing'),
@@ -92,7 +104,9 @@ class MailerApp(MayanAppConfig):
 
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_user_mailer_log_list,
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_user_mailer_log_list,
             ), sources=(UserMailer,)
         )
 
@@ -128,3 +142,5 @@ class MailerApp(MayanAppConfig):
         menu_tools.bind_links(links=(link_system_mailer_error_log,))
 
         menu_setup.bind_links(links=(link_user_mailer_setup,))
+
+        registry.register(UserMailer)
