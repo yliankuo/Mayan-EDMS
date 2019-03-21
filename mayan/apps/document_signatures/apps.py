@@ -10,7 +10,7 @@ from kombu import Exchange, Queue
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_object, menu_sidebar, menu_tools
+    MayanAppConfig, menu_facet, menu_object, menu_secondary, menu_tools
 )
 from mayan.apps.navigation import SourceColumn
 from mayan.celery import app
@@ -18,6 +18,10 @@ from mayan.celery import app
 from .handlers import (
     handler_unverify_key_signatures, handler_verify_key_signatures
 )
+from .hooks import (
+    hook_create_embedded_signature, hook_decrypt_document_version
+)
+
 from .links import (
     link_all_document_version_signature_verify, link_document_signature_list,
     link_document_version_signature_delete,
@@ -63,15 +67,15 @@ class DocumentSignaturesApp(MayanAppConfig):
             app_label='django_gpg', model_name='Key'
         )
 
-        EmbeddedSignature = self.get_model('EmbeddedSignature')
+        EmbeddedSignature = self.get_model(model_name='EmbeddedSignature')
 
-        SignatureBaseModel = self.get_model('SignatureBaseModel')
+        SignatureBaseModel = self.get_model(model_name='SignatureBaseModel')
 
         DocumentVersion.register_post_save_hook(
-            order=1, func=EmbeddedSignature.objects.create
+            func=hook_create_embedded_signature, order=1
         )
         DocumentVersion.register_pre_open_hook(
-            order=1, func=EmbeddedSignature.objects.open_signed
+            func=hook_decrypt_document_version, order=1
         )
 
         ModelPermission.register(
@@ -85,22 +89,15 @@ class DocumentSignaturesApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Date'), attribute='date'
+        ModelPermission.register_inheritance(
+            model=SignatureBaseModel, related='document_version'
         )
+
+        SourceColumn(attribute='date', source=SignatureBaseModel)
+        SourceColumn(attribute='get_key_id', source=SignatureBaseModel)
+        SourceColumn(attribute='get_signature_id', source=SignatureBaseModel)
         SourceColumn(
-            source=SignatureBaseModel, label=_('Key ID'),
-            attribute='get_key_id'
-        )
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Signature ID'),
-            func=lambda context: context['object'].signature_id or _('None')
-        )
-        SourceColumn(
-            source=SignatureBaseModel, label=_('Type'),
-            func=lambda context: SignatureBaseModel.objects.get_subclass(
-                pk=context['object'].pk
-            ).get_signature_type_display()
+            attribute='get_signature_type_display', source=SignatureBaseModel
         )
 
         app.conf.task_queues.append(
@@ -148,7 +145,7 @@ class DocumentSignaturesApp(MayanAppConfig):
                 link_document_version_signature_delete,
             ), sources=(SignatureBaseModel,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(
                 link_document_version_signature_upload,
             ), sources=(DocumentVersion,)

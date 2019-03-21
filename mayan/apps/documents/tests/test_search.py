@@ -9,12 +9,12 @@ from mayan.apps.documents.tests import DocumentTestMixin
 class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
     def _perform_document_page_search(self):
         return document_page_search.search(
-            query_string={'q': self.document.label}, user=self.user
+            query_string={'q': self.document.label}, user=self._test_case_user
         )
 
     def _perform_document_search(self):
         return document_search.search(
-            query_string={'q': self.document.label}, user=self.user
+            query_string={'q': self.document.label}, user=self._test_case_user
         )
 
     def test_document_page_search_no_access(self):

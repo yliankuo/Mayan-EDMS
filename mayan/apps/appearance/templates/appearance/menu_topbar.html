@@ -18,20 +18,22 @@
 
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                {% get_menu_links name='topbar' as menu_links %}
-                {% for link_set in menu_links %}
-                    {% for link in link_set %}
-                        {% with 'true' as as_li %}
-                        {% with 'true' as hide_active_anchor %}
-                        {% with 'active' as li_class_active %}
-                        {% with 'first' as li_class_first %}
-                        {% with ' ' as link_classes %}
-                            {% include 'navigation/generic_subnavigation.html' %}
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
+                {% navigation_resolve_menu name='topbar' as topbar_menus_results %}
+                {% for tobpar_menu_result in topbar_menus_results %}
+                    {% for link_group in tobpar_menu_result.link_groups %}
+                        {% for link in link_group.links %}
+                            {% with 'true' as as_li %}
+                            {% with 'true' as hide_active_anchor %}
+                            {% with 'active' as li_class_active %}
+                            {% with 'first' as li_class_first %}
+                            {% with ' ' as link_classes %}
+                                {% include 'navigation/generic_subnavigation.html' %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                        {% endfor %}
                     {% endfor %}
                 {% endfor %}
             </ul>

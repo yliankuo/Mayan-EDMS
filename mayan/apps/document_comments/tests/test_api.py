@@ -16,14 +16,10 @@ from .mixins import CommentsTestMixin
 
 
 class CommentAPITestCase(CommentsTestMixin, DocumentTestMixin, BaseAPITestCase):
-    def setUp(self):
-        super(CommentAPITestCase, self).setUp()
-        self.login_user()
-
     def _request_api_comment_create_view(self):
         return self.post(
             viewname='rest_api:comment-list',
-            kwargs={'document_pk': self.document.pk}, data={
+            kwargs={'document_id': self.document.pk}, data={
                 'comment': TEST_COMMENT_TEXT
             }
         )
@@ -44,8 +40,8 @@ class CommentAPITestCase(CommentsTestMixin, DocumentTestMixin, BaseAPITestCase):
     def _request_api_comment_delete_view(self):
         return self.delete(
             viewname='rest_api:comment-detail', kwargs={
-                'document_pk': self.document.pk,
-                'comment_pk': self.test_comment.pk
+                'document_id': self.document.pk,
+                'comment_id': self.test_comment.pk
             }
         )
 
@@ -67,8 +63,8 @@ class CommentAPITestCase(CommentsTestMixin, DocumentTestMixin, BaseAPITestCase):
     def _request_api_comment_detail_view(self):
         return self.get(
             viewname='rest_api:comment-detail', kwargs={
-                'document_pk': self.document.pk,
-                'comment_pk': self.test_comment.pk
+                'document_id': self.document.pk,
+                'comment_id': self.test_comment.pk
             }
         )
 
@@ -89,7 +85,7 @@ class CommentAPITestCase(CommentsTestMixin, DocumentTestMixin, BaseAPITestCase):
     def _request_api_comment_list_view(self):
         return self.get(
             viewname='rest_api:comment-list',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_comment_list_view_no_access(self):

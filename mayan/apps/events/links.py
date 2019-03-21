@@ -20,7 +20,7 @@ def get_kwargs_factory(variable_name):
         )
 
         content_type = ContentType.objects.get_for_model(
-            context[variable_name]
+            model=context[variable_name]
         )
         return {
             'app_label': '"{}"'.format(content_type.app_label),
@@ -29,6 +29,13 @@ def get_kwargs_factory(variable_name):
         }
 
     return get_kwargs
+
+
+def get_unread_notification_count(context):
+    Notification = apps.get_model(
+        app_label='events', model_name='Notification'
+    )
+    return Notification.objects.filter(user=context.request.user).filter(read=False).count()
 
 
 link_current_user_events = Link(
@@ -41,11 +48,11 @@ link_events_details = Link(
 link_events_for_object = Link(
     icon_class=icon_events_for_object,
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_events_view,), text=_('Events'),
+    permission=permission_events_view, text=_('Events'),
     view='events:events_for_object',
 )
 link_events_list = Link(
-    icon_class=icon_events_list, permissions=(permission_events_view,),
+    icon_class=icon_events_list, permission=permission_events_view,
     text=_('Events'), view='events:events_list'
 )
 link_event_types_subscriptions_list = Link(
@@ -54,7 +61,7 @@ link_event_types_subscriptions_list = Link(
     view='events:event_types_user_subcriptions_list'
 )
 link_notification_mark_read = Link(
-    args='object.pk', text=_('Mark as seen'),
+    kwargs={'notification_id': 'object.pk'}, text=_('Mark as seen'),
     view='events:notification_mark_read'
 )
 link_notification_mark_read_all = Link(
@@ -63,14 +70,11 @@ link_notification_mark_read_all = Link(
 link_object_event_types_user_subcriptions_list = Link(
     icon_class=icon_object_event_types_user_subcriptions_list,
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_events_view,), text=_('Subscriptions'),
+    permission=permission_events_view, text=_('Subscriptions'),
     view='events:object_event_types_user_subcriptions_list',
 )
 link_user_notifications_list = Link(
-    html_data={
-        'apw-attribute': 'count', 'apw-interval': '5000',
-        'apw-url': '/api/notifications/?read=False',
-        'apw-callback': 'MayanAppClass.mayanNotificationBadge'
-    }, icon_class=icon_user_notifications_list, text='',
+    badge_text=get_unread_notification_count,
+    icon_class=icon_user_notifications_list,
     view='events:user_notifications_list'
 )

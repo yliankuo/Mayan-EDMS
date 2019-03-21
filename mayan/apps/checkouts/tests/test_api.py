@@ -25,7 +25,7 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def _request_checkedout_document_view(self):
         return self.get(
             viewname='rest_api:checkedout-document-view',
-            args=(self.checkout.pk,)
+            kwargs={'document_pk': self.checkout.pk}
         )
 
     def _checkout_document(self):
@@ -44,7 +44,8 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkedout_document_view_with_checkout_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_checkout_detail_view, obj=self.document
+            obj=self.document,
+            permission=permission_document_checkout_detail_view
         )
         response = self._request_checkedout_document_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -52,7 +53,7 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkedout_document_view_with_document_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_view, obj=self.document
+            obj=self.document, permission=permission_document_view
         )
         response = self._request_checkedout_document_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -60,14 +61,17 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkedout_document_view_with_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_view, obj=self.document
+            obj=self.document, permission=permission_document_view
         )
         self.grant_access(
-            permission=permission_document_checkout_detail_view, obj=self.document
+            obj=self.document,
+            permission=permission_document_checkout_detail_view
         )
         response = self._request_checkedout_document_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['document']['uuid'], force_text(self.document.uuid))
+        self.assertEqual(
+            response.data['document']['uuid'], force_text(self.document.uuid)
+        )
 
     def _request_document_checkout_view(self):
         return self.post(
@@ -83,7 +87,9 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
         self.assertEqual(DocumentCheckout.objects.count(), 0)
 
     def test_document_checkout_with_access(self):
-        self.grant_access(permission=permission_document_checkout, obj=self.document)
+        self.grant_access(
+            obj=self.document, permission=permission_document_checkout
+        )
         response = self._request_document_checkout_view()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(
@@ -102,7 +108,7 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkout_list_view_with_document_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_view, obj=self.document
+            obj=self.document, permission=permission_document_view
         )
         response = self._request_checkout_list_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -111,7 +117,8 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkout_list_view_with_checkout_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_checkout_detail_view, obj=self.document
+            obj=self.document,
+            permission=permission_document_checkout_detail_view
         )
         response = self._request_checkout_list_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -120,10 +127,11 @@ class CheckoutsAPITestCase(DocumentTestMixin, BaseAPITestCase):
     def test_checkout_list_view_with_access(self):
         self._checkout_document()
         self.grant_access(
-            permission=permission_document_view, obj=self.document
+            obj=self.document, permission=permission_document_view
         )
         self.grant_access(
-            permission=permission_document_checkout_detail_view, obj=self.document
+            obj=self.document,
+            permission=permission_document_checkout_detail_view
         )
         response = self._request_checkout_list_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)

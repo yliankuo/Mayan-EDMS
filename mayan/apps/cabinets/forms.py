@@ -6,7 +6,9 @@ from mayan.apps.common.forms import FilteredSelectionForm
 
 
 class CabinetListForm(FilteredSelectionForm):
-    _field_name = 'cabinets'
-    _label = _('Cabinets')
-    _widget_attributes = {'class': 'select2'}
-    _allow_multiple = True
+    class Meta:
+        allow_multiple = True
+        field_name = 'cabinets'
+        label = _('Cabinets')
+        required = False
+        widget_attributes = {'class': 'select2'}

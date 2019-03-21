@@ -32,7 +32,7 @@ class APIResolvedSmartLinkDocumentListView(generics.ListAPIView):
     serializer_class = ResolvedSmartLinkDocumentSerializer
 
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=self.request.user,
@@ -86,7 +86,7 @@ class APIResolvedSmartLinkView(generics.RetrieveAPIView):
     serializer_class = ResolvedSmartLinkSerializer
 
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=self.request.user,
@@ -123,7 +123,7 @@ class APIResolvedSmartLinkListView(generics.ListAPIView):
     serializer_class = ResolvedSmartLinkSerializer
 
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_document_view, user=self.request.user,
@@ -182,7 +182,7 @@ class APISmartLinkConditionListView(generics.ListCreateAPIView):
         else:
             permission_required = permission_smart_link_edit
 
-        smart_link = get_object_or_404(klass=SmartLink, pk=self.kwargs['pk'])
+        smart_link = get_object_or_404(klass=SmartLink, pk=self.kwargs['smart_link_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -225,7 +225,7 @@ class APISmartLinkConditionView(generics.RetrieveUpdateDestroyAPIView):
         else:
             permission_required = permission_smart_link_edit
 
-        smart_link = get_object_or_404(klass=SmartLink, pk=self.kwargs['pk'])
+        smart_link = get_object_or_404(klass=SmartLink, pk=self.kwargs['smart_link_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,

@@ -2,13 +2,17 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.apps import apps
 from django.contrib.auth.models import Group
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.user_management.events import event_group_edited
+
 from .classes import Permission
+from .events import event_role_created, event_role_edited
 from .managers import RoleManager, StoredPermissionManager
 
 logger = logging.getLogger(__name__)
@@ -59,7 +63,7 @@ class StoredPermission(models.Model):
     def natural_key(self):
         return (self.namespace, self.name)
 
-    def requester_has_this(self, user):
+    def user_has_this(self, user):
         """
         Helper method to check if an user has been granted this permission.
         The check is done sequentially over all of the user's groups and
@@ -73,20 +77,13 @@ class StoredPermission(models.Model):
             )
             return True
 
-        # Request is one of the permission's holders?
-        for group in user.groups.all():
-            for role in group.roles.all():
-                if self in role.permissions.all():
-                    logger.debug(
-                        'Permission "%s" granted to user "%s" through role "%s"',
-                        self, user, role
-                    )
-                    return True
-
-        logger.debug(
-            'Fallthru: Permission "%s" not granted to user "%s"', self, user
-        )
-        return False
+        if Role.objects.filter(groups__user=user, permissions=self).exists():
+            return True
+        else:
+            logger.debug(
+                'Fallthru: Permission "%s" not granted to user "%s"', self, user
+            )
+            return False
 
 
 @python_2_unicode_compatible
@@ -120,8 +117,75 @@ class Role(models.Model):
         return self.label
 
     def get_absolute_url(self):
-        return reverse('permissions:role_list')
+        return reverse(viewname='permissions:role_list')
+
+    def grant(self, permission):
+        self.permissions.add(permission.stored_permission)
+
+    def get_groups(self, permission, user):
+        AccessControlList = apps.get_model(
+            app_label='acls', model_name='AccessControlList'
+        )
+
+        return AccessControlList.objects.restrict_queryset(
+            permission=permission, queryset=self.groups.all(),
+            user=user
+        )
+
+    def groups_add(self, queryset, _user=None):
+        with transaction.atomic():
+            event_role_edited.commit(
+                actor=_user, target=self
+            )
+            for obj in queryset:
+                self.groups.add(obj)
+                event_group_edited.commit(
+                    actor=_user, action_object=self, target=obj
+                )
+
+    def groups_remove(self, queryset, _user=None):
+        with transaction.atomic():
+            event_role_edited.commit(
+                actor=_user, target=self
+            )
+            for obj in queryset:
+                self.groups.remove(obj)
+                event_group_edited.commit(
+                    actor=_user, action_object=self, target=obj
+                )
 
     def natural_key(self):
         return (self.label,)
     natural_key.dependencies = ['auth.Group', 'permissions.StoredPermission']
+
+    def permissions_add(self, queryset, _user=None):
+        with transaction.atomic():
+            event_role_edited.commit(
+                actor=_user, target=self
+            )
+            self.permissions.add(*queryset)
+
+    def permissions_remove(self, queryset, _user=None):
+        with transaction.atomic():
+            event_role_edited.commit(
+                actor=_user, target=self
+            )
+            self.permissions.remove(*queryset)
+
+    def revoke(self, permission):
+        self.permissions.remove(permission.stored_permission)
+
+    def save(self, *args, **kwargs):
+        _user = kwargs.pop('_user', None)
+
+        with transaction.atomic():
+            is_new = not self.pk
+            super(Role, self).save(*args, **kwargs)
+            if is_new:
+                event_role_created.commit(
+                    actor=_user, target=self
+                )
+            else:
+                event_role_edited.commit(
+                    actor=_user, target=self
+                )

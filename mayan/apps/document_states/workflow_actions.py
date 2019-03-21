@@ -158,7 +158,7 @@ class HTTPPostAction(WorkflowAction):
         logger.debug('payload template result: %s', result)
 
         try:
-            payload = json.loads(result, strict=False)
+            payload = json.loads(s=result, strict=False)
         except Exception as exception:
             raise WorkflowStateActionError(
                 _('Payload JSON error: %s') % exception

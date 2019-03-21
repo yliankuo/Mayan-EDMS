@@ -38,7 +38,7 @@ class MOTDApp(MayanAppConfig):
     def ready(self):
         super(MOTDApp, self).ready()
 
-        Message = self.get_model('Message')
+        Message = self.get_model(model_name='Message')
         ModelPermission.register(
             model=Message, permissions=(
                 permission_acl_edit, permission_acl_view,
@@ -48,16 +48,20 @@ class MOTDApp(MayanAppConfig):
         )
 
         SourceColumn(
-            attribute='label', is_identifier=True, source=Message
+            attribute='label', is_identifier=True, is_sortable=True,
+            source=Message
         )
         SourceColumn(
-            attribute='enabled', source=Message, widget=TwoStateWidget
+            attribute='enabled', include_label=True, is_sortable=True,
+            source=Message, widget=TwoStateWidget
         )
         SourceColumn(
-            attribute='start_datetime', empty_value=_('None'), source=Message
+            attribute='start_datetime', empty_value=_('None'),
+            include_label=True, is_sortable=True, source=Message
         )
         SourceColumn(
-            attribute='end_datetime', empty_value=_('None'), source=Message
+            attribute='end_datetime', empty_value=_('None'),
+            include_label=True, is_sortable=True, source=Message
         )
 
         menu_list_facet.bind_links(

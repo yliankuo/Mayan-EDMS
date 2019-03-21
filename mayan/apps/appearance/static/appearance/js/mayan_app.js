@@ -8,10 +8,10 @@ class MayanApp {
             ajaxMenusOptions: []
         }
 
-        this.ajaxSpinnerSeletor = '#ajax-spinner';
         this.ajaxExecuting = false;
         this.ajaxMenusOptions = options.ajaxMenusOptions;
         this.ajaxMenuHashes = {};
+        this.ajaxSpinnerSeletor = '#ajax-spinner';
         this.window = $(window);
     }
 
@@ -26,29 +26,6 @@ class MayanApp {
         } else {
             $('#multi-item-title').show();
             $('#multi-item-actions').hide();
-        }
-    }
-
-    static mayanNotificationBadge (options, data) {
-        // Callback to add the notifications count inside a badge markup
-        var notifications = data[options.attributeName];
-
-        if (notifications > 0) {
-            // Save the original link text before adding the initial badge markup
-            if (!options.element.data('mn-saved-text')) {
-                options.element.data('mn-saved-text', options.element.html());
-            }
-
-            options.element.html(
-                options.element.data('mn-saved-text') + ' <span class="badge">' + notifications + '</span>'
-            );
-        } else {
-            if (options.element.data('mn-saved-text')) {
-                // If there is a saved original link text, restore it
-                options.element.html(
-                    options.element.data('mn-saved-text')
-                );
-            }
         }
     }
 
@@ -81,22 +58,6 @@ class MayanApp {
         });
     }
 
-    static tagSelectionTemplate (tag, container) {
-        var $tag = $(
-            '<span class="label label-tag" style="background: ' + tag.element.dataset.color + ';"> ' + tag.text + '</span>'
-        );
-        container[0].style.background = tag.element.dataset.color;
-        return $tag;
-    }
-
-    static tagResultTemplate (tag) {
-        if (!tag.element) { return ''; }
-        var $tag = $(
-            '<span class="label label-tag" style="background: ' + tag.element.dataset.color + ';"> ' + tag.text + '</span>'
-        );
-        return $tag;
-    }
-
     static updateNavbarState () {
         var uri = new URI(window.location.hash);
         var uriFragment = uri.fragment();
@@ -109,35 +70,6 @@ class MayanApp {
     }
 
     // Instance methods
-
-    AJAXperiodicWorker (options) {
-        var app = this;
-
-        $.ajax({
-            complete: function() {
-                if (!options.app) {
-                    // Preserve the app reference between consecutive calls
-                    options.app = app;
-                }
-                setTimeout(options.app.AJAXperiodicWorker, options.interval, options);
-            },
-            success: function(data) {
-                if (options.callback) {
-                    // Convert the callback string to an actual function
-                    var callbackFunction = window;
-
-                    $.each(options.callback.split('.'), function (index, value) {
-                        callbackFunction = callbackFunction[value]
-                    });
-
-                    callbackFunction(options, data);
-                } else {
-                    options.element.text(data[options.attributeName]);
-                }
-            },
-            url: options.APIURL
-      });
-    }
 
     callbackAJAXSpinnerUpdate () {
         if (this.ajaxExecuting) {
@@ -239,7 +171,6 @@ class MayanApp {
     initialize () {
         var self = this;
 
-        this.setupAJAXPeriodicWorkers();
         this.setupAJAXSpinner();
         this.setupFormHotkeys();
         this.setupFullHeightResizing();
@@ -254,22 +185,6 @@ class MayanApp {
         });
         this.setupPanelSelection();
         partialNavigation.initialize();
-    }
-
-    setupAJAXPeriodicWorkers () {
-        var app = this;
-
-        $('a[data-apw-url]').each(function() {
-            var $this = $(this);
-
-            app.AJAXperiodicWorker({
-                attributeName: $this.data('apw-attribute'),
-                APIURL: $this.data('apw-url'),
-                callback: $this.data('apw-callback'),
-                element: $this,
-                interval: $this.data('apw-interval'),
-            });
-        });
     }
 
     setupAJAXSpinner () {
@@ -443,12 +358,6 @@ class MayanApp {
     setupSelect2 () {
         $('.select2').select2({
             dropdownAutoWidth: true,
-            width: '100%'
-        });
-
-        $('.select2-tags').select2({
-            templateSelection: MayanApp.tagSelectionTemplate,
-            templateResult: MayanApp.tagResultTemplate,
             width: '100%'
         });
     }

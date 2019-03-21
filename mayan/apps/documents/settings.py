@@ -13,7 +13,7 @@ from .literals import (
 )
 from .utils import callback_update_cache_size
 
-namespace = Namespace(name='documents', label=_('Documents'))
+namespace = Namespace(label=_('Documents'), name='documents')
 
 setting_document_cache_maximum_size = namespace.add_setting(
     global_name='DOCUMENTS_CACHE_MAXIMUM_SIZE',

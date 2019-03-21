@@ -42,8 +42,9 @@ def widget_document_cabinets(document, user):
         app_label='acls', model_name='AccessControlList'
     )
 
-    cabinets = AccessControlList.objects.filter_by_access(
-        permission_cabinet_view, user, queryset=document.get_cabinets().all()
+    cabinets = AccessControlList.objects.restrict_queryset(
+        queryset=document.get_cabinets().all(),
+        permission=permission_cabinet_view, user=user
     )
 
     return format_html_join(

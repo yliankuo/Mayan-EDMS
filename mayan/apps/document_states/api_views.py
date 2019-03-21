@@ -9,8 +9,8 @@ from rest_framework import generics
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.documents.models import Document, DocumentType
 from mayan.apps.documents.permissions import permission_document_type_view
-from mayan.apps.rest_api.filters import MayanObjectPermissionsFilter
-from mayan.apps.rest_api.permissions import MayanPermission
+from mayan.apps.rest_api.mixins import ExternalObjectAPIViewSetMixin
+from mayan.apps.rest_api.viewsets import MayanAPIModelViewSet
 
 from .literals import WORKFLOW_IMAGE_TASK_TIMEOUT
 from .models import Workflow
@@ -19,17 +19,99 @@ from .permissions import (
     permission_workflow_edit, permission_workflow_view
 )
 from .serializers import (
-    NewWorkflowDocumentTypeSerializer, WorkflowDocumentTypeSerializer,
-    WorkflowInstanceLogEntrySerializer, WorkflowInstanceSerializer,
-    WorkflowSerializer, WorkflowStateSerializer, WorkflowTransitionSerializer,
-    WritableWorkflowInstanceLogEntrySerializer, WritableWorkflowSerializer,
-    WritableWorkflowTransitionSerializer
+    WorkflowSerializer, WorkflowStateSerializer,
+    WorkflowTransitionSerializer, WorkflowTransitionWritableSerializer
 )
 from .settings import settings_workflow_image_cache_time
 from .storages import storage_workflowimagecache
 from .tasks import task_generate_workflow_image
 
 
+class WorkflowAPIViewSet(MayanAPIModelViewSet):
+    lookup_url_kwarg = 'workflow_id'
+    object_permission_map = {
+        'destroy': permission_workflow_delete,
+        'list': permission_workflow_view,
+        'partial_update': permission_workflow_edit,
+        'retrieve': permission_workflow_view,
+        'update': permission_workflow_edit,
+    }
+    queryset = Workflow.objects.all()
+    serializer_class = WorkflowSerializer
+    view_permission_map = {
+        'create': permission_workflow_create
+    }
+
+
+class WorkflowStateAPIViewSet(ExternalObjectAPIViewSetMixin, MayanAPIModelViewSet):
+    external_object_class = Workflow
+    external_object_pk_url_kwarg = 'workflow_id'
+    lookup_url_kwarg = 'workflow_state_id'
+    serializer_class = WorkflowStateSerializer
+
+    def get_external_object_permission(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        elif action in ['create', 'destroy', 'partial_update', 'update']:
+            return permission_workflow_edit
+        else:
+            return permission_workflow_view
+
+    def get_queryset(self):
+        return self.get_external_object().states.all()
+
+    def get_serializer_context(self):
+        context = super(WorkflowStateAPIViewSet, self).get_serializer_context()
+        if self.kwargs:
+            context.update(
+                {
+                    'workflow': self.get_external_object(),
+                }
+            )
+
+        return context
+
+
+class WorkflowTransitionAPIViewSet(ExternalObjectAPIViewSetMixin, MayanAPIModelViewSet):
+    external_object_class = Workflow
+    external_object_pk_url_kwarg = 'workflow_id'
+    lookup_url_kwarg = 'workflow_transition_id'
+
+    def get_external_object_permission(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        elif action in ['create', 'destroy', 'partial_update', 'update']:
+            return permission_workflow_edit
+        else:
+            return permission_workflow_view
+
+    def get_queryset(self):
+        return self.get_external_object().transitions.all()
+
+    def get_serializer_class(self):
+        action = getattr(self, 'action', None)
+        if action is None:
+            return None
+        if action in ['create', 'partial_update', 'update']:
+            return WorkflowTransitionWritableSerializer
+        else:
+            return WorkflowTransitionSerializer
+
+    def get_serializer_context(self):
+        context = super(WorkflowTransitionAPIViewSet, self).get_serializer_context()
+        if self.kwargs:
+            context.update(
+                {
+                    'workflow': self.get_external_object(),
+                }
+            )
+
+        return context
+
+
+'''
 class APIDocumentTypeWorkflowListView(generics.ListAPIView):
     """
     get: Returns a list of all the document type workflows.
@@ -41,7 +123,7 @@ class APIDocumentTypeWorkflowListView(generics.ListAPIView):
     serializer_class = WorkflowSerializer
 
     def get_document_type(self):
-        document_type = get_object_or_404(klass=DocumentType, pk=self.kwargs['pk'])
+        document_type = get_object_or_404(klass=DocumentType, pk=self.kwargs['document_type_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_document_type_view, user=self.request.user,
@@ -106,7 +188,7 @@ class APIWorkflowDocumentTypeList(generics.ListCreateAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -159,7 +241,7 @@ class APIWorkflowDocumentTypeView(generics.RetrieveDestroyAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -297,7 +379,7 @@ class APIWorkflowStateListView(generics.ListCreateAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -340,7 +422,7 @@ class APIWorkflowStateView(generics.RetrieveUpdateDestroyAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -393,7 +475,7 @@ class APIWorkflowTransitionListView(generics.ListCreateAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -447,7 +529,7 @@ class APIWorkflowTransitionView(generics.RetrieveUpdateDestroyAPIView):
         else:
             permission_required = permission_workflow_edit
 
-        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['pk'])
+        workflow = get_object_or_404(klass=Workflow, pk=self.kwargs['workflow_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_required, user=self.request.user,
@@ -471,7 +553,7 @@ class APIWorkflowInstanceListView(generics.ListAPIView):
     }
 
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_workflow_view, user=self.request.user,
@@ -496,7 +578,7 @@ class APIWorkflowInstanceView(generics.RetrieveAPIView):
     serializer_class = WorkflowInstanceSerializer
 
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         AccessControlList.objects.check_access(
             permissions=permission_workflow_view, user=self.request.user,
@@ -515,7 +597,7 @@ class APIWorkflowInstanceLogEntryListView(generics.ListCreateAPIView):
     post: Transition a document workflow by creating a new document workflow log entry.
     """
     def get_document(self):
-        document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+        document = get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
 
         if self.request.method == 'GET':
             """
@@ -566,3 +648,4 @@ class APIWorkflowInstanceLogEntryListView(generics.ListCreateAPIView):
         )
 
         return workflow
+'''

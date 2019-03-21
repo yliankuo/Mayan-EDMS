@@ -3,9 +3,7 @@ from __future__ import unicode_literals
 from django.utils.encoding import force_text
 
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.documents.tests import (
-    TEST_SMALL_DOCUMENT_PATH, DocumentTestMixin
-)
+from mayan.apps.documents.tests import DocumentTestMixin
 from mayan.apps.documents.tests.literals import (
     TEST_DOCUMENT_DESCRIPTION, TEST_DOCUMENT_DESCRIPTION_EDITED,
     TEST_DOCUMENT_LABEL_EDITED
@@ -20,65 +18,54 @@ from .literals import (
     TEST_INDEX_TEMPLATE_METADATA_EXPRESSION, TEST_METADATA_TYPE_LABEL,
     TEST_METADATA_TYPE_NAME, TEST_METADATA_VALUE
 )
-from .mixins import DocumentIndexingTestMixin
+from .mixins import IndexTemplateTestMixin
 
 
-class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
+class IndexTestCase(IndexTemplateTestMixin, DocumentTestMixin, BaseTestCase):
     def test_document_description_index(self):
-        self._create_index()
-
-        self.index.node_templates.create(
-            parent=self.index.template_root,
+        self.test_document.description = TEST_DOCUMENT_DESCRIPTION
+        self.test_document.save()
+        self._create_index_template_node(
             expression=TEST_INDEX_TEMPLATE_DOCUMENT_DESCRIPTION_EXPRESSION,
-            link_documents=True
+            rebuild=True
         )
 
-        self.document.description = TEST_DOCUMENT_DESCRIPTION
-        self.document.save()
-
-        self.index.rebuild()
-
         self.assertEqual(
-            IndexInstanceNode.objects.last().value, self.document.description
+            IndexInstanceNode.objects.last().value, self.test_document.description
         )
-        self.document.description = TEST_DOCUMENT_DESCRIPTION_EDITED
-        self.document.save()
+        self.test_document.description = TEST_DOCUMENT_DESCRIPTION_EDITED
+        self.test_document.save()
 
         self.assertEqual(
-            IndexInstanceNode.objects.last().value, self.document.description
+            IndexInstanceNode.objects.last().value, self.test_document.description
         )
 
     def test_document_label_index(self):
-        self._create_index()
-
-        self.index.node_templates.create(
-            parent=self.index.template_root,
+        self._create_index_template_node(
             expression=TEST_INDEX_TEMPLATE_DOCUMENT_LABEL_EXPRESSION,
-            link_documents=True
+            rebuild=True
         )
 
-        self.index.rebuild()
-
         self.assertEqual(
-            IndexInstanceNode.objects.last().value, self.document.label
+            IndexInstanceNode.objects.last().value, self.test_document.label
         )
-        self.document.label = TEST_DOCUMENT_LABEL_EDITED
-        self.document.save()
+        self.test_document.label = TEST_DOCUMENT_LABEL_EDITED
+        self.test_document.save()
 
         self.assertEqual(
-            IndexInstanceNode.objects.last().value, self.document.label
+            IndexInstanceNode.objects.last().value, self.test_document.label
         )
 
     def test_date_based_index(self):
-        self._create_index()
+        self._create_index_template(add_document_type=True)
 
-        level_year = self.index.node_templates.create(
-            parent=self.index.template_root,
+        level_year = self.test_index_template.node_templates.create(
+            parent=self.test_index_template.template_root,
             expression='{{ document.date_added.year }}',
             link_documents=False
         )
 
-        self.index.node_templates.create(
+        self.test_index_template.node_templates.create(
             parent=level_year,
             expression='{{ document.date_added.month }}',
             link_documents=True
@@ -89,18 +76,18 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         self.document.delete()
 
         # Uploading a new should not trigger an error
-        document = self.upload_document()
+        self._create_document()
 
         self.assertEqual(
-            [instance.value for instance in IndexInstanceNode.objects.all().order_by('index_instance_node_pk')],
+            [instance.value for instance in IndexInstanceNode.objects.all()],
             [
-                '', force_text(document.date_added.year),
-                force_text(document.date_added.month).zfill(2)
+                '', force_text(self.test_document.date_added.year),
+                force_text(self.test_document.date_added.month)
             ]
         )
 
         self.assertTrue(
-            document in list(IndexInstanceNode.objects.order_by('index_instance_node_pk').last().documents.all())
+            self.test_document in list(IndexInstanceNode.objects.last().documents.all())
         )
 
     def test_dual_level_dual_document_index(self):
@@ -109,33 +96,33 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         values and two second levels with the same value but as separate
         children of each of the first levels. GitLab issue #391
         """
-        with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-            self.document_2 = self.document_type.new_document(
-                file_object=file_object
-            )
+        self.document_2 = self.upload_document()
 
-        self._create_index()
+        self._create_index_template(add_document_type=True)
 
         # Create simple index template
-        root = self.index.template_root
-        level_1 = self.index.node_templates.create(
+        root = self.test_index_template.template_root
+        level_1 = self.test_index_template.node_templates.create(
             parent=root, expression='{{ document.uuid }}',
             link_documents=False
         )
 
-        self.index.node_templates.create(
+        self.test_index_template.node_templates.create(
             parent=level_1, expression='{{ document.label }}',
             link_documents=True
         )
 
         Index.objects.rebuild()
 
+        # Typecast to sets to make sorting irrelevant in the comparison.
         self.assertEqual(
-            [instance.value for instance in IndexInstanceNode.objects.all().order_by('index_instance_node_pk')],
-            [
-                '', force_text(self.document_2.uuid), self.document_2.label,
-                force_text(self.document.uuid), self.document.label
-            ]
+            set(IndexInstanceNode.objects.values_list('value', flat=True)),
+            set(
+                [
+                    '', force_text(self.document_2.uuid), self.document_2.label,
+                    force_text(self.document.uuid), self.document.label
+                ]
+            )
         )
 
     def test_metadata_indexing(self):
@@ -146,11 +133,11 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
             document_type=self.document_type, metadata_type=metadata_type
         )
 
-        self._create_index()
+        self._create_index_template(add_document_type=True)
 
         # Create simple index template
-        root = self.index.template_root
-        self.index.node_templates.create(
+        root = self.test_index_template.template_root
+        self.test_index_template.node_templates.create(
             parent=root, expression=TEST_INDEX_TEMPLATE_METADATA_EXPRESSION,
             link_documents=True
         )
@@ -231,15 +218,15 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
         On a two level template if the first level doesn't return a result
         the indexing should stop. GitLab issue #391.
         """
-        self._create_index()
+        self._create_index_template(add_document_type=True)
 
-        level_1 = self.index.node_templates.create(
-            parent=self.index.template_root,
+        level_1 = self.test_index_template.node_templates.create(
+            parent=self.test_index_template.template_root,
             expression='',
             link_documents=True
         )
 
-        self.index.node_templates.create(
+        self.test_index_template.node_templates.create(
             parent=level_1, expression='{{ document.label }}',
             link_documents=True
         )
@@ -260,11 +247,11 @@ class IndexTestCase(DocumentIndexingTestMixin, DocumentTestMixin, BaseTestCase):
             metadata_type=metadata_type, value=TEST_METADATA_VALUE
         )
 
-        self._create_index()
+        self._create_index_template(add_document_type=True)
 
         # Create simple index template
-        root = self.index.template_root
-        self.index.node_templates.create(
+        root = self.test_index_template.template_root
+        self.test_index_template.node_templates.create(
             parent=root, expression=TEST_INDEX_TEMPLATE_METADATA_EXPRESSION,
             link_documents=True
         )

@@ -6,15 +6,14 @@ from furl import furl
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, resolve_url
 from django.urls import reverse
 from django.utils.encoding import force_text
-from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import SimpleView, SingleObjectListView
+from mayan.apps.common.mixins import ExternalObjectMixin
+from mayan.apps.common.settings import setting_home_view
 from mayan.apps.common.utils import resolve
 from mayan.apps.converter.literals import DEFAULT_ROTATION, DEFAULT_ZOOM_LEVEL
 
@@ -37,53 +36,40 @@ __all__ = (
 logger = logging.getLogger(__name__)
 
 
-class DocumentPageInteractiveTransformation(RedirectView):
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-
-        AccessControlList.objects.check_access(
-            obj=obj, permissions=permission_document_view, user=request.user,
-        )
-
-        return super(DocumentPageInteractiveTransformation, self).dispatch(
-            request, *args, **kwargs
-        )
+class DocumentPageInteractiveTransformation(ExternalObjectMixin, RedirectView):
+    external_object_class = DocumentPage
+    external_object_permission = permission_document_view
+    external_object_pk_url_kwarg = 'document_page_id'
 
     def get_object(self):
-        return get_object_or_404(
-            klass=DocumentPage, pk=self.kwargs['document_page_pk']
-        )
+        return self.get_external_object()
 
     def get_redirect_url(self, *args, **kwargs):
-        url = reverse(
-            viewname='documents:document_page_view',
-            kwargs={'document_page_pk': self.kwargs['document_page_pk']}
-        )
-
         query_dict = {
-            'rotation': int(
-                self.request.GET.get('rotation', DEFAULT_ROTATION)
-            ), 'zoom': int(self.request.GET.get('zoom', DEFAULT_ZOOM_LEVEL))
+            'rotation': self.request.GET.get('rotation', DEFAULT_ROTATION),
+            'zoom': self.request.GET.get('zoom', DEFAULT_ZOOM_LEVEL)
         }
 
-        self.transformation_function(query_dict)
+        url = furl(
+            args=query_dict, path=reverse(
+                viewname='documents:document_page_view',
+                kwargs={'document_page_id': self.kwargs['document_page_id']}
+            )
 
-        return '{}?{}'.format(url, urlencode(query_dict))
-
-
-class DocumentPageListView(SingleObjectListView):
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            obj=self.get_document(), permissions=permission_document_view,
-            user=self.request.user,
         )
 
-        return super(
-            DocumentPageListView, self
-        ).dispatch(request, *args, **kwargs)
+        self.transformation_function(query_dict=query_dict)
+
+        return url.tostr()
+
+
+class DocumentPageListView(ExternalObjectMixin, SingleObjectListView):
+    external_object_class = Document
+    external_object_permission = permission_document_view
+    external_object_pk_url_kwarg = 'document_id'
 
     def get_document(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['document_pk'])
+        return self.get_external_object()
 
     def get_extra_context(self):
         return {
@@ -95,27 +81,17 @@ class DocumentPageListView(SingleObjectListView):
             'title': _('Pages for document: %s') % self.get_document(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_document().pages.all()
 
 
-class DocumentPageNavigationBase(RedirectView):
-    def dispatch(self, request, *args, **kwargs):
-        document_page = self.get_object()
-
-        AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=document_page.document
-        )
-
-        return super(DocumentPageNavigationBase, self).dispatch(
-            request, *args, **kwargs
-        )
+class DocumentPageNavigationBase(ExternalObjectMixin, RedirectView):
+    external_object_class = DocumentPage
+    external_object_permission = permission_document_view
+    external_object_pk_url_kwarg = 'document_page_id'
 
     def get_object(self):
-        return get_object_or_404(
-            klass=DocumentPage, pk=self.kwargs['document_page_pk']
-        )
+        return self.get_external_object()
 
     def get_redirect_url(self, *args, **kwargs):
         """
@@ -128,7 +104,7 @@ class DocumentPageNavigationBase(RedirectView):
             try:
                 previous_url = self.get_object().get_absolute_url()
             except AttributeError:
-                previous_url = resolve_url(settings.LOGIN_REDIRECT_URL)
+                previous_url = reverse(viewname=setting_home_view.value)
 
         parsed_url = furl(url=previous_url)
 
@@ -158,14 +134,14 @@ class DocumentPageNavigationFirst(DocumentPageNavigationBase):
     def get_new_kwargs(self):
         document_page = self.get_object()
 
-        return {'document_page_pk': document_page.siblings.first().pk}
+        return {'document_page_id': document_page.siblings.first().pk}
 
 
 class DocumentPageNavigationLast(DocumentPageNavigationBase):
     def get_new_kwargs(self):
         document_page = self.get_object()
 
-        return {'document_page_pk': document_page.siblings.last().pk}
+        return {'document_page_id': document_page.siblings.last().pk}
 
 
 class DocumentPageNavigationNext(DocumentPageNavigationBase):
@@ -178,12 +154,12 @@ class DocumentPageNavigationNext(DocumentPageNavigationBase):
             )
         except DocumentPage.DoesNotExist:
             messages.warning(
-                request=self.request, message=_(
+                message=_(
                     'There are no more pages in this document'
-                )
+                ), request=self.request
             )
         finally:
-            return {'document_page_pk': document_page.pk}
+            return {'document_page_id': document_page.pk}
 
 
 class DocumentPageNavigationPrevious(DocumentPageNavigationBase):
@@ -196,47 +172,40 @@ class DocumentPageNavigationPrevious(DocumentPageNavigationBase):
             )
         except DocumentPage.DoesNotExist:
             messages.warning(
-                request=self.request, message=_(
+                message=_(
                     'You are already at the first page of this document'
-                )
+                ), request=self.request
             )
         finally:
-            return {'document_page_pk': document_page.pk}
+            return {'document_page_id': document_page.pk}
 
 
 class DocumentPageRotateLeftView(DocumentPageInteractiveTransformation):
     def transformation_function(self, query_dict):
         query_dict['rotation'] = (
-            query_dict['rotation'] - setting_rotation_step.value
+            int(query_dict['rotation']) - setting_rotation_step.value
         ) % 360
 
 
 class DocumentPageRotateRightView(DocumentPageInteractiveTransformation):
     def transformation_function(self, query_dict):
         query_dict['rotation'] = (
-            query_dict['rotation'] + setting_rotation_step.value
+            int(query_dict['rotation']) + setting_rotation_step.value
         ) % 360
 
 
-class DocumentPageView(SimpleView):
+class DocumentPageView(ExternalObjectMixin, SimpleView):
+    external_object_class = DocumentPage
+    external_object_permission = permission_document_view
+    external_object_pk_url_kwarg = 'document_page_id'
     template_name = 'appearance/generic_form.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_view, user=request.user,
-            obj=self.get_object().document
-        )
-
-        return super(
-            DocumentPageView, self
-        ).dispatch(request, *args, **kwargs)
 
     def get_extra_context(self):
         zoom = int(self.request.GET.get('zoom', DEFAULT_ZOOM_LEVEL))
         rotation = int(self.request.GET.get('rotation', DEFAULT_ROTATION))
 
         document_page_form = DocumentPageForm(
-            instance=self.get_object(), zoom=zoom, rotation=rotation
+            instance=self.get_object(), rotation=rotation, zoom=zoom
         )
 
         base_title = _('Image of: %s') % self.get_object()
@@ -252,15 +221,13 @@ class DocumentPageView(SimpleView):
             'navigation_object_list': ('page',),
             'page': self.get_object(),
             'rotation': rotation,
-            'title': ' '.join((base_title, zoom_text,)),
+            'title': ' '.join((base_title, zoom_text)),
             'read_only': True,
             'zoom': zoom,
         }
 
     def get_object(self):
-        return get_object_or_404(
-            klass=DocumentPage, pk=self.kwargs['document_page_pk']
-        )
+        return self.get_external_object()
 
 
 class DocumentPageViewResetView(RedirectView):
@@ -269,7 +236,7 @@ class DocumentPageViewResetView(RedirectView):
 
 class DocumentPageZoomInView(DocumentPageInteractiveTransformation):
     def transformation_function(self, query_dict):
-        zoom = query_dict['zoom'] + setting_zoom_percent_step.value
+        zoom = int(query_dict['zoom']) + setting_zoom_percent_step.value
 
         if zoom > setting_zoom_max_level.value:
             zoom = setting_zoom_max_level.value
@@ -279,7 +246,7 @@ class DocumentPageZoomInView(DocumentPageInteractiveTransformation):
 
 class DocumentPageZoomOutView(DocumentPageInteractiveTransformation):
     def transformation_function(self, query_dict):
-        zoom = query_dict['zoom'] - setting_zoom_percent_step.value
+        zoom = int(query_dict['zoom']) - setting_zoom_percent_step.value
 
         if zoom < setting_zoom_min_level.value:
             zoom = setting_zoom_min_level.value

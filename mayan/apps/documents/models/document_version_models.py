@@ -11,9 +11,10 @@ from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.converter import TransformationRotate, converter_class
+from mayan.apps.converter import TransformationRotate
 from mayan.apps.converter.exceptions import InvalidOfficeFormat, PageCountError
 from mayan.apps.converter.models import Transformation
+from mayan.apps.converter.utils import get_converter_class
 from mayan.apps.mimetype.api import get_mimetype
 
 from ..events import event_document_new_version, event_document_version_revert
@@ -47,8 +48,9 @@ class DocumentVersion(models.Model):
     document is modified after upload it's checksum will not match, used for
     detecting file tampering among other things.
     """
-    _pre_open_hooks = {}
-    _post_save_hooks = {}
+    _pre_open_hooks = []
+    _pre_save_hooks = []
+    _post_save_hooks = []
 
     document = models.ForeignKey(
         on_delete=models.CASCADE, related_name='versions', to=Document,
@@ -103,12 +105,38 @@ class DocumentVersion(models.Model):
         return self.get_rendered_string()
 
     @classmethod
-    def register_pre_open_hook(cls, order, func):
-        cls._pre_open_hooks[order] = func
+    def _execute_hooks(cls, hook_list, instance, **kwargs):
+        result = None
+
+        for hook in hook_list:
+            result = hook(document_version=instance, **kwargs)
+            if result:
+                kwargs.update(result)
+
+        return result
 
     @classmethod
-    def register_post_save_hook(cls, order, func):
-        cls._post_save_hooks[order] = func
+    def _insert_hook_entry(cls, hook_list, func, order=None):
+        order = order or len(hook_list)
+        hook_list.insert(order, func)
+
+    @classmethod
+    def register_pre_open_hook(cls, func, order=None):
+        cls._insert_hook_entry(
+            hook_list=cls._pre_open_hooks, func=func, order=order
+        )
+
+    @classmethod
+    def register_post_save_hook(cls, func, order=None):
+        cls._insert_hook_entry(
+            hook_list=cls._post_save_hooks, func=func, order=order
+        )
+
+    @classmethod
+    def register_pre_save_hook(cls, func, order=None):
+        cls._insert_hook_entry(
+            hook_list=cls._pre_save_hooks, func=func, order=order
+        )
 
     @cached_property
     def cache(self):
@@ -129,6 +157,11 @@ class DocumentVersion(models.Model):
         self.file.storage.delete(self.file.name)
 
         return super(DocumentVersion, self).delete(*args, **kwargs)
+
+    def execute_pre_save_hooks(self):
+        DocumentVersion._execute_hooks(
+            hook_list=DocumentVersion._pre_save_hooks, instance=self
+        )
 
     def exists(self):
         """
@@ -151,7 +184,7 @@ class DocumentVersion(models.Model):
     def get_absolute_url(self):
         return reverse(
             viewname='documents:document_version_view',
-            kwargs={'document_version_pk': self.pk}
+            kwargs={'document_version_id': self.pk}
         )
 
     def get_api_image_url(self, *args, **kwargs):
@@ -168,7 +201,7 @@ class DocumentVersion(models.Model):
             logger.debug('Intermidiate file not found.')
 
             try:
-                converter = converter_class(file_object=self.open())
+                converter = get_converter_class()(file_object=self.open())
                 pdf_file_object = converter.to_pdf()
 
                 with self.cache_partition.create_file(filename='intermediate_file') as file_object:
@@ -195,6 +228,7 @@ class DocumentVersion(models.Model):
                 filename, self.get_rendered_timestamp(), extension
             )
         else:
+            #TODO: use get_rendered_timestamp here
             return Template(
                 '{{ instance.document }} - {{ instance.timestamp }}'
             ).render(context=Context({'instance': self}))
@@ -204,6 +238,10 @@ class DocumentVersion(models.Model):
             context=Context({'instance': self})
         )
     get_rendered_timestamp.short_description = _('Date and time')
+
+    @property
+    def label(self):
+        return self.get_rendered_string()
 
     def natural_key(self):
         return (self.checksum, self.document.natural_key())
@@ -226,13 +264,14 @@ class DocumentVersion(models.Model):
         if raw:
             return self.file.storage.open(self.file.name)
         else:
-            result = self.file.storage.open(self.file.name)
-            for key in sorted(DocumentVersion._pre_open_hooks):
-                result = DocumentVersion._pre_open_hooks[key](
-                    file_object=result, document_version=self
-                )
+            file_object = self.file.storage.open(self.file.name)
 
-            return result
+            result = DocumentVersion._execute_hooks(
+                hook_list=DocumentVersion._pre_open_hooks,
+                instance=self, file_object=file_object
+            )
+
+            return result['file_object']
 
     @property
     def page_count(self):
@@ -250,9 +289,19 @@ class DocumentVersion(models.Model):
             self.document, self
         )
 
-        event_document_version_revert.commit(actor=_user, target=self.document)
-        for version in self.document.versions.filter(timestamp__gt=self.timestamp):
-            version.delete()
+        try:
+            with transaction.atomic():
+                event_document_version_revert.commit(
+                    actor=_user, target=self.document
+                )
+                for version in self.document.versions.filter(timestamp__gt=self.timestamp):
+                    version.delete()
+        except Exception as exception:
+            logger.error(
+                'Error reverting document version for document "%s"; %s',
+                self.document, exception
+            )
+            raise
 
     def save(self, *args, **kwargs):
         """
@@ -267,12 +316,14 @@ class DocumentVersion(models.Model):
 
         try:
             with transaction.atomic():
+                self.execute_pre_save_hooks()
+
                 super(DocumentVersion, self).save(*args, **kwargs)
 
-                for key in sorted(DocumentVersion._post_save_hooks):
-                    DocumentVersion._post_save_hooks[key](
-                        document_version=self
-                    )
+                DocumentVersion._execute_hooks(
+                    hook_list=DocumentVersion._post_save_hooks,
+                    instance=self
+                )
 
                 if new_document_version:
                     # Only do this for new documents
@@ -369,7 +420,7 @@ class DocumentVersion(models.Model):
     def update_page_count(self, save=True):
         try:
             with self.open() as file_object:
-                converter = converter_class(
+                converter = get_converter_class()(
                     file_object=file_object, mime_type=self.mimetype
                 )
                 detected_pages = converter.get_page_count()

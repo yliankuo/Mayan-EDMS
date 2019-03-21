@@ -27,23 +27,25 @@ from .handlers import (
     handler_index_document, handler_post_save_index_document,
     handler_remove_document
 )
+from .html_widgets import (
+    IndexInstanceNodeWidget, IndexTemplateNodeIndentationWidget,
+    get_instance_link
+)
 from .licenses import *  # NOQA
 from .links import (
-    link_document_index_list, link_index_main_menu, link_index_setup,
-    link_index_setup_create, link_index_setup_delete,
-    link_index_setup_document_types, link_index_setup_edit,
-    link_index_setup_list, link_index_setup_view, link_rebuild_index_instances,
-    link_template_node_create, link_template_node_delete,
-    link_template_node_edit
+    link_document_index_instance_list, link_index_instances_rebuild,
+    link_index_main_menu, link_index_setup, link_index_template_create,
+    link_index_template_delete, link_index_template_document_types,
+    link_index_template_edit, link_index_template_list,
+    link_index_template_view, link_index_template_node_create,
+    link_index_template_node_delete, link_index_template_node_edit
 )
 from .permissions import (
     permission_document_indexing_create, permission_document_indexing_delete,
-    permission_document_indexing_edit,
-    permission_document_indexing_instance_view,
+    permission_document_indexing_edit, permission_document_indexing_instance_view,
     permission_document_indexing_rebuild, permission_document_indexing_view
 )
 from .queues import *  # NOQA
-from .widgets import get_instance_link, index_instance_item_link, node_level
 
 
 class DocumentIndexingApp(MayanAppConfig):
@@ -86,53 +88,63 @@ class DocumentIndexingApp(MayanAppConfig):
             )
         )
 
-        SourceColumn(attribute='label', is_identifier=True, source=Index)
-        SourceColumn(attribute='slug', source=Index)
+        ModelPermission.register_inheritance(
+            model=IndexTemplateNode, related='index'
+        )
+
+        ModelPermission.register_inheritance(
+            model=IndexInstanceNode, related='index_template_node__index'
+        )
+
         SourceColumn(
-            attribute='enabled', source=Index, widget=TwoStateWidget
+            attribute='label', is_identifier=True, is_sortable=True, source=Index
+        )
+        SourceColumn(
+            attribute='slug', include_label=True, is_sortable=True, source=Index
+        )
+        SourceColumn(
+            attribute='enabled', include_label=True, is_sortable=True,
+            source=Index, widget=TwoStateWidget
         )
 
         SourceColumn(
             func=lambda context: context[
                 'object'
-            ].instance_root.get_descendants_count(), label=_('Total levels'),
-            source=IndexInstance,
+            ].instance_root.get_descendants_count(), include_label=True,
+            label=_('Total levels'), source=IndexInstance,
         )
         SourceColumn(
             func=lambda context: context[
                 'object'
             ].instance_root.get_descendants_document_count(
                 user=context['request'].user
-            ), label=_('Total documents'), source=IndexInstance
+            ), include_label=True, label=_('Total documents'), source=IndexInstance
+        )
+        SourceColumn(
+            label=_('Level'), is_identifier=True, source=IndexTemplateNode,
+            widget=IndexTemplateNodeIndentationWidget
+        )
+        SourceColumn(
+            attribute='enabled', include_label=True, is_sortable=True,
+            source=IndexTemplateNode, widget=TwoStateWidget
+        )
+        SourceColumn(
+            attribute='link_documents', include_label=True,
+            is_sortable=True, source=IndexTemplateNode, widget=TwoStateWidget
         )
 
         SourceColumn(
-            func=lambda context: node_level(context['object']),
-            label=_('Level'), source=IndexTemplateNode
-        )
-        SourceColumn(
-            attribute='enabled', source=IndexTemplateNode,
-            widget=TwoStateWidget
-        )
-        SourceColumn(
-            attribute='link_documents', source=IndexTemplateNode,
-            widget=TwoStateWidget
+            is_identifier=True, is_sortable=True, label=_('Level'),
+            sort_field='value', source=IndexInstanceNode,
+            widget=IndexInstanceNodeWidget
         )
 
-        SourceColumn(
-            func=lambda context: index_instance_item_link(context['object']),
-            label=_('Level'), source=IndexInstanceNode
-        )
-        SourceColumn(
-            func=lambda context: context['object'].get_descendants_count(),
-            label=_('Levels'), source=IndexInstanceNode
-        )
         SourceColumn(
             func=lambda context: context[
                 'object'
-            ].get_descendants_document_count(
+            ].get_item_count(
                 user=context['request'].user
-            ), label=_('Documents'), source=IndexInstanceNode
+            ), include_label=True, label=_('Items'), source=IndexInstanceNode
         )
 
         SourceColumn(
@@ -174,35 +186,35 @@ class DocumentIndexingApp(MayanAppConfig):
         )
 
         menu_facet.bind_links(
-            links=(link_document_index_list,), sources=(Document,)
+            links=(link_document_index_instance_list,), sources=(Document,)
         )
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_index_setup_document_types,
-                link_index_setup_view,
+                link_acl_list, link_index_template_document_types,
+                link_index_template_view,
             ), sources=(Index,)
         )
         menu_object.bind_links(
             links=(
-                link_index_setup_edit, link_index_setup_delete
+                link_index_template_edit, link_index_template_delete
             ), sources=(Index,)
         )
         menu_object.bind_links(
             links=(
-                link_template_node_create, link_template_node_edit,
-                link_template_node_delete
+                link_index_template_node_create, link_index_template_node_edit,
+                link_index_template_node_delete
             ), sources=(IndexTemplateNode,)
         )
         menu_main.bind_links(links=(link_index_main_menu,), position=98)
         menu_secondary.bind_links(
-            links=(link_index_setup_list, link_index_setup_create),
+            links=(link_index_template_list, link_index_template_create),
             sources=(
-                Index, 'indexing:index_setup_list',
-                'indexing:index_setup_create'
+                Index, 'indexing:index_template_list',
+                'indexing:index_template_create'
             )
         )
         menu_setup.bind_links(links=(link_index_setup,))
-        menu_tools.bind_links(links=(link_rebuild_index_instances,))
+        menu_tools.bind_links(links=(link_index_instances_rebuild,))
 
         post_delete.connect(
             dispatch_uid='document_indexing_handler_delete_empty',

@@ -6,7 +6,7 @@ from django.template import RequestContext
 from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.views import (
+from mayan.apps.common.generics import (
     SingleObjectCreateView, SingleObjectDeleteView, SingleObjectEditView,
     SingleObjectListView
 )
@@ -36,7 +36,8 @@ class MessageCreateView(SingleObjectCreateView):
 class MessageDeleteView(SingleObjectDeleteView):
     model = Message
     object_permission = permission_message_delete
-    post_action_redirect = reverse_lazy('motd:message_list')
+    pk_url_kwarg = 'message_id'
+    post_action_redirect = reverse_lazy(viewname='motd:message_list')
 
     def get_extra_context(self):
         return {
@@ -50,7 +51,8 @@ class MessageEditView(SingleObjectEditView):
     fields = ('label', 'message', 'enabled', 'start_datetime', 'end_datetime')
     model = Message
     object_permission = permission_message_edit
-    post_action_redirect = reverse_lazy('motd:message_list')
+    pk_url_kwarg = 'message_id'
+    post_action_redirect = reverse_lazy(viewname='motd:message_list')
 
     def get_extra_context(self):
         return {

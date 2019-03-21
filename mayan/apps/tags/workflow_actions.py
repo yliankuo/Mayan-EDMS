@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
@@ -38,8 +39,9 @@ class AttachTagAction(WorkflowAction):
         user = request.user
         logger.debug('user: %s', user)
 
-        queryset = AccessControlList.objects.filter_by_access(
-            self.permission, user, queryset=Tag.objects.all()
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=self.permission, queryset=Tag.objects.all(),
+            user=user
         )
 
         self.fields['tags']['kwargs']['queryset'] = queryset
@@ -54,8 +56,13 @@ class AttachTagAction(WorkflowAction):
         return Tag.objects.filter(pk__in=self.form_data.get('tags', ()))
 
     def execute(self, context):
-        for tag in self.get_tags():
-            tag.attach_to(document=context['document'])
+        with transaction.atomic():
+            for tag in self.get_tags():
+                document = context['document']
+                queryset = document._meta.model._meta.default_manager.filter(
+                    pk=document.pk
+                )
+                tag.documents_attach(queryset=queryset)
 
 
 class RemoveTagAction(AttachTagAction):
@@ -73,4 +80,8 @@ class RemoveTagAction(AttachTagAction):
 
     def execute(self, context):
         for tag in self.get_tags():
-            tag.remove_from(document=context['document'])
+            document = context['document']
+            queryset = document._meta.model._meta.default_manager.filter(
+                pk=document.pk
+            )
+            tag.documents_attach(queryset=queryset)

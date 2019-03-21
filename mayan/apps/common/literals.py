@@ -11,7 +11,7 @@ MESSAGE_SQLITE_WARNING = _(
     'for development and testing, not for production.'
 )
 PYPI_URL = 'https://pypi.python.org/pypi'
-
+PK_LIST_SEPARATOR = ','
 TEXT_LIST_AS_ITEMS_PARAMETER = '_list_mode'
 TEXT_LIST_AS_ITEMS_VARIABLE_NAME = 'list_as_items'
 TEXT_CHOICE_ITEMS = 'items'

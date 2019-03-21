@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 from django.test import override_settings
@@ -11,9 +9,10 @@ from mayan.apps.documents.tests import (
     DocumentTestMixin, TEST_DEU_DOCUMENT_PATH, TEST_DOCUMENT_TYPE_LABEL
 )
 
-TEST_DOCUMENT_CONTENT = 'Mayan EDMS Documentation'
-TEST_DOCUMENT_CONTENT_DEU_1 = 'Repository für elektronische Dokumente.'
-TEST_DOCUMENT_CONTENT_DEU_2 = 'Es bietet einen'
+from .literals import (
+    TEST_DOCUMENT_CONTENT, TEST_DOCUMENT_CONTENT_DEU_1,
+    TEST_DOCUMENT_CONTENT_DEU_2
+)
 
 
 @override_settings(OCR_AUTO_OCR=True)

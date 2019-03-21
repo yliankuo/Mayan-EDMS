@@ -18,6 +18,7 @@ from .storages import storage_sharedupload
 logger = logging.getLogger(__name__)
 
 
+# TODO: move outside of models.py or as a static method of SharedUploadedFile
 def upload_to(instance, filename):
     return 'shared-file-{}'.format(uuid.uuid4().hex)
 

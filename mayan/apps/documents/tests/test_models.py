@@ -7,7 +7,7 @@ from mayan.apps.common.tests import BaseTestCase
 
 from ..literals import STUB_EXPIRATION_INTERVAL
 from ..models import (
-    DeletedDocument, Document, DocumentType, DuplicatedDocument
+    Document, DocumentType, DuplicatedDocument, TrashedDocument
 )
 
 from .base import GenericDocumentTestCase
@@ -58,12 +58,12 @@ class DocumentTestCase(DocumentTestMixin, BaseTestCase):
 
         # Trash the document
         self.document.delete()
-        self.assertEqual(DeletedDocument.objects.count(), 1)
+        self.assertEqual(TrashedDocument.objects.count(), 1)
         self.assertEqual(Document.objects.count(), 0)
 
         # Restore the document
         self.document.restore()
-        self.assertEqual(DeletedDocument.objects.count(), 0)
+        self.assertEqual(TrashedDocument.objects.count(), 0)
         self.assertEqual(Document.objects.count(), 1)
 
     def test_trashing_documents(self):
@@ -71,12 +71,12 @@ class DocumentTestCase(DocumentTestMixin, BaseTestCase):
 
         # Trash the document
         self.document.delete()
-        self.assertEqual(DeletedDocument.objects.count(), 1)
+        self.assertEqual(TrashedDocument.objects.count(), 1)
         self.assertEqual(Document.objects.count(), 0)
 
         # Delete the document
         self.document.delete()
-        self.assertEqual(DeletedDocument.objects.count(), 0)
+        self.assertEqual(TrashedDocument.objects.count(), 0)
         self.assertEqual(Document.objects.count(), 0)
 
     def test_auto_trashing(self):
@@ -94,12 +94,12 @@ class DocumentTestCase(DocumentTestMixin, BaseTestCase):
         time.sleep(1.01)
 
         self.assertEqual(Document.objects.count(), 1)
-        self.assertEqual(DeletedDocument.objects.count(), 0)
+        self.assertEqual(TrashedDocument.objects.count(), 0)
 
         DocumentType.objects.check_trash_periods()
 
         self.assertEqual(Document.objects.count(), 0)
-        self.assertEqual(DeletedDocument.objects.count(), 1)
+        self.assertEqual(TrashedDocument.objects.count(), 1)
 
     def test_auto_delete(self):
         """
@@ -112,12 +112,12 @@ class DocumentTestCase(DocumentTestMixin, BaseTestCase):
         self.document_type.save()
 
         self.assertEqual(Document.objects.count(), 1)
-        self.assertEqual(DeletedDocument.objects.count(), 0)
+        self.assertEqual(TrashedDocument.objects.count(), 0)
 
         self.document.delete()
 
         self.assertEqual(Document.objects.count(), 0)
-        self.assertEqual(DeletedDocument.objects.count(), 1)
+        self.assertEqual(TrashedDocument.objects.count(), 1)
 
         # Needed by MySQL as milliseconds value is not stored in timestamp
         # field
@@ -126,7 +126,7 @@ class DocumentTestCase(DocumentTestMixin, BaseTestCase):
         DocumentType.objects.check_delete_periods()
 
         self.assertEqual(Document.objects.count(), 0)
-        self.assertEqual(DeletedDocument.objects.count(), 0)
+        self.assertEqual(TrashedDocument.objects.count(), 0)
 
 
 class PDFCompatibilityTestCase(BaseTestCase):

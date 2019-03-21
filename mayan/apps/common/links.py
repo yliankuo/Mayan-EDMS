@@ -57,12 +57,12 @@ link_documentation = Link(
 link_object_error_list = Link(
     icon_class=icon_object_error_list,
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_error_log_view,), text=_('Errors'),
+    permission=permission_error_log_view, text=_('Errors'),
     view='common:object_error_list',
 )
 link_object_error_list_clear = Link(
     kwargs=get_kwargs_factory('resolved_object'),
-    permissions=(permission_error_log_view,), text=_('Clear all'),
+    permission=permission_error_log_view, text=_('Clear all'),
     view='common:object_error_list_clear',
 )
 link_forum = Link(

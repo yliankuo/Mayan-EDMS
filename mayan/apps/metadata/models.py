@@ -5,13 +5,15 @@ import shlex
 from jinja2 import Template
 
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.module_loading import import_string
 from django.utils.six import PY2
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.acls.models import AccessControlList
+from mayan.apps.documents.events import event_document_type_edited
 from mayan.apps.documents.models import Document, DocumentType
 
 from .classes import MetadataLookup
@@ -98,7 +100,10 @@ class MetadataType(models.Model):
         return self.label
 
     def get_absolute_url(self):
-        return reverse('metadata:metadata_type_edit', kwargs={'pk': self.pk})
+        return reverse(
+            viewname='metadata:metadata_type_edit',
+            kwargs={'metadata_type_id': self.pk}
+        )
 
     if PY2:
         # Python 2 non unicode version
@@ -123,6 +128,38 @@ class MetadataType(models.Model):
         template = Template(self.default)
         return template.render()
 
+    def get_document_type_relations(self, permission, user):
+        return AccessControlList.objects.restrict_queryset(
+            permission=permission, queryset=self.document_type_relations.all(),
+            user=user
+        )
+
+    def document_types_add(self, queryset, required=False, _user=None):
+        with transaction.atomic():
+            event_metadata_type_edited.commit(
+                actor=_user, target=self
+            )
+            for obj in queryset:
+                self.document_type_relations.create(
+                    document_type=obj, required=required
+                )
+                event_document_type_edited.commit(
+                    actor=_user, action_object=self, target=obj
+                )
+
+    def document_types_remove(self, queryset, _user=None):
+        with transaction.atomic():
+            event_metadata_type_edited.commit(
+                actor=_user, target=self
+            )
+            for obj in queryset:
+                self.document_type_relations.filter(
+                    document_type=obj
+                ).delete()
+                event_document_type_edited.commit(
+                    actor=_user, action_object=self, target=obj
+                )
+
     def get_lookup_choices(self, first_choice=None):
         template = Template(self.lookup)
         context = MetadataLookup.get_as_context()
@@ -143,7 +180,7 @@ class MetadataType(models.Model):
         Return a queryset of metadata types that are required for the
         specified document type.
         """
-        return document_type.metadata.filter(
+        return document_type.metadata_type_relations.filter(
             required=True, metadata_type=self
         ).exists()
 
@@ -154,16 +191,17 @@ class MetadataType(models.Model):
         user = kwargs.pop('_user', None)
         created = not self.pk
 
-        result = super(MetadataType, self).save(*args, **kwargs)
+        with transaction.atomic():
+            result = super(MetadataType, self).save(*args, **kwargs)
 
-        if created:
-            event_metadata_type_created.commit(
-                actor=user, target=self
-            )
-        else:
-            event_metadata_type_edited.commit(
-                actor=user, target=self
-            )
+            if created:
+                event_metadata_type_created.commit(
+                    actor=user, target=self
+                )
+            else:
+                event_metadata_type_edited.commit(
+                    actor=user, target=self
+                )
 
         return result
 
@@ -207,7 +245,8 @@ class DocumentMetadata(models.Model):
         verbose_name=_('Document')
     )
     metadata_type = models.ForeignKey(
-        on_delete=models.CASCADE, to=MetadataType, verbose_name=_('Type')
+        on_delete=models.CASCADE, related_name='document_metadata', to=MetadataType,
+        verbose_name=_('Type')
     )
     value = models.CharField(
         blank=True, db_index=True, help_text=_(
@@ -239,17 +278,19 @@ class DocumentMetadata(models.Model):
         It used set to False when deleting document metadata on document
         type change.
         """
-        if enforce_required and self.metadata_type.pk in self.document.document_type.metadata.filter(required=True).values_list('metadata_type', flat=True):
+        if enforce_required and self.metadata_type.pk in self.document.document_type.metadata_type_relations.filter(required=True).values_list('metadata_type', flat=True):
             raise ValidationError(
                 _('Metadata type is required for this document type.')
             )
 
         user = kwargs.pop('_user', None)
-        result = super(DocumentMetadata, self).delete(*args, **kwargs)
+        with transaction.atomic():
+            result = super(DocumentMetadata, self).delete(*args, **kwargs)
 
-        event_document_metadata_removed.commit(
-            action_object=self.metadata_type, actor=user, target=self.document,
-        )
+            event_document_metadata_removed.commit(
+                action_object=self.metadata_type, actor=user, target=self.document,
+            )
+
         return result
 
     def natural_key(self):
@@ -268,7 +309,7 @@ class DocumentMetadata(models.Model):
     is_required.fget.short_description = _('Required')
 
     def save(self, *args, **kwargs):
-        if self.metadata_type.pk not in self.document.document_type.metadata.values_list('metadata_type', flat=True):
+        if self.metadata_type.pk not in self.document.document_type.metadata_type_relations.values_list('metadata_type', flat=True):
             raise ValidationError(
                 _('Metadata type is not valid for this document type.')
             )
@@ -276,18 +317,19 @@ class DocumentMetadata(models.Model):
         user = kwargs.pop('_user', None)
         created = not self.pk
 
-        result = super(DocumentMetadata, self).save(*args, **kwargs)
+        with transaction.atomic():
+            result = super(DocumentMetadata, self).save(*args, **kwargs)
 
-        if created:
-            event_document_metadata_added.commit(
-                action_object=self.metadata_type, actor=user,
-                target=self.document,
-            )
-        else:
-            event_document_metadata_edited.commit(
-                action_object=self.metadata_type, actor=user,
-                target=self.document,
-            )
+            if created:
+                event_document_metadata_added.commit(
+                    action_object=self.metadata_type, actor=user,
+                    target=self.document,
+                )
+            else:
+                event_document_metadata_edited.commit(
+                    action_object=self.metadata_type, actor=user,
+                    target=self.document,
+                )
 
         return result
 
@@ -299,12 +341,12 @@ class DocumentTypeMetadataType(models.Model):
     document type.
     """
     document_type = models.ForeignKey(
-        on_delete=models.CASCADE, related_name='metadata', to=DocumentType,
-        verbose_name=_('Document type')
+        on_delete=models.CASCADE, related_name='metadata_type_relations',
+        to=DocumentType, verbose_name=_('Document type')
     )
     metadata_type = models.ForeignKey(
-        on_delete=models.CASCADE, to=MetadataType,
-        verbose_name=_('Metadata type')
+        on_delete=models.CASCADE, related_name='document_type_relations',
+        to=MetadataType, verbose_name=_('Metadata type')
     )
     required = models.BooleanField(default=False, verbose_name=_('Required'))
 
@@ -322,21 +364,23 @@ class DocumentTypeMetadataType(models.Model):
     def delete(self, *args, **kwargs):
         user = kwargs.pop('_user', None)
 
-        result = super(DocumentTypeMetadataType, self).delete(*args, **kwargs)
+        with transaction.atomic():
+            result = super(DocumentTypeMetadataType, self).delete(*args, **kwargs)
 
-        event_metadata_type_relationship.commit(
-            action_object=self.document_type, actor=user, target=self.metadata_type,
-        )
+            event_metadata_type_relationship.commit(
+                action_object=self.document_type, actor=user, target=self.metadata_type,
+            )
 
         return result
 
     def save(self, *args, **kwargs):
         user = kwargs.pop('_user', None)
 
-        result = super(DocumentTypeMetadataType, self).save(*args, **kwargs)
+        with transaction.atomic():
+            result = super(DocumentTypeMetadataType, self).save(*args, **kwargs)
 
-        event_metadata_type_relationship.commit(
-            action_object=self.document_type, actor=user, target=self.metadata_type,
-        )
+            event_metadata_type_relationship.commit(
+                action_object=self.document_type, actor=user, target=self.metadata_type,
+            )
 
         return result

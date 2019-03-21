@@ -48,8 +48,8 @@ class PurePaginator(Paginator):
         self.allow_empty_first_page = allow_empty_first_page
         self.object_list = object_list
         self.orphans = orphans
-        self.per_page = per_page
         self.page_kwarg = page_kwarg
+        self.per_page = per_page
         self.request = request
 
     def page(self, number):

@@ -21,24 +21,26 @@ from .mixins import MetadataTypeTestMixin
 
 
 class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewTestCase):
+    auto_upload_document = False
+
     def setUp(self):
         super(DocumentUploadMetadataTestCase, self).setUp()
-        self.login_user()
         self.source = WebFormSource.objects.create(
             enabled=True, label=TEST_SOURCE_LABEL,
             uncompress=TEST_SOURCE_UNCOMPRESS_N
         )
 
-        self.document.delete()
+        #self.document.delete()
 
-        self.document_type.metadata.create(
+        self.document_type.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=True
         )
 
+        self.upload_url = furl(reverse(viewname='sources:upload_interactive'))
+
     def test_upload_interactive_with_unicode_metadata(self):
-        url = furl(reverse('sources:upload_interactive'))
-        url.args['metadata0_id'] = self.metadata_type.pk
-        url.args['metadata0_value'] = TEST_METADATA_VALUE_UNICODE
+        self.upload_url.args['metadata0_id'] = self.metadata_type.pk
+        self.upload_url.args['metadata0_value'] = TEST_METADATA_VALUE_UNICODE
 
         self.grant_access(
             permission=permission_document_create, obj=self.document_type
@@ -47,7 +49,7 @@ class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewT
         # Upload the test document
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_descriptor:
             response = self.post(
-                path=url, data={
+                path=self.upload_url, data={
                     'document-language': 'eng', 'source-file': file_descriptor,
                     'document_type_id': self.document_type.pk,
                 }
@@ -60,9 +62,8 @@ class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewT
         )
 
     def test_upload_interactive_with_ampersand_metadata(self):
-        url = furl(reverse('sources:upload_interactive'))
-        url.args['metadata0_id'] = self.metadata_type.pk
-        url.args['metadata0_value'] = TEST_METADATA_VALUE_WITH_AMPERSAND
+        self.upload_url.args['metadata0_id'] = self.metadata_type.pk
+        self.upload_url.args['metadata0_value'] = TEST_METADATA_VALUE_WITH_AMPERSAND
 
         self.grant_access(
             permission=permission_document_create, obj=self.document_type
@@ -70,7 +71,7 @@ class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewT
         # Upload the test document
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_descriptor:
             response = self.post(
-                path=url, data={
+                path=self.upload_url, data={
                     'document-language': 'eng', 'source-file': file_descriptor,
                     'document_type_id': self.document_type.pk,
                 }
@@ -81,3 +82,17 @@ class DocumentUploadMetadataTestCase(MetadataTypeTestMixin, GenericDocumentViewT
             Document.objects.first().metadata.first().value,
             TEST_METADATA_VALUE_WITH_AMPERSAND
         )
+
+    def test_initial_step_conditions(self):
+        self.grant_access(
+            permission=permission_document_create, obj=self.document_type
+        )
+
+        response = self.post(
+            viewname='sources:document_create_multiple', data={
+                'document_type_selection-document_type': self.document_type.pk,
+                'document_create_wizard-current_step': 0
+            }
+        )
+
+        self.assertContains(response=response, text='Step 2', status_code=200)

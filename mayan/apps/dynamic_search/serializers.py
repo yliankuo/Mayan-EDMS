@@ -13,3 +13,13 @@ class SearchModelSerializer(serializers.Serializer):
     model_name = serializers.CharField(read_only=True)
     pk = serializers.CharField(read_only=True)
     search_fields = SearchFieldSerializer(many=True, read_only=True)
+    search_url = serializers.HyperlinkedIdentityField(
+        lookup_field='pk',
+        lookup_url_kwarg='search_model_name',
+        view_name='rest_api:search_model-search'
+    )
+    url = serializers.HyperlinkedIdentityField(
+        lookup_field='pk',
+        lookup_url_kwarg='search_model_name',
+        view_name='rest_api:search_model-detail'
+    )

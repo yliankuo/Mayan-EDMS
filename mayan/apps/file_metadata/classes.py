@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 
 from django.apps import apps
+from django.db import transaction
 
 from .events import event_file_metadata_document_version_finish
 from .exceptions import FileMetadataDriverError
@@ -15,33 +16,34 @@ class FileMetadataDriver(object):
     _registry = {}
 
     @classmethod
-    def register(cls, mimetypes):
-        for mimetype in mimetypes:
-            cls._registry.setdefault(mimetype, []).append(cls)
-
-    @classmethod
     def process_document_version(cls, document_version):
         for driver_class in cls._registry.get(document_version.mimetype, ()):
             try:
                 driver = driver_class()
-                driver.process(document_version=document_version)
+
+                with transaction.atomic():
+                    driver.process(document_version=document_version)
+                    event_file_metadata_document_version_finish.commit(
+                        action_object=document_version.document,
+                        target=document_version
+                    )
+
+                    post_document_version_file_metadata_processing.send(
+                        sender=document_version.__class__,
+                        instance=document_version
+                    )
             except FileMetadataDriverError:
                 # If driver raises error, try next in the list
                 pass
             else:
                 # If driver was successfull there is no need to try
                 # others in the list for this mimetype
-
-                event_file_metadata_document_version_finish.commit(
-                    action_object=document_version.document,
-                    target=document_version
-                )
-
-                post_document_version_file_metadata_processing.send(
-                    sender=document_version.__class__,
-                    instance=document_version
-                )
                 return
+
+    @classmethod
+    def register(cls, mimetypes):
+        for mimetype in mimetypes:
+            cls._registry.setdefault(mimetype, []).append(cls)
 
     def process(self, document_version):
         logger.info(
@@ -68,7 +70,9 @@ class FileMetadataDriver(object):
             document_version=document_version
         )
 
-        for key, value in self._process(document_version=document_version).items():
+        results = self._process(document_version=document_version) or {}
+
+        for key, value in results.items():
             document_version_driver_entry.entries.create(
                 key=key, value=value
             )

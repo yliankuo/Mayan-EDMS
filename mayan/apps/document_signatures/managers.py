@@ -5,16 +5,16 @@ import os
 
 from django.db import models
 
-from mayan.apps.common.utils import mkstemp
 from mayan.apps.django_gpg.exceptions import DecryptionError
 from mayan.apps.django_gpg.models import Key
 from mayan.apps.documents.models import DocumentVersion
+from mayan.apps.storage.utils import mkstemp
 
 logger = logging.getLogger(__name__)
 
 
 class EmbeddedSignatureManager(models.Manager):
-    def open_signed(self, file_object, document_version):
+    def open_signed(self, document_version, file_object):
         for signature in self.filter(document_version=document_version):
             try:
                 return self.open_signed(

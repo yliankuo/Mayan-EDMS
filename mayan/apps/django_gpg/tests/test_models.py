@@ -8,7 +8,7 @@ import mock
 from django.utils.encoding import force_bytes
 
 from mayan.apps.common.tests import BaseTestCase
-from mayan.apps.common.utils import TemporaryFile
+from mayan.apps.storage.utils import TemporaryFile
 
 from ..exceptions import (
     DecryptionError, KeyDoesNotExist, NeedPassphrase, PassphraseError,
@@ -17,22 +17,12 @@ from ..exceptions import (
 from ..models import Key
 
 from .literals import (
-    TEST_DETACHED_SIGNATURE, TEST_FILE, TEST_KEY_DATA, TEST_KEY_FINGERPRINT,
-    TEST_KEY_PASSPHRASE, TEST_RECEIVE_KEY, TEST_SEARCH_FINGERPRINT,
-    TEST_SEARCH_UID, TEST_SIGNED_FILE, TEST_SIGNED_FILE_CONTENT
+    MOCK_SEARCH_KEYS_RESPONSE, TEST_DETACHED_SIGNATURE, TEST_FILE,
+    TEST_KEY_FINGERPRINT, TEST_KEY_PASSPHRASE, TEST_RECEIVE_KEY,
+    TEST_SEARCH_FINGERPRINT, TEST_SEARCH_UID, TEST_SIGNED_FILE,
+    TEST_SIGNED_FILE_CONTENT
 )
-
-MOCK_SEARCH_KEYS_RESPONSE = [
-    {
-        'algo': u'1',
-        'date': u'1311475606',
-        'expires': u'1643601600',
-        'keyid': u'607138F1AECC5A5CA31CB7715F3F7F75D210724D',
-        'length': u'2048',
-        'type': u'pub',
-        'uids': [u'Roberto Rosario <roberto.rosario.gonzalez@gmail.com>']
-    }
-]
+from .mixins import KeyTestMixin
 
 
 def mock_recv_keys(self, keyserver, *keyids):
@@ -45,12 +35,11 @@ def mock_recv_keys(self, keyserver, *keyids):
     return ImportResult()
 
 
-class KeyTestCase(BaseTestCase):
+class KeyTestCase(KeyTestMixin, BaseTestCase):
     def test_key_instance_creation(self):
-        # Creating a Key instance is analogous to importing a key
-        key = Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
-        self.assertEqual(key.fingerprint, TEST_KEY_FINGERPRINT)
+        self.assertEqual(self.test_key.fingerprint, TEST_KEY_FINGERPRINT)
 
     @mock.patch.object(gnupg.GPG, 'search_keys', autospec=True)
     def test_key_search(self, search_keys):
@@ -92,7 +81,7 @@ class KeyTestCase(BaseTestCase):
         self.assertTrue(result.key_id in TEST_KEY_FINGERPRINT)
 
     def test_embedded_verification_with_key(self):
-        Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_SIGNED_FILE, mode='rb') as signed_file:
             result = Key.objects.verify_file(signed_file)
@@ -100,7 +89,7 @@ class KeyTestCase(BaseTestCase):
         self.assertEqual(result.fingerprint, TEST_KEY_FINGERPRINT)
 
     def test_embedded_verification_with_correct_fingerprint(self):
-        Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_SIGNED_FILE, mode='rb') as signed_file:
             result = Key.objects.verify_file(
@@ -111,14 +100,14 @@ class KeyTestCase(BaseTestCase):
         self.assertEqual(result.fingerprint, TEST_KEY_FINGERPRINT)
 
     def test_embedded_verification_with_incorrect_fingerprint(self):
-        Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_SIGNED_FILE, mode='rb') as signed_file:
             with self.assertRaises(KeyDoesNotExist):
                 Key.objects.verify_file(signed_file, key_fingerprint='999')
 
     def test_signed_file_decryption(self):
-        Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_SIGNED_FILE, mode='rb') as signed_file:
             result = Key.objects.decrypt_file(file_object=signed_file)
@@ -145,7 +134,7 @@ class KeyTestCase(BaseTestCase):
         self.assertTrue(result.key_id in TEST_KEY_FINGERPRINT)
 
     def test_detached_verification_with_key(self):
-        Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_DETACHED_SIGNATURE, mode='rb') as signature_file:
             with open(TEST_FILE, mode='rb') as test_file:
@@ -157,29 +146,29 @@ class KeyTestCase(BaseTestCase):
         self.assertEqual(result.fingerprint, TEST_KEY_FINGERPRINT)
 
     def test_detached_signing_no_passphrase(self):
-        key = Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with self.assertRaises(NeedPassphrase):
             with open(TEST_FILE, mode='rb') as test_file:
-                key.sign_file(
+                self.test_key.sign_file(
                     file_object=test_file, detached=True,
                 )
 
     def test_detached_signing_bad_passphrase(self):
-        key = Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with self.assertRaises(PassphraseError):
             with open(TEST_FILE, mode='rb') as test_file:
-                key.sign_file(
+                self.test_key.sign_file(
                     file_object=test_file, detached=True,
                     passphrase='bad passphrase'
                 )
 
     def test_detached_signing_with_passphrase(self):
-        key = Key.objects.create(key_data=TEST_KEY_DATA)
+        self._create_test_key()
 
         with open(TEST_FILE, mode='rb') as test_file:
-            detached_signature = key.sign_file(
+            detached_signature = self.test_key.sign_file(
                 file_object=test_file, detached=True,
                 passphrase=TEST_KEY_PASSPHRASE
             )

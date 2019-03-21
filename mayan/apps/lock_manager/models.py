@@ -38,7 +38,7 @@ class Lock(models.Model):
         """
         try:
             lock = Lock.objects.get(
-                name=self.name, creation_datetime=self.creation_datetime
+                creation_datetime=self.creation_datetime, name=self.name
             )
         except Lock.DoesNotExist:
             # Our lock has expired and was reassigned

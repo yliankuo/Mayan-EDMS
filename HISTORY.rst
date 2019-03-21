@@ -217,6 +217,42 @@
 - The tags app permission workflow is now reciprocal. In order
   to attach a tag, the user's role will need the tag attach
   permissions for both, the document and the tag.
+- Refactor and optimize the access control computation. Most of
+  the computation has been moved to the database instead of doing
+  filtering in Python. The refactor added cascading access checking
+  in preparation for nested cabinet access control and the removal
+  of the permission proxy support which is now redundant.
+- Remove the permissions to grant or revoke a permission to a role.
+  The instead the role edit permission is used.
+- Add a test mixin to generate random model primary keys.
+- Add support for checkout and check in multiple documents at
+  the same time.
+- Move file and storage code to the storage app. The setting
+  COMMON_TEMPORARY_DIRECTORY is now STORAGE_TEMPORARY_DIRECTORY.
+- To lower memory usage and reduce memory leaks, the entire
+  entire converter class is no longer cached and instead loaded
+  on demand. This allows the garbage collector to clear the memory
+  used.
+- Update the permission requirements for the index template
+  document type selection screen. The document type view
+  permission is now required in addition to the index
+  template edit permission.
+- Update the links display templates to show which object the
+  links belong to when there is more than one object.
+- Update the links display templates to show which menu
+  the links belong to when there is more than one menu.
+- Remove the sidebar menu and unify its links with the 
+  secondary menu.
+- Increate the default maximum title lenght to 120 characters.
+- In the search API, the search function is now a service
+  of the search model resource.
+- The simple and advance search are now the same service. The
+  difference is determined by the URL query. A ?q= means a 
+  simple search. For advanced search pass the search model
+  fields in the URL query, example: ?q=document_type__label=
+- Remove django-mathfilters from requirements. These tags
+  are provided by default by Jinja2 template engine
+  (http://jinja.pocoo.org/docs/2.10/templates/#math).
 
 3.1.9 (2018-11-01)
 ==================

@@ -7,14 +7,14 @@ from mayan.apps.permissions import PermissionNamespace
 namespace = PermissionNamespace(label=_('File metadata'), name='file_metadata')
 
 permission_document_type_file_metadata_setup = namespace.add_permission(
-    name='file_metadata_document_type_setup',
-    label=_('Change document type file metadata settings')
+    label=_('Change document type file metadata settings'),
+    name='file_metadata_document_type_setup'
 )
 permission_file_metadata_submit = namespace.add_permission(
-    name='file_metadata_submit', label=_(
+    label=_(
         'Submit document for file metadata processing'
-    )
+    ), name='file_metadata_submit'
 )
 permission_file_metadata_view = namespace.add_permission(
-    name='file_metadata_view', label=_('View file metadata')
+    label=_('View file metadata'), name='file_metadata_view'
 )

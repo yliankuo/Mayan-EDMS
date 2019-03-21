@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import os
-import tempfile
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -11,7 +10,7 @@ from mayan.apps.smart_settings import Namespace
 
 from .literals import DEFAULT_COMMON_HOME_VIEW
 
-namespace = Namespace(name='common', label=_('Common'))
+namespace = Namespace(label=_('Common'), name='common')
 
 setting_auto_logging = namespace.add_setting(
     global_name='COMMON_AUTO_LOGGING',
@@ -53,8 +52,7 @@ setting_production_error_log_path = namespace.add_setting(
     global_name='COMMON_PRODUCTION_ERROR_LOG_PATH',
     default=os.path.join(settings.MEDIA_ROOT, 'error.log'), help_text=_(
         'Path to the logfile that will track errors during production.'
-    ),
-    is_path=True
+    )
 )
 setting_project_title = namespace.add_setting(
     global_name='COMMON_PROJECT_TITLE',
@@ -77,16 +75,8 @@ setting_shared_storage_arguments = namespace.add_setting(
     global_name='COMMON_SHARED_STORAGE_ARGUMENTS',
     default={'location': os.path.join(settings.MEDIA_ROOT, 'shared_files')}
 )
-setting_temporary_directory = namespace.add_setting(
-    global_name='COMMON_TEMPORARY_DIRECTORY', default=tempfile.gettempdir(),
-    help_text=_(
-        'Temporary directory used site wide to store thumbnails, previews '
-        'and temporary files.'
-    ),
-    is_path=True
-)
 
-namespace = Namespace(name='django', label=_('Django'))
+namespace = Namespace(label=_('Django'), name='django')
 
 setting_django_allowed_hosts = namespace.add_setting(
     global_name='ALLOWED_HOSTS', default=settings.ALLOWED_HOSTS,
@@ -357,7 +347,20 @@ setting_django_login_redirect_url = namespace.add_setting(
         'for example. This setting also accepts named URL patterns which '
         'can be used to reduce configuration duplication since you don\'t '
         'have to define the URL in two places (settings and URLconf).'
-    ),
+    )
+)
+setting_django_logout_redirect_url = namespace.add_setting(
+    global_name='LOGOUT_REDIRECT_URL',
+    default=settings.LOGOUT_REDIRECT_URL,
+    help_text=_(
+        'Default: None. The URL where requests are redirected after a user '
+        'logs out using LogoutView (if the view doesn\'t get a next_page '
+        'argument). If None, no redirect will be performed and the logout '
+        'view will be rendered. This setting also accepts named URL '
+        'patterns which can be used to reduce configuration duplication '
+        'since you don\'t have to define the URL in two places (settings '
+        'and URLconf).'
+    )
 )
 setting_django_static_url = namespace.add_setting(
     global_name='STATIC_URL',
@@ -402,7 +405,7 @@ setting_django_wsgi_application = namespace.add_setting(
     ),
 )
 
-namespace = Namespace(name='celery', label=_('Celery'))
+namespace = Namespace(label=_('Celery'), name='celery')
 
 setting_celery_always_eager = namespace.add_setting(
     global_name='CELERY_TASK_ALWAYS_EAGER',

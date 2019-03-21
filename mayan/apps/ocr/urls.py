@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIDocumentOCRView, APIDocumentPageOCRContentView,
-    APIDocumentVersionOCRView
+    DocumentPageOCRAPIViewSet, DocumentOCRAPIViewSet,
+    DocumentVersionOCRAPIViewSet
 )
 from .views import (
     DocumentOCRContentView, DocumentOCRDownloadView,
@@ -14,54 +14,58 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^documents/pages/(?P<pk>\d+)/content/$',
-        DocumentPageOCRContentView.as_view(), name='document_page_content'
+        regex=r'^document_types/ocr/submit/$', name='document_type_submit',
+        view=DocumentTypeSubmitView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>\d+)/content/$', DocumentOCRContentView.as_view(),
-        name='document_content'
+        regex=r'^document_types/(?P<document_type_id>\d+)/ocr/settings/$',
+        name='document_type_settings',
+        view=DocumentTypeSettingsEditView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>\d+)/submit/$', DocumentSubmitView.as_view(),
-        name='document_submit'
+        regex=r'^documents/(?P<document_id>\d+)/ocr/content/$',
+        name='document_content', view=DocumentOCRContentView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>\d+)/ocr/errors/$',
-        DocumentOCRErrorsListView.as_view(), name='document_error_list'
+        regex=r'^documents/(?P<document_id>\d+)/ocr/download/$',
+        name='document_download', view=DocumentOCRDownloadView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>\d+)/ocr/download/$',
-        DocumentOCRDownloadView.as_view(), name='document_download'
+        regex=r'^documents/(?P<document_id>\d+)/ocr/errors/$',
+        name='document_error_list',
+        view=DocumentOCRErrorsListView.as_view()
     ),
     url(
-        r'^documents/multiple/submit/$', DocumentSubmitView.as_view(),
-        name='document_multiple_submit'
+        regex=r'^documents/(?P<document_id>\d+)/ocr/submit/$',
+        name='document_submit', view=DocumentSubmitView.as_view()
     ),
     url(
-        r'^document_types/submit/$', DocumentTypeSubmitView.as_view(),
-        name='document_type_submit'
+        regex=r'^documents/multiple/ocr/submit/$',
+        name='document_multiple_submit',
+        view=DocumentSubmitView.as_view()
     ),
     url(
-        r'^document_types/(?P<pk>\d+)/ocr/settings/$',
-        DocumentTypeSettingsEditView.as_view(),
-        name='document_type_settings'
+        regex=r'^documents/pages/(?P<document_page_id>\d+)/ocr/content/$',
+        name='document_page_content',
+        view=DocumentPageOCRContentView.as_view()
     ),
-    url(r'^errors/$', EntryListView.as_view(), name='entry_list'),
+    url(
+        regex=r'^errors/$', name='entry_list',
+        view=EntryListView.as_view()
+    )
 ]
 
-api_urls = [
-    url(
-        r'^documents/(?P<pk>\d+)/submit/$', APIDocumentOCRView.as_view(),
-        name='document-ocr-submit-view'
-    ),
-    url(
-        r'^documents/(?P<document_pk>\d+)/versions/(?P<version_pk>\d+)/ocr/$',
-        APIDocumentVersionOCRView.as_view(),
-        name='document-version-ocr-submit-view'
-    ),
-    url(
-        r'^documents/(?P<document_pk>\d+)/versions/(?P<version_pk>\d+)/pages/(?P<page_pk>\d+)/ocr/$',
-        APIDocumentPageOCRContentView.as_view(),
-        name='document-page-ocr-content-view'
-    ),
-]
+api_router_entries = (
+    {
+        'prefix': r'documents',
+        'viewset': DocumentOCRAPIViewSet, 'basename': 'document-ocr'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions',
+        'viewset': DocumentVersionOCRAPIViewSet, 'basename': 'document_version-ocr'
+    },
+    {
+        'prefix': r'documents/(?P<document_id>\d+)/document_versions/(?P<document_version_id>\d+)/document_pages',
+        'viewset': DocumentPageOCRAPIViewSet, 'basename': 'document_page-ocr'
+    }
+)

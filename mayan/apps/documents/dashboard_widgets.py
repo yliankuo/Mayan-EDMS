@@ -32,17 +32,19 @@ class DashboardWidgetDocumentPagesTotal(DashboardWidgetNumeric):
         DocumentPage = apps.get_model(
             app_label='documents', model_name='DocumentPage'
         )
-        self.count = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=request.user,
-            queryset=DocumentPage.objects.all()
+        self.count = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view,
+            queryset=DocumentPage.objects.all(), user=request.user
         ).count()
-        return super(DashboardWidgetDocumentPagesTotal, self).render(request)
+        return super(DashboardWidgetDocumentPagesTotal, self).render(
+            request=request
+        )
 
 
 class DashboardWidgetDocumentsTotal(DashboardWidgetNumeric):
     icon_class = icon_dashboard_total_document
     label = _('Total documents')
-    link = reverse_lazy('documents:document_list')
+    link = reverse_lazy(viewname='documents:document_list')
 
     def render(self, request):
         AccessControlList = apps.get_model(
@@ -51,36 +53,40 @@ class DashboardWidgetDocumentsTotal(DashboardWidgetNumeric):
         Document = apps.get_model(
             app_label='documents', model_name='Document'
         )
-        self.count = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=request.user,
-            queryset=Document.objects.all()
+        self.count = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view,
+            queryset=Document.objects.all(), user=request.user
         ).count()
-        return super(DashboardWidgetDocumentsTotal, self).render(request)
+        return super(DashboardWidgetDocumentsTotal, self).render(
+            request=request
+        )
 
 
 class DashboardWidgetDocumentsInTrash(DashboardWidgetNumeric):
     icon_class = icon_dashboard_documents_in_trash
     label = _('Documents in trash')
-    link = reverse_lazy('documents:document_list_deleted')
+    link = reverse_lazy(viewname='documents:trashed_document_list')
 
     def render(self, request):
         AccessControlList = apps.get_model(
             app_label='acls', model_name='AccessControlList'
         )
-        DeletedDocument = apps.get_model(
-            app_label='documents', model_name='DeletedDocument'
+        TrashedDocument = apps.get_model(
+            app_label='documents', model_name='TrashedDocument'
         )
-        self.count = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=request.user,
-            queryset=DeletedDocument.objects.all()
+        self.count = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view,
+            queryset=TrashedDocument.objects.all(), user=request.user
         ).count()
-        return super(DashboardWidgetDocumentsInTrash, self).render(request)
+        return super(DashboardWidgetDocumentsInTrash, self).render(
+            request=request
+        )
 
 
 class DashboardWidgetDocumentsTypesTotal(DashboardWidgetNumeric):
     icon_class = icon_dashboard_document_types
     label = _('Document types')
-    link = reverse_lazy('documents:document_type_list')
+    link = reverse_lazy(viewname='documents:document_type_list')
 
     def render(self, request):
         AccessControlList = apps.get_model(
@@ -89,11 +95,13 @@ class DashboardWidgetDocumentsTypesTotal(DashboardWidgetNumeric):
         DocumentType = apps.get_model(
             app_label='documents', model_name='DocumentType'
         )
-        self.count = AccessControlList.objects.filter_by_access(
-            permission=permission_document_type_view, user=request.user,
-            queryset=DocumentType.objects.all()
+        self.count = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_type_view,
+            queryset=DocumentType.objects.all(), user=request.user
         ).count()
-        return super(DashboardWidgetDocumentsTypesTotal, self).render(request)
+        return super(DashboardWidgetDocumentsTypesTotal, self).render(
+            request=request
+        )
 
 
 class DashboardWidgetDocumentsNewThisMonth(DashboardWidgetNumeric):
@@ -106,7 +114,9 @@ class DashboardWidgetDocumentsNewThisMonth(DashboardWidgetNumeric):
 
     def render(self, request):
         self.count = new_documents_this_month(user=request.user)
-        return super(DashboardWidgetDocumentsNewThisMonth, self).render(request)
+        return super(DashboardWidgetDocumentsNewThisMonth, self).render(
+            request=request
+        )
 
 
 class DashboardWidgetDocumentsPagesNewThisMonth(DashboardWidgetNumeric):
@@ -119,4 +129,6 @@ class DashboardWidgetDocumentsPagesNewThisMonth(DashboardWidgetNumeric):
 
     def render(self, request):
         self.count = new_document_pages_this_month(user=request.user)
-        return super(DashboardWidgetDocumentsPagesNewThisMonth, self).render(request)
+        return super(DashboardWidgetDocumentsPagesNewThisMonth, self).render(
+            request=request
+        )

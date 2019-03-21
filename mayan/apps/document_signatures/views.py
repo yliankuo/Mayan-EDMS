@@ -5,21 +5,19 @@ import logging
 from django.contrib import messages
 from django.core.files import File
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (
     ConfirmView, FormView, SingleObjectCreateView, SingleObjectDeleteView,
     SingleObjectDetailView, SingleObjectDownloadView, SingleObjectListView
 )
-from mayan.apps.common.utils import TemporaryFile
+from mayan.apps.common.mixins import ExternalObjectMixin
 from mayan.apps.django_gpg.exceptions import NeedPassphrase, PassphraseError
-from mayan.apps.django_gpg.permissions import permission_key_sign
 from mayan.apps.documents.models import DocumentVersion
+from mayan.apps.storage.utils import TemporaryFile
 
 from .forms import (
     DocumentVersionSignatureCreateForm, DocumentVersionSignatureDetailForm
@@ -45,16 +43,15 @@ from .tasks import task_verify_missing_embedded_signature
 logger = logging.getLogger(__name__)
 
 
-class DocumentVersionDetachedSignatureCreateView(FormView):
+class DocumentVersionDetachedSignatureCreateView(ExternalObjectMixin, FormView):
+    external_object_class = DocumentVersion
+    external_object_permission = permission_document_version_sign_detached
+    external_object_pk_url_kwarg = 'document_version_id'
     form_class = DocumentVersionSignatureCreateForm
 
     def form_valid(self, form):
         key = form.cleaned_data['key']
         passphrase = form.cleaned_data['passphrase'] or None
-
-        AccessControlList.objects.check_access(
-            permissions=permission_key_sign, user=self.request.user, obj=key
-        )
 
         try:
             with self.get_document_version().open() as file_object:
@@ -64,22 +61,23 @@ class DocumentVersionDetachedSignatureCreateView(FormView):
                 )
         except NeedPassphrase:
             messages.error(
-                self.request, _('Passphrase is needed to unlock this key.')
+                message=_('Passphrase is needed to unlock this key.'),
+                request=self.request
             )
             return HttpResponseRedirect(
-                reverse(
-                    'signatures:document_version_signature_detached_create',
-                    args=(self.get_document_version().pk,)
+                redirect_to=reverse(
+                    viewname='signatures:document_version_signature_detached_create',
+                    kwargs={'document_version_id': self.get_document_version().pk}
                 )
             )
         except PassphraseError:
             messages.error(
-                self.request, _('Passphrase is incorrect.')
+                message=_('Passphrase is incorrect.'), request=self.request
             )
             return HttpResponseRedirect(
-                reverse(
-                    'signatures:document_version_signature_detached_create',
-                    args=(self.get_document_version().pk,)
+                redirect_to=reverse(
+                    viewname='signatures:document_version_signature_detached_create',
+                    kwargs={'document_version_id': self.get_document_version().pk}
                 )
             )
         else:
@@ -95,25 +93,16 @@ class DocumentVersionDetachedSignatureCreateView(FormView):
             temporary_file_object.close()
 
             messages.success(
-                self.request, _('Document version signed successfully.')
+                message=_('Document version signed successfully.'),
+                request=self.request
             )
 
         return super(
             DocumentVersionDetachedSignatureCreateView, self
         ).form_valid(form)
 
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_version_sign_detached,
-            user=request.user, obj=self.get_document_version().document
-        )
-
-        return super(
-            DocumentVersionDetachedSignatureCreateView, self
-        ).dispatch(request, *args, **kwargs)
-
     def get_document_version(self):
-        return get_object_or_404(klass=DocumentVersion, pk=self.kwargs['pk'])
+        return self.get_external_object()
 
     def get_extra_context(self):
         return {
@@ -123,32 +112,25 @@ class DocumentVersionDetachedSignatureCreateView(FormView):
             ) % self.get_document_version(),
         }
 
-    def get_form_kwargs(self):
-        result = super(
-            DocumentVersionDetachedSignatureCreateView, self
-        ).get_form_kwargs()
-
-        result.update({'user': self.request.user})
-
-        return result
+    def get_form_extra_kwargs(self):
+        return {'user': self.request.user}
 
     def get_post_action_redirect(self):
         return reverse(
-            'signatures:document_version_signature_list',
-            args=(self.get_document_version().pk,)
+            viewname='signatures:document_version_signature_list',
+            kwargs={'document_version_id': self.get_document_version().pk}
         )
 
 
 class DocumentVersionEmbeddedSignatureCreateView(FormView):
+    external_object_class = DocumentVersion
+    external_object_permission = permission_document_version_sign_embedded
+    external_object_pk_url_kwarg = 'document_version_id'
     form_class = DocumentVersionSignatureCreateForm
 
     def form_valid(self, form):
         key = form.cleaned_data['key']
         passphrase = form.cleaned_data['passphrase'] or None
-
-        AccessControlList.objects.check_access(
-            permissions=permission_key_sign, user=self.request.user, obj=key
-        )
 
         try:
             with self.get_document_version().open() as file_object:
@@ -157,22 +139,23 @@ class DocumentVersionEmbeddedSignatureCreateView(FormView):
                 )
         except NeedPassphrase:
             messages.error(
-                self.request, _('Passphrase is needed to unlock this key.')
+                message=_('Passphrase is needed to unlock this key.'),
+                request=self.request
             )
             return HttpResponseRedirect(
-                reverse(
-                    'signatures:document_version_signature_embedded_create',
-                    args=(self.get_document_version().pk,)
+                redirect_to=reverse(
+                    viewname='signatures:document_version_signature_embedded_create',
+                    kwargs={'document_version_id': self.get_document_version().pk}
                 )
             )
         except PassphraseError:
             messages.error(
-                self.request, _('Passphrase is incorrect.')
+                message=_('Passphrase is incorrect.'), request=self.request
             )
             return HttpResponseRedirect(
-                reverse(
-                    'signatures:document_version_signature_embedded_create',
-                    args=(self.get_document_version().pk,)
+                redirect_to=reverse(
+                    viewname='signatures:document_version_signature_embedded_create',
+                    kwargs={'document_version_id': self.get_document_version().pk}
                 )
             )
         else:
@@ -187,13 +170,14 @@ class DocumentVersionEmbeddedSignatureCreateView(FormView):
             temporary_file_object.close()
 
             messages.success(
-                self.request, _('Document version signed successfully.')
+                message=_('Document version signed successfully.'),
+                request=self.request
             )
 
             return HttpResponseRedirect(
-                reverse(
-                    'signatures:document_version_signature_list',
-                    args=(new_version.pk,)
+                redirect_to=reverse(
+                    viewname='signatures:document_version_signature_list',
+                    kwargs={'document_version_id': new_version.pk}
                 )
             )
 
@@ -201,18 +185,8 @@ class DocumentVersionEmbeddedSignatureCreateView(FormView):
             DocumentVersionEmbeddedSignatureCreateView, self
         ).form_valid(form)
 
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_version_sign_embedded,
-            user=request.user, obj=self.get_document_version().document
-        )
-
-        return super(
-            DocumentVersionEmbeddedSignatureCreateView, self
-        ).dispatch(request, *args, **kwargs)
-
     def get_document_version(self):
-        return get_object_or_404(klass=DocumentVersion, pk=self.kwargs['pk'])
+        return self.get_external_object()
 
     def get_extra_context(self):
         return {
@@ -222,20 +196,13 @@ class DocumentVersionEmbeddedSignatureCreateView(FormView):
             ) % self.get_document_version(),
         }
 
-    def get_form_kwargs(self):
-        result = super(
-            DocumentVersionEmbeddedSignatureCreateView, self
-        ).get_form_kwargs()
-
-        result.update({'user': self.request.user})
-
-        return result
+    def get_form_extra_kwargs(self):
+        return {'user': self.request.user}
 
 
 class DocumentVersionSignatureDeleteView(SingleObjectDeleteView):
-    model = DetachedSignature
     object_permission = permission_document_version_signature_delete
-    object_permission_related = 'document_version.document'
+    pk_url_kwarg = 'signature_id'
 
     def get_extra_context(self):
         return {
@@ -246,15 +213,18 @@ class DocumentVersionSignatureDeleteView(SingleObjectDeleteView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'signatures:document_version_signature_list',
-            args=(self.get_object().document_version.pk,)
+            viewname='signatures:document_version_signature_list',
+            kwargs={'document_version_id': self.get_object().document_version.pk}
         )
+
+    def get_source_queryset(self):
+        return SignatureBaseModel.objects.select_subclasses()
 
 
 class DocumentVersionSignatureDetailView(SingleObjectDetailView):
     form_class = DocumentVersionSignatureDetailForm
     object_permission = permission_document_version_signature_view
-    object_permission_related = 'document_version.document'
+    pk_url_kwarg = 'signature_id'
 
     def get_extra_context(self):
         return {
@@ -266,14 +236,13 @@ class DocumentVersionSignatureDetailView(SingleObjectDetailView):
             ) % self.get_object(),
         }
 
-    def get_queryset(self):
+    def get_source_queryset(self):
         return SignatureBaseModel.objects.select_subclasses()
 
 
 class DocumentVersionSignatureDownloadView(SingleObjectDownloadView):
-    model = DetachedSignature
     object_permission = permission_document_version_signature_download
-    object_permission_related = 'document_version.document'
+    pk_url_kwarg = 'signature_id'
 
     def get_file(self):
         signature = self.get_object()
@@ -282,20 +251,17 @@ class DocumentVersionSignatureDownloadView(SingleObjectDownloadView):
             signature.signature_file, name=force_text(signature)
         )
 
+    def get_source_queryset(self):
+        return SignatureBaseModel.objects.select_subclasses()
 
-class DocumentVersionSignatureListView(SingleObjectListView):
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_version_signature_view,
-            user=request.user, obj=self.get_document_version()
-        )
 
-        return super(
-            DocumentVersionSignatureListView, self
-        ).dispatch(request, *args, **kwargs)
+class DocumentVersionSignatureListView(ExternalObjectMixin, SingleObjectListView):
+    external_object_class = DocumentVersion
+    external_object_permission = permission_document_version_signature_view
+    external_object_pk_url_kwarg = 'document_version_id'
 
     def get_document_version(self):
-        return get_object_or_404(klass=DocumentVersion, pk=self.kwargs['pk'])
+        return self.get_external_object()
 
     def get_extra_context(self):
         return {
@@ -331,26 +297,19 @@ class DocumentVersionSignatureListView(SingleObjectListView):
             ) % self.get_document_version(),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_document_version().signatures.all()
 
 
-class DocumentVersionSignatureUploadView(SingleObjectCreateView):
+class DocumentVersionSignatureUploadView(ExternalObjectMixin, SingleObjectCreateView):
+    external_object_class = DocumentVersion
+    external_object_permission = permission_document_version_signature_upload
+    external_object_pk_url_kwarg = 'document_version_id'
     fields = ('signature_file',)
     model = DetachedSignature
 
-    def dispatch(self, request, *args, **kwargs):
-        AccessControlList.objects.check_access(
-            permissions=permission_document_version_signature_upload,
-            user=request.user, obj=self.get_document_version()
-        )
-
-        return super(
-            DocumentVersionSignatureUploadView, self
-        ).dispatch(request, *args, **kwargs)
-
     def get_document_version(self):
-        return get_object_or_404(klass=DocumentVersion, pk=self.kwargs['pk'])
+        return self.get_external_object()
 
     def get_extra_context(self):
         return {
@@ -365,8 +324,8 @@ class DocumentVersionSignatureUploadView(SingleObjectCreateView):
 
     def get_post_action_redirect(self):
         return reverse(
-            'signatures:document_version_signature_list',
-            args=(self.get_document_version().pk,)
+            viewname='signatures:document_version_signature_list',
+            kwargs={'document_version_id': self.get_document_version().pk}
         )
 
 
@@ -379,10 +338,11 @@ class AllDocumentSignatureVerifyView(ConfirmView):
     view_permission = permission_document_version_signature_verify
 
     def get_post_action_redirect(self):
-        return reverse('common:tools_list')
+        return reverse(viewname='common:tools_list')
 
     def view_action(self):
         task_verify_missing_embedded_signature.delay()
         messages.success(
-            self.request, _('Signature verification queued successfully.')
+            message=_('Signature verification queued successfully.'),
+            request=self.request
         )

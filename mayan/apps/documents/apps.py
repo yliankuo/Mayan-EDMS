@@ -14,8 +14,7 @@ from mayan.apps.acls.permissions import (
 )
 from mayan.apps.common import (
     MayanAppConfig, MissingItem, menu_facet, menu_list_facet, menu_main,
-    menu_multi_item, menu_object, menu_secondary, menu_setup, menu_sidebar,
-    menu_tools
+    menu_multi_item, menu_object, menu_secondary, menu_setup, menu_tools
 )
 from mayan.apps.common.classes import ModelField, Template
 from mayan.apps.common.signals import post_initial_setup
@@ -52,19 +51,19 @@ from .handlers import (
     handler_remove_empty_duplicates_lists, handler_scan_duplicates_for
 )
 from .links import (
-    link_clear_image_cache, link_document_clear_transformations,
-    link_document_clone_transformations, link_document_delete,
-    link_document_document_type_edit, link_document_download,
+    link_clear_image_cache, link_trashed_document_delete,
+    link_document_change_type, link_document_download,
     link_document_duplicates_list, link_document_edit,
     link_document_favorites_add, link_document_favorites_remove,
-    link_document_list, link_document_list_deleted,
+    link_document_list, link_trashed_document_list,
     link_document_list_favorites, link_document_list_recent_access,
     link_document_list_recent_added,
-    link_document_multiple_clear_transformations,
-    link_document_multiple_delete, link_document_multiple_document_type_edit,
+    link_document_multiple_change_type,
     link_document_multiple_download, link_document_multiple_favorites_add,
-    link_document_multiple_favorites_remove, link_document_multiple_restore,
-    link_document_multiple_trash, link_document_multiple_update_page_count,
+    link_document_multiple_favorites_remove, link_trashed_document_multiple_restore,
+    link_document_multiple_trash,
+    link_document_multiple_transformations_clear,
+    link_document_multiple_update_page_count,
     link_document_page_navigation_first, link_document_page_navigation_last,
     link_document_page_navigation_next, link_document_page_navigation_previous,
     link_document_page_return, link_document_page_rotate_left,
@@ -72,7 +71,7 @@ from .links import (
     link_document_page_view_reset, link_document_page_zoom_in,
     link_document_page_zoom_out, link_document_pages, link_document_preview,
     link_document_print, link_document_properties,
-    link_document_quick_download, link_document_restore, link_document_trash,
+    link_document_quick_download, link_trashed_document_restore, link_document_trash,
     link_document_type_create, link_document_type_delete,
     link_document_type_edit, link_document_type_filename_create,
     link_document_type_filename_delete, link_document_type_filename_edit,
@@ -82,7 +81,8 @@ from .links import (
     link_document_version_return_document, link_document_version_return_list,
     link_document_version_revert, link_document_version_view,
     link_duplicated_document_list, link_duplicated_document_scan,
-    link_trash_can_empty
+    link_document_transformations_clear, link_document_transformations_clone,
+    link_trash_can_empty, link_trashed_document_multiple_delete
 )
 from .literals import (
     CHECK_DELETE_PERIOD_INTERVAL, CHECK_TRASH_PERIOD_INTERVAL,
@@ -90,14 +90,14 @@ from .literals import (
 )
 from .menus import menu_documents
 from .permissions import (
-    permission_document_create, permission_document_delete,
+    permission_document_create,
     permission_document_download, permission_document_edit,
     permission_document_new_version, permission_document_print,
-    permission_document_properties_edit, permission_document_restore,
-    permission_document_trash, permission_document_type_delete,
-    permission_document_type_edit, permission_document_type_view,
-    permission_document_version_revert, permission_document_version_view,
-    permission_document_view
+    permission_document_properties_edit, permission_document_trash,
+    permission_document_type_delete, permission_document_type_edit,
+    permission_document_type_view, permission_document_version_revert,
+    permission_document_version_view, permission_document_view,
+    permission_trashed_document_delete, permission_trashed_document_restore
 )
 from .queues import *  # NOQA
 # Just import to initialize the search models
@@ -119,14 +119,18 @@ class DocumentsApp(MayanAppConfig):
         super(DocumentsApp, self).ready()
         from actstream import registry
 
-        DeletedDocument = self.get_model('DeletedDocument')
-        Document = self.get_model('Document')
-        DocumentPage = self.get_model('DocumentPage')
-        DocumentPageSearchResult = self.get_model('DocumentPageSearchResult')
-        DocumentType = self.get_model('DocumentType')
-        DocumentTypeFilename = self.get_model('DocumentTypeFilename')
-        DocumentVersion = self.get_model('DocumentVersion')
-        DuplicatedDocumentProxy = self.get_model('DuplicatedDocumentProxy')
+        Document = self.get_model(model_name='Document')
+        DocumentPage = self.get_model(model_name='DocumentPage')
+        DocumentPageSearchResult = self.get_model(
+            model_name='DocumentPageSearchResult'
+        )
+        DocumentType = self.get_model(model_name='DocumentType')
+        DocumentTypeFilename = self.get_model(model_name='DocumentTypeFilename')
+        DocumentVersion = self.get_model(model_name='DocumentVersion')
+        DuplicatedDocumentProxy = self.get_model(
+            model_name='DuplicatedDocumentProxy'
+        )
+        TrashedDocument = self.get_model(model_name='TrashedDocument')
 
         DynamicSerializerField.add_serializer(
             klass=Document,
@@ -185,15 +189,16 @@ class DocumentsApp(MayanAppConfig):
         ModelPermission.register(
             model=Document, permissions=(
                 permission_acl_edit, permission_acl_view,
-                permission_document_delete, permission_document_download,
-                permission_document_edit, permission_document_new_version,
-                permission_document_print, permission_document_properties_edit,
-                permission_document_restore, permission_document_trash,
+                permission_document_download, permission_document_edit,
+                permission_document_new_version, permission_document_print,
+                permission_document_properties_edit, permission_document_trash,
                 permission_document_version_revert,
                 permission_document_version_view, permission_document_view,
                 permission_events_view, permission_transformation_create,
                 permission_transformation_delete,
                 permission_transformation_edit, permission_transformation_view,
+                permission_trashed_document_delete,
+                permission_trashed_document_restore
             )
         )
 
@@ -297,22 +302,22 @@ class DocumentsApp(MayanAppConfig):
             widget=TwoStateWidget
         )
 
-        # DeletedDocument
+        # TrashedDocument
         SourceColumn(
             attribute='label', is_identifier=True, is_sortable=True,
-            source=DeletedDocument
+            source=TrashedDocument
         )
         SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
-            ), label=_('Thumbnail'), source=DeletedDocument
+            ), label=_('Thumbnail'), source=TrashedDocument
         )
 
         SourceColumn(
-            attribute='document_type', is_sortable=True, source=DeletedDocument
+            attribute='document_type', is_sortable=True, source=TrashedDocument
         )
         SourceColumn(
-            attribute='get_rendered_deleted_date_time', source=DeletedDocument
+            attribute='get_rendered_deleted_date_time', source=TrashedDocument
         )
 
         # DocumentVersion
@@ -338,14 +343,19 @@ class DocumentsApp(MayanAppConfig):
 
         # DuplicatedDocument
         SourceColumn(
+            attribute='label', is_absolute_url=True, is_identifier=True,
+            is_sortable=True, source=DuplicatedDocumentProxy
+        )
+        SourceColumn(
             func=lambda context: document_page_thumbnail_widget.render(
                 instance=context['object']
             ), label=_('Thumbnail'), source=DuplicatedDocumentProxy
         )
         SourceColumn(
             func=lambda context: context['object'].get_duplicate_count(
-                user=context['request'].user,
-            ), label=_('Duplicates'), source=DuplicatedDocumentProxy
+                user=context['request'].user
+            ), include_label=True, label=_('Duplicates'),
+            source=DuplicatedDocumentProxy
         )
 
         app.conf.beat_schedule.update(
@@ -445,7 +455,7 @@ class DocumentsApp(MayanAppConfig):
             links=(
                 link_document_list_recent_access,
                 link_document_list_recent_added, link_document_list_favorites,
-                link_document_list, link_document_list_deleted,
+                link_document_list, link_trashed_document_list,
                 link_duplicated_document_list,
             )
         )
@@ -483,17 +493,17 @@ class DocumentsApp(MayanAppConfig):
                 'documents:document_type_list'
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_document_type_filename_create,),
             sources=(
                 DocumentTypeFilename, 'documents:document_type_filename_list',
                 'documents:document_type_filename_create'
             )
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_trash_can_empty,),
             sources=(
-                'documents:document_list_deleted', 'documents:trash_can_empty'
+                'documents:trashed_document_list', 'documents:trash_can_empty'
             )
         )
 
@@ -501,17 +511,17 @@ class DocumentsApp(MayanAppConfig):
         menu_object.bind_links(
             links=(
                 link_document_favorites_add, link_document_favorites_remove,
-                link_document_edit, link_document_document_type_edit,
+                link_document_edit, link_document_change_type,
                 link_document_print, link_document_trash,
                 link_document_quick_download, link_document_download,
-                link_document_clear_transformations,
-                link_document_clone_transformations,
+                link_document_transformations_clear,
+                link_document_transformations_clone,
                 link_document_update_page_count,
             ), sources=(Document,)
         )
         menu_object.bind_links(
-            links=(link_document_restore, link_document_delete),
-            sources=(DeletedDocument,)
+            links=(link_trashed_document_restore, link_trashed_document_delete),
+            sources=(TrashedDocument,)
         )
 
         # Document facet links
@@ -545,16 +555,17 @@ class DocumentsApp(MayanAppConfig):
             links=(
                 link_document_multiple_favorites_add,
                 link_document_multiple_favorites_remove,
-                link_document_multiple_clear_transformations,
+                link_document_multiple_transformations_clear,
                 link_document_multiple_trash, link_document_multiple_download,
                 link_document_multiple_update_page_count,
-                link_document_multiple_document_type_edit,
+                link_document_multiple_change_type,
             ), sources=(Document,)
         )
         menu_multi_item.bind_links(
             links=(
-                link_document_multiple_restore, link_document_multiple_delete
-            ), sources=(DeletedDocument,)
+                link_trashed_document_multiple_restore,
+                link_trashed_document_multiple_delete
+            ), sources=(TrashedDocument,)
         )
 
         # Document pages
@@ -614,7 +625,7 @@ class DocumentsApp(MayanAppConfig):
             receiver=handler_scan_duplicates_for,
         )
 
-        registry.register(DeletedDocument)
+        registry.register(TrashedDocument)
         registry.register(Document)
         registry.register(DocumentType)
         registry.register(DocumentVersion)

@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_main, menu_sidebar
+    MayanAppConfig, menu_facet, menu_main, menu_multi_item, menu_secondary
 )
 from mayan.apps.dashboards.dashboards import dashboard_main
 from mayan.apps.events import ModelEventType
@@ -22,9 +22,11 @@ from .events import (
     event_document_check_out, event_document_forceful_check_in
 )
 from .handlers import handler_check_new_version_creation
+from .hooks import hook_is_new_version_allowed
 from .links import (
-    link_checkin_document, link_checkout_document, link_checkout_info,
-    link_checkout_list
+    link_document_check_in, link_document_checkout, link_document_checkout_info,
+    link_document_checkout_list, link_document_multiple_check_in,
+    link_document_multiple_checkout
 )
 from .literals import CHECK_EXPIRED_CHECK_OUTS_INTERVAL
 from .methods import (
@@ -32,7 +34,7 @@ from .methods import (
     method_is_checked_out
 )
 from .permissions import (
-    permission_document_checkin, permission_document_checkin_override,
+    permission_document_check_in, permission_document_check_in_override,
     permission_document_checkout, permission_document_checkout_detail_view
 )
 from .queues import *  # NOQA
@@ -69,6 +71,10 @@ class CheckoutsApp(MayanAppConfig):
             name='is_checked_out', value=method_is_checked_out
         )
 
+        DocumentVersion.register_pre_save_hook(
+            func=hook_is_new_version_allowed
+        )
+
         ModelEventType.register(
             model=Document, event_types=(
                 event_document_auto_check_in, event_document_check_in,
@@ -79,8 +85,8 @@ class CheckoutsApp(MayanAppConfig):
         ModelPermission.register(
             model=Document, permissions=(
                 permission_document_checkout,
-                permission_document_checkin,
-                permission_document_checkin_override,
+                permission_document_check_in,
+                permission_document_check_in_override,
                 permission_document_checkout_detail_view
             )
         )
@@ -115,13 +121,18 @@ class CheckoutsApp(MayanAppConfig):
             widget=DashboardWidgetTotalCheckouts, order=-1
         )
 
-        menu_facet.bind_links(links=(link_checkout_info,), sources=(Document,))
-        menu_main.bind_links(links=(link_checkout_list,), position=98)
-        menu_sidebar.bind_links(
-            links=(link_checkout_document, link_checkin_document),
+        menu_facet.bind_links(links=(link_document_checkout_info,), sources=(Document,))
+        menu_main.bind_links(links=(link_document_checkout_list,), position=98)
+        menu_multi_item.bind_links(
+            links=(
+                link_document_multiple_check_in, link_document_multiple_checkout
+            ), sources=(Document,)
+        )
+        menu_secondary.bind_links(
+            links=(link_document_checkout, link_document_check_in),
             sources=(
-                'checkouts:checkout_info', 'checkouts:checkout_document',
-                'checkouts:checkin_document'
+                'checkouts:document_checkout_info', 'checkouts:document_checkout',
+                'checkouts:document_check_in'
             )
         )
 

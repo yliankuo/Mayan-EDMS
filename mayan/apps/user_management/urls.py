@@ -2,10 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import (
-    APICurrentUserView, APIGroupListView, APIGroupView, APIUserGroupList,
-    APIUserListView, APIUserView
-)
+from .api_views import CurrentUserAPIView, GroupAPIViewSet, UserAPIViewSet
 from .views import (
     CurrentUserDetailsView, CurrentUserEditView, GroupCreateView,
     GroupDeleteView, GroupEditView, GroupListView, GroupMembersView,
@@ -14,76 +11,81 @@ from .views import (
 )
 
 urlpatterns = [
-    url(r'^groups/list/$', GroupListView.as_view(), name='group_list'),
-    url(r'^groups/create/$', GroupCreateView.as_view(), name='group_create'),
     url(
-        r'^groups/(?P<pk>\d+)/edit/$', GroupEditView.as_view(),
-        name='group_edit'
+        regex=r'^groups/$', name='group_list', view=GroupListView.as_view()
     ),
     url(
-        r'^groups/(?P<pk>\d+)/delete/$', GroupDeleteView.as_view(),
-        name='group_delete'
+        regex=r'^groups/create/$', name='group_create',
+        view=GroupCreateView.as_view()
     ),
     url(
-        r'^groups/(?P<pk>\d+)/members/$', GroupMembersView.as_view(),
-        name='group_members'
-    ),
-
-    url(
-        r'^users/current/$', CurrentUserDetailsView.as_view(),
-        name='current_user_details'
+        regex=r'^groups/(?P<group_id>\d+)/delete/$', name='group_delete',
+        view=GroupDeleteView.as_view()
     ),
     url(
-        r'^users/current/edit/$', CurrentUserEditView.as_view(),
-        name='current_user_edit'
-    ),
-    url(r'^users/list/$', UserListView.as_view(), name='user_list'),
-    url(r'^users/create/$', UserCreateView.as_view(), name='user_create'),
-    url(
-        r'^users/(?P<pk>\d+)/delete/$', UserDeleteView.as_view(),
-        name='user_delete'
-    ),
-    url(r'^users/(?P<pk>\d+)/edit/$', UserEditView.as_view(), name='user_edit'),
-    url(
-        r'^users/(?P<pk>\d+)/$', UserDetailsView.as_view(),
-        name='user_details'
+        regex=r'^groups/(?P<group_id>\d+)/edit/$', name='group_edit',
+        view=GroupEditView.as_view()
     ),
     url(
-        r'^users/multiple/delete/$', UserDeleteView.as_view(),
-        name='user_multiple_delete'
+        regex=r'^groups/(?P<group_id>\d+)/members/$', name='group_members',
+        view=GroupMembersView.as_view()
     ),
     url(
-        r'^users/(?P<pk>\d+)/set_password/$', UserSetPasswordView.as_view(),
-        name='user_set_password'
+        regex=r'^user/$', name='current_user_details',
+        view=CurrentUserDetailsView.as_view()
     ),
     url(
-        r'^users/multiple/set_password/$', UserSetPasswordView.as_view(),
-        name='user_multiple_set_password'
+        regex=r'^user/edit/$', name='current_user_edit',
+        view=CurrentUserEditView.as_view()
     ),
     url(
-        r'^users/(?P<pk>\d+)/groups/$', UserGroupsView.as_view(),
-        name='user_groups'
+        regex=r'^users/$', name='user_list', view=UserListView.as_view()
     ),
     url(
-        r'^users/(?P<pk>\d+)/options/$',
-        UserOptionsEditView.as_view(),
-        name='user_options'
+        regex=r'^users/create/$', name='user_create',
+        view=UserCreateView.as_view()
     ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/$', name='user_details',
+        view=UserDetailsView.as_view()
+    ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/delete/$', name='user_delete',
+        view=UserDeleteView.as_view(),
+    ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/edit/$', name='user_edit',
+        view=UserEditView.as_view()
+    ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/groups/$', name='user_groups',
+        view=UserGroupsView.as_view()
+    ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/options/$', name='user_options',
+        view=UserOptionsEditView.as_view()
+    ),
+    url(
+        regex=r'^users/(?P<user_id>\d+)/set_password/$',
+        name='user_set_password', view=UserSetPasswordView.as_view()
+    ),
+    url(
+        regex=r'^users/multiple/delete/$', name='user_multiple_delete',
+        view=UserDeleteView.as_view()
+    ),
+    url(
+        regex=r'^users/multiple/set_password/$',
+        name='user_multiple_set_password', view=UserSetPasswordView.as_view()
+    )
 ]
 
-api_urls = [
-    url(r'^groups/$', APIGroupListView.as_view(), name='group-list'),
+api_urlpatterns = [
     url(
-        r'^groups/(?P<pk>[0-9]+)/$', APIGroupView.as_view(),
-        name='group-detail'
-    ),
-    url(r'^users/$', APIUserListView.as_view(), name='user-list'),
-    url(r'^users/(?P<pk>[0-9]+)/$', APIUserView.as_view(), name='user-detail'),
-    url(
-        r'^users/current/$', APICurrentUserView.as_view(), name='user-current'
-    ),
-    url(
-        r'^users/(?P<pk>[0-9]+)/groups/$', APIUserGroupList.as_view(),
-        name='users-group-list'
-    ),
+        regex=r'^user/$', name='user-current', view=CurrentUserAPIView.as_view()
+    )
 ]
+
+api_router_entries = (
+    {'prefix': r'groups', 'viewset': GroupAPIViewSet, 'basename': 'group'},
+    {'prefix': r'users', 'viewset': UserAPIViewSet, 'basename': 'user'},
+)

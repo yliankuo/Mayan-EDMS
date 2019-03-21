@@ -17,31 +17,6 @@ from .literals import (
 
 
 class TransformationViewsTestCase(GenericDocumentViewTestCase):
-    def setUp(self):
-        super(TransformationViewsTestCase, self).setUp()
-        self.login_user()
-
-    def _transformation_list_view(self):
-        return self.get(
-            viewname='converter:transformation_list', kwargs={
-                'app_label': 'documents', 'model': 'document',
-                'object_id': self.document.pk
-            }
-        )
-
-    def test_transformation_list_view_no_permissions(self):
-        response = self._transformation_list_view()
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_transformation_list_view_with_permissions(self):
-        self.grant_permission(permission=permission_transformation_view)
-        response = self._transformation_list_view()
-
-        self.assertContains(
-            response, text=self.document.label, status_code=200
-        )
-
     def _transformation_create_view(self):
         return self.post(
             viewname='converter:transformation_create', kwargs={
@@ -56,7 +31,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def test_transformation_create_view_no_permissions(self):
         response = self._transformation_create_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Transformation.objects.count(), 0)
 
     def test_transformation_create_view_with_access(self):
@@ -80,7 +55,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def _transformation_delete_view(self):
         return self.post(
             viewname='converter:transformation_delete', kwargs={
-                'pk': self.transformation.pk
+                'transformation_id': self.transformation.pk
             }
         )
 
@@ -88,7 +63,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
         self._create_transformation()
         response = self._transformation_delete_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Transformation.objects.count(), 1)
 
     def test_transformation_delete_view_with_access(self):
@@ -104,7 +79,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def _transformation_edit_view(self):
         return self.post(
             viewname='converter:transformation_edit', kwargs={
-                'pk': self.transformation.pk
+                'transformation_id': self.transformation.pk
             }, data={
                 'arguments': TEST_TRANSFORMATION_ARGUMENT_EDITED,
                 'name': self.transformation.name
@@ -114,7 +89,7 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
     def test_transformation_edit_view_no_permission(self):
         self._create_transformation()
         response = self._transformation_edit_view()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
         self.transformation.refresh_from_db()
         self.assertNotEqual(
@@ -132,4 +107,25 @@ class TransformationViewsTestCase(GenericDocumentViewTestCase):
         self.transformation.refresh_from_db()
         self.assertEqual(
             self.transformation.arguments, TEST_TRANSFORMATION_ARGUMENT_EDITED
+        )
+
+    def _transformation_list_view(self):
+        return self.get(
+            viewname='converter:transformation_list', kwargs={
+                'app_label': 'documents', 'model': 'document',
+                'object_id': self.document.pk
+            }
+        )
+
+    def test_transformation_list_view_no_permissions(self):
+        response = self._transformation_list_view()
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_transformation_list_view_with_permissions(self):
+        self.grant_permission(permission=permission_transformation_view)
+        response = self._transformation_list_view()
+
+        self.assertContains(
+            response, text=self.document.label, status_code=200
         )

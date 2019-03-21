@@ -140,7 +140,7 @@ class APICabinetDocumentListView(generics.ListCreateAPIView):
     def get_queryset(self):
         cabinet = self.get_cabinet()
 
-        return AccessControlList.objects.filter_by_access(
+        return AccessControlList.objects.restrict_queryset(
             permission_document_view, self.request.user,
             queryset=cabinet.documents.all()
         )

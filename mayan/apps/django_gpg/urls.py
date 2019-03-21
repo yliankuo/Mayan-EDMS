@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from .api_views import APIKeyListView, APIKeyView
+from .api_views import KeyAPIViewSet
 from .views import (
     KeyDeleteView, KeyDetailView, KeyDownloadView, KeyQueryView,
     KeyQueryResultView, KeyReceive, KeyUploadView, PrivateKeyListView,
@@ -11,39 +11,40 @@ from .views import (
 
 urlpatterns = [
     url(
-        r'^(?P<pk>\d+)/$', KeyDetailView.as_view(), name='key_detail'
+        regex=r'^keys/(?P<key_id>\d+)/$', name='key_detail',
+        view=KeyDetailView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/delete/$', KeyDeleteView.as_view(), name='key_delete'
+        regex=r'^keys/(?P<key_id>\d+)/delete/$', name='key_delete',
+        view=KeyDeleteView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/download/$', KeyDownloadView.as_view(),
-        name='key_download'
+        regex=r'^keys/(?P<key_id>\d+)/download/$', name='key_download',
+        view=KeyDownloadView.as_view()
     ),
     url(
-        r'^list/private/$', PrivateKeyListView.as_view(),
-        name='key_private_list'
+        regex=r'^keys/private/$', name='key_private_list',
+        view=PrivateKeyListView.as_view()
     ),
     url(
-        r'^list/public/$', PublicKeyListView.as_view(), name='key_public_list'
+        regex=r'^keys/public/$', name='key_public_list',
+        view=PublicKeyListView.as_view()
     ),
     url(
-        r'^upload/$', KeyUploadView.as_view(), name='key_upload'
+        regex=r'^keys/upload/$', name='key_upload',
+        view=KeyUploadView.as_view()
     ),
-    url(r'^query/$', KeyQueryView.as_view(), name='key_query'),
+    url(regex=r'^keys/query/$', name='key_query', view=KeyQueryView.as_view()),
     url(
-        r'^query/results/$', KeyQueryResultView.as_view(),
-        name='key_query_results'
+        regex=r'^keys/query/results/$', name='key_query_results',
+        view=KeyQueryResultView.as_view()
     ),
     url(
-        r'^receive/(?P<key_id>.+)/$', KeyReceive.as_view(), name='key_receive'
-    ),
+        regex=r'^keys/receive/(?P<key_id>.+)/$', name='key_receive',
+        view=KeyReceive.as_view()
+    )
 ]
 
-api_urls = [
-    url(
-        r'^keys/(?P<pk>[0-9]+)/$', APIKeyView.as_view(),
-        name='key-detail'
-    ),
-    url(r'^keys/$', APIKeyListView.as_view(), name='key-list'),
-]
+api_router_entries = (
+    {'prefix': r'keys', 'viewset': KeyAPIViewSet, 'basename': 'key'},
+)

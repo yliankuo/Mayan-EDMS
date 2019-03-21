@@ -6,27 +6,25 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, resolve_url
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone, translation
 from django.utils.http import urlencode
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import RedirectView, TemplateView
 
-from mayan.apps.acls.models import AccessControlList
+from mayan.apps.common.mixins import (
+    ContentTypeViewMixin, ExternalObjectMixin
+)
 
 from .exceptions import NotLatestVersion, UnknownLatestVersion
 from .forms import (
     LicenseForm, LocaleProfileForm, LocaleProfileForm_view,
     PackagesLicensesForm
 )
-from .generics import (  # NOQA
-    AssignRemoveView, ConfirmView, FormView, MultiFormView,
-    MultipleObjectConfirmActionView, MultipleObjectFormActionView, SimpleView,
-    SingleObjectCreateView, SingleObjectDeleteView, SingleObjectDetailView,
-    SingleObjectDownloadView, SingleObjectDynamicFormCreateView,
-    SingleObjectDynamicFormEditView, SingleObjectEditView, SingleObjectListView
+from .generics import (
+    ConfirmView, SimpleView, SingleObjectEditView, SingleObjectListView
 )
 from .icons import icon_object_error_list, icon_setup
 from .menus import menu_setup, menu_tools
@@ -171,7 +169,9 @@ class ObjectErrorLogEntryListClearView(ConfirmView):
         )
 
 
-class ObjectErrorLogEntryListView(SingleObjectListView):
+class ObjectErrorLogEntryListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListView):
+    #TODO: Update for MERC 6. Return 404.
+    """
     def dispatch(self, request, *args, **kwargs):
         AccessControlList.objects.check_access(
             obj=self.get_object(), permissions=permission_error_log_view,
@@ -181,6 +181,7 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
         return super(ObjectErrorLogEntryListView, self).dispatch(
             request, *args, **kwargs
         )
+    """
 
     def get_extra_context(self):
         return {
@@ -202,6 +203,7 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
             'title': _('Error log entries for: %s' % self.get_object()),
         }
 
+    """
     def get_object(self):
         content_type = get_object_or_404(
             klass=ContentType, app_label=self.kwargs['app_label'],
@@ -211,9 +213,9 @@ class ObjectErrorLogEntryListView(SingleObjectListView):
         return get_object_or_404(
             klass=content_type.model_class(), pk=self.kwargs['object_id']
         )
-
+    """
     def get_object_list(self):
-        return self.get_object().error_logs.all()
+        return self.get_external_object().error_logs.all()
 
 
 class PackagesLicensesView(SimpleView):
@@ -234,41 +236,41 @@ class RootView(SimpleView):
     template_name = 'appearance/root.html'
 
 
-class SetupListView(TemplateView):
+class SetupListView(SimpleView):
     template_name = 'appearance/generic_list_horizontal.html'
 
-    def get_context_data(self, **kwargs):
-        data = super(SetupListView, self).get_context_data(**kwargs)
+    def get_extra_context(self):
         context = RequestContext(self.request)
         context['request'] = self.request
-        data.update(
-            {
-                'no_results_icon': icon_setup,
-                'no_results_label': _('No setup options available.'),
-                'no_results_text': _(
-                    'No results here means that don\'t have the required '
-                    'permissions to perform administrative task.'
-                ),
-                'resolved_links': menu_setup.resolve(context=context),
-                'title': _('Setup items'),
-            }
-        )
-        return data
+        return {
+            'no_results_icon': icon_setup,
+            'no_results_label': _('No setup options available.'),
+            'no_results_text': _(
+                'No results here means that don\'t have the required '
+                'permissions to perform administrative task.'
+            ),
+            'resolved_links': menu_setup.resolve(context=context),
+            'title': _('Setup'),
+            'subtitle': _(
+                'Here you can configure all aspects of the system.'
+            ),
+        }
 
 
 class ToolsListView(SimpleView):
     template_name = 'appearance/generic_list_horizontal.html'
 
-    def get_menu_links(self):
+    def get_extra_context(self):
         context = RequestContext(self.request)
         context['request'] = self.request
 
-        return menu_tools.resolve(context=context)
-
-    def get_extra_context(self):
         return {
-            'resolved_links': self.get_menu_links(),
+            'resolved_links': menu_tools.resolve(context=context),
             'title': _('Tools'),
+            'subtitle': _(
+                'These are programs are modules used to do maintenance in '
+                'the system.'
+            ),
         }
 
 
@@ -280,7 +282,7 @@ def multi_object_action_view(request):
     next = request.POST.get(
         'next', request.GET.get(
             'next', request.META.get(
-                'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                'HTTP_REFERER', reverse(setting_home_view.value)
             )
         )
     )
@@ -297,7 +299,7 @@ def multi_object_action_view(request):
         messages.error(request, _('No action selected.'))
         return HttpResponseRedirect(
             request.META.get(
-                'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                'HTTP_REFERER', reverse(setting_home_view.value)
             )
         )
 
@@ -305,7 +307,7 @@ def multi_object_action_view(request):
         messages.error(request, _('Must select at least one item.'))
         return HttpResponseRedirect(
             request.META.get(
-                'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                'HTTP_REFERER', reverse(setting_home_view.value)
             )
         )
 

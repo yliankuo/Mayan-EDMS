@@ -66,7 +66,7 @@ class Index(models.Model):
         try:
             return reverse(
                 viewname='indexing:index_instance_node_view',
-                kwargs={'index_instance_node_pk': self.instance_root.pk}
+                kwargs={'index_instance_node_id': self.instance_root.pk}
             )
         except IndexInstanceNode.DoesNotExist:
             return '#'
@@ -183,7 +183,7 @@ class IndexTemplateNode(MPTTModel):
     )
     index = models.ForeignKey(
         on_delete=models.CASCADE, related_name='node_templates', to=Index,
-        verbose_name=_('Index')
+        verbose_name=_('Index template')
     )
     expression = models.TextField(
         help_text=_(
@@ -356,7 +356,7 @@ class IndexInstanceNode(MPTTModel):
     def get_absolute_url(self):
         return reverse(
             viewname='indexing:index_instance_node_view',
-            kwargs={'index_instance_node_pk': self.pk}
+            kwargs={'index_instance_node_id': self.pk}
         )
 
     def get_children_count(self):
@@ -366,7 +366,7 @@ class IndexInstanceNode(MPTTModel):
         return self.get_descendants().count()
 
     def get_descendants_document_count(self, user):
-        return AccessControlList.objects.filter_by_access(
+        return AccessControlList.objects.restrict_queryset(
             permission=permission_document_view,
             queryset=Document.objects.filter(
                 index_instance_nodes__in=self.get_descendants(
@@ -387,7 +387,7 @@ class IndexInstanceNode(MPTTModel):
 
     def get_item_count(self, user):
         if self.index_template_node.link_documents:
-            queryset = AccessControlList.objects.filter_by_access(
+            queryset = AccessControlList.objects.restrict_queryset(
                 permission=permission_document_view, queryset=self.documents,
                 user=user
             )

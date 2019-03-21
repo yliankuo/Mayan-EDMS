@@ -94,7 +94,7 @@ class DocumentStateIndexingTestCase(BaseTestCase):
 
         self.document.workflows.first().do_transition(
             transition=self.workflow_transition,
-            user=self.admin_user
+            user=self._test_case_user
         )
 
         self.assertEqual(
@@ -111,7 +111,7 @@ class DocumentStateIndexingTestCase(BaseTestCase):
 
         self.document.workflows.first().do_transition(
             transition=self.workflow_transition,
-            user=self.admin_user
+            user=self._test_case_user
         )
 
         self.document.delete(to_trash=False)

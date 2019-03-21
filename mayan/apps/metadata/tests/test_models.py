@@ -23,7 +23,9 @@ from .mixins import MetadataTypeTestMixin
 class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
     def setUp(self):
         super(MetadataTestCase, self).setUp()
-        self.document_type.metadata.create(metadata_type=self.metadata_type)
+        self.document_type.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
 
     def test_no_default(self):
         document_metadata = DocumentMetadata(
@@ -146,13 +148,13 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
         )
 
     def test_required_metadata(self):
-        self.document_type.metadata.all().delete()
+        self.document_type.metadata_type_relations.all().delete()
 
         self.assertFalse(
             self.metadata_type.get_required_for(self.document_type)
         )
 
-        self.document_type.metadata.create(
+        self.document_type.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=False
         )
 
@@ -160,9 +162,9 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
             self.metadata_type.get_required_for(self.document_type)
         )
 
-        self.document_type.metadata.all().delete()
+        self.document_type.metadata_type_relations.all().delete()
 
-        self.document_type.metadata.create(
+        self.document_type.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=True
         )
 
@@ -198,7 +200,7 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
             label=TEST_DOCUMENT_TYPE_2_LABEL
         )
 
-        self.document_type_2.metadata.create(
+        self.document_type_2.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=True
         )
 
@@ -226,7 +228,9 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
             label=TEST_DOCUMENT_TYPE_2_LABEL
         )
 
-        self.document_type_2.metadata.create(metadata_type=self.metadata_type)
+        self.document_type_2.metadata_type_relations.create(
+            metadata_type=self.metadata_type
+        )
 
         self.document.set_document_type(document_type=self.document_type_2)
 
@@ -276,7 +280,7 @@ class MetadataTestCase(DocumentTestMixin, MetadataTypeTestMixin, BaseTestCase):
             label=TEST_DOCUMENT_TYPE_2_LABEL
         )
 
-        self.document_type_2.metadata.create(
+        self.document_type_2.metadata_type_relations.create(
             metadata_type=self.metadata_type, required=True
         )
 

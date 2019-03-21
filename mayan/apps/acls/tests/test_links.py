@@ -1,100 +1,84 @@
 from __future__ import unicode_literals
 
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
-from mayan.apps.documents.tests import GenericDocumentViewTestCase
+from mayan.apps.common.tests import GenericViewTestCase
 
 from ..links import (
     link_acl_create, link_acl_delete, link_acl_list, link_acl_permissions
 )
-from ..models import AccessControlList
 from ..permissions import permission_acl_edit, permission_acl_view
 
+from .mixins import ACLTestMixin
 
-class ACLsLinksTestCase(GenericDocumentViewTestCase):
-    def test_document_acl_create_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
 
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
+class AccessControlListLinksTestCase(ACLTestMixin, GenericViewTestCase):
+    auto_create_test_role = False
 
-        self.add_test_view(test_object=self.document)
+    def setUp(self):
+        super(AccessControlListLinksTestCase, self).setUp()
+        self._setup_test_object()
+
+    def test_object_acl_create_link(self):
+        self.grant_access(obj=self.test_object, permission=permission_acl_edit)
+
+        self.add_test_view(test_object=self.test_object)
         context = self.get_test_view()
         resolved_link = link_acl_create.resolve(context=context)
 
         self.assertNotEqual(resolved_link, None)
 
-        content_type = ContentType.objects.get_for_model(self.document)
-        kwargs = {
-            'app_label': content_type.app_label,
-            'model': content_type.model,
-            'object_id': self.document.pk
-        }
-
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_create', kwargs=kwargs)
+            resolved_link.url, reverse(
+                viewname='acls:acl_create',
+                kwargs=self.test_content_object_view_kwargs
+            )
         )
 
-    def test_document_acl_delete_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
+    def test_object_acl_delete_link(self):
+        self.grant_access(obj=self.test_object, permission=permission_acl_edit)
 
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
-
-        self.add_test_view(test_object=acl)
+        self.add_test_view(test_object=self._test_case_acl)
         context = self.get_test_view()
         resolved_link = link_acl_delete.resolve(context=context)
 
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_delete', kwargs={'acl_pk': acl.pk})
+            resolved_link.url, reverse(
+                viewname='acls:acl_delete',
+                kwargs={'acl_id': self._test_case_acl.pk}
+            )
         )
 
-    def test_document_acl_edit_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
+    def test_object_acl_edit_link(self):
+        self.grant_access(obj=self.test_object, permission=permission_acl_edit)
 
-        acl.permissions.add(permission_acl_edit.stored_permission)
-        self.login_user()
-
-        self.add_test_view(test_object=acl)
+        self.add_test_view(test_object=self._test_case_acl)
         context = self.get_test_view()
         resolved_link = link_acl_permissions.resolve(context=context)
 
         self.assertNotEqual(resolved_link, None)
 
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_permissions', kwargs={'acl_pk': acl.pk})
+            resolved_link.url, reverse(
+                viewname='acls:acl_permissions',
+                kwargs={'acl_id': self._test_case_acl.pk}
+            )
         )
 
-    def test_document_acl_list_link(self):
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
+    def test_object_acl_list_link(self):
+        self.grant_access(obj=self.test_object, permission=permission_acl_view)
 
-        acl.permissions.add(permission_acl_view.stored_permission)
-        self.login_user()
-
-        self.add_test_view(test_object=self.document)
+        self.add_test_view(test_object=self.test_object)
         context = self.get_test_view()
         resolved_link = link_acl_list.resolve(context=context)
 
         self.assertNotEqual(resolved_link, None)
 
-        content_type = ContentType.objects.get_for_model(self.document)
-        kwargs = {
-            'app_label': content_type.app_label,
-            'model': content_type.model,
-            'object_id': self.document.pk
-        }
-
         self.assertEqual(
-            resolved_link.url, reverse(viewname='acls:acl_list', kwargs=kwargs)
+            resolved_link.url, reverse(
+                viewname='acls:acl_list',
+                kwargs=self.test_content_object_view_kwargs
+            )
         )

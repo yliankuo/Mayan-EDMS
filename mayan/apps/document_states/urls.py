@@ -3,233 +3,263 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from .api_views import (
-    APIDocumentTypeWorkflowListView, APIWorkflowDocumentTypeList,
-    APIWorkflowDocumentTypeView, APIWorkflowImageView,
-    APIWorkflowInstanceListView, APIWorkflowInstanceLogEntryListView,
-    APIWorkflowInstanceView, APIWorkflowListView, APIWorkflowStateListView,
-    APIWorkflowStateView, APIWorkflowTransitionListView,
-    APIWorkflowTransitionView, APIWorkflowView
+    WorkflowAPIViewSet, WorkflowStateAPIViewSet,
+    WorkflowTransitionAPIViewSet
 )
 from .views import (
-    DocumentWorkflowInstanceListView, SetupWorkflowCreateView,
-    SetupWorkflowDeleteView, SetupWorkflowDocumentTypesView,
-    SetupWorkflowEditView, SetupWorkflowListView,
-    SetupWorkflowStateActionCreateView, SetupWorkflowStateActionDeleteView,
-    SetupWorkflowStateActionEditView, SetupWorkflowStateActionListView,
-    SetupWorkflowStateActionSelectionView, SetupWorkflowStateCreateView,
-    SetupWorkflowStateDeleteView, SetupWorkflowStateEditView,
-    SetupWorkflowStateListView, SetupWorkflowTransitionCreateView,
-    SetupWorkflowTransitionDeleteView, SetupWorkflowTransitionEditView,
-    SetupWorkflowTransitionListView,
-    SetupWorkflowTransitionTriggerEventListView, ToolLaunchAllWorkflows,
-    WorkflowDocumentListView, WorkflowInstanceDetailView,
+    DocumentWorkflowInstanceListView, ToolLaunchAllWorkflows,
+    WorkflowCreateView, WorkflowDeleteView, WorkflowDocumentTypesView,
+    WorkflowEditView, WorkflowInstanceDetailView,
     WorkflowInstanceTransitionView, WorkflowListView, WorkflowPreviewView,
-    WorkflowStateDocumentListView, WorkflowStateListView
+    WorkflowRuntimeProxyDocumentListView, WorkflowRuntimeProxyListView,
+    WorkflowRuntimeProxyStateDocumentListView,
+    WorkflowRuntimeProxyStateListView, WorkflowStateActionCreateView,
+    WorkflowStateActionDeleteView, WorkflowStateActionEditView,
+    WorkflowStateActionListView, WorkflowStateActionSelectionView,
+    WorkflowStateCreateView, WorkflowStateDeleteView, WorkflowStateEditView,
+    WorkflowStateListView, WorkflowTransitionCreateView,
+    WorkflowTransitionDeleteView, WorkflowTransitionEditView,
+    WorkflowTransitionListView, WorkflowTransitionTriggerEventListView
 )
 
 urlpatterns = [
     url(
-        r'^document/(?P<pk>\d+)/workflows/$',
-        DocumentWorkflowInstanceListView.as_view(),
-        name='document_workflow_instance_list'
+        regex=r'^workflows/$', name='workflow_list',
+        view=WorkflowListView.as_view()
     ),
     url(
-        r'^document/workflows/(?P<pk>\d+)/$',
-        WorkflowInstanceDetailView.as_view(), name='workflow_instance_detail'
+        regex=r'^workflows/create/$', name='workflow_create',
+        view=WorkflowCreateView.as_view()
     ),
     url(
-        r'^document/workflows/(?P<pk>\d+)/transition/$',
-        WorkflowInstanceTransitionView.as_view(),
-        name='workflow_instance_transition'
+        regex=r'^workflows/(?P<workflow_id>\d+)/delete/$',
+        name='workflow_delete', view=WorkflowDeleteView.as_view()
     ),
     url(
-        r'^setup/all/$', SetupWorkflowListView.as_view(),
-        name='setup_workflow_list'
+        regex=r'^workflows/(?P<workflow_id>\d+)/edit/$',
+        name='workflow_edit', view=WorkflowEditView.as_view()
     ),
     url(
-        r'^setup/create/$', SetupWorkflowCreateView.as_view(),
-        name='setup_workflow_create'
+        regex=r'^workflows/(?P<workflow_id>\d+)/preview/$',
+        name='workflow_preview', view=WorkflowPreviewView.as_view()
     ),
     url(
-        r'^setup/workflow/(?P<pk>\d+)/edit/$', SetupWorkflowEditView.as_view(),
-        name='setup_workflow_edit'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/delete/$', SetupWorkflowDeleteView.as_view(),
-        name='setup_workflow_delete'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/documents/$',
-        WorkflowDocumentListView.as_view(),
-        name='setup_workflow_document_list'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/document_types/$',
-        SetupWorkflowDocumentTypesView.as_view(),
-        name='setup_workflow_document_types'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/states/$', SetupWorkflowStateListView.as_view(),
-        name='setup_workflow_state_list'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/states/create/$',
-        SetupWorkflowStateCreateView.as_view(),
-        name='setup_workflow_state_create'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/transitions/$',
-        SetupWorkflowTransitionListView.as_view(),
-        name='setup_workflow_transition_list'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/transitions/create/$',
-        SetupWorkflowTransitionCreateView.as_view(),
-        name='setup_workflow_transition_create'
-    ),
-    url(
-        r'^setup/workflow/(?P<pk>\d+)/transitions/events/$',
-        SetupWorkflowTransitionTriggerEventListView.as_view(),
-        name='setup_workflow_transition_events'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/delete/$',
-        SetupWorkflowStateDeleteView.as_view(),
-        name='setup_workflow_state_delete'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/edit/$',
-        SetupWorkflowStateEditView.as_view(),
-        name='setup_workflow_state_edit'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/actions/$',
-        SetupWorkflowStateActionListView.as_view(),
-        name='setup_workflow_state_action_list'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/actions/$',
-        SetupWorkflowStateActionListView.as_view(),
-        name='setup_workflow_state_action_list'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/actions/selection/$',
-        SetupWorkflowStateActionSelectionView.as_view(),
-        name='setup_workflow_state_action_selection'
-    ),
-    url(
-        r'^setup/workflow/state/(?P<pk>\d+)/actions/(?P<class_path>[a-zA-Z0-9_.]+)/create/$',
-        SetupWorkflowStateActionCreateView.as_view(),
-        name='setup_workflow_state_action_create'
+        regex=r'^workflows/(?P<workflow_id>\d+)/document_types/$',
+        name='workflow_document_types',
+        view=WorkflowDocumentTypesView.as_view()
     ),
 
-    url(
-        r'^setup/workflow/state/actions/(?P<pk>\d+)/delete/$',
-        SetupWorkflowStateActionDeleteView.as_view(),
-        name='setup_workflow_state_action_delete'
-    ),
-    url(
-        r'^setup/workflow/state/actions/(?P<pk>\d+)/edit/$',
-        SetupWorkflowStateActionEditView.as_view(),
-        name='setup_workflow_state_action_edit'
-    ),
-
+    # Workflow states
 
     url(
-        r'^setup/workflow/transitions/(?P<pk>\d+)/delete/$',
-        SetupWorkflowTransitionDeleteView.as_view(),
-        name='setup_workflow_transition_delete'
+        regex=r'^workflows/(?P<workflow_id>\d+)/states/$',
+        name='workflow_state_list',
+        view=WorkflowStateListView.as_view()
     ),
     url(
-        r'^setup/workflow/transitions/(?P<pk>\d+)/edit/$',
-        SetupWorkflowTransitionEditView.as_view(),
-        name='setup_workflow_transition_edit'
+        regex=r'^workflows/(?P<workflow_id>\d+)/states/create/$',
+        name='workflow_state_create',
+        view=WorkflowStateCreateView.as_view()
     ),
     url(
-        r'^tools/workflow/all/launch/$',
-        ToolLaunchAllWorkflows.as_view(),
-        name='tool_launch_all_workflows'
+        regex=r'^workflows/states/(?P<workflow_state_id>\d+)/delete/$',
+        name='workflow_state_delete',
+        view=WorkflowStateDeleteView.as_view()
     ),
     url(
-        r'all/$',
-        WorkflowListView.as_view(),
-        name='workflow_list'
-    ),
-    url(
-        r'^(?P<pk>\d+)/documents/$',
-        WorkflowDocumentListView.as_view(),
-        name='workflow_document_list'
+        regex=r'^workflows/states/(?P<workflow_state_id>\d+)/edit/$',
+        name='workflow_state_edit',
+        view=WorkflowStateEditView.as_view()
     ),
 
+    # Workflow states actions
+
     url(
-        r'^(?P<pk>\d+)/states/$',
-        WorkflowStateListView.as_view(),
-        name='workflow_state_list'
+        regex=r'^workflows/states/(?P<workflow_state_id>\d+)/actions/$',
+        name='workflow_state_action_list',
+        view=WorkflowStateActionListView.as_view()
     ),
     url(
-        r'^(?P<pk>\d+)/preview/$',
-        WorkflowPreviewView.as_view(),
-        name='workflow_preview'
+        regex=r'^workflows/states/(?P<workflow_state_id>\d+)/actions/selection/$',
+        name='workflow_state_action_selection',
+        view=WorkflowStateActionSelectionView.as_view(),
     ),
     url(
-        r'^state/(?P<pk>\d+)/documents/$',
-        WorkflowStateDocumentListView.as_view(),
-        name='workflow_state_document_list'
+        regex=r'^workflows/states/(?P<workflow_state_id>\d+)/actions/(?P<class_path>[a-zA-Z0-9_.]+)/create/$',
+        name='workflow_state_action_create',
+        view=WorkflowStateActionCreateView.as_view()
     ),
+    url(
+        regex=r'^workflows/states/actions/(?P<workflow_state_action_id>\d+)/delete/$',
+        view=WorkflowStateActionDeleteView.as_view(),
+        name='workflow_state_action_delete'
+    ),
+    url(
+        regex=r'^workflows/states/actions/(?P<workflow_state_action_id>\d+)/edit/$',
+        name='workflow_state_action_edit',
+        view=WorkflowStateActionEditView.as_view()
+    ),
+
+    # Workflow transitions
+
+    url(
+        regex=r'^workflows/(?P<workflow_id>\d+)/transitions/$',
+        name='workflow_transition_list',
+        view=WorkflowTransitionListView.as_view()
+    ),
+    url(
+        regex=r'^workflows/(?P<workflow_id>\d+)/transitions/create/$',
+        name='workflow_transition_create',
+        view=WorkflowTransitionCreateView.as_view()
+    ),
+    url(
+        regex=r'^workflows/transitions/(?P<workflow_transition_id>\d+)/delete/$',
+        name='workflow_transition_delete',
+        view=WorkflowTransitionDeleteView.as_view()
+    ),
+    url(
+        regex=r'^workflows/transitions/(?P<workflow_transition_id>\d+)/edit/$',
+        name='workflow_transition_edit',
+        view=WorkflowTransitionEditView.as_view()
+    ),
+    url(
+        regex=r'^workflows/transitions/(?P<workflow_transition_id>\d+)/triggers/$',
+        name='workflow_transition_triggers',
+        view=WorkflowTransitionTriggerEventListView.as_view()
+    ),
+
+    # Workflow runtime proxies
+
+    url(
+        regex=r'^workflow_runtime_proxies/$', name='workflow_runtime_proxy_list',
+        view=WorkflowRuntimeProxyListView.as_view()
+    ),
+    url(
+        regex=r'^workflow_runtime_proxies/(?P<workflow_runtime_proxy_id>\d+)/documents/$',
+        name='workflow_runtime_proxy_document_list',
+        view=WorkflowRuntimeProxyDocumentListView.as_view()
+    ),
+    url(
+        regex=r'^workflow_runtime_proxies/(?P<workflow_runtime_proxy_id>\d+)/states/$',
+        name='workflow_runtime_proxy_state_list',
+        view=WorkflowRuntimeProxyStateListView.as_view()
+    ),
+    url(
+        regex=r'^workflow_runtime_proxies/states/(?P<workflow_runtime_proxy_state_id>\d+)/documents/$',
+        name='workflow_runtime_proxy_state_document_list',
+        view=WorkflowRuntimeProxyStateDocumentListView.as_view()
+    ),
+
+    # Workflow instances
+
+    url(
+        regex=r'^documents/(?P<document_id>\d+)/workflows/$',
+        name='document_workflow_instance_list',
+        view=DocumentWorkflowInstanceListView.as_view()
+    ),
+    url(
+        regex=r'^documents/workflows/(?P<workflow_instance_id>\d+)/$',
+        name='workflow_instance_detail',
+        view=WorkflowInstanceDetailView.as_view()
+    ),
+    url(
+        regex=r'^documents/workflows/(?P<workflow_instance_id>\d+)/transition/$',
+        name='workflow_instance_transition',
+        view=WorkflowInstanceTransitionView.as_view()
+    ),
+
+    # Workflow tools
+
+    url(
+        regex=r'^tools/workflows/all/launch/$',
+        name='tool_launch_all_workflows',
+        view=ToolLaunchAllWorkflows.as_view()
+    )
 ]
 
+api_router_entries = (
+    {
+        'prefix': r'workflows', 'viewset': WorkflowAPIViewSet,
+        'basename': 'workflow'
+    },
+    {
+        'prefix': r'workflows/(?P<workflow_id>[^/.]+)/states',
+        'viewset': WorkflowStateAPIViewSet, 'basename': 'workflow-state'
+    },
+    {
+        'prefix': r'workflows/(?P<workflow_id>[^/.]+)/transitions',
+        'viewset': WorkflowTransitionAPIViewSet,
+        'basename': 'workflow-transition'
+    }
+    #{
+    #    'prefix': r'metadata_types/(?P<metadata_type_id>[^/.]+)/document_type_relations',
+    #    'viewset': MetadataTypeDocumentTypeRelationAPIViewSet,
+    #    'basename': 'metadata_type-document_type_relation'
+    #},
+)
+
+'''
 api_urls = [
-    url(r'^workflows/$', APIWorkflowListView.as_view(), name='workflow-list'),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/$', APIWorkflowView.as_view(),
-        name='workflow-detail'
+        regex=r'^workflows/$', name='workflow-list',
+        view=APIWorkflowListView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/image/$',
-        APIWorkflowImageView.as_view(), name='workflow-image'
+        regex=r'^workflows/(?P<workflow_id>\d+)/$',
+        name='workflow-detail', view=APIWorkflowView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/document_types/$',
-        APIWorkflowDocumentTypeList.as_view(),
-        name='workflow-document-type-list'
+        regex=r'^workflows/(?P<workflow_id>\d+)/image/$',
+        name='workflow-image', view=APIWorkflowImageView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/document_types/(?P<document_type_pk>[0-9]+)/$',
-        APIWorkflowDocumentTypeView.as_view(),
-        name='workflow-document-type-detail'
+        regex=r'^workflows/(?P<workflow_id>\d+)/document_types/$',
+        name='workflow-document-type-list',
+        view=APIWorkflowDocumentTypeList.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/states/$',
-        APIWorkflowStateListView.as_view(), name='workflowstate-list'
+        regex=r'^workflows/(?P<workflow_id>\d+)/document_types/(?P<document_type_id>\d+)/$',
+        name='workflow-document-type-detail',
+        view=APIWorkflowDocumentTypeView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/states/(?P<state_pk>[0-9]+)/$',
-        APIWorkflowStateView.as_view(), name='workflowstate-detail'
+        regex=r'^workflows/(?P<workflow_id>\d+)/states/$',
+        name='workflowstate-list',
+        view=APIWorkflowStateListView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/transitions/$',
-        APIWorkflowTransitionListView.as_view(), name='workflowtransition-list'
+        regex=r'^workflows/(?P<workflow_id>\d+)/states/(?P<state_id>\d+)/$',
+        name='workflowstate-detail', view=APIWorkflowStateView.as_view()
     ),
     url(
-        r'^workflows/(?P<pk>[0-9]+)/transitions/(?P<transition_pk>[0-9]+)/$',
-        APIWorkflowTransitionView.as_view(), name='workflowtransition-detail'
+        regex=r'^workflows/(?P<workflow_id>\d+)/transitions/$',
+        name='workflowtransition-list',
+        view=APIWorkflowTransitionListView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>[0-9]+)/workflows/$',
-        APIWorkflowInstanceListView.as_view(), name='workflowinstance-list'
+        regex=r'^workflows/(?P<workflow_id>\d+)/transitions/(?P<transition_id>\d+)/$',
+        name='workflowtransition-detail',
+        view=APIWorkflowTransitionView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>[0-9]+)/workflows/(?P<workflow_pk>[0-9]+)/$',
-        APIWorkflowInstanceView.as_view(), name='workflowinstance-detail'
+        regex=r'^documents/(?P<document_id>\d+)/workflows/$',
+        name='workflowinstance-list',
+        view=APIWorkflowInstanceListView.as_view()
     ),
     url(
-        r'^documents/(?P<pk>[0-9]+)/workflows/(?P<workflow_pk>[0-9]+)/log_entries/$',
-        APIWorkflowInstanceLogEntryListView.as_view(),
-        name='workflowinstancelogentry-list'
+        regex=r'^documents/(?P<document_id>\d+)/workflows/(?P<workflow_id>\d+)/$',
+        name='workflowinstance-detail',
+        view=APIWorkflowInstanceView.as_view()
     ),
     url(
-        r'^document_types/(?P<pk>[0-9]+)/workflows/$',
-        APIDocumentTypeWorkflowListView.as_view(),
-        name='documenttype-workflow-list'
+        regex=r'^documents/(?P<document_id>\d+)/workflows/(?P<workflow_id>\d+)/log_entries/$',
+        name='workflowinstancelogentry-list',
+        view=APIWorkflowInstanceLogEntryListView.as_view()
     ),
+    url(
+        regex=r'^document_types/(?P<document_type_id>\d+)/workflows/$',
+        name='documenttype-workflow-list',
+        view=APIDocumentTypeWorkflowListView.as_view()
+    )
 ]
+'''

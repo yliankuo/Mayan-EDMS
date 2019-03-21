@@ -6,15 +6,15 @@ from .views import NamespaceDetailView, NamespaceListView, SettingEditView
 
 urlpatterns = [
     url(
-        r'^namespace/all/$', NamespaceListView.as_view(),
-        name='namespace_list'
+        regex=r'^namespaces/$', name='namespace_list',
+        view=NamespaceListView.as_view()
     ),
     url(
-        r'^namespace/(?P<namespace_name>\w+)/$',
-        NamespaceDetailView.as_view(), name='namespace_detail'
+        regex=r'^namespaces/(?P<namespace_name>\w+)/$',
+        name='namespace_detail', view=NamespaceDetailView.as_view()
     ),
     url(
-        r'^edit/(?P<setting_global_name>\w+)/$',
-        SettingEditView.as_view(), name='setting_edit_view'
-    ),
+        regex=r'^settings/(?P<setting_global_name>\w+)/edit/$',
+        name='setting_edit_view', view=SettingEditView.as_view()
+    )
 ]

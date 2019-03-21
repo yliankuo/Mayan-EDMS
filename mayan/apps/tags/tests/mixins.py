@@ -9,38 +9,99 @@ from .literals import (
 
 
 class TagTestMixin(object):
-    def _create_tag(self):
-        self.tag = Tag.objects.create(
+    def _create_test_tag(self):
+        self.test_tag = Tag.objects.create(
             color=TEST_TAG_COLOR, label=TEST_TAG_LABEL
         )
 
+
+class TagAPITestMixin(object):
     def _request_api_tag_create_view(self):
         return self.post(
             viewname='rest_api:tag-list', data={
-                'label': TEST_TAG_LABEL, 'color': TEST_TAG_COLOR
+                'color': TEST_TAG_COLOR, 'label': TEST_TAG_LABEL
+            }
+        )
+
+    def _request_api_tag_create_and_attach_view(self):
+        return self.post(
+            viewname='rest_api:tag-list', data={
+                'color': TEST_TAG_COLOR, 'label': TEST_TAG_LABEL,
+                'document_id_list': self.document.pk
             }
         )
 
     def _request_api_tag_delete_view(self):
         return self.delete(
-            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}
+            viewname='rest_api:tag-detail', kwargs={'tag_id': self.test_tag.pk}
         )
 
-    def _request_api_tag_edit_via_patch_view(self):
+    def _request_api_tag_edit_patch_view(self):
         return self.patch(
-            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}, data={
+            viewname='rest_api:tag-detail', kwargs={
+                'tag_id': self.test_tag.pk
+            }, data={
                 'label': TEST_TAG_LABEL_EDITED,
                 'color': TEST_TAG_COLOR_EDITED
             }
         )
 
-    def _request_api_tag_edit_via_put_view(self):
+    def _request_api_tag_edit_put_view(self):
         return self.put(
-            viewname='rest_api:tag-detail', kwargs={'tag_pk': self.tag.pk}, data={
+            viewname='rest_api:tag-detail', kwargs={
+                'tag_id': self.test_tag.pk
+            }, data={
                 'label': TEST_TAG_LABEL_EDITED,
                 'color': TEST_TAG_COLOR_EDITED
             }
         )
+
+    def _request_api_tag_list_view(self):
+        return self.get(viewname='rest_api:tag-list')
+
+
+class TagViewTestMixin(object):
+    def _request_document_tag_multiple_attach_view(self):
+        return self.post(
+            viewname='tags:document_tag_multiple_attach',
+            kwargs={'document_id': self.document.pk}, data={
+                'tags': self.test_tag.pk,
+            }
+        )
+
+    def _request_document_multiple_tag_multiple_attach_view(self):
+        return self.post(
+            viewname='tags:document_multiple_tag_multiple_attach', data={
+                'id_list': self.document.pk, 'tags': self.test_tag.pk,
+            }
+        )
+
+    def _request_document_tag_multiple_remove_view(self):
+        return self.post(
+            viewname='tags:document_tag_multiple_remove',
+            kwargs={'document_id': self.document.pk}, data={
+                'tags': self.test_tag.pk,
+            }
+        )
+
+    def _request_document_multiple_tag_multiple_remove_view(self):
+        return self.post(
+            viewname='tags:document_multiple_tag_multiple_remove',
+            data={
+                'id_list': self.document.pk,
+                'tags': self.test_tag.pk,
+            }
+        )
+
+    def _request_document_tag_list_view(self):
+        return self.get(
+            viewname='tags:document_tag_list',
+            kwargs={
+                'document_id': self.document.pk,
+            }
+        )
+
+    # Normal tag view
 
     def _request_tag_create_view(self):
         return self.post(
@@ -52,68 +113,19 @@ class TagTestMixin(object):
 
     def _request_tag_delete_view(self):
         return self.post(
-            viewname='tags:tag_delete', kwargs={'tag_pk': self.tag.pk}
+            viewname='tags:tag_delete', kwargs={'tag_id': self.test_tag.pk},
         )
 
     def _request_tag_edit_view(self):
         return self.post(
-            viewname='tags:tag_edit', kwargs={'tag_pk': self.tag.pk}, data={
+            viewname='tags:tag_edit', kwargs={'tag_id': self.test_tag.pk},
+            data={
                 'label': TEST_TAG_LABEL_EDITED, 'color': TEST_TAG_COLOR_EDITED
             }
         )
 
-    def _request_multiple_delete_view(self):
+    def _request_tag_multiple_delete_view(self):
         return self.post(
             viewname='tags:tag_multiple_delete',
-            data={'id_list': self.tag.pk},
-        )
-
-    def _request_edit_tag_view(self):
-        return self.post(
-            viewname='tags:tag_edit', kwargs={'tag_pk': self.tag.pk}, data={
-                'label': TEST_TAG_LABEL_EDITED, 'color': TEST_TAG_COLOR_EDITED
-            }
-        )
-
-    def _request_create_tag_view(self):
-        return self.post(
-            viewname='tags:tag_create', data={
-                'label': TEST_TAG_LABEL,
-                'color': TEST_TAG_COLOR
-            }
-        )
-
-    def _request_attach_tag_view(self):
-        return self.post(
-            viewname='tags:tag_attach',
-            kwargs={'document_pk': self.document.pk}, data={
-                'tags': self.tag.pk,
-                'user': self.user.pk
-            }
-        )
-
-    def _request_multiple_attach_tag_view(self):
-        return self.post(
-            viewname='tags:multiple_documents_tag_attach', data={
-                'id_list': self.document.pk, 'tags': self.tag.pk,
-                'user': self.user.pk
-            }
-        )
-
-    def _request_single_document_multiple_tag_remove_view(self):
-        return self.post(
-            viewname='tags:single_document_multiple_tag_remove',
-            kwargs={'document_pk': self.document.pk}, data={
-                'id_list': self.document.pk,
-                'tags': self.tag.pk,
-            }
-        )
-
-    def _request_multiple_documents_selection_tag_remove_view(self):
-        return self.post(
-            viewname='tags:multiple_documents_selection_tag_remove',
-            data={
-                'id_list': self.document.pk,
-                'tags': self.tag.pk,
-            }
+            data={'id_list': self.test_tag.pk}
         )

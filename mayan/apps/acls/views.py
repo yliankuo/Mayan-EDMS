@@ -1,24 +1,20 @@
 from __future__ import absolute_import, unicode_literals
 
-import itertools
 import logging
 
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.common.mixins import (
-    ContentTypeViewMixin, ExternalObjectViewMixin
+    ContentTypeViewMixin, ExternalObjectMixin
 )
-from mayan.apps.common.views import (
-    AssignRemoveView, SingleObjectCreateView, SingleObjectDeleteView,
+from mayan.apps.common.generics import (
+    AddRemoveView, SingleObjectCreateView, SingleObjectDeleteView,
     SingleObjectListView
 )
-from mayan.apps.permissions import Permission, PermissionNamespace
-from mayan.apps.permissions.models import Role, StoredPermission
+from mayan.apps.permissions.models import Role
 
 from .classes import ModelPermission
 from .forms import ACLCreateForm
@@ -30,7 +26,11 @@ from .permissions import permission_acl_edit, permission_acl_view
 logger = logging.getLogger(__name__)
 
 
-class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectCreateView):
+class ACLCreateView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectCreateView):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model_name'
+    }
     external_object_permission = permission_acl_edit
     external_object_pk_url_kwarg = 'object_id'
     form_class = ACLCreateForm
@@ -44,7 +44,7 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectC
     def get_external_object_queryset(self):
         # Here we get a queryset the object model for which an ACL will be
         # created.
-        return self.get_content_type().model_class().objects.all()
+        return self.get_content_type().get_all_objects_for_this_type()
 
     def get_extra_context(self):
         return {
@@ -61,7 +61,8 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectC
             'queryset': Role.objects.exclude(
                 pk__in=self.get_external_object().acls.values('role')
             ),
-            'widget_attributes': {'class': 'select2'}
+            'widget_attributes': {'class': 'select2'},
+            'user': self.request.user
         }
 
     def get_instance_extra_data(self):
@@ -77,15 +78,17 @@ class ACLCreateView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectC
 
 
 class ACLDeleteView(SingleObjectDeleteView):
-    object_permission = permission_acl_edit
-    object_permission_related = 'content_object'
-    object_permission_raise_404 = True
     model = AccessControlList
-    pk_url_kwarg = 'acl_pk'
+    object_permission = permission_acl_edit
+    pk_url_kwarg = 'acl_id'
 
     def get_extra_context(self):
+        acl = self.get_object()
+
         return {
-            'object': self.get_object().content_object,
+            'acl': acl,
+            'object': acl.content_object,
+            'navigation_object_list': ('object', 'acl'),
             'title': _('Delete ACL: %s') % self.get_object(),
         }
 
@@ -94,20 +97,24 @@ class ACLDeleteView(SingleObjectDeleteView):
         return reverse(
             'acls:acl_list', kwargs={
                 'app_label': instance.content_type.app_label,
-                'model': instance.content_type.model,
+                'model_name': instance.content_type.model,
                 'object_id': instance.object_id
             }
         )
 
 
-class ACLListView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectListView):
+class ACLListView(ContentTypeViewMixin, ExternalObjectMixin, SingleObjectListView):
+    content_type_url_kw_args = {
+        'app_label': 'app_label',
+        'model': 'model_name'
+    }
     external_object_permission = permission_acl_view
     external_object_pk_url_kwarg = 'object_id'
 
     def get_external_object_queryset(self):
         # Here we get a queryset the object model for which an ACL will be
         # created.
-        return self.get_content_type().model_class().objects.all()
+        return self.get_content_type().get_all_objects_for_this_type()
 
     def get_extra_context(self):
         return {
@@ -135,118 +142,88 @@ class ACLListView(ContentTypeViewMixin, ExternalObjectViewMixin, SingleObjectLis
             ),
         }
 
-    def get_object_list(self):
+    def get_source_queryset(self):
         return self.get_external_object().acls.all()
 
 
-class ACLPermissionsView(AssignRemoveView):
-    grouped = True
-    left_list_title = _('Available permissions')
-    right_list_title = _('Granted permissions')
+class ACLPermissionsView(AddRemoveView):
+    action_add_method = 'permissions_add'
+    action_remove_method = 'permissions_remove'
+    main_object_model = AccessControlList
+    main_object_permission = permission_acl_edit
+    main_object_pk_url_kwarg = 'acl_id'
+    list_added_title = _('Granted permissions')
+    list_available_title = _('Available permissions')
+    related_field = 'permissions'
 
-    @staticmethod
-    def generate_choices(entries):
-        results = []
+    def generate_choices(self, queryset):
+        namespaces_dictionary = {}
 
-        entries = sorted(
-            entries, key=lambda x: (
-                x.volatile_permission.namespace.label,
-                x.volatile_permission.label
-            )
+        # Sort permissions by their translatable label
+        object_list = sorted(
+            queryset, key=lambda permission: permission.volatile_permission.label
         )
 
-        for namespace, permissions in itertools.groupby(entries, lambda entry: entry.namespace):
-            permission_options = [
-                (force_text(permission.pk), permission) for permission in permissions
-            ]
-            results.append(
-                (PermissionNamespace.get(name=namespace), permission_options)
+        # Group permissions by namespace
+        for permission in object_list:
+            namespaces_dictionary.setdefault(
+                permission.volatile_permission.namespace.label,
+                []
+            )
+            namespaces_dictionary[permission.volatile_permission.namespace.label].append(
+                (permission.pk, force_text(permission))
             )
 
-        return results
+        # Sort permissions by their translatable namespace label
+        return sorted(namespaces_dictionary.items())
 
-    def add(self, item):
-        permission = get_object_or_404(klass=StoredPermission, pk=item)
-        self.get_object().permissions.add(permission)
-
-    def get_available_list(self):
-        return ModelPermission.get_for_instance(
-            instance=self.get_object().content_object
-        ).exclude(id__in=self.get_granted_list().values_list('pk', flat=True))
+    def get_actions_extra_kwargs(self):
+        return {'_user': self.request.user}
 
     def get_disabled_choices(self):
         """
-        Get permissions from a parent's acls but remove the permissions we
-        already hold for this object
+        Get permissions from a parent's ACLs or directly granted to the role.
+        We return a list since that is what the form widget's can process.
         """
-        return map(
-            str, set(
-                self.get_object().get_inherited_permissions().values_list(
-                    'pk', flat=True
-                )
-            ).difference(
-                self.get_object().permissions.values_list('pk', flat=True)
-            )
-        )
+        return self.main_object.get_inherited_permissions().values_list('pk', flat=True)
 
     def get_extra_context(self):
         return {
-            'object': self.get_object().content_object,
-            'title': _('Role "%(role)s" permission\'s for "%(object)s"') % {
-                'role': self.get_object().role,
-                'object': self.get_object().content_object,
-            },
+            'acl': self.main_object,
+            'object': self.main_object.content_object,
+            'navigation_object_list': ('object', 'acl'),
+            'title': _('Role "%(role)s" permission\'s for "%(object)s".') % {
+                'role': self.main_object.role,
+                'object': self.main_object.content_object,
+            }
         }
 
-    def get_granted_list(self):
+    def get_list_added_help_text(self):
+        if self.main_object.get_inherited_permissions():
+            return _(
+                'Disabled permissions are inherited from a parent object or '
+                'directly granted to the role and can\'t be removed from this '
+                'view. Inherited permissions need to be removed from the '
+                'parent object\'s ACL or from them role via the Setup menu.'
+            )
+
+    def get_list_added_queryset(self):
         """
         Merge of permissions we hold for this object and the permissions we
-        hold for this object's parent via another ACL.
+        hold for this object's parents via another ACL. .distinct() is added
+        in case the permission was added to the ACL and then added to a
+        parent ACL's and thus inherited and would appear twice. If
+        order to remove the double permission from the ACL it would need to be
+        remove from the parent first to enable the choice in the form,
+        remove it from the ACL and then re-add it to the parent ACL.
         """
-        merged_pks = self.get_object().permissions.values_list(
-            'pk', flat=True
-        ) | self.get_object().get_inherited_permissions().values_list(
-            'pk', flat=True
+        queryset_acl = super(ACLPermissionsView, self).get_list_added_queryset()
+
+        return (
+            queryset_acl | self.main_object.get_inherited_permissions()
+        ).distinct()
+
+    def get_secondary_object_source_queryset(self):
+        return ModelPermission.get_for_instance(
+            instance=self.main_object.content_object
         )
-        return StoredPermission.objects.filter(pk__in=merged_pks)
-
-    def get_object(self):
-        acl = get_object_or_404(
-            klass=AccessControlList, pk=self.kwargs['acl_pk']
-        )
-
-        # Get the ACL, from this get the object of the ACL, from the object
-        # get all ACLs it holds as a filtered queryset by access.
-
-        try:
-            AccessControlList.objects.check_access(
-                permissions=(permission_acl_edit,), obj=acl.content_object,
-                user=self.request.user
-            )
-        except PermissionDenied:
-            queryset = AccessControlList.objects.none()
-        else:
-            queryset = acl.content_object.acls.all()
-
-        return get_object_or_404(klass=queryset, pk=self.kwargs['acl_pk'])
-
-    def get_right_list_help_text(self):
-        if self.get_object().get_inherited_permissions():
-            return _(
-                'Disabled permissions are inherited from a parent object and '
-                'can\'t be removed from this view, they need to be removed '
-                'from the parent object\'s ACL view.'
-            )
-
-        return self.right_list_help_text
-
-    def left_list(self):
-        Permission.refresh()
-        return ACLPermissionsView.generate_choices(self.get_available_list())
-
-    def remove(self, item):
-        permission = get_object_or_404(klass=StoredPermission, pk=item)
-        self.get_object().permissions.remove(permission)
-
-    def right_list(self):
-        return ACLPermissionsView.generate_choices(self.get_granted_list())

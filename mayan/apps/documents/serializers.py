@@ -6,6 +6,8 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from mayan.apps.common.models import SharedUploadedFile
+from mayan.apps.rest_api.relations import MultiKwargHyperlinkedIdentityField
+from mayan.apps.rest_api.serializers import LazyExtraFieldsHyperlinkedModelSerializer
 
 from .models import (
     Document, DocumentPage, DocumentType, DocumentTypeFilename,
@@ -15,40 +17,50 @@ from .settings import setting_language
 from .tasks import task_upload_new_version
 
 
-class DocumentPageSerializer(serializers.HyperlinkedModelSerializer):
-    document_version_url = serializers.SerializerMethodField()
-    image_url = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
+class DocumentPageSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
+    image_url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_page_id',
+            },
+            {
+                'lookup_field': 'document.pk', 'lookup_url_kwarg': 'document_id',
+            },
+            {
+                'lookup_field': 'document_version_id', 'lookup_url_kwarg': 'document_version_id',
+            },
+        ),
+        view_name='rest_api:document_page-image'
+    )
+    document_version_url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'document_version_id', 'lookup_url_kwarg': 'document_version_id',
+            },
+            {
+                'lookup_field': 'document.pk', 'lookup_url_kwarg': 'document_id',
+            }
+        ),
+        view_name='rest_api:document_version-detail'
+    )
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_page_id',
+            },
+            {
+                'lookup_field': 'document.pk', 'lookup_url_kwarg': 'document_id',
+            },
+            {
+                'lookup_field': 'document_version_id', 'lookup_url_kwarg': 'document_version_id',
+            },
+        ),
+        view_name='rest_api:document_page-detail'
+    )
 
     class Meta:
         fields = ('document_version_url', 'image_url', 'page_number', 'url')
         model = DocumentPage
-
-    def get_document_version_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.document_version.pk
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def get_image_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentpage-image', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.document_version.pk,
-                'document_page_pk': instance.pk,
-            }, request=self.context['request'], format=self.context['format']
-        )
-
-    def get_url(self, instance):
-        return reverse(
-            viewname='rest_api:documentpage-detail', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.document_version.pk,
-                'document_page_pk': instance.pk,
-            }, request=self.context['request'], format=self.context['format']
-        )
 
 
 class DocumentTypeFilenameSerializer(serializers.ModelSerializer):
@@ -59,33 +71,34 @@ class DocumentTypeFilenameSerializer(serializers.ModelSerializer):
 
 class DocumentTypeSerializer(serializers.HyperlinkedModelSerializer):
     documents_url = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_type_pk',
-        view_name='rest_api:documenttype-document-list'
+        lookup_url_kwarg='document_type_id',
+        view_name='rest_api:document_type-document-list'
     )
-    documents_count = serializers.SerializerMethodField()
-    filenames = DocumentTypeFilenameSerializer(many=True, read_only=True)
+    #documents_count = serializers.SerializerMethodField()
+    #filenames = DocumentTypeFilenameSerializer(many=True, read_only=True)
 
     class Meta:
         extra_kwargs = {
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
-                'view_name': 'rest_api:documenttype-detail'
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_id',
+                'view_name': 'rest_api:document_type-detail'
             }
         }
         fields = (
             'delete_time_period', 'delete_time_unit', 'documents_url',
-            'documents_count', 'id', 'label', 'filenames', 'trash_time_period',
+            #'documents_count', 'filenames',
+            'id', 'label', 'trash_time_period',
             'trash_time_unit', 'url'
         )
         model = DocumentType
 
-    def get_documents_count(self, obj):
-        return obj.documents.count()
+    #def get_documents_count(self, obj):
+    #    return obj.documents.count()
 
-
+"""
 class WritableDocumentTypeSerializer(serializers.ModelSerializer):
     documents_url = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_type_pk',
+        lookup_field='pk', lookup_url_kwarg='document_type_id',
         view_name='rest_api:documenttype-document-list'
     )
     documents_count = serializers.SerializerMethodField()
@@ -93,7 +106,7 @@ class WritableDocumentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_id',
                 'view_name': 'rest_api:documenttype-detail'
             }
         }
@@ -106,26 +119,47 @@ class WritableDocumentTypeSerializer(serializers.ModelSerializer):
 
     def get_documents_count(self, obj):
         return obj.documents.count()
+"""
 
+class DocumentVersionSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
+    #download_url = serializers.SerializerMethodField()
+    document_url = serializers.HyperlinkedIdentityField(
+        lookup_field='document_id', lookup_url_kwarg='document_id',
+        view_name='rest_api:document-detail'
+    )
+    document_page_list_url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'document_id', 'lookup_url_kwarg': 'document_id',
+            },
+            {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_version_id',
+            }
+        ),
+        view_name='rest_api:document_page-list'
+    )
 
-class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
-    document_url = serializers.SerializerMethodField()
-    download_url = serializers.SerializerMethodField()
-    pages_url = serializers.SerializerMethodField()
     size = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
+    url = MultiKwargHyperlinkedIdentityField(
+        view_kwargs=(
+            {
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_version_id',
+            },
+            {
+                'lookup_field': 'document_id', 'lookup_url_kwarg': 'document_id',
+            },
+        ),
+        view_name='rest_api:document_version-detail'
+    )
 
     class Meta:
         extra_kwargs = {
-            'document': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
-                'view_name': 'rest_api:document-detail'
-            },
             'file': {'use_url': False},
         }
         fields = (
-            'checksum', 'comment', 'document_url', 'download_url', 'encoding',
-            'file', 'mimetype', 'pages_url', 'size', 'timestamp', 'url'
+            # 'download_url',
+            'checksum', 'comment', 'document_url', 'encoding',
+            'file', 'mimetype', 'document_page_list_url', 'size', 'timestamp', 'url'
         )
         model = DocumentVersion
         read_only_fields = ('document', 'file', 'size')
@@ -133,38 +167,62 @@ class DocumentVersionSerializer(serializers.HyperlinkedModelSerializer):
     def get_size(self, instance):
         return instance.size
 
+    def build_url_field(self, field_name, model_class):
+        """
+        Create a field representing the object's own URL.
+        """
+        field_class = self.serializer_url_field
+        field_kwargs = {'kwargs': 1}
+
+        return field_class, field_kwargs
+
+    """
     def get_document_url(self, instance):
         return reverse(
             viewname='rest_api:document-detail', kwargs={
-                'document_pk': instance.document.pk
-            }, request=self.context['request'], format=self.context['format']
+                'document_id': instance.document.pk
+            }, request=self.context['request']#, format=self.context['format']
         )
 
     def get_download_url(self, instance):
         return reverse(
-            viewname='rest_api:documentversion-download', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document_version-download', kwargs={
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
+            }, request=self.context['request']#, format=self.context['format']
         )
 
     def get_pages_url(self, instance):
         return reverse(
-            viewname='rest_api:documentversion-page-list', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document_version-page-list', kwargs={
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
+            }, request=self.context['request']#, format=self.context['format']
         )
 
-    def get_url(self, instance):
+
+    def get_url(self, obj, view_name, request, format):
+        print ' obj, view_name, request, format', obj, view_name, request, format
+        # Unsaved objects will not yet have a valid URL.
+        if hasattr(obj, 'pk') and obj.pk in (None, ''):
+            return None
+
+        lookup_value = getattr(obj, self.lookup_field)
+        kwargs = {self.lookup_url_kwarg: lookup_value}
+        return self.reverse(view_name, kwargs=kwargs, request=request, format=format)
+    """
+    """
+
+    def get_url(self, instance, *args, **kwargs):
+        print ', *args, **kwargs', args, kwargs
         return reverse(
-            viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
-            }, request=self.context['request'], format=self.context['format']
+            viewname='rest_api:document_version-detail', kwargs={
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
+            }, request=self.context['request']#, format=self.context['format']
         )
-
-
+    """
+"""
 class WritableDocumentVersionSerializer(serializers.ModelSerializer):
     document_url = serializers.SerializerMethodField()
     download_url = serializers.SerializerMethodField()
@@ -185,31 +243,31 @@ class WritableDocumentVersionSerializer(serializers.ModelSerializer):
     def get_document_url(self, instance):
         return reverse(
             viewname='rest_api:document-detail', kwargs={
-                'document_pk': instance.document.pk
+                'document_id': instance.document.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
     def get_download_url(self, instance):
         return reverse(
             viewname='rest_api:documentversion-download', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
     def get_pages_url(self, instance):
         return reverse(
             viewname='rest_api:documentversion-page-list', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
             viewname='rest_api:documentversion-detail', kwargs={
-                'document_pk': instance.document.pk,
-                'document_version_pk': instance.pk
+                'document_id': instance.document.pk,
+                'document_version_id': instance.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
@@ -228,23 +286,23 @@ class NewDocumentVersionSerializer(serializers.Serializer):
             document_id=document.pk,
             shared_uploaded_file_id=shared_uploaded_file.pk, user_id=_user.pk
         )
-
+"""
 
 class DeletedDocumentSerializer(serializers.HyperlinkedModelSerializer):
     document_type_label = serializers.SerializerMethodField()
     restore = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_pk',
+        lookup_field='pk', lookup_url_kwarg='document_id',
         view_name='rest_api:trasheddocument-restore'
     )
 
     class Meta:
         extra_kwargs = {
             'document_type': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_id',
                 'view_name': 'rest_api:documenttype-detail'
             },
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_id',
                 'view_name': 'rest_api:trasheddocument-detail'
             }
         }
@@ -263,42 +321,48 @@ class DeletedDocumentSerializer(serializers.HyperlinkedModelSerializer):
         return instance.document_type.label
 
 
-class DocumentSerializer(serializers.HyperlinkedModelSerializer):
-    document_type = DocumentTypeSerializer()
+class DocumentSerializer(LazyExtraFieldsHyperlinkedModelSerializer):
+    document_type = DocumentTypeSerializer(read_only=True)
+    #document_type_url = serializers.HyperlinkedIdentityField(
+    #    lookup_field='document_type_id', lookup_url_kwarg='document_type_id',
+    #    view_name='rest_api:document_type-detail'
+    #)
     latest_version = DocumentVersionSerializer(many=False, read_only=True)
-    versions_url = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_pk',
-        view_name='rest_api:document-version-list'
+    document_version_list_url = serializers.HyperlinkedIdentityField(
+        lookup_field='pk', lookup_url_kwarg='document_id',
+        view_name='rest_api:document_version-list'
     )
 
     class Meta:
         extra_kwargs = {
             'document_type': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_pk',
-                'view_name': 'rest_api:documenttype-detail'
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_type_id',
+                'view_name': 'rest_api:document_type-detail'
             },
             'url': {
-                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_pk',
+                'lookup_field': 'pk', 'lookup_url_kwarg': 'document_id',
                 'view_name': 'rest_api:document-detail'
             }
         }
         fields = (
             'date_added', 'description', 'document_type', 'id', 'label',
-            'language', 'latest_version', 'url', 'uuid', 'versions_url',
+            #'document_type_url',
+            'language', 'latest_version', 'url', 'uuid', 'document_version_list_url',
         )
         model = Document
-        read_only_fields = ('document_type',)
+        #read_only_fields = ('document_type', 'label')
 
 
+"""
 class WritableDocumentSerializer(serializers.ModelSerializer):
     document_type = DocumentTypeSerializer(read_only=True)
     latest_version = DocumentVersionSerializer(many=False, read_only=True)
     versions = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_pk',
+        lookup_field='pk', lookup_url_kwarg='document_id',
         view_name='rest_api:document-version-list'
     )
     url = serializers.HyperlinkedIdentityField(
-        lookup_field='pk', lookup_url_kwarg='document_pk',
+        lookup_field='pk', lookup_url_kwarg='document_id',
         view_name='rest_api:document-detail',
     )
 
@@ -344,7 +408,7 @@ class NewDocumentSerializer(serializers.ModelSerializer):
             'description', 'document_type', 'id', 'file', 'label', 'language',
         )
         model = Document
-
+"""
 
 class RecentDocumentSerializer(serializers.ModelSerializer):
     class Meta:

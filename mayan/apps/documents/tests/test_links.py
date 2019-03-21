@@ -1,135 +1,134 @@
 from __future__ import unicode_literals
 
-import time
-
 from django.urls import reverse
 
-from mayan.apps.acls.models import AccessControlList
+from mayan.apps.converter.permissions import (
+    permission_transformation_delete, permission_transformation_edit
+)
 
 from ..links import (
-    link_document_restore, link_document_version_download,
-    link_document_version_revert
+    link_document_transformations_clear, link_document_transformations_clone,
+    link_document_version_revert, link_trashed_document_restore
 )
+from ..models import TrashedDocument
 from ..permissions import (
-    permission_document_download, permission_document_restore,
-    permission_document_version_revert
+    permission_trashed_document_restore, permission_document_version_revert
 )
 
 from .base import GenericDocumentViewTestCase
-from .literals import TEST_SMALL_DOCUMENT_PATH
 
 
 class DocumentsLinksTestCase(GenericDocumentViewTestCase):
-    def test_document_version_revert_link_no_permission(self):
-        with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-            self.document.new_version(file_object=file_object)
+    use_document_stub = False
 
-        self.assertTrue(self.document.versions.count(), 2)
-
-        self.login_user()
-
+    def _resolve_document_version_revert_link(self):
         self.add_test_view(test_object=self.document.versions.first())
         context = self.get_test_view()
-        resolved_link = link_document_version_revert.resolve(context=context)
+        return link_document_version_revert.resolve(context=context)
 
+    def test_document_version_revert_link_no_permission(self):
+        self._create_document_version()
+
+        resolved_link = self._resolve_document_version_revert_link()
         self.assertEqual(resolved_link, None)
 
-    def test_document_version_revert_link_with_permission(self):
-        # Needed by MySQL as milliseconds value is not store in timestamp
-        # field
-        time.sleep(1.01)
+    def test_document_version_revert_link_with_access(self):
+        self._create_document_version()
 
-        with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
-            self.document.new_version(file_object=file_object)
-
-        self.assertTrue(self.document.versions.count(), 2)
-
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-        acl.permissions.add(
-            permission_document_version_revert.stored_permission
+        self.grant_access(
+            obj=self.document, permission=permission_document_version_revert
         )
 
-        self.add_test_view(test_object=self.document.versions.first())
-        context = self.get_test_view()
-        resolved_link = link_document_version_revert.resolve(context=context)
-
+        resolved_link = self._resolve_document_version_revert_link()
         self.assertNotEqual(resolved_link, None)
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_version_revert',
-                args=(self.document.versions.first().pk,)
+                viewname='documents:document_version_revert',
+                kwargs={'document_version_id': self.document.versions.first().pk}
             )
         )
 
-    def test_document_version_download_link_no_permission(self):
-        self.login_user()
-
-        self.add_test_view(test_object=self.document.latest_version)
+    def _resolve_document_transformations_clear_link(self):
+        self.add_test_view(test_object=self.document)
         context = self.get_test_view()
-        resolved_link = link_document_version_download.resolve(context=context)
+        return link_document_transformations_clear.resolve(context=context)
 
+    def test_document_transformations_clone_link_no_permission(self):
+        resolved_link = self._resolve_document_transformations_clear_link()
         self.assertEqual(resolved_link, None)
 
-    def test_document_version_download_link_with_permission(self):
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
+    def test_document_transformations_clone_link_with_access(self):
+        self.grant_access(
+            obj=self.document, permission=permission_transformation_delete
         )
-        acl.permissions.add(permission_document_download.stored_permission)
 
-        self.add_test_view(test_object=self.document.latest_version)
-        context = self.get_test_view()
-        resolved_link = link_document_version_download.resolve(context=context)
-
+        resolved_link = self._resolve_document_transformations_clear_link()
         self.assertNotEqual(resolved_link, None)
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_version_download_form',
-                args=(self.document.latest_version.pk,)
+                viewname='documents:document_transformations_clear',
+                kwargs={'document_id': self.document.pk}
+            )
+        )
+
+    def _resolve_document_transformations_clone_link(self):
+        self.add_test_view(test_object=self.document)
+        context = self.get_test_view()
+        return link_document_transformations_clone.resolve(context=context)
+
+    def test_document_transformations_clone_link_no_permission(self):
+        resolved_link = self._resolve_document_transformations_clone_link()
+        self.assertEqual(resolved_link, None)
+
+    def test_document_transformations_clone_link_with_access(self):
+        self.grant_access(
+            obj=self.document, permission=permission_transformation_edit
+        )
+
+        resolved_link = self._resolve_document_transformations_clone_link()
+        self.assertNotEqual(resolved_link, None)
+        self.assertEqual(
+            resolved_link.url,
+            reverse(
+                viewname='documents:document_transformations_clone',
+                kwargs={'document_id': self.document.pk}
             )
         )
 
 
 class DeletedDocumentsLinksTestCase(GenericDocumentViewTestCase):
+    use_document_stub = True
+
+    def _resolve_trashed_document_restore_link(self):
+        self.add_test_view(
+            test_object=TrashedDocument.objects.get(pk=self.document.pk)
+        )
+        context = self.get_test_view()
+        return link_trashed_document_restore.resolve(context=context)
+
     def test_deleted_document_restore_link_no_permission(self):
         self.document.delete()
 
-        self.login_user()
-
-        self.add_test_view(test_object=self.document)
-        context = self.get_test_view()
-        resolved_link = link_document_restore.resolve(context=context)
+        resolved_link = self._resolve_trashed_document_restore_link()
 
         self.assertEqual(resolved_link, None)
 
-    def test_deleted_document_restore_link_with_permission(self):
+    def test_deleted_document_restore_link_with_access(self):
         self.document.delete()
 
-        self.login_user()
-
-        acl = AccessControlList.objects.create(
-            content_object=self.document, role=self.role
-        )
-        acl.permissions.add(
-            permission_document_restore.stored_permission
+        self.grant_access(
+            obj=self.document, permission=permission_trashed_document_restore
         )
 
-        self.add_test_view(test_object=self.document)
-        context = self.get_test_view()
-        resolved_link = link_document_restore.resolve(context=context)
+        resolved_link = self._resolve_trashed_document_restore_link()
 
         self.assertNotEqual(resolved_link, None)
         self.assertEqual(
             resolved_link.url,
             reverse(
-                'documents:document_restore',
-                args=(self.document.pk,)
+                viewname='documents:trashed_document_restore',
+                kwargs={'trashed_document_id': self.document.pk}
             )
         )

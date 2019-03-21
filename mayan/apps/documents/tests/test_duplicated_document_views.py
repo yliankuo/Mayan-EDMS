@@ -7,10 +7,6 @@ from .literals import TEST_SMALL_DOCUMENT_FILENAME, TEST_SMALL_DOCUMENT_PATH
 
 
 class DuplicatedDocumentsViewsTestCase(GenericDocumentViewTestCase):
-    def setUp(self):
-        super(DuplicatedDocumentsViewsTestCase, self).setUp()
-        self.login_user()
-
     def _upload_duplicate_document(self):
         with open(TEST_SMALL_DOCUMENT_PATH, mode='rb') as file_object:
             self.document_duplicate = self.document_type.new_document(
@@ -23,7 +19,7 @@ class DuplicatedDocumentsViewsTestCase(GenericDocumentViewTestCase):
     def _request_document_duplicates_list_view(self):
         return self.get(
             viewname='documents:document_duplicates_list',
-            kwargs={'document_pk': self.document.pk}
+            kwargs={'document_id': self.document.pk}
         )
 
     def test_duplicated_document_list_no_permissions(self):
@@ -53,7 +49,7 @@ class DuplicatedDocumentsViewsTestCase(GenericDocumentViewTestCase):
         self._upload_duplicate_document()
         response = self._request_document_duplicates_list_view()
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_document_duplicates_list_with_access(self):
         self._upload_duplicate_document()

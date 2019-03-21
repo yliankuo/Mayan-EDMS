@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.events import EventTypeNamespace
 
 namespace = EventTypeNamespace(
-    name='user_management', label=_('User management')
+    label=_('User management'), name='user_management'
 )
 
 event_group_created = namespace.add_event_type(

@@ -1,10 +1,33 @@
 from __future__ import unicode_literals
 
-from django.apps import apps
-from django.utils.encoding import force_text
+from django.template.loader import render_to_string
 from django.utils.html import escape, mark_safe
 
-from .icons import icon_index, icon_index_level_up, icon_node_with_documents
+from .icons import (
+    icon_index, icon_index_level_up,
+    icon_index_instance_node_with_documents
+)
+
+
+class IndexInstanceNodeWidget(object):
+    def render(self, name, value):
+        return render_to_string(
+            template_name='document_indexing/index_instance_node.html',
+            context={
+                'index_instance_node': value,
+            }
+        )
+
+
+class IndexTemplateNodeIndentationWidget(object):
+    def render(self, name, value):
+        return render_to_string(
+            template_name='document_indexing/index_template_node_indentation.html',
+            context={
+                'index_template_node': value,
+                'index_template_node_level': range(value.get_level()),
+            }
+        )
 
 
 def get_instance_link(index_instance_node):
@@ -15,45 +38,6 @@ def get_instance_link(index_instance_node):
         s='<a href="{url}">{text}</a>'.format(
             url=index_instance_node.get_absolute_url(),
             text=escape(index_instance_node.get_full_path())
-        )
-    )
-
-
-def index_instance_item_link(index_instance_item):
-    #TODO: Replace with a file template
-    IndexInstanceNode = apps.get_model(
-        app_label='document_indexing', model_name='IndexInstanceNode'
-    )
-
-    if isinstance(index_instance_item, IndexInstanceNode):
-        if index_instance_item.index_template_node.link_documents:
-            icon = icon_node_with_documents.render()
-        else:
-            icon = icon_index_level_up.render()
-    else:
-        icon = ''
-
-    return mark_safe(
-        s='%(icon)s&nbsp;<a href="%(url)s">%(text)s</a>' % {
-            'url': index_instance_item.get_absolute_url(),
-            'icon': icon,
-            'text': index_instance_item
-        }
-    )
-
-
-def node_level(node):
-    """
-    Render an indented tree like output for a specific node
-    """
-    #TODO: Replace with a file template
-    return mark_safe(
-        s=''.join(
-            [
-                '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' * node.get_level(),
-                '' if node.is_root_node() else icon_index_level_up.render(),
-                force_text(node)
-            ]
         )
     )
 
@@ -71,7 +55,7 @@ def node_tree(node, user):
         else:
             element = ancestor
             if element.index_template_node.link_documents:
-                icon = icon_node_with_documents
+                icon = icon_index_instance_node_with_documents
             else:
                 icon = icon_index_level_up
 

@@ -10,10 +10,9 @@ from django.conf import settings
 from django.contrib.admin.utils import label_for_field
 from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 from django.db.models.constants import LOOKUP_SEP
-from django.shortcuts import resolve_url
 from django.template import VariableDoesNotExist, Variable
 from django.template.defaulttags import URLNode
-from django.urls import resolve
+from django.urls import reverse, resolve
 from django.utils.encoding import force_str, force_text
 from django.utils.translation import ugettext_lazy as _
 
@@ -22,6 +21,7 @@ from mayan.apps.common.literals import (
     TEXT_SORT_ORDER_CHOICE_ASCENDING, TEXT_SORT_ORDER_CHOICE_DESCENDING,
     TEXT_SORT_ORDER_PARAMETER, TEXT_SORT_ORDER_VARIABLE_NAME
 )
+from mayan.apps.common.settings import setting_home_view
 from mayan.apps.common.utils import resolve_attribute
 from mayan.apps.permissions import Permission
 
@@ -29,270 +29,6 @@ from .exceptions import NavigationError
 from .utils import get_current_view_name
 
 logger = logging.getLogger(__name__)
-
-
-class ResolvedLink(object):
-    def __init__(self, link, current_view_name):
-        self.current_view_name = current_view_name
-        self.disabled = False
-        self.link = link
-        self.url = '#'
-        self.context = None
-        self.request = None
-
-    @property
-    def active(self):
-        return self.link.view == self.current_view_name
-
-    @property
-    def description(self):
-        return self.link.description
-
-    @property
-    def html_data(self):
-        return self.link.html_data
-
-    @property
-    def html_extra_classes(self):
-        return self.link.html_extra_classes
-
-    @property
-    def icon(self):
-        return self.link.icon
-
-    @property
-    def icon_class(self):
-        return self.link.icon_class
-
-    @property
-    def tags(self):
-        return self.link.tags
-
-    @property
-    def text(self):
-        try:
-            return self.link.text(context=self.context)
-        except TypeError:
-            return self.link.text
-
-
-class Menu(object):
-    _registry = {}
-
-    @classmethod
-    def get(cls, name):
-        return cls._registry[name]
-
-    @classmethod
-    def remove(cls, name):
-        del cls._registry[name]
-
-    def __init__(self, name, condition=None, icon=None, icon_class=None, label=None, non_sorted_sources=None):
-        if name in self.__class__._registry:
-            raise Exception('A menu with this name already exists')
-
-        self.condition = condition
-        self.icon = icon
-        self.icon_class = icon_class
-        self.name = name
-        self.label = label
-        self.bound_links = {}
-        self.unbound_links = {}
-        self.link_positions = {}
-        self.__class__._registry[name] = self
-        self.non_sorted_sources = non_sorted_sources or []
-
-    def _map_links_to_source(self, links, source, map_variable='bound_links', position=None):
-        source_links = getattr(self, map_variable).setdefault(source, [])
-
-        for link in links:
-            source_links.append(link)
-            self.link_positions[link] = position
-
-    def add_unsorted_source(self, source):
-        self.non_sorted_sources.append(source)
-
-    def check_condition(self, context):
-        """
-        Check to see if menu has a conditional display function and return
-        the result of the condition function against the context.
-        """
-        if self.condition:
-            return self.condition(context=context)
-        else:
-            return True
-
-    def bind_links(self, links, sources=None, position=None):
-        """
-        Associate a link to a model, a view inside this menu
-        """
-        try:
-            for source in sources:
-                self._map_links_to_source(
-                    links=links, position=position, source=source
-                )
-        except TypeError:
-            # Unsourced links display always
-            self._map_links_to_source(
-                links=links, position=position, source=sources
-            )
-
-    def get_resolved_navigation_object_list(self, context, source):
-        resolved_navigation_object_list = []
-
-        if source:
-            resolved_navigation_object_list = [source]
-        else:
-            navigation_object_list = context.get(
-                'navigation_object_list', ('object',)
-            )
-
-            logger.debug('navigation_object_list: %s', navigation_object_list)
-
-            # Multiple objects
-            for navigation_object in navigation_object_list:
-                try:
-                    resolved_navigation_object_list.append(
-                        Variable(navigation_object).resolve(context)
-                    )
-                except VariableDoesNotExist:
-                    pass
-
-        logger.debug(
-            'resolved_navigation_object_list: %s',
-            force_text(resolved_navigation_object_list)
-        )
-        return resolved_navigation_object_list
-
-    def resolve(self, context, source=None, sort_results=False):
-        if not self.check_condition(context=context):
-            return []
-
-        result = []
-
-        try:
-            request = context.request
-        except AttributeError:
-            # Simple request extraction failed. Might not be a view context.
-            # Try alternate method.
-            try:
-                request = Variable('request').resolve(context)
-            except VariableDoesNotExist:
-                # There is no request variable, most probable a 500 in a test
-                # view. Don't return any resolved links then.
-                logger.warning('No request variable, aborting menu resolution')
-                return ()
-
-        current_view_name = get_current_view_name(request=request)
-        if not current_view_name:
-            return ()
-
-        resolved_navigation_object_list = self.get_resolved_navigation_object_list(
-            context=context, source=source
-        )
-
-        for resolved_navigation_object in resolved_navigation_object_list:
-            resolved_links = []
-
-            for bound_source, links in self.bound_links.items():
-                try:
-                    if inspect.isclass(bound_source):
-                        if type(resolved_navigation_object) == bound_source:
-                            for link in links:
-                                resolved_link = link.resolve(
-                                    context=context,
-                                    resolved_object=resolved_navigation_object
-                                )
-                                if resolved_link:
-                                    if resolved_link.link not in self.unbound_links.get(bound_source, ()):
-                                        resolved_links.append(resolved_link)
-                            # No need for further content object match testing
-                            break
-                        elif hasattr(resolved_navigation_object, 'get_deferred_fields') and resolved_navigation_object.get_deferred_fields() and isinstance(resolved_navigation_object, bound_source):
-                            # Second try for objects using .defer() or .only()
-                            for link in links:
-                                resolved_link = link.resolve(
-                                    context=context,
-                                    resolved_object=resolved_navigation_object
-                                )
-                                if resolved_link:
-                                    if resolved_link.link not in self.unbound_links.get(bound_source, ()):
-                                        resolved_links.append(resolved_link)
-                            # No need for further content object match testing
-                            break
-                except TypeError:
-                    # When source is a dictionary
-                    pass
-
-            if resolved_links:
-                result.append(resolved_links)
-
-        resolved_links = []
-        # View links
-        for link in self.bound_links.get(current_view_name, []):
-            resolved_link = link.resolve(context=context)
-            if resolved_link:
-                if resolved_link.link not in self.unbound_links.get(current_view_name, ()):
-                    resolved_links.append(resolved_link)
-
-        if resolved_links:
-            result.append(resolved_links)
-
-        resolved_links = []
-
-        # Main menu links
-        for link in self.bound_links.get(None, []):
-            if isinstance(link, Menu):
-                condition = link.check_condition(context=context)
-                if condition and link not in self.unbound_links.get(None, ()):
-                    resolved_links.append(link)
-            else:
-                # "Always show" links
-                resolved_link = link.resolve(context=context)
-                if resolved_link:
-                    if resolved_link.link not in self.unbound_links.get(None, ()):
-                        resolved_links.append(resolved_link)
-
-        if resolved_links:
-            result.append(resolved_links)
-
-        if result:
-            unsorted_source = False
-            for resolved_navigation_object in resolved_navigation_object_list:
-                for source in self.non_sorted_sources:
-                    if isinstance(resolved_navigation_object, source):
-                        unsorted_source = True
-                        break
-
-            if sort_results and not unsorted_source:
-                result[0] = sorted(
-                    result[0], key=lambda item: (
-                        item.link.text if isinstance(item, ResolvedLink) else item.label
-                    )
-                )
-            else:
-                # Sort links by position value passed during bind
-                result[0] = sorted(
-                    result[0], key=lambda item: (self.link_positions.get(item.link) or 0) if isinstance(item, ResolvedLink) else (self.link_positions.get(item) or 0)
-                )
-
-        return result
-
-    def unbind_links(self, links, sources=None):
-        """
-        Allow unbinding links from sources, used to allow 3rd party apps to
-        change the link binding of core apps
-        """
-        try:
-            for source in sources:
-                self._map_links_to_source(
-                    links=links, source=source, map_variable='unbound_links'
-                )
-        except TypeError:
-            # Unsourced links display always
-            self._map_links_to_source(
-                links=links, source=sources, map_variable='unbound_links'
-            )
 
 
 class Link(object):
@@ -306,14 +42,14 @@ class Link(object):
     def remove(cls, name):
         del cls._registry[name]
 
-    def __init__(self, text, view=None, args=None, condition=None,
+    def __init__(self, text=None, view=None, args=None, badge_text=None, condition=None,
                  conditional_disable=None, description=None, html_data=None,
                  html_extra_classes=None, icon=None, icon_class=None,
-                 keep_query=False, kwargs=None, name=None, permissions=None,
-                 permissions_related=None, remove_from_query=None, tags=None,
-                 url=None):
+                 keep_query=False, kwargs=None, name=None, permission=None,
+                 remove_from_query=None, tags=None, url=None):
 
         self.args = args or []
+        self.badge_text = badge_text
         self.condition = condition
         self.conditional_disable = conditional_disable
         self.description = description
@@ -324,8 +60,7 @@ class Link(object):
         self.keep_query = keep_query
         self.kwargs = kwargs or {}
         self.name = name
-        self.permissions = permissions or []
-        self.permissions_related = permissions_related
+        self.permission = permission
         self.remove_from_query = remove_from_query or []
         self.tags = tags
         self.text = text
@@ -359,19 +94,19 @@ class Link(object):
 
         # If this link has a required permission check that the user has it
         # too
-        if self.permissions:
+        if self.permission:
             if resolved_object:
                 try:
                     AccessControlList.objects.check_access(
-                        permissions=self.permissions, user=request.user,
-                        obj=resolved_object, related=self.permissions_related
+                        obj=resolved_object, permission=self.permission,
+                        user=request.user
                     )
                 except PermissionDenied:
                     return None
             else:
                 try:
-                    Permission.check_permissions(
-                        requester=request.user, permissions=self.permissions
+                    Permission.check_user_permission(
+                        permission=self.permission, user=request.user
                     )
                 except PermissionDenied:
                     return None
@@ -436,7 +171,7 @@ class Link(object):
             parsed_url = furl(
                 force_str(
                     request.get_full_path() or request.META.get(
-                        'HTTP_REFERER', resolve_url(settings.LOGIN_REDIRECT_URL)
+                        'HTTP_REFERER', reverse(setting_home_view.value)
                     )
                 )
             )
@@ -454,6 +189,313 @@ class Link(object):
 
         resolved_link.context = context
         return resolved_link
+
+
+class Menu(object):
+    _registry = {}
+
+    @classmethod
+    def get(cls, name):
+        return cls._registry[name]
+
+    @classmethod
+    def remove(cls, name):
+        del cls._registry[name]
+
+    def __init__(self, name, condition=None, icon=None, icon_class=None, label=None, non_sorted_sources=None):
+        if name in self.__class__._registry:
+            raise Exception('A menu with this name already exists')
+
+        self.condition = condition
+        self.icon = icon
+        self.icon_class = icon_class
+        self.name = name
+        self.label = label
+        self.bound_links = {}
+        self.unbound_links = {}
+        self.link_positions = {}
+        self.__class__._registry[name] = self
+        self.non_sorted_sources = non_sorted_sources or []
+
+    def __repr__(self):
+        return '<Menu: {}>'.format(self.name)
+
+    def _map_links_to_source(self, links, source, map_variable='bound_links', position=None):
+        source_links = getattr(self, map_variable).setdefault(source, [])
+
+        for link in links:
+            source_links.append(link)
+            self.link_positions[link] = position
+
+    def add_unsorted_source(self, source):
+        self.non_sorted_sources.append(source)
+
+    def check_condition(self, context):
+        """
+        Check to see if menu has a conditional display function and return
+        the result of the condition function against the context.
+        """
+        if self.condition:
+            return self.condition(context=context)
+        else:
+            return True
+
+    def bind_links(self, links, sources=None, position=None):
+        """
+        Associate a link to a model, a view inside this menu
+        """
+        try:
+            for source in sources:
+                self._map_links_to_source(
+                    links=links, position=position, source=source
+                )
+        except TypeError:
+            # Unsourced links display always
+            self._map_links_to_source(
+                links=links, position=position, source=sources
+            )
+
+    def get_resolved_navigation_object_list(self, context, source):
+        resolved_navigation_object_list = []
+
+        if source:
+            resolved_navigation_object_list = [source]
+        else:
+            navigation_object_list = context.get(
+                'navigation_object_list', ('object',)
+            )
+
+            logger.debug('navigation_object_list: %s', navigation_object_list)
+
+            # Multiple objects
+            for navigation_object in navigation_object_list:
+                try:
+                    resolved_navigation_object_list.append(
+                        Variable(navigation_object).resolve(context)
+                    )
+                except VariableDoesNotExist:
+                    pass
+
+        logger.debug(
+            'resolved_navigation_object_list: %s',
+            force_text(resolved_navigation_object_list)
+        )
+        return resolved_navigation_object_list
+
+    def get_result_position(self, item):
+        """
+        Method to help sort results by position.
+        """
+        if isinstance(item, ResolvedLink):
+            return self.link_positions.get(item.link, 0)
+        else:
+            return self.link_positions.get(item, 0)
+
+    def get_result_label(self, item):
+        """
+        Method to help sort results by label.
+        """
+        if isinstance(item, ResolvedLink):
+            return item.link.text
+        else:
+            return item.label
+
+    def resolve(self, context, source=None, sort_results=False):
+        if not self.check_condition(context=context):
+            return []
+
+        result = []
+
+        try:
+            request = context.request
+        except AttributeError:
+            # Simple request extraction failed. Might not be a view context.
+            # Try alternate method.
+            try:
+                request = Variable('request').resolve(context)
+            except VariableDoesNotExist:
+                # There is no request variable, most probable a 500 in a test
+                # view. Don't return any resolved links then.
+                logger.warning('No request variable, aborting menu resolution')
+                return ()
+
+        current_view_name = get_current_view_name(request=request)
+        if not current_view_name:
+            return ()
+
+        resolved_navigation_object_list = self.get_resolved_navigation_object_list(
+            context=context, source=source
+        )
+
+        for resolved_navigation_object in resolved_navigation_object_list:
+            resolved_links = []
+
+            for bound_source, links in self.bound_links.items():
+                try:
+                    if inspect.isclass(bound_source):
+                        if type(resolved_navigation_object) == bound_source:
+                            for link in links:
+                                resolved_link = link.resolve(
+                                    context=context,
+                                    resolved_object=resolved_navigation_object
+                                )
+                                if resolved_link:
+                                    if resolved_link.link not in self.unbound_links.get(bound_source, ()):
+                                        resolved_links.append(resolved_link)
+                            # No need for further content object match testing
+                            break
+                        elif hasattr(resolved_navigation_object, 'get_deferred_fields') and resolved_navigation_object.get_deferred_fields() and isinstance(resolved_navigation_object, bound_source):
+                            # Second try for objects using .defer() or .only()
+                            for link in links:
+                                resolved_link = link.resolve(
+                                    context=context,
+                                    resolved_object=resolved_navigation_object
+                                )
+                                if resolved_link:
+                                    if resolved_link.link not in self.unbound_links.get(bound_source, ()):
+                                        resolved_links.append(resolved_link)
+                            # No need for further content object match testing
+                            break
+                except TypeError:
+                    # When source is a dictionary
+                    pass
+
+            if resolved_links:
+                result.append(
+                    {
+                        'object': resolved_navigation_object,
+                        'links': resolved_links
+                    }
+                )
+
+        resolved_links = []
+        # View links
+        for link in self.bound_links.get(current_view_name, []):
+            resolved_link = link.resolve(context=context)
+            if resolved_link:
+                if resolved_link.link not in self.unbound_links.get(current_view_name, ()):
+                    resolved_links.append(resolved_link)
+
+        if resolved_links:
+            result.append(
+                {
+                    'object': current_view_name,
+                    'links': resolved_links
+                }
+            )
+
+        resolved_links = []
+
+        # Main menu links
+        for link in self.bound_links.get(None, []):
+            if isinstance(link, Menu):
+                condition = link.check_condition(context=context)
+                if condition and link not in self.unbound_links.get(None, ()):
+                    resolved_links.append(link)
+            else:
+                # "Always show" links
+                resolved_link = link.resolve(context=context)
+                if resolved_link:
+                    if resolved_link.link not in self.unbound_links.get(None, ()):
+                        resolved_links.append(resolved_link)
+
+        if resolved_links:
+            result.append(
+                {
+                    'object': None,
+                    'links': resolved_links
+                }
+            )
+
+        if result:
+            unsorted_source = False
+            for resolved_navigation_object in resolved_navigation_object_list:
+                for source in self.non_sorted_sources:
+                    if isinstance(resolved_navigation_object, source):
+                        unsorted_source = True
+                        break
+
+            if sort_results and not unsorted_source:
+                for link_group in result:
+                    link_group['links'] = sorted(
+                        link_group['links'], key=self.get_result_label
+                    )
+            else:
+                for link_group in result:
+                    link_group['links'] = sorted(
+                        link_group['links'], key=self.get_result_position
+                    )
+
+        return result
+
+    def unbind_links(self, links, sources=None):
+        """
+        Allow unbinding links from sources, used to allow 3rd party apps to
+        change the link binding of core apps
+        """
+        try:
+            for source in sources:
+                self._map_links_to_source(
+                    links=links, source=source, map_variable='unbound_links'
+                )
+        except TypeError:
+            # Unsourced links display always
+            self._map_links_to_source(
+                links=links, source=sources, map_variable='unbound_links'
+            )
+
+
+class ResolvedLink(object):
+    def __init__(self, link, current_view_name):
+        self.context = None
+        self.current_view_name = current_view_name
+        self.disabled = False
+        self.link = link
+        self.request = None
+        self.url = '#'
+
+    def __repr__(self):
+        return '<ResolvedLink: {}>'.format(self.url)
+
+    @property
+    def active(self):
+        return self.link.view == self.current_view_name
+
+    @property
+    def badge_text(self):
+        if self.link.badge_text:
+            return self.link.badge_text(context=self.context)
+
+    @property
+    def description(self):
+        return self.link.description
+
+    @property
+    def html_data(self):
+        return self.link.html_data
+
+    @property
+    def html_extra_classes(self):
+        return self.link.html_extra_classes
+
+    @property
+    def icon(self):
+        return self.link.icon
+
+    @property
+    def icon_class(self):
+        return self.link.icon_class
+
+    @property
+    def tags(self):
+        return self.link.tags
+
+    @property
+    def text(self):
+        try:
+            return self.link.text(context=self.context)
+        except TypeError:
+            return self.link.text
 
 
 class Separator(Link):
@@ -563,7 +605,12 @@ class SourceColumn(object):
 
         return final_result
 
-    def __init__(self, source, attribute=None, empty_value=None, func=None, include_label=False, is_absolute_url=False, is_identifier=False, is_sortable=False, kwargs=None, label=None, order=None, views=None, widget=None):
+    def __init__(
+        self, source, attribute=None, empty_value=None, func=None,
+        include_label=False, is_absolute_url=False, is_identifier=False,
+        is_sortable=False, kwargs=None, label=None, order=None, sort_field=None,
+        views=None, widget=None
+    ):
         self.source = source
         self._label = label
         self.attribute = attribute
@@ -578,12 +625,9 @@ class SourceColumn(object):
         self.__class__._registry.setdefault(source, [])
         self.__class__._registry[source].append(self)
         self.label = None
+        self.sort_field = sort_field
         self.views = views or []
         self.widget = widget
-        if not attribute and not func:
-            raise NavigationError(
-                'Must provide either an attribute or a function'
-            )
 
         self._calculate_label()
 
@@ -609,6 +653,12 @@ class SourceColumn(object):
 
         self.label = self._label
 
+    def get_sort_field(self):
+        if self.sort_field:
+            return self.sort_field
+        else:
+            return self.attribute
+
     def get_sort_field_querystring(self, context):
         # We do this to get an mutable copy we can modify
         querystring = context.request.GET.copy()
@@ -618,7 +668,7 @@ class SourceColumn(object):
             TEXT_SORT_ORDER_VARIABLE_NAME, TEXT_SORT_ORDER_CHOICE_DESCENDING
         )
 
-        if previous_sort_field != self.attribute:
+        if previous_sort_field != self.get_sort_field():
             sort_order = TEXT_SORT_ORDER_CHOICE_ASCENDING
         else:
             if previous_sort_order == TEXT_SORT_ORDER_CHOICE_DESCENDING:
@@ -626,7 +676,7 @@ class SourceColumn(object):
             else:
                 sort_order = TEXT_SORT_ORDER_CHOICE_DESCENDING
 
-        querystring[TEXT_SORT_FIELD_PARAMETER] = self.attribute
+        querystring[TEXT_SORT_FIELD_PARAMETER] = self.get_sort_field()
         querystring[TEXT_SORT_ORDER_PARAMETER] = sort_order
 
         return '?{}'.format(querystring.urlencode())
@@ -638,11 +688,13 @@ class SourceColumn(object):
 
         if self.attribute:
             result = resolve_attribute(
-                obj=context['object'], attribute=self.attribute,
-                kwargs=self.kwargs
+                attribute=self.attribute, kwargs=self.kwargs,
+                obj=context['object']
             )
         elif self.func:
             result = self.func(context=context, **self.kwargs)
+        else:
+            result = context['object']
 
         if self.widget:
             widget_instance = self.widget()

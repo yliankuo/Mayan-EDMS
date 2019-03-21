@@ -6,55 +6,55 @@ from mayan.apps.common.queues import queue_tools
 from mayan.apps.task_manager.classes import CeleryQueue
 
 queue_converter = CeleryQueue(
-    name='converter', label=_('Converter'), transient=True
+    label=_('Converter'), name='converter', transient=True
 )
 queue_documents_periodic = CeleryQueue(
-    name='documents_periodic', label=_('Documents periodic'), transient=True
+    label=_('Documents periodic'), name='documents_periodic', transient=True
 )
 queue_uploads = CeleryQueue(
-    name='uploads', label=_('Uploads')
+    label=_('Uploads'), name='uploads'
 )
 queue_documents = CeleryQueue(
-    name='documents', label=_('Documents')
+    label=_('Documents'), name='documents'
 )
 
 queue_converter.add_task_type(
-    name='mayan.apps.documents.tasks.task_generate_document_page_image',
-    label=_('Generate document page image')
+    label=_('Generate document page image'),
+    name='mayan.apps.documents.tasks.task_generate_document_page_image'
 )
 
 queue_documents.add_task_type(
-    name='mayan.apps.documents.tasks.task_delete_document',
-    label=_('Delete a document')
+    label=_('Delete a document'),
+    name='mayan.apps.documents.tasks.task_delete_document'
 )
 queue_documents.add_task_type(
-    name='mayan.apps.documents.tasks.task_clean_empty_duplicate_lists',
-    label=_('Clean empty duplicate lists')
+    label=_('Clean empty duplicate lists'),
+    name='mayan.apps.documents.tasks.task_clean_empty_duplicate_lists'
 )
 
 queue_documents_periodic.add_task_type(
-    name='mayan.apps.documents.tasks.task_check_delete_periods',
-    label=_('Check document type delete periods')
+    label=_('Check document type delete periods'),
+    name='mayan.apps.documents.tasks.task_check_delete_periods'
 )
 queue_documents_periodic.add_task_type(
-    name='mayan.apps.documents.tasks.task_check_trash_periods',
-    label=_('Check document type trash periods')
+    label=_('Check document type trash periods'),
+    name='mayan.apps.documents.tasks.task_check_trash_periods'
 )
 queue_documents_periodic.add_task_type(
-    name='mayan.apps.documents.tasks.task_delete_stubs',
-    label=_('Delete document stubs')
+    label=_('Delete document stubs'),
+    name='mayan.apps.documents.tasks.task_delete_stubs'
 )
 
 queue_tools.add_task_type(
-    name='mayan.apps.documents.tasks.task_clear_image_cache',
-    label=_('Clear image cache')
+    label=_('Clear image cache'),
+    name='mayan.apps.documents.tasks.task_clear_image_cache'
 )
 
 queue_uploads.add_task_type(
-    name='mayan.apps.documents.tasks.task_update_page_count',
-    label=_('Update document page count')
+    label=_('Update document page count'),
+    name='mayan.apps.documents.tasks.task_update_page_count'
 )
 queue_uploads.add_task_type(
-    name='mayan.apps.documents.tasks.task_upload_new_version',
-    label=_('Upload new document version')
+    label=_('Upload new document version'),
+    name='mayan.apps.documents.tasks.task_upload_new_version'
 )

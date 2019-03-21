@@ -11,24 +11,18 @@ from ..permissions import (
 )
 
 from .literals import (
-    TEST_LABEL, TEST_LABEL_EDITED, TEST_MESSAGE, TEST_MESSAGE_EDITED
+    TEST_MESSAGE_LABEL, TEST_MESSAGE_LABEL_EDITED, TEST_MESSAGE_TEXT,
+    TEST_MESSAGE_TEXT_EDITED
 )
+from .mixins import MOTDTestMixin
 
 
-class MOTDAPITestCase(BaseAPITestCase):
-    def setUp(self):
-        super(MOTDAPITestCase, self).setUp()
-        self.login_user()
-
-    def _create_message(self):
-        return Message.objects.create(
-            label=TEST_LABEL, message=TEST_MESSAGE
-        )
-
+class MOTDAPITestCase(MOTDTestMixin, BaseAPITestCase):
     def _request_message_create_view(self):
         return self.post(
             viewname='rest_api:message-list', data={
-                'label': TEST_LABEL, 'message': TEST_MESSAGE
+                'label': TEST_MESSAGE_LABEL,
+                'message': TEST_MESSAGE_TEXT
             }
         )
 
@@ -44,103 +38,107 @@ class MOTDAPITestCase(BaseAPITestCase):
 
         message = Message.objects.first()
         self.assertEqual(response.data['id'], message.pk)
-        self.assertEqual(response.data['label'], TEST_LABEL)
-        self.assertEqual(response.data['message'], TEST_MESSAGE)
+        self.assertEqual(response.data['label'], TEST_MESSAGE_LABEL)
+        self.assertEqual(response.data['message'], TEST_MESSAGE_TEXT)
 
         self.assertEqual(Message.objects.count(), 1)
-        self.assertEqual(message.label, TEST_LABEL)
-        self.assertEqual(message.message, TEST_MESSAGE)
+        self.assertEqual(message.label, TEST_MESSAGE_LABEL)
+        self.assertEqual(message.message, TEST_MESSAGE_TEXT)
 
     def _request_message_delete_view(self):
         return self.delete(
-            viewname='rest_api:message-detail', args=(self.message.pk,)
+            viewname='rest_api:message-detail',
+            kwargs={'message_id': self.test_message.pk},
         )
 
     def test_message_delete_view_no_access(self):
-        self.message = self._create_message()
+        self._create_test_message()
         response = self._request_message_delete_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(Message.objects.count(), 1)
 
     def test_message_delete_view_with_access(self):
-        self.message = self._create_message()
-        self.grant_access(permission=permission_message_delete, obj=self.message)
+        self._create_test_message()
+        self.grant_access(permission=permission_message_delete, obj=self.test_message)
         response = self._request_message_delete_view()
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Message.objects.count(), 0)
 
     def _request_message_detail_view(self):
         return self.get(
-            viewname='rest_api:message-detail', args=(self.message.pk,)
+            viewname='rest_api:message-detail',
+            kwargs={'message_id': self.test_message.pk},
         )
 
     def test_message_detail_view_no_access(self):
-        self.message = self._create_message()
+        self._create_test_message()
         response = self._request_message_detail_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_message_detail_view_with_access(self):
-        self.message = self._create_message()
-        self.grant_access(permission=permission_message_view, obj=self.message)
+        self._create_test_message()
+        self.grant_access(permission=permission_message_view, obj=self.test_message)
         response = self._request_message_detail_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(response.data['label'], TEST_LABEL)
+        self.assertEqual(response.data['label'], TEST_MESSAGE_LABEL)
 
     def _request_message_edit_via_patch_view(self):
         return self.patch(
-            viewname='rest_api:message-detail', args=(self.message.pk,),
+            viewname='rest_api:message-detail',
+            kwargs={'message_id': self.test_message.pk},
             data={
-                'label': TEST_LABEL_EDITED,
-                'message': TEST_MESSAGE_EDITED
+                'label': TEST_MESSAGE_LABEL_EDITED,
+                'message': TEST_MESSAGE_TEXT_EDITED
             }
         )
 
     def test_message_edit_via_patch_view_no_access(self):
-        self.message = self._create_message()
+        self._create_test_message()
         response = self._request_message_edit_via_patch_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        self.message.refresh_from_db()
+        self.test_message.refresh_from_db()
 
-        self.assertEqual(self.message.label, TEST_LABEL)
-        self.assertEqual(self.message.message, TEST_MESSAGE)
+        self.assertEqual(self.test_message.label, TEST_MESSAGE_LABEL)
+        self.assertEqual(self.test_message.message, TEST_MESSAGE_TEXT)
 
     def test_message_edit_via_patch_view_with_access(self):
-        self.message = self._create_message()
-        self.grant_access(permission=permission_message_edit, obj=self.message)
+        self._create_test_message()
+        self.grant_access(permission=permission_message_edit, obj=self.test_message)
         response = self._request_message_edit_via_patch_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.message.refresh_from_db()
-        self.assertEqual(self.message.label, TEST_LABEL_EDITED)
-        self.assertEqual(self.message.message, TEST_MESSAGE_EDITED)
+        self.test_message.refresh_from_db()
+        self.assertEqual(self.test_message.label, TEST_MESSAGE_LABEL_EDITED)
+        self.assertEqual(self.test_message.message, TEST_MESSAGE_TEXT_EDITED)
 
     def _request_message_edit_via_put_view(self):
         return self.put(
-            viewname='rest_api:message-detail', args=(self.message.pk,),
+            viewname='rest_api:message-detail',
+            kwargs={'message_id': self.test_message.pk},
             data={
-                'label': TEST_LABEL_EDITED,
-                'message': TEST_MESSAGE_EDITED
+                'label': TEST_MESSAGE_LABEL_EDITED,
+                'message': TEST_MESSAGE_TEXT_EDITED
             }
         )
 
     def test_message_edit_via_put_view_no_access(self):
-        self.message = self._create_message()
+        self._create_test_message()
         response = self._request_message_edit_via_put_view()
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-        self.message.refresh_from_db()
+        self.test_message.refresh_from_db()
 
-        self.assertEqual(self.message.label, TEST_LABEL)
-        self.assertEqual(self.message.message, TEST_MESSAGE)
+        self.assertEqual(self.test_message.label, TEST_MESSAGE_LABEL)
+        self.assertEqual(self.test_message.message, TEST_MESSAGE_TEXT)
 
     def test_message_edit_via_put_view_with_access(self):
-        self.message = self._create_message()
-        self.grant_access(permission=permission_message_edit, obj=self.message)
+        self._create_test_message()
+        self.grant_access(permission=permission_message_edit, obj=self.test_message)
         response = self._request_message_edit_via_put_view()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.message.refresh_from_db()
-        self.assertEqual(self.message.label, TEST_LABEL_EDITED)
-        self.assertEqual(self.message.message, TEST_MESSAGE_EDITED)
+        self.test_message.refresh_from_db()
+        self.assertEqual(self.test_message.label, TEST_MESSAGE_LABEL_EDITED)
+        self.assertEqual(self.test_message.message, TEST_MESSAGE_TEXT_EDITED)

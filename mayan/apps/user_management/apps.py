@@ -22,7 +22,10 @@ from mayan.apps.metadata import MetadataLookup
 from mayan.apps.navigation import SourceColumn
 from mayan.apps.rest_api.fields import DynamicSerializerField
 
-from .events import event_user_edited
+from .events import (
+    event_group_created, event_group_edited, event_user_created,
+    event_user_edited
+)
 from .handlers import handler_initialize_new_user_options
 from .links import (
     link_current_user_details, link_current_user_edit, link_group_create,
@@ -33,14 +36,19 @@ from .links import (
     link_user_set_password, link_user_setup, text_user_label,
     separator_user_label
 )
-from .methods import method_get_absolute_url
+from .methods import (
+    get_method_group_save, get_method_user_save, method_group_get_users,
+    method_group_users_add, method_group_users_remove,
+    method_user_get_absolute_url, method_user_get_groups,
+    method_user_groups_add, method_user_groups_remove
+)
 from .permissions import (
     permission_group_delete, permission_group_edit,
     permission_group_view, permission_user_delete, permission_user_edit,
     permission_user_view
 )
 from .search import *  # NOQA
-from .utils import get_groups, get_users
+from .utils import lookup_get_groups, lookup_get_users
 
 
 class UserManagementApp(MayanAppConfig):
@@ -63,17 +71,30 @@ class UserManagementApp(MayanAppConfig):
             serializer_class='mayan.apps.user_management.serializers.UserSerializer'
         )
 
+        # Silence UnorderedObjectListWarning
+        # "Pagination may yield inconsistent result"
+        # TODO: Remove on Django 2.x
+        Group._meta.ordering = ('name',)
+        Group.add_to_class(name='get_users', value=method_group_get_users)
+        Group.add_to_class(name='save', value=get_method_group_save())
+        Group.add_to_class(name='users_add', value=method_group_users_add)
+        Group.add_to_class(name='users_remove', value=method_group_users_remove)
+
         MetadataLookup(
             description=_('All the groups.'), name='groups',
-            value=get_groups
+            value=lookup_get_groups
         )
         MetadataLookup(
             description=_('All the users.'), name='users',
-            value=get_users
+            value=lookup_get_users
         )
 
         ModelEventType.register(
-            model=User, event_types=(event_user_edited,)
+            event_types=(event_group_created, event_group_edited), model=Group
+        )
+
+        ModelEventType.register(
+            event_types=(event_user_created, event_user_edited), model=User
         )
 
         ModelPermission.register(
@@ -123,13 +144,29 @@ class UserManagementApp(MayanAppConfig):
             source=User, widget=TwoStateWidget
         )
 
+        # Silence UnorderedObjectListWarning
+        # "Pagination may yield inconsistent result"
+        # TODO: Remove on Django 2.x
+        User._meta.ordering = ('pk',)
         User.add_to_class(
-            name='get_absolute_url', value=method_get_absolute_url
+            name='get_absolute_url', value=method_user_get_absolute_url
         )
+        User.add_to_class(
+            name='get_groups', value=method_user_get_groups
+        )
+        User.add_to_class(
+            name='groups_add', value=method_user_groups_add
+        )
+        User.add_to_class(
+            name='groups_remove', value=method_user_groups_remove
+        )
+        User.add_to_class(name='save', value=get_method_user_save())
 
         menu_list_facet.bind_links(
             links=(
-                link_acl_list, link_group_members,
+                link_acl_list, link_events_for_object,
+                link_object_event_types_user_subcriptions_list,
+                link_group_members,
             ), sources=(Group,)
         )
 
@@ -138,8 +175,7 @@ class UserManagementApp(MayanAppConfig):
                 link_acl_list, link_events_for_object,
                 link_object_event_types_user_subcriptions_list,
                 link_user_groups,
-            ),
-            sources=(User,)
+            ), sources=(User,)
         )
 
         menu_multi_item.bind_links(
@@ -147,12 +183,10 @@ class UserManagementApp(MayanAppConfig):
             sources=('user_management:user_list',)
         )
         menu_object.bind_links(
-            links=(link_group_edit,),
-            sources=(Group,)
+            links=(link_group_edit,), sources=(Group,)
         )
         menu_object.bind_links(
-            links=(link_group_delete,), position=99,
-            sources=(Group,)
+            links=(link_group_delete,), position=99, sources=(Group,)
         )
         menu_object.bind_links(
             links=(

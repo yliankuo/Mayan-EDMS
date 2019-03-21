@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common import MayanAppConfig, menu_object, menu_sidebar
+from mayan.apps.acls.classes import ModelPermission
+from mayan.apps.common import MayanAppConfig, menu_object, menu_secondary
 from mayan.apps.navigation import SourceColumn
 
 from .links import (
@@ -23,25 +23,31 @@ class ConverterApp(MayanAppConfig):
     def ready(self):
         super(ConverterApp, self).ready()
 
-        Transformation = self.get_model('Transformation')
+        Transformation = self.get_model(model_name='Transformation')
 
-        SourceColumn(source=Transformation, label=_('Order'), attribute='order')
+        ModelPermission.register_inheritance(
+            model=Transformation, related='content_object'
+        )
+
         SourceColumn(
-            source=Transformation, label=_('Transformation'),
-            func=lambda context: force_text(context['object'])
+            attribute='order', include_label=True, source=Transformation
         )
         SourceColumn(
-            source=Transformation, label=_('Arguments'), attribute='arguments'
+            attribute='get_transformation_label', is_identifier=True,
+            source=Transformation
+        )
+        SourceColumn(
+            attribute='arguments', include_label=True, source=Transformation
         )
 
         menu_object.bind_links(
             links=(link_transformation_edit, link_transformation_delete),
             sources=(Transformation,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_transformation_create,), sources=(Transformation,)
         )
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_transformation_create,),
             sources=(
                 'converter:transformation_create',

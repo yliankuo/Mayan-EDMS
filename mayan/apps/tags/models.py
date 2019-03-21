@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -15,7 +15,6 @@ from .events import (
     event_tag_attach, event_tag_created, event_tag_edited, event_tag_remove
 )
 from .managers import DocumentTagManager
-from .widgets import widget_single_tag
 
 
 @python_2_unicode_compatible
@@ -45,43 +44,46 @@ class Tag(models.Model):
     def __str__(self):
         return self.label
 
-    def attach_to(self, document, user=None):
+    def documents_attach(self, queryset, _user=None):
         """
         Attach a tag to a document and commit the corresponding event.
         """
-        self.documents.add(document)
-        event_tag_attach.commit(
-            action_object=self, actor=user, target=document
-        )
+        with transaction.atomic():
+            for document in queryset:
+                self.documents.add(document)
+                event_tag_attach.commit(
+                    action_object=self, actor=_user, target=document
+                )
 
-    def get_absolute_url(self):
-        return reverse(
-            viewname='tags:tag_tagged_item_list', kwargs={'tag_pk': str(self.pk)}
-        )
-
-    def get_document_count(self, user):
-        """
-        Return the numeric count of documents that have this tag attached.
-        The count if filtered by access.
-        """
-        queryset = AccessControlList.objects.filter_by_access(
-            permission_document_view, user, queryset=self.documents
-        )
-
-        return queryset.count()
-
-    def get_preview_widget(self):
-        return widget_single_tag(tag=self)
-    get_preview_widget.short_description = _('Preview')
-
-    def remove_from(self, document, user=None):
+    def documents_remove(self, queryset, _user=None):
         """
         Remove a tag from a document and commit the corresponding event.
         """
-        self.documents.remove(document)
-        event_tag_remove.commit(
-            action_object=self, actor=user, target=document
+        with transaction.atomic():
+            for document in queryset:
+                self.documents.remove(document)
+                event_tag_remove.commit(
+                    action_object=self, actor=_user, target=document
+                )
+
+    def get_absolute_url(self):
+        return reverse(
+            viewname='tags:tag_document_list', kwargs={
+                'tag_id': self.pk
+            }
         )
+
+    def get_documents(self, user):
+        """
+        Return a filtered queryset documents that have this tag attached.
+        """
+        return AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view, queryset=self.documents.all(),
+            user=user
+        )
+
+    def get_document_count(self, user):
+        return self.get_documents(user=user).count()
 
     def save(self, *args, **kwargs):
         user = kwargs.pop('_user', None)

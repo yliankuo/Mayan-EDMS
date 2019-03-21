@@ -26,12 +26,8 @@ from .mixins import MailerTestMixin
 
 
 class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
-    def setUp(self):
-        super(MailerViewsTestCase, self).setUp()
-        self.login_user()
-
     def test_user_mailer_create_view_no_permissions(self):
-        response = self._request_user_mailer_create()
+        response = self._request_test_user_mailer_create()
 
         self.assertNotContains(
             response, text=TestBackend.label, status_code=403
@@ -41,7 +37,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
     def test_user_mailer_create_view_with_permission(self):
         self.grant_permission(permission=permission_user_mailer_create)
 
-        response = self._request_user_mailer_create()
+        response = self._request_test_user_mailer_create()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(UserMailer.objects.count(), 1)
@@ -49,7 +45,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
     def test_user_mailer_delete_view_no_permissions(self):
         self._create_user_mailer()
 
-        response = self._request_user_mailer_delete()
+        response = self._request_test_user_mailer_delete()
         self.assertEqual(response.status_code, 404)
 
         self.assertQuerysetEqual(
@@ -63,7 +59,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
             obj=self.user_mailer, permission=permission_user_mailer_delete
         )
 
-        response = self._request_user_mailer_delete()
+        response = self._request_test_user_mailer_delete()
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(UserMailer.objects.count(), 0)
@@ -71,7 +67,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
     def test_user_mailer_edit_view_no_permission(self):
         self._create_user_mailer()
 
-        response = self._request_user_mailer_edit()
+        response = self._request_test_user_mailer_edit()
         self.assertEqual(response.status_code, 404)
 
         self.user_mailer.refresh_from_db()
@@ -84,7 +80,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
             obj=self.user_mailer, permission=permission_user_mailer_edit
         )
 
-        response = self._request_user_mailer_edit()
+        response = self._request_test_user_mailer_edit()
         self.assertEqual(response.status_code, 302)
 
         self.user_mailer.refresh_from_db()
@@ -93,7 +89,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
     def test_user_mailer_list_view_no_permissions(self):
         self._create_user_mailer()
 
-        response = self._request_user_mailer_list_view()
+        response = self._request_test_user_mailer_list_view()
         self.assertNotContains(
             response, text=self.user_mailer.label, status_code=200
         )
@@ -104,7 +100,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
         self.grant_access(
             permission=permission_user_mailer_view, obj=self.user_mailer
         )
-        response = self._request_user_mailer_list_view()
+        response = self._request_test_user_mailer_list_view()
 
         self.assertContains(
             response, text=self.user_mailer.label, status_code=200
@@ -113,7 +109,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
     def test_user_mailer_test_view_no_permissions(self):
         self._create_user_mailer()
 
-        response = self._request_user_mailer_test()
+        response = self._request_test_user_mailer_test()
 
         self.assertEqual(response.status_code, 404)
 
@@ -126,7 +122,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
             obj=self.user_mailer, permission=permission_user_mailer_use
         )
 
-        response = self._request_user_mailer_test()
+        response = self._request_test_user_mailer_test()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 1)
@@ -141,7 +137,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
         )
 
         self.test_email_address = TEST_RECIPIENTS_MULTIPLE_COMMA
-        response = self._request_user_mailer_test()
+        response = self._request_test_user_mailer_test()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
@@ -157,7 +153,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
         )
 
         self.test_email_address = TEST_RECIPIENTS_MULTIPLE_MIXED
-        response = self._request_user_mailer_test()
+        response = self._request_test_user_mailer_test()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
@@ -173,7 +169,7 @@ class MailerViewsTestCase(MailerTestMixin, GenericViewTestCase):
         )
 
         self.test_email_address = TEST_RECIPIENTS_MULTIPLE_SEMICOLON
-        response = self._request_user_mailer_test()
+        response = self._request_test_user_mailer_test()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].from_email, TEST_EMAIL_FROM_ADDRESS)
@@ -190,7 +186,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
     def _request_document_link_send(self):
         return self.post(
             viewname='mailer:document_send_link',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={
                 'email': getattr(
                     self, 'test_email_address', TEST_EMAIL_ADDRESS
@@ -202,7 +198,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
     def _request_document_send(self):
         return self.post(
             viewname='mailer:document_send',
-            kwargs={'document_pk': self.document.pk},
+            kwargs={'document_id': self.document.pk},
             data={
                 'email': getattr(
                     self, 'test_email_address', TEST_EMAIL_ADDRESS
@@ -216,10 +212,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
         response = self._request_document_link_send()
 
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=200
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=200
+            response=response, text=self.document.label, status_code=404
         )
         self.assertEqual(len(mail.outbox), 0)
 
@@ -248,10 +244,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_link_send()
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=302
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=302
+            response=response, text=self.document.label, status_code=404
         )
 
         self.assertEqual(len(mail.outbox), 0)
@@ -278,10 +274,10 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_send()
         self.assertNotContains(
-            response=response, text=self.user_mailer.label, status_code=200
+            response=response, text=self.user_mailer.label, status_code=404
         )
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=200
+            response=response, text=self.document.label, status_code=404
         )
         self.assertEqual(len(mail.outbox), 0)
 
@@ -311,7 +307,7 @@ class DocumentViewsTestCase(MailerTestMixin, GenericDocumentViewTestCase):
 
         response = self._request_document_send()
         self.assertNotContains(
-            response=response, text=self.document.label, status_code=302
+            response=response, text=self.document.label, status_code=404
         )
 
         self.assertEqual(len(mail.outbox), 0)

@@ -16,9 +16,7 @@ from .links import (
     link_events_list, link_notification_mark_read,
     link_notification_mark_read_all, link_user_notifications_list
 )
-from .widgets import (
-    widget_event_actor_link, widget_event_type_link
-)
+from .widgets import widget_event_actor_link, widget_event_type_link
 
 
 class EventsApp(MayanAppConfig):
@@ -31,6 +29,7 @@ class EventsApp(MayanAppConfig):
 
     def ready(self):
         super(EventsApp, self).ready()
+
         Action = apps.get_model(app_label='actstream', model_name='Action')
         Notification = self.get_model(model_name='Notification')
         StoredEventType = self.get_model(model_name='StoredEventType')
@@ -56,10 +55,10 @@ class EventsApp(MayanAppConfig):
         )
 
         SourceColumn(
-            source=StoredEventType, label=_('Namespace'), attribute='namespace'
+            attribute='namespace', label=_('Namespace'), source=StoredEventType
         )
         SourceColumn(
-            source=StoredEventType, label=_('Label'), attribute='label'
+            attribute='label', label=_('Label'), source=StoredEventType
         )
 
         SourceColumn(
@@ -67,12 +66,12 @@ class EventsApp(MayanAppConfig):
             is_sortable=True, label=_('Date and time'), source=Notification
         )
         SourceColumn(
-            func=widget_event_actor_link, kwargs={'attribute': 'action'},
-            label=_('Actor'), source=Notification
+            func=widget_event_actor_link, label=_('Actor'),
+            kwargs={'attribute': 'action'}, source=Notification
         )
         SourceColumn(
-            func=widget_event_type_link, kwargs={'attribute': 'action'},
-            label=_('Event'), source=Notification
+            func=widget_event_type_link, label=_('Event'),
+            kwargs={'attribute': 'action'}, source=Notification
         )
         SourceColumn(
             attribute='action.target', label=_('Target'), source=Notification,

@@ -14,121 +14,116 @@ from .literals import (
     TEST_SMART_LINK_DYNAMIC_LABEL, TEST_SMART_LINK_LABEL,
     TEST_SMART_LINK_LABEL_EDITED
 )
+from .mixins import SmartLinkTestMixin
 
 
-class SmartLinkViewTestCase(GenericViewTestCase):
-    def setUp(self):
-        super(SmartLinkViewTestCase, self).setUp()
-        self.login_user()
-
-    def test_smart_link_create_view_no_permission(self):
-        response = self.post(
-            'linking:smart_link_create', data={
+class SmartLinkViewTestCase(SmartLinkTestMixin, GenericViewTestCase):
+    def _request_smart_link_create_view(self):
+        return self.post(
+            viewname='linking:smart_link_create', data={
                 'label': TEST_SMART_LINK_LABEL
             }
         )
 
-        self.assertEquals(response.status_code, 403)
+    def test_smart_link_create_view_no_permission(self):
+        response = self._request_smart_link_create_view()
+        self.assertEqual(response.status_code, 403)
+
         self.assertEqual(SmartLink.objects.count(), 0)
 
     def test_smart_link_create_view_with_permission(self):
-        self.role.permissions.add(
-            permission_smart_link_create.stored_permission
-        )
+        self.grant_permission(permission=permission_smart_link_create)
 
-        response = self.post(
-            'linking:smart_link_create', data={
-                'label': TEST_SMART_LINK_LABEL
-            }, follow=True
-        )
-        self.assertContains(response, text='created', status_code=200)
+        response = self._request_smart_link_create_view()
+        self.assertEqual(response.status_code, 302)
+
         self.assertEqual(SmartLink.objects.count(), 1)
         self.assertEqual(
             SmartLink.objects.first().label, TEST_SMART_LINK_LABEL
         )
 
-    def test_smart_link_delete_view_no_permission(self):
-        smart_link = SmartLink.objects.create(label=TEST_SMART_LINK_LABEL)
-
-        response = self.post(
-            'linking:smart_link_delete', args=(smart_link.pk,)
+    def _request_smart_link_delete_view(self):
+        return self.post(
+            viewname='linking:smart_link_delete',
+            kwargs={'smart_link_id': self.test_smart_link.pk}
         )
-        self.assertEqual(response.status_code, 403)
+
+    def test_smart_link_delete_view_no_permission(self):
+        self._create_test_smart_link()
+
+        response = self._request_smart_link_delete_view()
+        self.assertEqual(response.status_code, 404)
+
         self.assertEqual(SmartLink.objects.count(), 1)
 
-    def test_smart_link_delete_view_with_permission(self):
-        self.role.permissions.add(
-            permission_smart_link_delete.stored_permission
+    def test_smart_link_delete_view_with_access(self):
+        self._create_test_smart_link()
+        self.grant_access(
+            obj=self.test_smart_link, permission=permission_smart_link_delete
         )
+        response = self._request_smart_link_delete_view()
+        self.assertEqual(response.status_code, 302)
 
-        smart_link = SmartLink.objects.create(label=TEST_SMART_LINK_LABEL)
-
-        response = self.post(
-            'linking:smart_link_delete', args=(smart_link.pk,), follow=True
-        )
-
-        self.assertContains(response, text='deleted', status_code=200)
         self.assertEqual(SmartLink.objects.count(), 0)
 
-    def test_smart_link_edit_view_no_permission(self):
-        smart_link = SmartLink.objects.create(label=TEST_SMART_LINK_LABEL)
-
-        response = self.post(
-            'linking:smart_link_edit', args=(smart_link.pk,), data={
+    def _request_smart_link_edit_view(self):
+        return self.post(
+            viewname='linking:smart_link_edit',
+            kwargs={'smart_link_id': self.test_smart_link.pk}, data={
                 'label': TEST_SMART_LINK_LABEL_EDITED
             }
         )
-        self.assertEqual(response.status_code, 403)
-        smart_link = SmartLink.objects.get(pk=smart_link.pk)
-        self.assertEqual(smart_link.label, TEST_SMART_LINK_LABEL)
 
-    def test_smart_link_edit_view_with_permission(self):
-        self.role.permissions.add(
-            permission_smart_link_edit.stored_permission
+    def test_smart_link_edit_view_no_permission(self):
+        self._create_test_smart_link()
+
+        response = self._request_smart_link_edit_view()
+        self.assertEqual(response.status_code, 404)
+
+        self.test_smart_link.refresh_from_db()
+        self.assertEqual(self.test_smart_link.label, TEST_SMART_LINK_LABEL)
+
+    def test_smart_link_edit_view_with_access(self):
+        self._create_test_smart_link()
+
+        self.grant_access(
+            obj=self.test_smart_link, permission=permission_smart_link_edit
         )
+        response = self._request_smart_link_edit_view()
+        self.assertEqual(response.status_code, 302)
 
-        smart_link = SmartLink.objects.create(label=TEST_SMART_LINK_LABEL)
-
-        response = self.post(
-            'linking:smart_link_edit', args=(smart_link.pk,), data={
-                'label': TEST_SMART_LINK_LABEL_EDITED
-            }, follow=True
+        self.test_smart_link.refresh_from_db()
+        self.assertEqual(
+            self.test_smart_link.label, TEST_SMART_LINK_LABEL_EDITED
         )
-
-        smart_link = SmartLink.objects.get(pk=smart_link.pk)
-        self.assertContains(response, text='update', status_code=200)
-        self.assertEqual(smart_link.label, TEST_SMART_LINK_LABEL_EDITED)
 
 
 class SmartLinkDocumentsViewTestCase(GenericDocumentViewTestCase):
-    def setUp(self):
-        super(SmartLinkDocumentsViewTestCase, self).setUp()
-        self.login_user()
-
-    def setup_smart_links(self):
-        smart_link = SmartLink.objects.create(
+    def _setup_smart_links(self):
+        self.test_smart_link = SmartLink.objects.create(
             label=TEST_SMART_LINK_LABEL,
             dynamic_label=TEST_SMART_LINK_DYNAMIC_LABEL
         )
-        smart_link.document_types.add(self.document_type)
+        self.test_smart_link.document_types.add(self.document_type)
 
-        smart_link_2 = SmartLink.objects.create(
+        self.test_smart_link_2 = SmartLink.objects.create(
             label=TEST_SMART_LINK_LABEL,
             dynamic_label=TEST_SMART_LINK_DYNAMIC_LABEL
         )
-        smart_link_2.document_types.add(self.document_type)
+        self.test_smart_link_2.document_types.add(self.document_type)
+
+    def _request_document_resolved_smart_links_for_document_view(self):
+        return self.get(
+            viewname='linking:resolved_smart_links_for_document',
+            kwargs={'document_id': self.document.pk}
+        )
 
     def test_document_smart_link_list_view_no_permission(self):
-        self.setup_smart_links()
+        self._setup_smart_links()
 
-        self.role.permissions.add(
-            permission_document_view.stored_permission
-        )
+        self.grant_access(obj=self.document, permission=permission_document_view)
 
-        response = self.get(
-            'linking:smart_link_instances_for_document',
-            args=(self.document.pk,)
-        )
+        response = self._request_document_resolved_smart_links_for_document_view()
         # Text must appear 3 times, 2 for the window titles and template
         # heading. The two smart links are not shown.
 
@@ -137,20 +132,13 @@ class SmartLinkDocumentsViewTestCase(GenericDocumentViewTestCase):
         )
 
     def test_document_smart_link_list_view_with_permission(self):
-        self.setup_smart_links()
+        self._setup_smart_links()
 
-        self.role.permissions.add(
-            permission_smart_link_view.stored_permission
+        self.grant_access(obj=self.document, permission=permission_document_view)
+        self.grant_access(
+            obj=self.test_smart_link, permission=permission_smart_link_view
         )
-
-        self.role.permissions.add(
-            permission_document_view.stored_permission
-        )
-
-        response = self.get(
-            'linking:smart_link_instances_for_document',
-            args=(self.document.pk,)
-        )
+        response = self._request_document_resolved_smart_links_for_document_view()
 
         # Text must appear 5 times: 3 for the window titles and template
         # heading, plus 2 for the test.

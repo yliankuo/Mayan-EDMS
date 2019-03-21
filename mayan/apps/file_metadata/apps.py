@@ -121,6 +121,9 @@ class FileMetadataApp(MayanAppConfig):
         ModelPermission.register_inheritance(
             model=DocumentTypeSettings, related='document_type',
         )
+        ModelPermission.register_inheritance(
+            model=DocumentVersionDriverEntry, related='document_version',
+        )
 
         SourceColumn(attribute='key', source=FileMetadataEntry)
         SourceColumn(attribute='value', source=FileMetadataEntry)

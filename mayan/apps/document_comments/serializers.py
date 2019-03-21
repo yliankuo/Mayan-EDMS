@@ -25,14 +25,14 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
     def get_document_comments_url(self, instance):
         return reverse(
             viewname='rest_api:comment-list', kwargs={
-                'document_pk': instance.document.pk,
+                'document_id': instance.document.pk,
             }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
             viewname='rest_api:comment-detail', kwargs={
-                'document_pk': instance.document.pk, 'comment_pk': instance.pk
+                'document_id': instance.document.pk, 'comment_pk': instance.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
@@ -59,13 +59,13 @@ class WritableCommentSerializer(serializers.ModelSerializer):
     def get_document_comments_url(self, instance):
         return reverse(
             viewname='rest_api:comment-list', kwargs={
-                'document_pk': instance.document.pk
+                'document_id': instance.document.pk
             }, request=self.context['request'], format=self.context['format']
         )
 
     def get_url(self, instance):
         return reverse(
             viewname='rest_api:comment-detail', kwargs={
-                'document_pk': instance.document.pk, 'comment_pk': instance.pk
+                'document_id': instance.document.pk, 'comment_id': instance.pk
             }, request=self.context['request'], format=self.context['format']
         )

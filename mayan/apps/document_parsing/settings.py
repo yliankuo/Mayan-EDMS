@@ -6,7 +6,7 @@ from mayan.apps.smart_settings import Namespace
 
 from .literals import DEFAULT_PDFTOTEXT_PATH
 
-namespace = Namespace(name='document_parsing', label=_('Document parsing'))
+namespace = Namespace(label=_('Document parsing'), name='document_parsing')
 
 setting_auto_parsing = namespace.add_setting(
     global_name='DOCUMENT_PARSING_AUTO_PARSING', default=True,
@@ -21,5 +21,4 @@ setting_pdftotext_path = namespace.add_setting(
         'File path to poppler\'s pdftotext program used to extract text '
         'from PDF files.'
     ),
-    is_path=True
 )

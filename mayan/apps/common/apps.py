@@ -4,6 +4,8 @@ import logging
 import os
 import warnings
 from datetime import timedelta
+import sys
+import traceback
 
 from kombu import Exchange, Queue
 
@@ -41,6 +43,7 @@ from .settings import (
 from .signals import pre_initial_setup, pre_upgrade
 from .tasks import task_delete_stale_uploads  # NOQA - Force task registration
 from .utils import check_for_sqlite
+from .warnings import DatabaseWarning
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +77,8 @@ class MayanAppConfig(apps.AppConfig):
                     'Import time error when running AppConfig.ready() of app '
                     '"%s".', self.name
                 )
+                exc_info = sys.exc_info()
+                traceback.print_exception(*exc_info)
                 raise exception
 
 
@@ -88,7 +93,9 @@ class CommonApp(MayanAppConfig):
     def ready(self):
         super(CommonApp, self).ready()
         if check_for_sqlite():
-            warnings.warn(force_text(MESSAGE_SQLITE_WARNING))
+            warnings.warn(
+                category=DatabaseWarning, message=force_text(MESSAGE_SQLITE_WARNING)
+            )
 
         Template(
             name='menu_main', template_name='appearance/menu_main.html'

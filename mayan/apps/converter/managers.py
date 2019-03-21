@@ -17,15 +17,15 @@ class TransformationManager(models.Manager):
         content_type = ContentType.objects.get_for_model(obj)
 
         self.create(
-            content_type=content_type, object_id=obj.pk,
-            name=transformation.name, arguments=yaml.safe_dump(arguments)
+            arguments=yaml.safe_dump(arguments), content_type=content_type,
+            name=transformation.name, object_id=obj.pk
         )
 
     def copy(self, source, targets):
         """
         Copy transformation from source to all targets
         """
-        content_type = ContentType.objects.get_for_model(source)
+        content_type = ContentType.objects.get_for_model(model=source)
 
         # Get transformations
         transformations = self.filter(
@@ -76,7 +76,7 @@ class TransformationManager(models.Manager):
             for transformation in transformations:
                 try:
                     transformation_class = BaseTransformation.get(
-                        transformation.name
+                        name=transformation.name
                     )
                 except KeyError:
                     # Non existant transformation, but we don't raise an error
@@ -89,7 +89,9 @@ class TransformationManager(models.Manager):
                         # Some transformations don't require arguments
                         # return an empty dictionary as ** doesn't allow None
                         if transformation.arguments:
-                            kwargs = yaml.safe_load(transformation.arguments)
+                            kwargs = yaml.safe_load(
+                                stream=transformation.arguments
+                            )
                         else:
                             kwargs = {}
 

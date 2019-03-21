@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls import ModelPermission
 from mayan.apps.common import (
-    MayanAppConfig, menu_facet, menu_object, menu_sidebar
+    MayanAppConfig, menu_facet, menu_object, menu_secondary
 )
 from mayan.apps.documents.search import document_page_search, document_search
 from mayan.apps.events import ModelEventType
@@ -60,21 +60,21 @@ class DocumentCommentsApp(MayanAppConfig):
 
         SourceColumn(source=Comment, label=_('Date'), attribute='submit_date')
         SourceColumn(
-            source=Comment, label=_('User'),
-            func=lambda context: context['object'].user.get_full_name() if context['object'].user.get_full_name() else context['object'].user
+            func=lambda context: context['object'].user.get_full_name() if context['object'].user.get_full_name() else context['object'].user,
+            label=_('User'), source=Comment
         )
         SourceColumn(source=Comment, label=_('Comment'), attribute='comment')
 
         document_page_search.add_model_field(
+            label=_('Comments'),
             field='document_version__document__comments__comment',
-            label=_('Comments')
         )
         document_search.add_model_field(
-            field='comments__comment',
-            label=_('Comments')
+            label=_('Comments'),
+            field='comments__comment'
         )
 
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_comment_add,),
             sources=(
                 'comments:comments_for_document', 'comments:comment_add',

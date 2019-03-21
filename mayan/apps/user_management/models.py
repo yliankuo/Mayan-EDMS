@@ -18,8 +18,9 @@ class UserOptions(models.Model):
         to=settings.AUTH_USER_MODEL, unique=True, verbose_name=_('User')
     )
     block_password_change = models.BooleanField(
-        default=False,
-        verbose_name=_('Forbid this user from changing their password.')
+        default=False, verbose_name=_(
+            'Forbid this user from changing their password.'
+        )
     )
 
     objects = UserOptionsManager()

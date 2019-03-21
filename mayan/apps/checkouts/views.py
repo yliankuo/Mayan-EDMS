@@ -1,85 +1,154 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.contrib import messages
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ungettext
 
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.generics import (
-    ConfirmView, SingleObjectCreateView, SingleObjectDetailView
+    MultipleObjectConfirmActionView, MultipleObjectFormActionView,
+    SingleObjectDetailView
 )
 from mayan.apps.common.utils import encapsulate
 from mayan.apps.documents.models import Document
 from mayan.apps.documents.views import DocumentListView
 
-from .exceptions import DocumentAlreadyCheckedOut, DocumentNotCheckedOut
 from .forms import DocumentCheckoutDefailForm, DocumentCheckoutForm
 from .icons import icon_checkout_info
 from .models import DocumentCheckout
 from .permissions import (
-    permission_document_checkin, permission_document_checkin_override,
-    permission_document_checkout, permission_document_checkout_detail_view
+    permission_document_check_in, permission_document_checkout,
+    permission_document_checkout_detail_view
 )
 
 
-class CheckoutDocumentView(SingleObjectCreateView):
-    form_class = DocumentCheckoutForm
+class DocumentCheckinView(MultipleObjectConfirmActionView):
+    error_message = 'Unable to check in document "%(instance)s". %(exception)s'
+    model = Document
+    object_permission = permission_document_check_in
+    pk_url_kwarg = 'document_id'
+    success_message_singular = '%(count)d document checked in.'
+    success_message_plural = '%(count)d documents checked in.'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.document = get_object_or_404(klass=Document, pk=self.kwargs['pk'])
+    def get_extra_context(self):
+        queryset = self.get_object_list()
 
-        AccessControlList.objects.check_access(
-            permissions=permission_document_checkout, user=request.user,
-            obj=self.document
-        )
+        result = {
+            'title': ungettext(
+                singular='Check in %(count)d document',
+                plural='Check in %(count)d documents',
+                number=queryset.count()
+            ) % {
+                'count': queryset.count(),
+            }
+        }
 
-        return super(
-            CheckoutDocumentView, self
-        ).dispatch(request, *args, **kwargs)
+        if queryset.count() == 1:
+            result.update(
+                {
+                    'object': queryset.first(),
+                    'title': _(
+                        'Check in document: %s'
+                    ) % queryset.first()
+                }
+            )
 
-    def form_valid(self, form):
-        try:
-            instance = form.save(commit=False)
-            instance.user = self.request.user
-            instance.document = self.document
-            instance.save()
-        except DocumentAlreadyCheckedOut:
-            messages.error(self.request, _('Document already checked out.'))
-        except Exception as exception:
-            messages.error(
-                self.request,
-                _('Error trying to check out document; %s') % exception
+        return result
+
+    def get_post_object_action_url(self):
+        if self.action_count == 1:
+            return reverse(
+                viewname='checkouts:document_checkout_info',
+                kwargs={'document_id': self.action_id_list[0]}
             )
         else:
-            messages.success(
-                self.request,
-                _('Document "%s" checked out successfully.') % self.document
+            super(DocumentCheckinView, self).get_post_action_redirect()
+
+    def object_action(self, form, instance):
+        DocumentCheckout.objects.check_in_document(
+            document=instance, user=self.request.user
+        )
+
+
+class DocumentCheckoutView(MultipleObjectFormActionView):
+    error_message = 'Unable to checkout document "%(instance)s". %(exception)s'
+    form_class = DocumentCheckoutForm
+    model = Document
+    object_permission = permission_document_checkout
+    pk_url_kwarg = 'document_id'
+    success_message_singular = '%(count)d document checked out.'
+    success_message_plural = '%(count)d documents checked out.'
+
+    def get_extra_context(self):
+        queryset = self.get_object_list()
+
+        result = {
+            'title': ungettext(
+                singular='Checkout %(count)d document',
+                plural='Checkout %(count)d documents',
+                number=queryset.count()
+            ) % {
+                'count': queryset.count(),
+            }
+        }
+
+        if queryset.count() == 1:
+            result.update(
+                {
+                    'object': queryset.first(),
+                    'title': _(
+                        'Check out document: %s'
+                    ) % queryset.first()
+                }
             )
 
-        return HttpResponseRedirect(self.get_success_url())
+        return result
+
+    def get_post_object_action_url(self):
+        if self.action_count == 1:
+            return reverse(
+                viewname='checkouts:document_checkout_info',
+                kwargs={'document_id': self.action_id_list[0]}
+            )
+        else:
+            super(DocumentCheckoutView, self).get_post_action_redirect()
+
+    def object_action(self, form, instance):
+        DocumentCheckout.objects.checkout_document(
+            block_new_version=form.cleaned_data['block_new_version'],
+            document=instance,
+            expiration_datetime=form.cleaned_data['expiration_datetime'],
+            user=self.request.user,
+        )
+
+
+class DocumentCheckoutDetailView(SingleObjectDetailView):
+    form_class = DocumentCheckoutDefailForm
+    model = Document
+    object_permission = permission_document_checkout_detail_view
 
     def get_extra_context(self):
         return {
-            'object': self.document,
-            'title': _('Check out document: %s') % self.document
+            'object': self.get_object(),
+            'title': _(
+                'Check out details for document: %s'
+            ) % self.get_object()
         }
 
-    def get_post_action_redirect(self):
-        return reverse('checkouts:checkout_info', args=(self.document.pk,))
+    def get_object(self):
+        return get_object_or_404(klass=Document, pk=self.kwargs['document_id'])
 
 
-class CheckoutListView(DocumentListView):
+class DocumentCheckoutListView(DocumentListView):
     def get_document_queryset(self):
-        return AccessControlList.objects.filter_by_access(
+        return AccessControlList.objects.restrict_queryset(
             permission=permission_document_checkout_detail_view,
-            user=self.request.user,
-            queryset=DocumentCheckout.objects.checked_out_documents()
+            queryset=DocumentCheckout.objects.checked_out_documents(),
+            user=self.request.user
         )
 
     def get_extra_context(self):
-        context = super(CheckoutListView, self).get_extra_context()
+        context = super(DocumentCheckoutListView, self).get_extra_context()
         context.update(
             {
                 'extra_columns': (
@@ -113,76 +182,3 @@ class CheckoutListView(DocumentListView):
             }
         )
         return context
-
-
-class CheckoutDetailView(SingleObjectDetailView):
-    form_class = DocumentCheckoutDefailForm
-    model = Document
-    object_permission = permission_document_checkout_detail_view
-
-    def get_extra_context(self):
-        return {
-            'object': self.get_object(),
-            'title': _(
-                'Check out details for document: %s'
-            ) % self.get_object()
-        }
-
-    def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
-
-
-class DocumentCheckinView(ConfirmView):
-    def get_extra_context(self):
-        document = self.get_object()
-
-        context = {
-            'object': document,
-        }
-
-        if document.get_checkout_info().user != self.request.user:
-            context['title'] = _(
-                'You didn\'t originally checked out this document. '
-                'Forcefully check in the document: %s?'
-            ) % document
-        else:
-            context['title'] = _('Check in the document: %s?') % document
-
-        return context
-
-    def get_object(self):
-        return get_object_or_404(klass=Document, pk=self.kwargs['pk'])
-
-    def get_post_action_redirect(self):
-        return reverse('checkouts:checkout_info', args=(self.get_object().pk,))
-
-    def view_action(self):
-        document = self.get_object()
-
-        if document.get_checkout_info().user == self.request.user:
-            AccessControlList.objects.check_access(
-                permissions=permission_document_checkin,
-                user=self.request.user, obj=document
-            )
-        else:
-            AccessControlList.objects.check_access(
-                permissions=permission_document_checkin_override,
-                user=self.request.user, obj=document
-            )
-
-        try:
-            document.check_in(user=self.request.user)
-        except DocumentNotCheckedOut:
-            messages.error(
-                self.request, _('Document has not been checked out.')
-            )
-        except Exception as exception:
-            messages.error(
-                self.request,
-                _('Error trying to check in document; %s') % exception
-            )
-        else:
-            messages.success(
-                self.request,
-                _('Document "%s" checked in successfully.') % document
-            )

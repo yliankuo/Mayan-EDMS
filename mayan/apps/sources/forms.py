@@ -93,21 +93,6 @@ class SaneScannerSetupForm(forms.ModelForm):
         model = SaneScanner
 
 
-class WebFormSetupForm(forms.ModelForm):
-    class Meta:
-        fields = ('label', 'enabled', 'uncompress')
-        model = WebFormSource
-
-
-class StagingFolderSetupForm(forms.ModelForm):
-    class Meta:
-        fields = (
-            'label', 'enabled', 'folder_path', 'preview_width',
-            'preview_height', 'uncompress', 'delete_after_upload'
-        )
-        model = StagingFolderSource
-
-
 class EmailSetupBaseForm(forms.ModelForm):
     class Meta:
         fields = (
@@ -133,6 +118,15 @@ class POP3EmailSetupForm(EmailSetupBaseForm):
         model = POP3Email
 
 
+class StagingFolderSetupForm(forms.ModelForm):
+    class Meta:
+        fields = (
+            'label', 'enabled', 'folder_path', 'preview_width',
+            'preview_height', 'uncompress', 'delete_after_upload'
+        )
+        model = StagingFolderSource
+
+
 class WatchFolderSetupForm(forms.ModelForm):
     class Meta:
         fields = (
@@ -140,3 +134,9 @@ class WatchFolderSetupForm(forms.ModelForm):
             'folder_path', 'include_subdirectories'
         )
         model = WatchFolderSource
+
+
+class WebFormSetupForm(forms.ModelForm):
+    class Meta:
+        fields = ('label', 'enabled', 'uncompress')
+        model = WebFormSource

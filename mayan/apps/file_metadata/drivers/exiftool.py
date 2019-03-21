@@ -7,7 +7,7 @@ import sh
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.utils import fs_cleanup, mkstemp
+from mayan.apps.storage.utils import fs_cleanup, mkstemp
 
 from ..classes import FileMetadataDriver
 from ..settings import setting_drivers_arguments
@@ -30,14 +30,20 @@ class EXIFToolDriver(FileMetadataDriver):
             self.command_exiftool = self.command_exiftool.bake('-j')
 
     def _process(self, document_version):
-        new_file_object, temp_filename = mkstemp()
+        if self.command_exiftool:
+            new_file_object, temp_filename = mkstemp()
 
-        try:
-            document_version.save_to_file(filepath=temp_filename)
-            result = self.command_exiftool(temp_filename)
-            return json.loads(result.stdout)[0]
-        finally:
-            fs_cleanup(filename=temp_filename)
+            try:
+                document_version.save_to_file(filepath=temp_filename)
+                result = self.command_exiftool(temp_filename)
+                return json.loads(s=result.stdout)[0]
+            finally:
+                fs_cleanup(filename=temp_filename)
+        else:
+            logger.warning(
+                'EXIFTool binary not found, not processing document version: %s',
+                document_version
+            )
 
 
 EXIFToolDriver.register(

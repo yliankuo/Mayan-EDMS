@@ -11,21 +11,21 @@ from .views import (
 
 urlpatterns = [
     url(
-        regex=r'^documents/(?P<document_pk>\d+)/send/link/$',
+        regex=r'^documents/(?P<document_id>\d+)/send/link/$',
         name='document_send_link', view=MailDocumentLinkView.as_view()
     ),
     url(
-        regex=r'^documents/multiple/send/link/$',
-        name='document_multiple_send_link',
-        view=MailDocumentLinkView.as_view()
-    ),
-    url(
-        regex=r'^documents/(?P<document_pk>\d+)/send/$', name='document_send',
+        regex=r'^documents/(?P<document_id>\d+)/send/$', name='document_send',
         view=MailDocumentView.as_view()
     ),
     url(
         regex=r'^documents/multiple/send/document/$',
         name='document_multiple_send', view=MailDocumentView.as_view()
+    ),
+    url(
+        regex=r'^documents/multiple/send/link/$',
+        name='document_multiple_send_link',
+        view=MailDocumentLinkView.as_view()
     ),
     url(
         regex=r'^system_mailer/log/$', name='system_mailer_error_log',
@@ -41,19 +41,19 @@ urlpatterns = [
         name='user_mailer_create', view=UserMailingCreateView.as_view()
     ),
     url(
-        regex=r'^user_mailers/(?P<mailer_pk>\d+)/delete/$',
+        regex=r'^user_mailers/(?P<mailer_id>\d+)/delete/$',
         name='user_mailer_delete', view=UserMailingDeleteView.as_view()
     ),
     url(
-        regex=r'^user_mailers/(?P<mailer_pk>\d+)/edit/$',
+        regex=r'^user_mailers/(?P<mailer_id>\d+)/edit/$',
         name='user_mailer_edit', view=UserMailingEditView.as_view()
     ),
     url(
-        regex=r'^user_mailers/(?P<mailer_pk>\d+)/log/$',
+        regex=r'^user_mailers/(?P<mailer_id>\d+)/log/$',
         name='user_mailer_log', view=UserMailerLogEntryListView.as_view()
     ),
     url(
-        regex=r'^user_mailers/(?P<mailer_pk>\d+)/test/$',
+        regex=r'^user_mailers/(?P<mailer_id>\d+)/test/$',
         name='user_mailer_test', view=UserMailerTestView.as_view()
     ),
     url(

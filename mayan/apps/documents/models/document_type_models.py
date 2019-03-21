@@ -73,23 +73,16 @@ class DocumentType(models.Model):
 
         return super(DocumentType, self).delete(*args, **kwargs)
 
-    @property
-    def deleted_documents(self):
-        DeletedDocument = apps.get_model(
-            app_label='documents', model_name='DeletedDocument'
-        )
-        return DeletedDocument.objects.filter(document_type=self)
-
     def get_absolute_url(self):
         return reverse(
             viewname='documents:document_type_document_list',
-            kwargs={'document_type_pk': self.pk}
+            kwargs={'document_type_id': self.pk}
         )
 
     def get_document_count(self, user):
-        queryset = AccessControlList.objects.filter_by_access(
-            permission=permission_document_view, user=user,
-            queryset=self.documents
+        queryset = AccessControlList.objects.restrict_queryset(
+            permission=permission_document_view, queryset=self.documents,
+            user=user
         )
         return queryset.count()
     get_document_count.short_description = _('Documents')
@@ -133,6 +126,13 @@ class DocumentType(models.Model):
             )
 
         return result
+
+    @property
+    def trashed_documents(self):
+        TrashedDocument = apps.get_model(
+            app_label='documents', model_name='TrashedDocument'
+        )
+        return TrashedDocument.objects.filter(document_type=self)
 
 
 @python_2_unicode_compatible

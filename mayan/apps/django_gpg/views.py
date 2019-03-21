@@ -30,12 +30,13 @@ logger = logging.getLogger(__name__)
 class KeyDeleteView(SingleObjectDeleteView):
     model = Key
     object_permission = permission_key_delete
+    pk_url_kwarg = 'key_id'
 
     def get_post_action_redirect(self):
         if self.get_object().key_type == KEY_TYPE_PUBLIC:
-            return reverse_lazy('django_gpg:key_public_list')
+            return reverse_lazy(viewname='django_gpg:key_public_list')
         else:
-            return reverse_lazy('django_gpg:key_private_list')
+            return reverse_lazy(viewname='django_gpg:key_private_list')
 
     def get_extra_context(self):
         return {'title': _('Delete key: %s') % self.get_object()}
@@ -45,6 +46,7 @@ class KeyDetailView(SingleObjectDetailView):
     form_class = KeyDetailForm
     model = Key
     object_permission = permission_key_view
+    pk_url_kwarg = 'key_id'
 
     def get_extra_context(self):
         return {
@@ -55,6 +57,7 @@ class KeyDetailView(SingleObjectDetailView):
 class KeyDownloadView(SingleObjectDownloadView):
     model = Key
     object_permission = permission_key_download
+    pk_url_kwarg = 'key_id'
 
     def get_file(self):
         key = self.get_object()
@@ -63,7 +66,7 @@ class KeyDownloadView(SingleObjectDownloadView):
 
 
 class KeyReceive(ConfirmView):
-    post_action_redirect = reverse_lazy('django_gpg:key_public_list')
+    post_action_redirect = reverse_lazy(viewname='django_gpg:key_public_list')
     view_permission = permission_key_receive
 
     def get_extra_context(self):
@@ -105,7 +108,7 @@ class KeyQueryView(SimpleView):
     def get_extra_context(self):
         return {
             'form': self.get_form(),
-            'form_action': reverse('django_gpg:key_query_results'),
+            'form_action': reverse(viewname='django_gpg:key_query_results'),
             'submit_icon_class': icon_keyserver_search,
             'submit_label': _('Search'),
             'submit_method': 'GET',
@@ -144,7 +147,7 @@ class KeyQueryResultView(SingleObjectListView):
 class KeyUploadView(SingleObjectCreateView):
     fields = ('key_data',)
     model = Key
-    post_action_redirect = reverse_lazy('django_gpg:key_public_list')
+    post_action_redirect = reverse_lazy(viewname='django_gpg:key_public_list')
     view_permission = permission_key_upload
 
     def get_extra_context(self):

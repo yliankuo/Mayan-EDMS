@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 
 from .exceptions import NeedPassphrase, PassphraseError
@@ -77,7 +78,17 @@ class Key(models.Model):
             raise ValidationError(_('Key already exists.'))
 
     def get_absolute_url(self):
-        return reverse('django_gpg:key_detail', args=(self.pk,))
+        return reverse(
+            viewname='django_gpg:key_detail', kwargs={'key_id': self.pk}
+        )
+
+    def get_expiration_date_display(self):
+        return self.expiration_date or _('None')
+    get_expiration_date_display.short_description = _('Expiration date')
+
+    def get_escaped_user_id(self):
+        return escape(self.user_id)
+    get_escaped_user_id.short_description = _('User ID')
 
     @property
     def key_id(self):

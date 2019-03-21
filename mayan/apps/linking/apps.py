@@ -10,7 +10,7 @@ from mayan.apps.acls.permissions import (
 )
 from mayan.apps.common import (
     MayanAppConfig, menu_facet, menu_list_facet, menu_object, menu_secondary,
-    menu_setup, menu_sidebar
+    menu_setup, menu_secondary
 )
 from mayan.apps.common.widgets import TwoStateWidget
 from mayan.apps.navigation import SourceColumn
@@ -44,9 +44,9 @@ class LinkingApp(MayanAppConfig):
             app_label='documents', model_name='Document'
         )
 
-        ResolvedSmartLink = self.get_model('ResolvedSmartLink')
-        SmartLink = self.get_model('SmartLink')
-        SmartLinkCondition = self.get_model('SmartLinkCondition')
+        ResolvedSmartLink = self.get_model(model_name='ResolvedSmartLink')
+        SmartLink = self.get_model(model_name='SmartLink')
+        SmartLinkCondition = self.get_model(model_name='SmartLinkCondition')
 
         ModelPermission.register(
             model=SmartLink, permissions=(
@@ -108,7 +108,7 @@ class LinkingApp(MayanAppConfig):
             )
         )
         menu_setup.bind_links(links=(link_smart_link_setup,))
-        menu_sidebar.bind_links(
+        menu_secondary.bind_links(
             links=(link_smart_link_condition_create,),
             sources=(
                 'linking:smart_link_condition_list',

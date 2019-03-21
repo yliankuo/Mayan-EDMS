@@ -12,6 +12,6 @@ class SearchModelMixin(object):
 
     def get_search_model(self):
         try:
-            return SearchModel.get(self.get_search_model_name())
+            return SearchModel.get(name=self.get_search_model_name())
         except KeyError as exception:
             raise Http404(force_text(exception))

@@ -8,13 +8,31 @@ import gnupg
 
 from django.utils.translation import ugettext_lazy as _
 
-from mayan.apps.common.utils import mkdtemp
+from mayan.apps.storage.utils import mkdtemp
 
 
 class GPGBackend(object):
     def __init__(self, gpg_path, **kwargs):
         self.gpg_path = gpg_path
         self.kwargs = kwargs
+
+
+class KeyStub(object):
+    def __init__(self, raw):
+        self.fingerprint = raw['keyid']
+        self.key_type = raw['type']
+        self.date = date.fromtimestamp(int(raw['date']))
+        if raw['expires']:
+            self.expires = date.fromtimestamp(int(raw['expires']))
+        else:
+            self.expires = None
+        self.length = raw['length']
+        self.user_id = raw['uids']
+
+    @property
+    def key_id(self):
+        return self.fingerprint[-8:]
+    key_id.fget.short_description = _('Key ID')
 
 
 class PythonGNUPGBackend(GPGBackend):
@@ -134,24 +152,6 @@ class PythonGNUPGBackend(GPGBackend):
             function=PythonGNUPGBackend._search_keys, keyserver=keyserver,
             query=query
         )
-
-
-class KeyStub(object):
-    def __init__(self, raw):
-        self.fingerprint = raw['keyid']
-        self.key_type = raw['type']
-        self.date = date.fromtimestamp(int(raw['date']))
-        if raw['expires']:
-            self.expires = date.fromtimestamp(int(raw['expires']))
-        else:
-            self.expires = None
-        self.length = raw['length']
-        self.user_id = raw['uids']
-
-    @property
-    def key_id(self):
-        return self.fingerprint[-8:]
-    key_id.fget.short_description = _('Key ID')
 
 
 class SignatureVerification(object):

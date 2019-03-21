@@ -7,8 +7,8 @@ from mayan.apps.permissions import PermissionNamespace
 namespace = PermissionNamespace(label=_('Smart settings'), name='smart_settings')
 
 permission_settings_edit = namespace.add_permission(
-    name='permission_settings_edit', label=_('Edit settings')
+    label=_('Edit settings'), name='permission_settings_edit'
 )
 permission_settings_view = namespace.add_permission(
-    name='permission_settings_view', label=_('View settings')
+    label=_('View settings'), name='permission_settings_view'
 )

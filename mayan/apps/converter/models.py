@@ -31,7 +31,9 @@ class Transformation(models.Model):
     """
     content_type = models.ForeignKey(on_delete=models.CASCADE, to=ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey(
+        ct_field='content_type', fk_field='object_id'
+    )
     order = models.PositiveIntegerField(
         blank=True, db_index=True, default=0, help_text=_(
             'Order in which the transformations will be executed. If left '
@@ -58,7 +60,11 @@ class Transformation(models.Model):
         verbose_name_plural = _('Transformations')
 
     def __str__(self):
+        return self.get_transformation_label()
+
+    def get_transformation_label(self):
         return self.get_name_display()
+    get_transformation_label.short_description = _('Name')
 
     def save(self, *args, **kwargs):
         if not self.order:

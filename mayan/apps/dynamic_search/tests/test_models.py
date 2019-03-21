@@ -9,6 +9,8 @@ from mayan.apps.documents.tests import (
 
 class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
     auto_upload_document = False
+    create_test_case_superuser = True
+    create_test_case_user = False
     test_document_filename = TEST_DOCUMENT_FILENAME
 
     def test_simple_search_after_related_name_change(self):
@@ -18,7 +20,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         """
         self.document = self.upload_document()
         queryset = document_search.search(
-            {'q': 'Mayan'}, user=self.admin_user
+            {'q': 'Mayan'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.document in queryset)
@@ -27,7 +29,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         # Test versions__filename
         self.document = self.upload_document()
         queryset = document_search.search(
-            {'label': self.document.label}, user=self.admin_user
+            {'label': self.document.label}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.document in queryset)
@@ -35,7 +37,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         # Test versions__mimetype
         queryset = document_search.search(
             {'versions__mimetype': self.document.file_mimetype},
-            user=self.admin_user
+            user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.document in queryset)
@@ -48,7 +50,7 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.save()
 
         queryset = document_search.search(
-            {'q': 'Mayan OR second'}, user=self.admin_user
+            {'q': 'Mayan OR second'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 2)
         self.assertTrue(self.document in queryset)
@@ -61,12 +63,12 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.save()
 
         queryset = document_search.search(
-            {'q': 'non_valid second'}, user=self.admin_user
+            {'q': 'non_valid second'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 0)
 
         queryset = document_search.search(
-            {'q': 'second non_valid'}, user=self.admin_user
+            {'q': 'second non_valid'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 0)
 
@@ -77,26 +79,26 @@ class DocumentSearchTestCase(DocumentTestMixin, BaseTestCase):
         self.document_2.save()
 
         queryset = document_search.search(
-            {'q': '-non_valid second'}, user=self.admin_user
+            {'q': '-non_valid second'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 1)
 
         queryset = document_search.search(
-            {'label': '-second'}, user=self.admin_user
+            {'label': '-second'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 0)
 
         queryset = document_search.search(
-            {'label': '-second -Mayan'}, user=self.admin_user
+            {'label': '-second -Mayan'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 0)
 
         queryset = document_search.search(
-            {'label': '-second OR -Mayan'}, user=self.admin_user
+            {'label': '-second OR -Mayan'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 1)
 
         queryset = document_search.search(
-            {'label': '-non_valid -second'}, user=self.admin_user
+            {'label': '-non_valid -second'}, user=self._test_case_superuser
         )
         self.assertEqual(queryset.count(), 0)

@@ -9,7 +9,7 @@ from .literals import (
     DEFAULT_LINK_BODY_TEMPLATE, DEFAULT_LINK_SUBJECT_TEMPLATE
 )
 
-namespace = Namespace(name='mailer', label=_('Mailing'))
+namespace = Namespace(label=_('Mailing'), name='mailer')
 
 setting_link_subject_template = namespace.add_setting(
     default=DEFAULT_LINK_SUBJECT_TEMPLATE,

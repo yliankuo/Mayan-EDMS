@@ -72,16 +72,6 @@ class ErrorLogNamespace(object):
         return ErrorLogEntry.objects.filter(namespace=self.name)
 
 
-class FakeStorageSubclass(object):
-    """
-    Placeholder class to allow serializing the real storage subclass to
-    support migrations.
-    """
-
-    def __eq__(self, other):
-        return True
-
-
 class MissingItem(object):
     _registry = []
 
@@ -302,7 +292,7 @@ class Template(object):
 
     def get_absolute_url(self):
         return reverse(
-            viewname='rest_api:template-detail', kwargs={'template_pk': self.name}
+            viewname='rest_api:template-detail', kwargs={'template_name': self.name}
         )
 
     def render(self, request):

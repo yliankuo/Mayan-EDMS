@@ -34,6 +34,7 @@ TEST_DOCUMENT_TYPE_2_LABEL = 'test document type 2'
 TEST_DOCUMENT_TYPE_LABEL_EDITED = 'test document type edited label'
 TEST_DOCUMENT_TYPE_QUICK_LABEL = 'test quick label'
 TEST_DOCUMENT_TYPE_QUICK_LABEL_EDITED = 'test quick label edited'
+TEST_DOCUMENT_TYPE_RANDOM_LABEL_LENGTH = 16
 TEST_DOCUMENT_VERSION_COMMENT_EDITED = 'test document version comment edited'
 TEST_HYBRID_DOCUMENT = 'hybrid_text_and_image.pdf'
 TEST_MULTI_PAGE_TIFF = 'multi_page.tiff'
