@@ -301,7 +301,9 @@ class Template(object):
         self.__class__._registry[name] = self
 
     def get_absolute_url(self):
-        return reverse('rest_api:template-detail', args=(self.name,))
+        return reverse(
+            viewname='rest_api:template-detail', kwargs={'template_pk': self.name}
+        )
 
     def render(self, request):
         context = {
@@ -313,8 +315,10 @@ class Template(object):
             context=context,
         ).render()
 
-        self.html = result.rendered_content
-        self.hex_hash = hashlib.sha256(result.content).hexdigest()
+        content = result.rendered_content.replace('\n', '')
+
+        self.html = content
+        self.hex_hash = hashlib.sha256(content).hexdigest()
         return self
 
 
