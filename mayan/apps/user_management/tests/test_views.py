@@ -270,11 +270,12 @@ class UserViewsTestCase(GroupTestMixin, UserTestMixin, UserViewTestMixin, Generi
 
         self.logout()
 
-        with self.assertRaises(AssertionError):
-            self.login(
-                username=self.test_user.username,
-                password=TEST_USER_PASSWORD_EDITED
-            )
+        result = self.login(
+            username=self.test_user.username,
+            password=TEST_USER_PASSWORD_EDITED
+        )
+
+        self.assertFalse(result)
 
         response = self.get(viewname='user_management:current_user_details')
 
@@ -318,11 +319,12 @@ class UserViewsTestCase(GroupTestMixin, UserTestMixin, UserViewTestMixin, Generi
 
         self.logout()
 
-        with self.assertRaises(AssertionError):
-            self.login(
-                username=self.test_user.username,
-                password=TEST_USER_PASSWORD_EDITED
-            )
+        result = self.login(
+            username=self.test_user.username,
+            password=TEST_USER_PASSWORD_EDITED
+        )
+
+        self.assertFalse(result)
 
         response = self.get(viewname='user_management:current_user_details')
         self.assertEqual(response.status_code, 302)
