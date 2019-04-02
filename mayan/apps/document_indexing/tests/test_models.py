@@ -79,7 +79,7 @@ class IndexTestCase(IndexTemplateTestMixin, DocumentTestMixin, BaseTestCase):
         self._create_document()
 
         self.assertEqual(
-            [instance.value for instance in IndexInstanceNode.objects.all()],
+            list(IndexInstanceNode.objects.values_list('value', flat=True)),
             [
                 '', force_text(self.test_document.date_added.year),
                 force_text(self.test_document.date_added.month)
