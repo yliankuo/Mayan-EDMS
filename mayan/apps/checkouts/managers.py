@@ -96,10 +96,7 @@ class DocumentCheckoutManager(models.Manager):
         return expired_list
 
     def is_document_checked_out(self, document):
-        if self.filter(document=document).exists():
-            return True
-        else:
-            return False
+        return self.filter(document=document).exists()
 
 
 class NewVersionBlockManager(models.Manager):
