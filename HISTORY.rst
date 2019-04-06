@@ -253,6 +253,9 @@
 - Remove django-mathfilters from requirements. These tags
   are provided by default by Jinja2 template engine
   (http://jinja.pocoo.org/docs/2.10/templates/#math).
+- Reject emails attachments of size 0. Thanks to Robert Schoeftner
+  (@robert.schoeftner)for the report and solution. GitLab issue #574.
+ 
 
 3.1.9 (2018-11-01)
 ==================
