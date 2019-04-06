@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from ..models import Tag
 
 from .literals import (
-    TEST_TAG_COLOR, TEST_TAG_COLOR_EDITED, TEST_TAG_LABEL,
+    TEST_TAG_COLOR, TEST_TAG_COLOR_EDITED, TEST_TAG_LABEL, TEST_TAG_LABEL_2
     TEST_TAG_LABEL_EDITED
 )
 
@@ -12,6 +12,11 @@ class TagTestMixin(object):
     def _create_test_tag(self):
         self.test_tag = Tag.objects.create(
             color=TEST_TAG_COLOR, label=TEST_TAG_LABEL
+        )
+
+    def _create_test_tag_2(self):
+        self.test_tag_2 = Tag.objects.create(
+            color=TEST_TAG_COLOR, label=TEST_TAG_LABEL_2
         )
 
 

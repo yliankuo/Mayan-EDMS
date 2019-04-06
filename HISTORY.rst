@@ -1,5 +1,6 @@
 4.0 (2019-XX-XX)
 ================
+<<<<<<< HEAD
 - Documents: Add a server side template for invalid documents.
   The new template can be accessed via the templates API.
   Improve the way invalid documents are detected in the JavaScript
@@ -255,7 +256,8 @@
   (http://jinja.pocoo.org/docs/2.10/templates/#math).
 - Reject emails attachments of size 0. Thanks to Robert Schoeftner
   (@robert.schoeftner)for the report and solution. GitLab issue #574.
- 
+- Fix multiple tag selection wizard step.
+
 
 3.1.9 (2018-11-01)
 ==================
