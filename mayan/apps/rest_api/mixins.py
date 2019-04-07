@@ -11,7 +11,9 @@ from mayan.apps.common.mixins import ExternalObjectMixin
 
 
 class ExternalObjectAPIViewSetMixin(ExternalObjectMixin):
-    """Override get_external_object to use REST API get_object_or_404"""
+    """
+    Override get_external_object to use REST API get_object_or_404.
+    """
     def dispatch(self, *args, **kwargs):
         return super(ExternalObjectMixin, self).dispatch(*args, **kwargs)
 
@@ -21,6 +23,20 @@ class ExternalObjectAPIViewSetMixin(ExternalObjectMixin):
             **self.get_pk_url_kwargs()
         )
 
+    def get_serializer_context(self):
+        """
+        Add the external object to the serializer context. Useful for the
+        create action when there is no instance available.
+        """
+        context = super(ExternalObjectAPIViewSetMixin, self).get_serializer_context()
+        if self.kwargs:
+            context.update(
+                {
+                    'external_object': self.get_external_object(),
+                }
+            )
+
+        return context
 
 class ExternalObjectListSerializerMixin(object):
     """
