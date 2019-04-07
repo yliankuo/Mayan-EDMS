@@ -9,6 +9,7 @@ from mayan.apps.common.literals import TIME_DELTA_UNIT_DAYS
 from mayan.apps.documents.tests import GenericDocumentViewTestCase
 from mayan.apps.sources.links import link_upload_version
 
+from ..literals import STATE_CHECKED_OUT, STATE_LABELS
 from ..models import DocumentCheckout
 from ..permissions import (
     permission_document_check_in, permission_document_check_in_override,
@@ -90,6 +91,32 @@ class DocumentCheckoutViewTestCase(GenericDocumentViewTestCase):
         self.assertEquals(response.status_code, 302)
 
         self.assertTrue(self.document.is_checked_out())
+
+    def _request_checkout_detail_view(self):
+        return self.get(
+            viewname='checkouts:checkout_info', args=(self.document.pk,),
+        )
+
+    def test_checkout_detail_view_no_permission(self):
+        self._checkout_document()
+
+        response = self._request_checkout_detail_view()
+
+        self.assertNotContains(
+            response, text=STATE_LABELS[STATE_CHECKED_OUT], status_code=403
+        )
+
+    def test_checkout_detail_view_with_access(self):
+        self._checkout_document()
+
+        self.grant_access(
+            obj=self.document,
+            permission=permission_document_checkout_detail_view
+        )
+
+        response = self._request_checkout_detail_view()
+
+        self.assertContains(response, text=STATE_LABELS[STATE_CHECKED_OUT], status_code=200)
 
     def test_document_new_version_after_checkout(self):
         """
