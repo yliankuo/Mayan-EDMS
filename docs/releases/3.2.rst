@@ -81,7 +81,7 @@ Migrate existing database schema with::
 
 Add new static media::
 
-    $ mayan-edms.py collectstatic --noinput
+    $ mayan-edms.py preparestatic --noinput
 
 The upgrade procedure is now complete.
 

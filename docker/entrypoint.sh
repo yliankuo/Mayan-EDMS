@@ -55,13 +55,13 @@ chown mayan:mayan /var/lib/mayan -R
 initialize() {
     echo "mayan: initialize()"
     su mayan -c "${MAYAN_BIN} initialsetup --force"
-    su mayan -c "${MAYAN_BIN} collectstatic --noinput --clear"
+    su mayan -c "${MAYAN_BIN} preparestatic --noinput --clear"
 }
 
 upgrade() {
     echo "mayan: upgrade()"
     su mayan -c "${MAYAN_BIN} performupgrade"
-    su mayan -c "${MAYAN_BIN} collectstatic --noinput --clear"
+    su mayan -c "${MAYAN_BIN} preparestatic --noinput --clear"
 }
 
 start() {
