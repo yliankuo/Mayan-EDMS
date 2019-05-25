@@ -82,7 +82,7 @@ Collect the static files:
 ::
 
     sudo -u mayan MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
-    /opt/mayan-edms/bin/mayan-edms.py collectstatic --noinput
+    /opt/mayan-edms/bin/mayan-edms.py preparestatic --noinput
 
 Create the supervisor file at ``/etc/supervisor/conf.d/mayan.conf``:
 --------------------------------------------------------------------
@@ -244,7 +244,7 @@ Collect the static files:
 ::
 
     sudo -u mayan MAYAN_MEDIA_ROOT=/opt/mayan-edms/media \
-    /opt/mayan-edms/bin/mayan-edms.py collectstatic --noinput
+    /opt/mayan-edms/bin/mayan-edms.py preparestatic --noinput
 
 Create the RabbitMQ user and vhost:
 -----------------------------------
