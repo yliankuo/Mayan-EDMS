@@ -228,14 +228,60 @@ class DocumentViewTestMixin(object):
             data={'id_list': self.test_document.pk}
         )
 
-    def _request_empty_trash_view(self):
-        return self.post(viewname='documents:trash_can_empty')
-
     def _request_document_print_view(self):
         return self.get(
             viewname='documents:document_print', kwargs={
                 'pk': self.test_document.pk,
             }, data={
                 'page_group': PAGE_RANGE_ALL
+            }
+        )
+
+
+class DocumentTrashViewMixin(object):
+    def _request_document_delete_get_view(self):
+        return self.get(
+            viewname='documents:document_delete', kwargs={
+                'pk': self.test_document.pk
+            }
+        )
+
+    def _request_document_delete_post_view(self):
+        return self.post(
+            viewname='documents:document_delete', kwargs={
+                'pk': self.test_document.pk
+            }
+        )
+
+    def _request_document_list_deleted_view(self):
+        return self.get(viewname='documents:document_list_deleted')
+
+    def _request_document_restore_get_view(self):
+        return self.get(
+            viewname='documents:document_restore', kwargs={
+                'pk': self.test_document.pk
+            }
+        )
+    def _request_document_restore_post_view(self):
+        return self.post(
+            viewname='documents:document_restore', kwargs={
+                'pk': self.test_document.pk
+            }
+        )
+
+    def _request_document_trash_get_view(self):
+        return self.get(
+            viewname='documents:document_trash', kwargs={
+                'pk': self.test_document.pk
+            }
+        )
+
+    def _request_empty_trash_view(self):
+        return self.post(viewname='documents:trash_can_empty')
+
+    def _request_document_trash_post_view(self):
+        return self.post(
+            viewname='documents:document_trash', kwargs={
+                'pk': self.test_document.pk
             }
         )

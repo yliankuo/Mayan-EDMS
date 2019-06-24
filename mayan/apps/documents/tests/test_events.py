@@ -3,12 +3,16 @@ from __future__ import unicode_literals
 from actstream.models import Action
 from django_downloadview import assert_download_response
 
-from ..events import event_document_download, event_document_view
+from ..events import (
+    event_document_download, event_document_trashed, event_document_view
+)
 from ..permissions import (
-    permission_document_download, permission_document_view
+    permission_document_download, permission_document_trash,
+    permission_document_view
 )
 
 from .base import GenericDocumentViewTestCase
+from .mixins import DocumentTrashViewMixin
 
 
 TEST_DOCUMENT_TYPE_EDITED_LABEL = 'test document type edited label'
@@ -84,3 +88,20 @@ class DocumentEventsTestCase(GenericDocumentViewTestCase):
         self.assertEqual(event.actor, self._test_case_user)
         self.assertEqual(event.target, self.test_document)
         self.assertEqual(event.verb, event_document_view.id)
+
+
+class DocumentTrashEventsTestCase(DocumentTrashViewMixin, GenericDocumentViewTestCase):
+    def test_document_trash_event_with_permissions(self):
+        Action.objects.all().delete()
+
+        self.grant_access(
+            obj=self.test_document, permission=permission_document_trash
+        )
+
+        response = self._request_document_trash_post_view()
+        self.assertEqual(response.status_code, 302)
+
+        event = Action.objects.any(obj=self.test_document).first()
+        #self.assertEqual(event.actor, self._test_case_user)
+        self.assertEqual(event.target, self.test_document)
+        self.assertEqual(event.verb, event_document_trashed.id)
