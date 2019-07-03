@@ -96,14 +96,14 @@ apt-get install -y --no-install-recommends \
     libssl-dev \
     g++ \
     gcc \
-    python-dev \
-    python-virtualenv \
+    python3-dev \
+    python3-virtualenv \
 && mkdir -p "${PROJECT_INSTALL_DIR}" \
 && chown -R mayan:mayan "${PROJECT_INSTALL_DIR}" \
 && chown -R mayan:mayan /src
 
 USER mayan
-RUN python -m virtualenv "${PROJECT_INSTALL_DIR}" \
+RUN python3 -m virtualenv -p /usr/bin/python3 "${PROJECT_INSTALL_DIR}" \
 && . "${PROJECT_INSTALL_DIR}/bin/activate" \
 && pip install --no-cache-dir --no-use-pep517 \
     librabbitmq==1.6.1 \
