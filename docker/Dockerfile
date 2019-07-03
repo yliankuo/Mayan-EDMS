@@ -57,8 +57,9 @@ apt-get update \
 && echo "maxmemory-policy allkeys-lru" >> /etc/redis/redis.conf \
 # Disable saving the Redis database
 echo "save \"\"" >> /etc/redis/redis.conf \
-# Only provision 1 database
-&& echo "databases 1" >> /etc/redis/redis.conf
+# Only provision 2 database. One for the broker and the other for
+# results
+&& echo "databases 2" >> /etc/redis/redis.conf
 
 
 ####
