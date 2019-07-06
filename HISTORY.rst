@@ -1,3 +1,25 @@
+3.3 (2019-XX-XX)
+================
+* Add support for icon shadows.
+
+3.2.5 (2019-07-05)
+==================
+* Don't error out if the EXTRA_APPS or the DISABLED_APPS settings
+  are set to blank.
+* Update troubleshooting documentation topic.
+* Add data migration to the file metadata app. Synchronizes the
+  document type settings model of existing document types.
+* Fix cabinet and tags upload wizard steps missing some entries.
+  GitLab issue #632. Thanks to Matthias Urhahn (@d4rken) for the
+  report.
+* Add alert when settings are changed and util the installation
+  is restarted. GitLab issue #605. Thanks to
+  Vikas Kedia (@vikaskedia) to the report.
+* Update Django to version 1.11.22, PyYAML to version 5.1.1,
+  django-widget-tweaks to version 1.4.5, pathlib2 to version 2.3.4,
+  Werkzeug to version 0.15.4, django-extensions to version 2.1.9,
+  django-rosetta to version 0.9.3, psutil to version 5.6.3.
+
 3.2.4 (2019-06-29)
 ==================
 * Support configurable GUnicorn timeouts. Defaults to
