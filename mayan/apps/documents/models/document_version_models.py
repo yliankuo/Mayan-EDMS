@@ -4,7 +4,6 @@ import hashlib
 import logging
 import os
 import shutil
-import uuid
 
 from django.apps import apps
 from django.core.files.base import ContentFile
@@ -37,8 +36,10 @@ def hash_function():
     return hashlib.sha256()
 
 
-def UUID_FUNCTION(*args, **kwargs):
-    return force_text(uuid.uuid4())
+def upload_to(instance, filename):
+    return instance.document.document_type.get_upload_filename(
+        instance=instance, filename=filename
+    )
 
 
 @python_2_unicode_compatible
@@ -86,7 +87,7 @@ class DocumentVersion(models.Model):
 
     # File related fields
     file = models.FileField(
-        storage=storage_documentversion, upload_to=UUID_FUNCTION,
+        storage=storage_documentversion, upload_to=upload_to,
         verbose_name=_('File')
     )
     mimetype = models.CharField(

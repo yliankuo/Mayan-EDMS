@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from mayan.apps.acls.models import AccessControlList
 from mayan.apps.common.literals import TIME_DELTA_UNIT_CHOICES
 
+from ..classes import BaseDocumentFilenameGenerator
 from ..events import event_document_type_created, event_document_type_edited
 from ..literals import DEFAULT_DELETE_PERIOD, DEFAULT_DELETE_TIME_UNIT
 from ..managers import DocumentTypeManager
@@ -51,6 +52,12 @@ class DocumentType(models.Model):
         blank=True, choices=TIME_DELTA_UNIT_CHOICES,
         default=DEFAULT_DELETE_TIME_UNIT, max_length=8, null=True,
         verbose_name=_('Delete time unit')
+    )
+    filename_generator = models.CharField(
+        help_text=_(
+            'The class responsible for producing the actual filename used '
+            'to store the uploaded documents.'
+        ), max_length=128, verbose_name=_('Filename generator')
     )
 
     objects = DocumentTypeManager()
@@ -93,6 +100,10 @@ class DocumentType(models.Model):
         )
 
         return queryset.count()
+
+    def get_upload_filename(self, instance, filename):
+        klass = BaseDocumentFilenameGenerator.get(name=self.filename_generator)
+        return klass.upload_to(instance=instance, filename=filename)
 
     def natural_key(self):
         return (self.label,)

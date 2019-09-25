@@ -5,9 +5,18 @@ from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.acls.models import AccessControlList
 
+from ..classes import BaseDocumentFilenameGenerator
 from ..models import DocumentType, DocumentTypeFilename
 
 __all__ = ('DocumentTypeFilteredSelectForm', 'DocumentTypeFilenameForm_create')
+
+
+class DocumentTypeForm(forms.ModelForm):
+    #filename_generator = forms.
+
+    class Meta:
+        fields = ('label', 'filename_generator')
+        model = DocumentType
 
 
 class DocumentTypeFilteredSelectForm(forms.Form):

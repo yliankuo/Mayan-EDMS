@@ -82,7 +82,9 @@ class DocumentTypeListView(SingleObjectListView):
 class DocumentTypeCreateView(SingleObjectCreateView):
     fields = ('label',)
     model = DocumentType
-    post_action_redirect = reverse_lazy(viewname='documents:document_type_list')
+    post_action_redirect = reverse_lazy(
+        viewname='documents:document_type_list'
+    )
     view_permission = permission_document_type_create
 
     def get_extra_context(self):
