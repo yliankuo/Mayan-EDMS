@@ -6,6 +6,7 @@ from django.utils.module_loading import import_string
 from django.utils.translation import ugettext as _
 
 from mayan.apps.common.literals import LIST_MODE_CHOICE_LIST
+from mayan.apps.common.utils import get_related_field
 
 logger = logging.getLogger(name=__name__)
 
@@ -30,6 +31,9 @@ class SearchField:
 
     def get_model(self):
         return self.search_model.model
+
+    def get_model_field(self):
+        return get_related_field(model=self.get_model(), related_field_name=self.field)
 
 
 class SearchModel:
