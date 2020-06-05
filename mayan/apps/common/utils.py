@@ -113,7 +113,19 @@ class ResolverPipelineObjectAttribute:
         return result
 
 
+class ResolverRelatedManager(Resolver):
+    exceptions = (AttributeError,)
+
+    def _resolve(self):
+        return getattr(self.obj, self.attribute).all()
+
+
 class ResolverPipelineModelAttribute(ResolverPipelineObjectAttribute):
+    resolver_list = (
+        ResolverDictionary, ResolverList, ResolverRelatedManager,
+        ResolverFunction, ResolverObjectAttribute, ResolverGetattr
+    )
+
     @classmethod
     def resolve(cls, attribute, obj, kwargs=None):
         attribute = attribute.replace(LOOKUP_SEP, '.')
