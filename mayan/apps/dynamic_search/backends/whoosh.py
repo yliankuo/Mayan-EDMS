@@ -1,32 +1,49 @@
+from collections import Iterable
 import logging
 
 from whoosh import fields
+from whoosh import qparser
 from whoosh.filedb.filestore import FileStorage
-from whoosh.qparser import QueryParser
 
 from django.apps import apps
 from django.db import models
 
-from mayan.apps.common.utils import resolve_attribute
+from colorful.fields import RGBColorField
+
+from mayan.apps.common.exceptions import ResolverPipelineError
+from mayan.apps.common.utils import ResolverPipelineModelAttribute, resolve_attribute
 
 from ..classes import SearchBackend, SearchField
 
 DJANGO_TO_WHOOSH_FIELD_MAP = {
-    models.AutoField: fields.NUMERIC(stored=True),
+    models.AutoField: fields.ID(stored=True),
     models.CharField: fields.TEXT,
     models.TextField: fields.TEXT,
+    models.UUIDField: fields.TEXT,
+    RGBColorField: fields.TEXT,
 }
 INDEX_DIRECTORY = '/tmp/indexdir'
+SEARCH_LIMIT = 100
 logger = logging.getLogger(name=__name__)
 
 
 class WhooshSearchBackend(SearchBackend):
+    @staticmethod
+    def flatten_list(value):
+        for item in value:
+            if isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
+                yield from WhooshSearchBackend.flatten_list(value=item)
+            else:
+                yield item
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from ..classes import SearchModel
 
-        for search_model in SearchModel.all():
-            self.index_search_model(search_model=search_model)
+        #for search_model in SearchModel.all():
+        #    self.index_search_model(search_model=search_model)
+        #search_model=SearchModel.get(name='documents.Document')
+        #self.index_search_model(search_model=search_model)
 
     def index_search_model(self, search_model):
         index = self.get_index(search_model=search_model)
@@ -34,21 +51,37 @@ class WhooshSearchBackend(SearchBackend):
         # Clear the model index
         self.get_storage().create_index(index.schema, indexname=search_model.get_full_name())
 
-        writer = index.writer()
-        for instance in search_model.model._meta.default_manager.all():
-            kwargs = {}
+        try:
+            writer = index.writer()
+        except Exception as exception:
+            logger.error('error instantiating index writer; %s', exception)
 
+            index_fields = []
             for search_field in self.get_search_model_fields(search_model=search_model):
                 if search_field.get_full_name() in index.schema:
+                    index_fields.append(search_field.get_full_name())
+
+            for instance in search_model.model._meta.default_manager.all():
+                kwargs = {}
+
+                for search_field in index_fields:
                     try:
-                        kwargs[search_field.get_full_name()] = resolve_attribute(attribute=search_field.get_full_name().replace('__', '.'), obj=instance)
-                    except Exception as exception:
-                        #TODO: switch to logging
-                        print('Unexpected exception', exception)
+                        value = ResolverPipelineModelAttribute.resolve(
+                            attribute=search_field, obj=instance
+                        )
+                        try:
+                            value = ''.join(WhooshSearchBackend.flatten_list(value))
+                        except TypeError:
+                            """Value is not a list"""
 
-            writer.add_document(**kwargs)
+                    except ResolverPipelineError:
+                        """Not fatal"""
+                    else:
+                        kwargs[search_field] = value
 
-        writer.commit()
+                writer.add_document(**kwargs)
+
+            writer.commit()
 
     def get_index(self, search_model):
         storage = self.get_storage()
@@ -56,14 +89,18 @@ class WhooshSearchBackend(SearchBackend):
         schema = self.get_search_model_schema(search_model=search_model)
 
         try:
-            index = storage.open_index(indexname=search_model.get_full_name())
+            index = storage.open_index(
+                indexname=search_model.get_full_name()
+            )
         except Exception:
-            index = storage.create_index(schema, indexname=search_model.get_full_name())
+            index = storage.create_index(
+                schema, indexname=search_model.get_full_name()
+            )
 
         return index
 
     def get_search_model_fields(self, search_model):
-        result = search_model.search_fields
+        result = search_model.search_fields.copy()
         result.append(
             SearchField(search_model=search_model, field='id', label='ID')
         )
@@ -72,12 +109,17 @@ class WhooshSearchBackend(SearchBackend):
     def get_search_model_schema(self, search_model):
         kwargs = {}
         for search_field in self.get_search_model_fields(search_model=search_model):
-            whoosh_field_type = DJANGO_TO_WHOOSH_FIELD_MAP.get(search_field.get_model_field().__class__)
+            whoosh_field_type = DJANGO_TO_WHOOSH_FIELD_MAP.get(
+                search_field.get_model_field().__class__
+            )
             if whoosh_field_type:
                 kwargs[search_field.get_full_name()] = whoosh_field_type
             else:
-                #TODO: switch to logging
-                print('Unknown field type', search_field, search_field.get_full_name())
+                logging.warning(
+                    'unknown field type "%s" for model "%s"',
+                    search_field.get_full_name(),
+                    search_model.get_full_name()
+                )
 
         return fields.Schema(**kwargs)
 
@@ -112,9 +154,13 @@ class WhooshSearchBackend(SearchBackend):
             global_logic_string = ' AND ' if global_and_search else ' OR '
             search_string = global_logic_string.join(search_string)
 
-            query = QueryParser('label', index.schema).parse(search_string)
-            # TODO: Implement limit size
-            results = searcher.search(query)
+            logger.debug('search_string: ', search_string)
+
+            parser = qparser.QueryParser('label', index.schema)
+            parser.remove_plugin_class(qparser.WildcardPlugin)
+            parser.add_plugin(qparser.PrefixPlugin())
+            query = parser.parse(search_string)
+            results = searcher.search(query, limit=SEARCH_LIMIT)
 
             for result in results:
                 id_list.append(result['id'])
