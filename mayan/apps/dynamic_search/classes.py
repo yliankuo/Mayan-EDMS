@@ -12,6 +12,12 @@ logger = logging.getLogger(name=__name__)
 
 
 class SearchBackend:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def index_instance(self, instance):
+        raise NotImplementedError
+
     def search(self, global_and_search, search_model, query_string, user):
         raise NotImplementedError
 
@@ -33,7 +39,9 @@ class SearchField:
         return self.search_model.model
 
     def get_model_field(self):
-        return get_related_field(model=self.get_model(), related_field_name=self.field)
+        return get_related_field(
+            model=self.get_model(), related_field_name=self.field
+        )
 
 
 class SearchModel:
@@ -57,6 +65,10 @@ class SearchModel:
             result.serializer = import_string(dotted_path=result.serializer_path)
 
         return result
+
+    @classmethod
+    def get_for_model(cls, instance):
+        return cls.get(name=instance._meta.label)
 
     def __init__(
         self, app_label, model_name, serializer_path, label=None,

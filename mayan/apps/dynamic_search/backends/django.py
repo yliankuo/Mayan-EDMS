@@ -6,15 +6,29 @@ from django.utils.encoding import force_text
 
 from ..classes import SearchBackend
 
-from .literals import (
-    QUERY_OPERATION_AND, QUERY_OPERATION_OR, TERM_NEGATION_CHARACTER,
-    TERM_OPERATION_OR, TERM_OPERATIONS, TERM_QUOTES, TERM_SPACE_CHARACTER
-)
-
+QUERY_OPERATION_AND = 1
+QUERY_OPERATION_OR = 2
+TERM_OPERATION_AND = 'AND'
+TERM_OPERATION_OR = 'OR'
+TERM_OPERATIONS = [TERM_OPERATION_AND, TERM_OPERATION_OR]
+TERM_QUOTES = ['"', '\'']
+TERM_NEGATION_CHARACTER = '-'
+TERM_SPACE_CHARACTER = ' '
 logger = logging.getLogger(name=__name__)
 
 
 class DjangoSearchBackend(SearchBackend):
+    def index_instance(self, instance):
+        # This backend doesn't index instances. Searches query the
+        # database directly.
+        return
+
+    def get_search_query(self, search_model, query_string, global_and_search=False):
+        return SearchQuery(
+            query_string=query_string, search_model=search_model,
+            global_and_search=global_and_search
+        )
+
     def search(self, query_string, search_model, user, global_and_search=False):
         AccessControlList = apps.get_model(
             app_label='acls', model_name='AccessControlList'
@@ -34,12 +48,6 @@ class DjangoSearchBackend(SearchBackend):
             )
 
         return queryset
-
-    def get_search_query(self, search_model, query_string, global_and_search=False):
-        return SearchQuery(
-            query_string=query_string, search_model=search_model,
-            global_and_search=global_and_search
-        )
 
 
 class FieldQuery:
