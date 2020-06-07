@@ -2,6 +2,7 @@ import logging
 
 from django.apps import apps
 from django.utils.encoding import force_text
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext as _
 
@@ -15,11 +16,35 @@ class SearchBackend:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
+    def _search(self, global_and_search, search_model, query_string, user):
+        raise NotImplementedError
+
     def index_instance(self, instance):
         raise NotImplementedError
 
     def search(self, global_and_search, search_model, query_string, user):
-        raise NotImplementedError
+        AccessControlList = apps.get_model(
+            app_label='acls', model_name='AccessControlList'
+        )
+
+        # Clean up the query_string
+        # The original query_string is immutable, create a new
+        # mutable copy
+        query_string = query_string.copy()
+        query_string.pop('_match_all', None)
+
+        queryset = self._search(
+            global_and_search=global_and_search, search_model=search_model,
+            query_string=query_string, user=user
+        )
+
+        if search_model.permission:
+            queryset = AccessControlList.objects.restrict_queryset(
+                permission=search_model.permission, queryset=queryset,
+                user=user
+            )
+
+        return queryset
 
 
 class SearchField:
@@ -85,6 +110,11 @@ class SearchModel:
         self.queryset = queryset
         self.__class__._registry[self.get_full_name()] = self
 
+    def __repr__(self):
+        return '<{}: {}>'.format(
+            self.__class__.__name__, self.label
+        )
+
     def __str__(self):
         return force_text(self.label)
 
@@ -120,18 +150,18 @@ class SearchModel:
         except KeyError:
             raise KeyError('No search field named: %s' % full_name)
 
-    @property
+    @cached_property
     def label(self):
         if not self._label:
             self._label = self.model._meta.verbose_name
         return self._label
 
-    @property
+    @cached_property
     def model(self):
         if not self._model:
             self._model = apps.get_model(self.app_label, self.model_name)
         return self._model
 
-    @property
+    @cached_property
     def pk(self):
         return self.get_full_name()

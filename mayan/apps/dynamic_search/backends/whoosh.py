@@ -87,6 +87,49 @@ class WhooshSearchBackend(SearchBackend):
         #search_model=SearchModel.get(name='documents.Document')
         #self.index_search_model(search_model=search_model)
 
+    def _search(self, query_string, search_model, user, global_and_search=False):
+        index = self.get_index(search_model=search_model)
+
+        id_list = []
+        with index.searcher() as searcher:
+            search_string = []
+
+            if 'q' in query_string:
+                # Emulate full field set search
+                for search_field in self.get_search_model_fields(search_model=search_model):
+                    search_string.append(
+                        '{}:({})'.format(search_field.get_full_name(), query_string['q'])
+                    )
+
+                fields = [field[0] for field in search_model.get_fields_simple_list()]
+                string = query_string['q']
+            else:
+                fields = []
+                for key, value in query_string.items():
+                    if value:
+                        fields.append(key)
+                        search_string.append(
+                            '{}:({})'.format(key, value)
+                        )
+
+            global_logic_string = ' AND ' if global_and_search else ' OR '
+            search_string = global_logic_string.join(search_string)
+
+            logger.debug('search_string: %s', search_string)
+
+            parser = qparser.QueryParser(
+               fieldname='_', schema=index.schema
+            )
+            parser.remove_plugin_class(cls=qparser.WildcardPlugin)
+            parser.add_plugin(pin=qparser.PrefixPlugin())
+            query = parser.parse(text=search_string)
+            results = searcher.search(q=query, limit=self.search_limit)
+
+            for result in results:
+                id_list.append(result['id'])
+
+        return search_model.model.objects.filter(id__in=id_list).distinct()
+
     def get_index(self, search_model):
         storage = self.get_storage()
 
@@ -156,53 +199,3 @@ class WhooshSearchBackend(SearchBackend):
 
         for instance in search_model.model._meta.default_manager.all():
             self.index_instance(instance=instance)
-
-    def search(self, query_string, search_model, user, global_and_search=False):
-        AccessControlList = apps.get_model(
-            app_label='acls', model_name='AccessControlList'
-        )
-
-        index = self.get_index(search_model=search_model)
-
-        id_list = []
-        with index.searcher() as searcher:
-            search_string = []
-
-            if 'q' in query_string:
-                # Emulate full field set search
-                for search_field in self.get_search_model_fields(search_model=search_model):
-                    search_string.append(
-                        '{}:{}'.format(search_field.get_full_name(), query_string['q'])
-                    )
-            else:
-                for key, value in query_string.items():
-                    # TODO: Remove _match_all in parent class
-                    if value and key != '_match_all':
-                        search_string.append(
-                            '{}:{}'.format(key, value)
-                        )
-
-            global_logic_string = ' AND ' if global_and_search else ' OR '
-            search_string = global_logic_string.join(search_string)
-
-            logger.debug('search_string: ', search_string)
-
-            parser = qparser.QueryParser('label', index.schema)
-            parser.remove_plugin_class(qparser.WildcardPlugin)
-            parser.add_plugin(qparser.PrefixPlugin())
-            query = parser.parse(search_string)
-            results = searcher.search(query, limit=self.search_limit)
-
-            for result in results:
-                id_list.append(result['id'])
-
-        queryset = search_model.model.objects.filter(id__in=id_list).distinct()
-
-        #TODO: Move to parent class
-        if search_model.permission:
-            queryset = AccessControlList.objects.restrict_queryset(
-                permission=search_model.permission, queryset=queryset,
-                user=user
-            )
-
-        return queryset

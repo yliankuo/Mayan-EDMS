@@ -18,6 +18,14 @@ logger = logging.getLogger(name=__name__)
 
 
 class DjangoSearchBackend(SearchBackend):
+    def _search(self, query_string, search_model, user, global_and_search=False):
+        search_query = self.get_search_query(
+            search_model=search_model, query_string=query_string,
+            global_and_search=global_and_search
+        )
+
+        return search_model.get_queryset().filter(search_query.query).distinct()
+
     def index_instance(self, instance):
         # This backend doesn't index instances. Searches query the
         # database directly.
@@ -28,26 +36,6 @@ class DjangoSearchBackend(SearchBackend):
             query_string=query_string, search_model=search_model,
             global_and_search=global_and_search
         )
-
-    def search(self, query_string, search_model, user, global_and_search=False):
-        AccessControlList = apps.get_model(
-            app_label='acls', model_name='AccessControlList'
-        )
-
-        search_query = self.get_search_query(
-            search_model=search_model, query_string=query_string,
-            global_and_search=global_and_search
-        )
-
-        queryset = search_model.get_queryset().filter(search_query.query).distinct()
-
-        if search_model.permission:
-            queryset = AccessControlList.objects.restrict_queryset(
-                permission=search_model.permission, queryset=queryset,
-                user=user
-            )
-
-        return queryset
 
 
 class FieldQuery:
