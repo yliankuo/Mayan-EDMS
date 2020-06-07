@@ -6,7 +6,6 @@ from whoosh import fields
 from whoosh import qparser
 from whoosh.filedb.filestore import FileStorage
 
-from django.apps import apps
 from django.conf import settings
 from django.db import models
 
@@ -74,18 +73,21 @@ class WhooshSearchBackend(SearchBackend):
         self.index_path = Path(settings.MEDIA_ROOT, INDEX_DIRECTORY_NAME)
         self.index_path.mkdir(exist_ok=True)
 
-        self.search_limit = self.kwargs.get('search_limit', DEFAULT_SEARCH_LIMIT)
-
-        self.search_mode_sieves = {}
-        for search_model in SearchModel.all():
-            self.search_mode_sieves[search_model] = Sieve(
-                search_backend=self, search_model=search_model
-            )
+        self.search_limit = self.kwargs.get(
+            'search_limit', DEFAULT_SEARCH_LIMIT
+        )
 
         #for search_model in SearchModel.all():
         #    self.index_search_model(search_model=search_model)
         #search_model=SearchModel.get(name='documents.Document')
         #self.index_search_model(search_model=search_model)
+
+    def initialize(self):
+        self.search_model_sieves = {}
+        for search_model in SearchModel.all():
+            self.search_model_sieves[search_model] = Sieve(
+                search_backend=self, search_model=search_model
+            )
 
     def _search(self, query_string, search_model, user, global_and_search=False):
         index = self.get_index(search_model=search_model)
@@ -100,14 +102,9 @@ class WhooshSearchBackend(SearchBackend):
                     search_string.append(
                         '{}:({})'.format(search_field.get_full_name(), query_string['q'])
                     )
-
-                fields = [field[0] for field in search_model.get_fields_simple_list()]
-                string = query_string['q']
             else:
-                fields = []
                 for key, value in query_string.items():
                     if value:
-                        fields.append(key)
                         search_string.append(
                             '{}:({})'.format(key, value)
                         )
@@ -118,7 +115,7 @@ class WhooshSearchBackend(SearchBackend):
             logger.debug('search_string: %s', search_string)
 
             parser = qparser.QueryParser(
-               fieldname='_', schema=index.schema
+                fieldname='_', schema=index.schema
             )
             parser.remove_plugin_class(cls=qparser.WildcardPlugin)
             parser.add_plugin(pin=qparser.PrefixPlugin())
@@ -183,9 +180,10 @@ class WhooshSearchBackend(SearchBackend):
         index = self.get_index(search_model=search_model)
 
         writer = index.writer()
-        kwargs = self.search_mode_sieves[search_model].process_instance(
+        kwargs = self.search_model_sieves[search_model].process_instance(
             instance=instance
         )
+        writer.delete_by_term('id', str(instance.pk))
         writer.add_document(**kwargs)
         writer.commit()
 

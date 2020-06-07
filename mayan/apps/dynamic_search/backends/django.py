@@ -1,6 +1,5 @@
 import logging
 
-from django.apps import apps
 from django.db.models import Q
 from django.utils.encoding import force_text
 

@@ -1,6 +1,7 @@
 import logging
 
 from django.apps import apps
+from django.db.models.signals import post_save
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -69,8 +70,38 @@ class SearchField:
         )
 
 
+def handler_factory(search_model):
+    from .tasks import task_index_instance
+
+    def handler_index_instance(sender, **kwargs):
+        print('handler !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', search_model, sender)
+        instance = kwargs['instance']
+
+        task_index_instance.apply_async(
+            kwargs={
+                'app_label': instance._meta.app_label,
+                'model_name': instance._meta.model_name,
+                'object_id': instance.pk
+            }
+        )
+
+    return handler_index_instance
+
+
 class SearchModel:
     _registry = {}
+
+    @staticmethod
+    def initialize():
+        for search_model in SearchModel.all():
+            print("@@@@@@@@@@@@@ init", search_model, search_model.model)
+
+            post_save.connect(
+                dispatch_uid='search_handler_index_instance_{}'.format(search_model),
+                receiver=handler_factory(search_model=search_model),
+                sender=search_model.model,
+                weak=False
+            )
 
     @classmethod
     def all(cls):
