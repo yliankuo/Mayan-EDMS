@@ -122,10 +122,20 @@ class WhooshSearchBackend(SearchBackend):
             query = parser.parse(text=search_string)
             results = searcher.search(q=query, limit=self.search_limit)
 
+            logger.debug('results: %s', results)
+
             for result in results:
                 id_list.append(result['id'])
 
         return search_model.model.objects.filter(id__in=id_list).distinct()
+
+    def deindex_instance(self, instance):
+        search_model = SearchModel.get_for_model(instance=instance)
+        index = self.get_index(search_model=search_model)
+
+        writer = index.writer()
+        writer.delete_by_term('id', str(instance.pk))
+        writer.commit()
 
     def get_index(self, search_model):
         storage = self.get_storage()

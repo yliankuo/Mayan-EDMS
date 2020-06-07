@@ -1,7 +1,7 @@
 import logging
 
 from django.apps import apps
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -18,6 +18,9 @@ class SearchBackend:
         self.kwargs = kwargs
 
     def _search(self, global_and_search, search_model, query_string, user):
+        raise NotImplementedError
+
+    def deindex_instance(self, instance):
         raise NotImplementedError
 
     def index_instance(self, instance):
@@ -70,11 +73,27 @@ class SearchField:
         )
 
 
-def handler_factory(search_model):
+def handler_factory_deindex_instance(search_model):
+    from .tasks import task_deindex_instance
+
+    def handler_deindex_instance(sender, **kwargs):
+        instance = kwargs['instance']
+
+        task_deindex_instance.apply_async(
+            kwargs={
+                'app_label': instance._meta.app_label,
+                'model_name': instance._meta.model_name,
+                'object_id': instance.pk
+            }
+        )
+
+    return handler_deindex_instance
+
+
+def handler_factory_index_instance(search_model):
     from .tasks import task_index_instance
 
     def handler_index_instance(sender, **kwargs):
-        print('handler !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', search_model, sender)
         instance = kwargs['instance']
 
         task_index_instance.apply_async(
@@ -94,11 +113,15 @@ class SearchModel:
     @staticmethod
     def initialize():
         for search_model in SearchModel.all():
-            print("@@@@@@@@@@@@@ init", search_model, search_model.model)
-
             post_save.connect(
                 dispatch_uid='search_handler_index_instance_{}'.format(search_model),
-                receiver=handler_factory(search_model=search_model),
+                receiver=handler_factory_index_instance(search_model=search_model),
+                sender=search_model.model,
+                weak=False
+            )
+            pre_delete.connect(
+                dispatch_uid='search_handler_deindex_instance_{}'.format(search_model),
+                receiver=handler_factory_deindex_instance(search_model=search_model),
                 sender=search_model.model,
                 weak=False
             )
