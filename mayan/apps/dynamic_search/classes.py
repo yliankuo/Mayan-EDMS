@@ -73,51 +73,20 @@ class SearchField:
         )
 
 
-def handler_factory_deindex_instance(search_model):
-    from .tasks import task_deindex_instance
-
-    def handler_deindex_instance(sender, **kwargs):
-        instance = kwargs['instance']
-
-        task_deindex_instance.apply_async(
-            kwargs={
-                'app_label': instance._meta.app_label,
-                'model_name': instance._meta.model_name,
-                'object_id': instance.pk
-            }
-        )
-
-    return handler_deindex_instance
-
-
-def handler_factory_index_instance(search_model):
-    from .tasks import task_index_instance
-
-    def handler_index_instance(sender, **kwargs):
-        instance = kwargs['instance']
-
-        task_index_instance.apply_async(
-            kwargs={
-                'app_label': instance._meta.app_label,
-                'model_name': instance._meta.model_name,
-                'object_id': instance.pk
-            }
-        )
-
-    return handler_index_instance
-
-
 class SearchModel:
+    _model_search_relationships = {}
     _registry = {}
 
     @staticmethod
     def initialize():
+        from .handlers import (
+            handler_factory_deindex_instance, handler_index_instance
+        )
+
         for search_model in SearchModel.all():
             post_save.connect(
-                dispatch_uid='search_handler_index_instance_{}'.format(search_model),
-                receiver=handler_factory_index_instance(search_model=search_model),
-                sender=search_model.model,
-                weak=False
+                dispatch_uid='search_handler_index_instance',
+                receiver=handler_index_instance,
             )
             pre_delete.connect(
                 dispatch_uid='search_handler_deindex_instance_{}'.format(search_model),
@@ -125,6 +94,8 @@ class SearchModel:
                 sender=search_model.model,
                 weak=False
             )
+
+            search_model._initialize()
 
     @classmethod
     def all(cls):
@@ -171,6 +142,19 @@ class SearchModel:
 
     def __str__(self):
         return force_text(self.label)
+
+    def _initialize(self):
+        for search_field in self.search_fields:
+            related_model = get_related_field(
+                model=self.model, related_field_name=search_field.field
+            ).model
+
+            if related_model != self.model:
+                self.__class__._model_search_relationships.setdefault(self.model, set())
+                self.__class__._model_search_relationships[self.model].add(related_model)
+
+                self.__class__._model_search_relationships.setdefault(related_model, set())
+                self.__class__._model_search_relationships[related_model].add(self.model)
 
     def add_model_field(self, *args, **kwargs):
         """

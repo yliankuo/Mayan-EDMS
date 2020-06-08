@@ -13,12 +13,16 @@ from colorful.fields import RGBColorField
 
 from mayan.apps.common.exceptions import ResolverPipelineError
 from mayan.apps.common.utils import ResolverPipelineModelAttribute
+from mayan.apps.lock_manager.exceptions import LockError
+from mayan.apps.lock_manager.runtime import locking_backend
 
 from ..classes import SearchBackend, SearchField, SearchModel
 
 DEFAULT_SEARCH_LIMIT = 100
 DJANGO_TO_WHOOSH_FIELD_MAP = {
-    models.AutoField: {'field': fields.ID(stored=True), 'transformation': str},
+    models.AutoField: {
+        'field': fields.ID(stored=True), 'transformation': str
+    },
     models.CharField: {'field': fields.TEXT},
     models.TextField: {'field': fields.TEXT},
     models.UUIDField: {'field': fields.TEXT, 'transformation': str},
@@ -130,12 +134,22 @@ class WhooshSearchBackend(SearchBackend):
         return search_model.model.objects.filter(id__in=id_list).distinct()
 
     def deindex_instance(self, instance):
-        search_model = SearchModel.get_for_model(instance=instance)
-        index = self.get_index(search_model=search_model)
+        try:
+            lock = locking_backend.acquire_lock(
+                name='dynamic_search_whoosh_deindex_instance'
+            )
+        except LockError:
+            raise
+        else:
+            try:
+                search_model = SearchModel.get_for_model(instance=instance)
+                index = self.get_index(search_model=search_model)
 
-        writer = index.writer()
-        writer.delete_by_term('id', str(instance.pk))
-        writer.commit()
+                writer = index.writer()
+                writer.delete_by_term('id', str(instance.pk))
+                writer.commit()
+            finally:
+                lock.release()
 
     def get_index(self, search_model):
         storage = self.get_storage()
@@ -185,17 +199,76 @@ class WhooshSearchBackend(SearchBackend):
     def get_storage(self):
         return FileStorage(path=self.index_path)
 
-    def index_instance(self, instance):
-        search_model = SearchModel.get_for_model(instance=instance)
-        index = self.get_index(search_model=search_model)
+    def index_instance(self, instance, exclude_set=None):
+        try:
+            lock = locking_backend.acquire_lock(
+                name='dynamic_search_whoosh_index_instance'
+            )
+        except LockError:
+            raise
+        else:
+            try:
+                # Use a shadow method to allow using a single lock for
+                # all recursions.
+                self._index_instance(
+                    instance=instance, exclude_set=exclude_set
+                )
+            finally:
+                lock.release()
 
-        writer = index.writer()
-        kwargs = self.search_model_sieves[search_model].process_instance(
-            instance=instance
-        )
-        writer.delete_by_term('id', str(instance.pk))
-        writer.add_document(**kwargs)
-        writer.commit()
+    def _index_instance(self, instance, exclude_set=None):
+        if not exclude_set:
+            exclude_set = set()
+
+        # Avoid infite recursion
+        if instance in exclude_set:
+            return
+
+        exclude_set.add(instance)
+
+        try:
+            search_model = SearchModel.get_for_model(instance=instance)
+        except KeyError:
+            """
+            A keyerror is not fatal. It means search is not configured
+            for this instance but we still need to check if one of its
+            field's related models are configure for search and need
+            to be updated.
+            """
+        else:
+            index = self.get_index(search_model=search_model)
+
+            writer = index.writer()
+            kwargs = self.search_model_sieves[search_model].process_instance(
+                instance=instance
+            )
+            writer.delete_by_term('id', str(instance.pk))
+            writer.add_document(**kwargs)
+            writer.commit()
+
+        for field_class in instance._meta.get_fields():
+            # Only to recursive indexing for related models that are
+            # known to have a search configuration.
+            if field_class.related_model and field_class.related_model in SearchModel._model_search_relationships.get(instance._meta.model, ()):
+                field_instance = getattr(instance, field_class.name, None)
+
+                if field_instance:
+                    try:
+                        # Try as a many field.
+                        results = field_instance.all()
+                    except AttributeError:
+                        # Try as a one to one field.
+                        try:
+                            results = [field_instance.get()]
+                        except AttributeError:
+                            # It is neither then it must be a
+                            # foreign key.
+                            results = [field_instance]
+
+                    for instance in results:
+                        self._index_instance(
+                            instance=instance, exclude_set=exclude_set
+                        )
 
     def index_search_model(self, search_model):
         index = self.get_index(search_model=search_model)
