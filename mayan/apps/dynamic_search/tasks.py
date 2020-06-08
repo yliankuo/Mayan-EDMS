@@ -31,11 +31,14 @@ def task_index_instance(self, app_label, model_name, object_id):
     logger.info('Executing')
 
     Model = apps.get_model(app_label=app_label, model_name=model_name)
-    instance = Model._meta.default_manager.get(pk=object_id)
-
     try:
-        search_backend.index_instance(instance=instance)
-    except LockError as exception:
-        raise self.retry(exc=exception)
+        instance = Model._meta.default_manager.get(pk=object_id)
+    except Exception:
+        pass
+    else:
+        try:
+            search_backend.index_instance(instance=instance)
+        except LockError as exception:
+            raise self.retry(exc=exception)
 
     logger.info('Finshed')

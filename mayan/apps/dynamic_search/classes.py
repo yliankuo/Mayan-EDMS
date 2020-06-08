@@ -26,7 +26,7 @@ class SearchBackend:
     def index_instance(self, instance):
         raise NotImplementedError
 
-    def search(self, global_and_search, search_model, query_string, user):
+    def search(self, search_model, query_string, user, global_and_search=False):
         AccessControlList = apps.get_model(
             app_label='acls', model_name='AccessControlList'
         )

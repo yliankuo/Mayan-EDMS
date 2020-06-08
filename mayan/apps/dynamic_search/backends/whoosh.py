@@ -35,11 +35,14 @@ logger = logging.getLogger(name=__name__)
 class Sieve:
     @staticmethod
     def flatten_list(value):
-        for item in value:
-            if isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
-                yield from Sieve.flatten_list(value=item)
-            else:
-                yield item
+        if isinstance(value, (str, bytes)):
+            yield value
+        else:
+            for item in value:
+                if isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
+                    yield from Sieve.flatten_list(value=item)
+                else:
+                    yield item
 
     @staticmethod
     def function_return_same(value):
@@ -58,7 +61,11 @@ class Sieve:
                     attribute=field, obj=instance
                 )
                 try:
-                    value = ''.join(Sieve.flatten_list(value))
+                    value = list(Sieve.flatten_list(value))
+                    if value == [None]:
+                        value = None
+                    else:
+                        value = ''.join(value)
                 except TypeError:
                     """Value is not a list"""
             except ResolverPipelineError:
