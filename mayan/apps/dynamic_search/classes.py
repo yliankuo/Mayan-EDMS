@@ -79,6 +79,7 @@ class SearchModel:
 
     @staticmethod
     def initialize():
+        # Hide a circular import
         from .handlers import (
             handler_factory_deindex_instance, handler_index_instance
         )

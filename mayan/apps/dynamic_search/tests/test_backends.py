@@ -15,7 +15,7 @@ class DjangoSearchBackendDocumentSearchTestCase(
     auto_upload_test_document = False
 
     def setUp(self):
-        super(DjangoSearchBackendDocumentSearchTestCase, self).setUp()
+        super().setUp()
         self.search_backend = DjangoSearchBackend()
 
     def test_simple_search(self):
@@ -215,7 +215,7 @@ class WhooshSearchBackendDocumentSearchTestCase(
     auto_upload_test_document = False
 
     def setUp(self):
-        super(WhooshSearchBackendDocumentSearchTestCase, self).setUp()
+        super().setUp()
         self.search_backend = WhooshSearchBackend()
 
     def test_simple_search(self):

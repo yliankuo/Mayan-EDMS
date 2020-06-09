@@ -88,11 +88,6 @@ class WhooshSearchBackend(SearchBackend):
             'search_limit', DEFAULT_SEARCH_LIMIT
         )
 
-        #for search_model in SearchModel.all():
-        #    self.index_search_model(search_model=search_model)
-        #search_model=SearchModel.get(name='documents.Document')
-        #self.index_search_model(search_model=search_model)
-
     def initialize(self):
         self.search_model_sieves = {}
         for search_model in SearchModel.all():
@@ -139,6 +134,14 @@ class WhooshSearchBackend(SearchBackend):
                 id_list.append(result['id'])
 
         return search_model.model.objects.filter(id__in=id_list).distinct()
+
+    def clear_search_model_index(self, search_model):
+        index = self.get_index(search_model=search_model)
+
+        # Clear the model index
+        self.get_storage().create_index(
+            index.schema, indexname=search_model.get_full_name()
+        )
 
     def deindex_instance(self, instance):
         try:

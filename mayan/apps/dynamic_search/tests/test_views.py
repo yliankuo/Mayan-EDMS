@@ -1,11 +1,15 @@
 from mayan.apps.tests.tests.base import GenericViewTestCase
+from mayan.apps.documents.models.document_models import Document
 from mayan.apps.documents.permissions import permission_document_view
 from mayan.apps.documents.search import document_search
 from mayan.apps.documents.tests.mixins import DocumentTestMixin
 
 from ..backends.django import DjangoSearchBackend
+from ..backends.whoosh import WhooshSearchBackend
+from ..classes import SearchModel
+from ..permissions import permission_search_tools
 
-from .mixins import SearchViewTestMixin
+from .mixins import SearchToolsViewTestMixin, SearchViewTestMixin
 
 
 class AdvancedSearchViewTestCase(
@@ -97,3 +101,51 @@ class SearchViewTestCase(
         self.assertContains(
             response=response, status_code=200, text=self.test_document.label
         )
+
+
+class SearchToolsViewTestCase(
+    DocumentTestMixin, SearchToolsViewTestMixin, GenericViewTestCase
+):
+    def setUp(self):
+        super().setUp()
+        self.document_search_model = SearchModel.get_for_model(
+            instance=Document
+        )
+        self.search_backend = WhooshSearchBackend()
+
+    def test_search_backend_reindex_view_no_permission(self):
+        self.search_backend.clear_search_model_index(
+            search_model=self.document_search_model
+        )
+        self.grant_access(
+            obj=self.test_document, permission=permission_document_view
+        )
+
+        response = self._request_search_backend_reindex_view()
+        self.assertEqual(response.status_code, 403)
+
+        queryset = self.search_backend.search(
+            search_model=self.document_search_model,
+            query_string={'q': self.test_document.label},
+            user=self._test_case_user
+        )
+        self.assertEqual(queryset.count(), 0)
+
+    def test_search_backend_reindex_view_with_permission(self):
+        self.search_backend.clear_search_model_index(
+            search_model=self.document_search_model
+        )
+        self.grant_access(
+            obj=self.test_document, permission=permission_document_view
+        )
+        self.grant_permission(permission=permission_search_tools)
+
+        response = self._request_search_backend_reindex_view()
+        self.assertEqual(response.status_code, 302)
+
+        queryset = self.search_backend.search(
+            search_model=self.document_search_model,
+            query_string={'q': self.test_document.label},
+            user=self._test_case_user
+        )
+        self.assertNotEqual(queryset.count(), 0)

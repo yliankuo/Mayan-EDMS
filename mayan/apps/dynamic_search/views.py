@@ -1,16 +1,22 @@
 import logging
 
+from django.contrib import messages
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import RedirectView
 
-from mayan.apps.common.generics import SimpleView, SingleObjectListView
+from mayan.apps.common.generics import (
+    ConfirmView, SimpleView, SingleObjectListView
+)
 from mayan.apps.common.literals import LIST_MODE_CHOICE_ITEM
 
+from .classes import SearchModel
 from .forms import SearchForm, AdvancedSearchForm
 from .icons import icon_search_submit
 from .mixins import SearchModelMixin
+from .permissions import permission_search_tools
 from .runtime import search_backend
+from .tasks import task_index_search_model
 
 logger = logging.getLogger(name=__name__)
 
@@ -54,6 +60,37 @@ class ResultsView(SearchModelMixin, SingleObjectListView):
             return queryset
 
 
+class SearchAgainView(RedirectView):
+    pattern_name = 'search:search_advanced'
+    query_string = True
+
+
+class SearchBackendReindexView(ConfirmView):
+    extra_context = {
+        'title': _('Reindex search backend'),
+        'subtitle': _(
+            'This tool is required only for some search backends.'
+        ),
+    }
+    view_permission = permission_search_tools
+
+    def get_post_action_redirect(self):
+        return reverse(viewname='common:tools_list')
+
+    def view_action(self):
+        for search_model in SearchModel.all():
+            task_index_search_model.apply_async(
+                kwargs={
+                    'search_model_full_name': search_model.get_full_name(),
+                }
+            )
+
+        messages.success(
+            message=_('Search backend reindexing queued.'),
+            request=self.request
+        )
+
+
 class SearchView(SearchModelMixin, SimpleView):
     template_name = 'appearance/generic_form.html'
     title = _('Search')
@@ -89,8 +126,3 @@ class AdvancedSearchView(SearchView):
         return AdvancedSearchForm(
             data=self.request.GET, search_model=self.get_search_model()
         )
-
-
-class SearchAgainView(RedirectView):
-    pattern_name = 'search:search_advanced'
-    query_string = True
