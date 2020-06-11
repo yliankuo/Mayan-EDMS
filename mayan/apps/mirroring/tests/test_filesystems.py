@@ -178,9 +178,7 @@ class IndexFilesystemTestCase(
             expression=TEST_NODE_EXPRESSION, link_documents=True
         )
 
-        self.test_document = Document.objects.create(
-            document_type=self.test_document_type, label='document_stub'
-        )
+        self._create_test_document_stub()
         index_filesystem = IndexFilesystem(index_slug=self.test_index.slug)
         self.test_index.rebuild()
 

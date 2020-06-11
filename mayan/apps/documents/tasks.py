@@ -58,7 +58,7 @@ def task_delete_stubs():
     )
 
     logger.info(msg='Executing')
-    Document.passthrough.delete_stubs()
+    Document.objects.delete_stubs()
     logger.info(msg='Finshed')
 
 
@@ -134,7 +134,7 @@ def task_upload_new_version(self, document_id, shared_uploaded_file_id, user_id,
     )
 
     try:
-        document = Document.passthrough.get(pk=document_id)
+        document = Document.objects.get(pk=document_id)
         shared_file = SharedUploadedFile.objects.get(
             pk=shared_uploaded_file_id
         )
