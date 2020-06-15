@@ -1,3 +1,5 @@
+import uuid
+
 from pytz import common_timezones
 
 from django.conf import settings
@@ -6,6 +8,11 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from .managers import UserLocaleProfileManager
+
+
+# Required by migration 0010_auto_20180403_0702.py
+def upload_to(instance, filename):
+    return 'shared-file-{}'.format(uuid.uuid4().hex)
 
 
 class UserLocaleProfile(models.Model):
