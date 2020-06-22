@@ -1,12 +1,13 @@
 from django.utils.translation import ugettext_lazy as _
 
 from mayan.apps.navigation.classes import Link
+from mayan.apps.navigation.utils import get_content_type_kwargs_factory
 
 from .icons import (
     icon_about, icon_book, icon_current_user_locale_profile_details,
     icon_current_user_locale_profile_edit, icon_documentation,
-    icon_forum, icon_license, icon_setup, icon_source_code, icon_support,
-    icon_tools
+    icon_forum, icon_license, icon_object_copy, icon_setup, icon_source_code,
+    icon_support, icon_tools
 )
 
 link_about = Link(
@@ -36,6 +37,10 @@ link_forum = Link(
 )
 link_license = Link(
     icon_class=icon_license, text=_('License'), view='common:license_view'
+)
+link_object_copy = Link(
+    icon_class=icon_object_copy, kwargs=get_content_type_kwargs_factory(),
+    text=_('Copy'), view='common:object_copy'
 )
 link_setup = Link(
     icon_class=icon_setup, text=_('Setup'), view='common:setup_list'

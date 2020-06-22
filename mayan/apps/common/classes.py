@@ -7,7 +7,121 @@ from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
+from mayan.apps.acls.classes import ModelPermission
+
+from .links import link_object_copy
+from .menus import menu_object
+from .permissions import permission_object_copy
 from .settings import setting_home_view
+
+
+class ModelCopy:
+    _registry = {}
+
+    @staticmethod
+    def method_instance_copy(self, values=None):
+        model_copy = ModelCopy.get(model=self._meta.model)
+        model_copy.copy(instance=self, values=values)
+
+    @classmethod
+    def get(cls, model):
+        return cls._registry[model]
+
+    def __init__(self, model, register_permission=False):
+        self.fields_copy = []
+        self.fields_foreign_keys = []
+        self.fields_many_to_many = []
+        self.fields_reverse_related = []
+        self.fields_unique = []
+
+        self.model = model
+        self.__class__._registry[model] = self
+        model.add_to_class(
+            name='copy_instance', value=ModelCopy.method_instance_copy
+        )
+        menu_object.bind_links(
+            links=(link_object_copy,), sources=(model,)
+        )
+
+        if register_permission:
+            ModelPermission.register(
+                model=model, permissions=(permission_object_copy,)
+            )
+
+    def add_fields(self, field_names, field_value_gets=None):
+        self.field_value_gets = field_value_gets or {}
+
+        for field_name in field_names:
+            field = self.model._meta.get_field(field_name=field_name)
+
+            if isinstance(field, models.fields.reverse_related.ManyToOneRel):
+                self.fields_reverse_related.append(field_name)
+            elif isinstance(field, models.fields.related.ForeignKey):
+                self.fields_foreign_keys.append(field_name)
+            elif isinstance(field, models.fields.related.ManyToManyField):
+                self.fields_many_to_many.append(field_name)
+            else:
+                if field.unique:
+                    self.fields_unique.append(field_name)
+                else:
+                    self.fields_copy.append(field_name)
+
+    def copy(self, instance, values=None):
+        values = values or {}
+
+        new_instance = self.model()
+
+        # Base fields whose values are copied
+        for field in self.fields_copy:
+            value = values.get(field, getattr(instance, field))
+            setattr(new_instance, field, value)
+
+        # Base fields with unique values
+        for field in self.fields_unique:
+            base_value = getattr(instance, field)
+            counter = 1
+
+            while True:
+                value = '{}_{}'.format(base_value, counter)
+                if not self.model._meta.default_manager.filter(**{field: value}).exists():
+                    break
+
+                counter = counter + 1
+
+            setattr(new_instance, field, value)
+
+        # Foreign keys
+        for field in self.fields_foreign_keys:
+            value = values.get(field, getattr(instance, field))
+
+            field_value_gets = self.field_value_gets.get(field, None)
+            if field_value_gets:
+                related_model = self.model._meta.get_field(field).related_model
+                final_filter = {}
+                context = {'instance': instance}
+                context.update(values)
+                for key, value in field_value_gets.items():
+                    final_filter[key] = (value.format(**context))
+
+                value = related_model._meta.default_manager.get(**final_filter)
+
+            setattr(new_instance, field, value)
+
+        new_instance.save()
+
+        # Many to many fields added after instance creation
+        for field in self.fields_many_to_many:
+            getattr(new_instance, field).set(getattr(instance, field).all())
+
+        # Reverse related
+        for field in self.fields_reverse_related:
+            related_field = self.model._meta.get_field(field_name=field)
+            related_field_name = related_field.field.name
+
+            for related_instance in getattr(instance, field).all():
+                related_instance.copy_instance(
+                    values={related_field_name: new_instance}
+                )
 
 
 class MissingItem:

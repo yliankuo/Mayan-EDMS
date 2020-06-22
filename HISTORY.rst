@@ -137,6 +137,7 @@
 - Allow passing environment entries to the Tesseract OCR backend.
 - Improve main menu styling and JavaScript code. Improve hover highlighting
   and maximize space.
+- Add support for copying workflows.
 
 3.4.9 (2020-05-26)
 ==================
