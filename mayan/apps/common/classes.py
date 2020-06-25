@@ -17,6 +17,7 @@ from .settings import setting_home_view
 
 class ModelCopy:
     _registry = {}
+    _lazy = {}
 
     @staticmethod
     def method_instance_copy(self, values=None):
@@ -24,14 +25,21 @@ class ModelCopy:
         model_copy.copy(instance=self, values=values)
 
     @classmethod
+    def add_fields_lazy(cls, model, **kwargs):
+        cls._lazy.setdefault(model, [])
+        cls._lazy[model].append(kwargs)
+
+    @classmethod
     def get(cls, model):
         return cls._registry[model]
 
-    def __init__(self, model, register_permission=False):
+    def __init__(self, model, bind_link=False, register_permission=False):
         self.fields_copy = []
         self.fields_foreign_keys = []
         self.fields_many_to_many = []
         self.fields_reverse_related = []
+        self.fields_many_to_many_reverse_related = []
+        self.fields_related_one_to_one = []
         self.fields_unique = []
 
         self.model = model
@@ -39,37 +47,67 @@ class ModelCopy:
         model.add_to_class(
             name='copy_instance', value=ModelCopy.method_instance_copy
         )
-        menu_object.bind_links(
-            links=(link_object_copy,), sources=(model,)
-        )
+        if bind_link:
+            menu_object.bind_links(
+                links=(link_object_copy,), sources=(model,)
+            )
 
         if register_permission:
             ModelPermission.register(
                 model=model, permissions=(permission_object_copy,)
             )
 
-    def add_fields(self, field_names, field_value_gets=None):
+        for entry in self.__class__._lazy.get(model, ()):
+            self.add_fields(**entry)
+            self.__class__._lazy.get(model).pop()
+
+    def add_fields(
+        self, field_names, excludes=None, field_value_gets=None
+    ):
+        self.excludes = excludes or {}
         self.field_value_gets = field_value_gets or {}
 
         for field_name in field_names:
             field = self.model._meta.get_field(field_name=field_name)
 
-            if isinstance(field, models.fields.reverse_related.ManyToOneRel):
+            if isinstance(field, models.fields.reverse_related.OneToOneRel):
+                self.fields_related_one_to_one.append(field_name)
+            elif isinstance(field, models.fields.reverse_related.ManyToOneRel):
                 self.fields_reverse_related.append(field_name)
             elif isinstance(field, models.fields.related.ForeignKey):
                 self.fields_foreign_keys.append(field_name)
             elif isinstance(field, models.fields.related.ManyToManyField):
                 self.fields_many_to_many.append(field_name)
+            elif isinstance(field, models.fields.reverse_related.ManyToManyRel):
+                self.fields_many_to_many_reverse_related.append(field.related_name)
             else:
                 if field.unique:
                     self.fields_unique.append(field_name)
                 else:
                     self.fields_copy.append(field_name)
 
+    def _evaluate_field_get_for_field(self, field, instance, value, values):
+        field_value_gets = self.field_value_gets.get(field, None)
+        if field_value_gets:
+            related_model = self.model._meta.get_field(field).related_model or self.model._meta.get_field(field).model
+            final_filter = {}
+            context = {'instance': instance}
+            context.update(values)
+            for key, value in field_value_gets.items():
+                final_filter[key] = (value.format(**context))
+
+            value = related_model._meta.default_manager.get(**final_filter)
+
+        return value
+
     def copy(self, instance, values=None):
         values = values or {}
 
         new_instance = self.model()
+
+        if self.excludes:
+            if self.model._meta.default_manager.filter(pk=instance.pk, **self.excludes).exists():
+                return
 
         # Base fields whose values are copied
         for field in self.fields_copy:
@@ -88,22 +126,19 @@ class ModelCopy:
 
                 counter = counter + 1
 
+            value = self._evaluate_field_get_for_field(
+                field=field, instance=instance, value=value, values=values
+            )
+
             setattr(new_instance, field, value)
 
         # Foreign keys
         for field in self.fields_foreign_keys:
             value = values.get(field, getattr(instance, field))
 
-            field_value_gets = self.field_value_gets.get(field, None)
-            if field_value_gets:
-                related_model = self.model._meta.get_field(field).related_model
-                final_filter = {}
-                context = {'instance': instance}
-                context.update(values)
-                for key, value in field_value_gets.items():
-                    final_filter[key] = (value.format(**context))
-
-                value = related_model._meta.default_manager.get(**final_filter)
+            value = self._evaluate_field_get_for_field(
+                field=field, instance=instance, value=value, values=values
+            )
 
             setattr(new_instance, field, value)
 
@@ -112,6 +147,12 @@ class ModelCopy:
         # Many to many fields added after instance creation
         for field in self.fields_many_to_many:
             getattr(new_instance, field).set(getattr(instance, field).all())
+
+        # Many to many reverse related fields added after instance creation
+        for field in self.fields_many_to_many_reverse_related:
+            getattr(
+                new_instance, field
+            ).set(getattr(instance, field).all())
 
         # Reverse related
         for field in self.fields_reverse_related:
@@ -122,6 +163,15 @@ class ModelCopy:
                 related_instance.copy_instance(
                     values={related_field_name: new_instance}
                 )
+
+        # Reverse related one to one
+        for field in self.fields_related_one_to_one:
+            related_field = self.model._meta.get_field(field_name=field)
+            related_field_name = related_field.field.name
+
+            getattr(instance, field).copy_instance(
+                values={related_field_name: new_instance}
+            )
 
 
 class MissingItem:

@@ -144,7 +144,9 @@ class DocumentStatesApp(MayanAppConfig):
                 'required', 'widget', 'widget_kwargs',
             )
         )
-        ModelCopy(model=Workflow, register_permission=True).add_fields(
+        ModelCopy(
+            model=Workflow, bind_link=True, register_permission=True
+        ).add_fields(
             field_names=(
                 'internal_name', 'label', 'document_types', 'states',
                 'transitions'
