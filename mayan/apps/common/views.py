@@ -11,6 +11,7 @@ from mayan.apps.views.generics import (
 )
 from mayan.apps.views.mixins import ExternalContentTypeObjectMixin
 
+from .classes import ModelCopy
 from .forms import (
     LicenseForm, LocaleProfileForm, LocaleProfileForm_view,
 )
@@ -102,15 +103,28 @@ class LicenseView(SimpleView):
     }
     template_name = 'appearance/generic_form.html'
 
-
-class ObjectCopyView(ExternalContentTypeObjectMixin, ConfirmView):
+from mayan.apps.views.mixins import ObjectNameMixin
+class ObjectCopyView(ExternalContentTypeObjectMixin, ObjectNameMixin, ConfirmView):
     external_object_permission = permission_object_copy
 
     def get_extra_context(self):
-        return {
+        model_copy = ModelCopy.get(model=self.external_object._meta.model)
+        context = {
             'object': self.external_object,
-            'title': _('Copy the object: %s?' % self.external_object),
+            'subtitle': _('Fields to be copied: %s') % ', '.join(
+                sorted(
+                    map(
+                        str, model_copy.get_fields_verbose_names()
+                    )
+                )
+            )
         }
+
+        context['title'] = _('Make a copy of %(object_name)s "%(object)s"?') % {
+            'object_name': self.get_object_name(context=context), 'object': self.external_object
+        }
+
+        return context
 
     def view_action(self):
         self.external_object.copy_instance()

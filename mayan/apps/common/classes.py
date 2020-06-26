@@ -1,5 +1,6 @@
 import hashlib
 
+from django.contrib import contenttypes
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.template.response import TemplateResponse
@@ -34,8 +35,10 @@ class ModelCopy:
         return cls._registry[model]
 
     def __init__(self, model, bind_link=False, register_permission=False):
+        self.fields = []
         self.fields_copy = []
         self.fields_foreign_keys = []
+        self.fields_generic_related = []
         self.fields_many_to_many = []
         self.fields_reverse_related = []
         self.fields_many_to_many_reverse_related = []
@@ -49,7 +52,7 @@ class ModelCopy:
         )
         if bind_link:
             menu_object.bind_links(
-                links=(link_object_copy,), sources=(model,)
+                links=(link_object_copy,), sources=(model,), position=99
             )
 
         if register_permission:
@@ -62,12 +65,15 @@ class ModelCopy:
             self.__class__._lazy.get(model).pop()
 
     def add_fields(
-        self, field_names, excludes=None, field_value_gets=None
+        self, field_names, excludes=None, field_value_gets=None, field_values=None
     ):
         self.excludes = excludes or {}
         self.field_value_gets = field_value_gets or {}
+        self.field_values = field_values or {}
 
         for field_name in field_names:
+            self.fields.append(field_name)
+
             field = self.model._meta.get_field(field_name=field_name)
 
             if isinstance(field, models.fields.reverse_related.OneToOneRel):
@@ -75,6 +81,10 @@ class ModelCopy:
             elif isinstance(field, models.fields.reverse_related.ManyToOneRel):
                 self.fields_reverse_related.append(field_name)
             elif isinstance(field, models.fields.related.ForeignKey):
+                self.fields_foreign_keys.append(field_name)
+            elif isinstance(field, contenttypes.fields.GenericRelation):
+                self.fields_generic_related.append(field_name)
+            elif isinstance(field, contenttypes.fields.GenericForeignKey):
                 self.fields_foreign_keys.append(field_name)
             elif isinstance(field, models.fields.related.ManyToManyField):
                 self.fields_many_to_many.append(field_name)
@@ -109,9 +119,17 @@ class ModelCopy:
             if self.model._meta.default_manager.filter(pk=instance.pk, **self.excludes).exists():
                 return
 
+        # Static values
+        for field, value in self.field_values.items():
+            setattr(new_instance, field, value)
+
         # Base fields whose values are copied
         for field in self.fields_copy:
             value = values.get(field, getattr(instance, field))
+
+            value = self._evaluate_field_get_for_field(
+                field=field, instance=instance, value=value, values=values
+            )
             setattr(new_instance, field, value)
 
         # Base fields with unique values
@@ -150,9 +168,7 @@ class ModelCopy:
 
         # Many to many reverse related fields added after instance creation
         for field in self.fields_many_to_many_reverse_related:
-            getattr(
-                new_instance, field
-            ).set(getattr(instance, field).all())
+            getattr(new_instance, field).set(getattr(instance, field).all())
 
         # Reverse related
         for field in self.fields_reverse_related:
@@ -172,6 +188,31 @@ class ModelCopy:
             getattr(instance, field).copy_instance(
                 values={related_field_name: new_instance}
             )
+
+        # Generic relations
+        for field in self.fields_generic_related:
+            related_field = self.model._meta.get_field(field_name=field)
+            related_field_name = 'content_object'#related_field.field.name
+
+            for related_instance in getattr(instance, field).all():
+                related_instance.copy_instance(
+                    values={related_field_name: new_instance}
+                )
+
+    def get_fields_verbose_names(self):
+        result = []
+
+        for field_name in self.fields:
+            field = self.model._meta.get_field(field_name=field_name)
+
+            verbose_name = getattr(field, 'verbose_name', None)
+
+            if not verbose_name and field.related_model:
+                verbose_name = field.related_model._meta.verbose_name
+
+            result.append(verbose_name)
+
+        return result
 
 
 class MissingItem:
