@@ -64,11 +64,27 @@ class ModelCopy:
             self.add_fields(**entry)
             self.__class__._lazy.get(model).pop()
 
+    def _evaluate_field_get_for_field(self, field, instance, value, values):
+        field_value_gets = self.field_value_gets.get(field, None)
+        if field_value_gets:
+            related_model = self.model._meta.get_field(field).related_model or self.model._meta.get_field(field).model
+            final_filter = {}
+            context = {'instance': instance}
+            context.update(values)
+            for key, value in field_value_gets.items():
+                final_filter[key] = (value.format(**context))
+
+            value = related_model._meta.default_manager.get(**final_filter)
+
+        return value
+
     def add_fields(
-        self, field_names, excludes=None, field_value_gets=None, field_values=None
+        self, field_names, excludes=None, field_value_gets=None,
+        field_values=None, field_value_templates=None
     ):
         self.excludes = excludes or {}
         self.field_value_gets = field_value_gets or {}
+        self.field_value_templates = field_value_templates or {}
         self.field_values = field_values or {}
 
         for field_name in field_names:
@@ -96,20 +112,6 @@ class ModelCopy:
                 else:
                     self.fields_copy.append(field_name)
 
-    def _evaluate_field_get_for_field(self, field, instance, value, values):
-        field_value_gets = self.field_value_gets.get(field, None)
-        if field_value_gets:
-            related_model = self.model._meta.get_field(field).related_model or self.model._meta.get_field(field).model
-            final_filter = {}
-            context = {'instance': instance}
-            context.update(values)
-            for key, value in field_value_gets.items():
-                final_filter[key] = (value.format(**context))
-
-            value = related_model._meta.default_manager.get(**final_filter)
-
-        return value
-
     def copy(self, instance, values=None):
         values = values or {}
 
@@ -119,9 +121,16 @@ class ModelCopy:
             if self.model._meta.default_manager.filter(pk=instance.pk, **self.excludes).exists():
                 return
 
+        context = {'instance': instance}
+        context.update(values)
+
         # Static values
         for field, value in self.field_values.items():
             setattr(new_instance, field, value)
+
+        # Static values templates
+        for field, value in self.field_value_templates.items():
+            setattr(new_instance, field, value.format(**context))
 
         # Base fields whose values are copied
         for field in self.fields_copy:
@@ -192,7 +201,7 @@ class ModelCopy:
         # Generic relations
         for field in self.fields_generic_related:
             related_field = self.model._meta.get_field(field_name=field)
-            related_field_name = 'content_object'#related_field.field.name
+            related_field_name = 'content_object'
 
             for related_instance in getattr(instance, field).all():
                 related_instance.copy_instance(

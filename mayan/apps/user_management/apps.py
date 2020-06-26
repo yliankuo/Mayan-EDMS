@@ -149,15 +149,12 @@ class UserManagementApp(MayanAppConfig):
                 'name', 'user',
             ),
         )
-        #ModelCopy(model=UserOptions).add_fields(
-        #    field_names=('user', 'block_password_change'),
-        #    update_only=True
-        #    #field_value_gets={
-        #    #    'id': {
-        #    #        'user': '{user.id}',
-        #    #    },
-        #    #}
-        #)
+        ModelCopy(model=UserOptions).add_fields(
+            field_names=('user', 'block_password_change'),
+            field_value_templates={
+                'id': '{user.user_options.pk}'
+            }
+        )
         ModelCopy(
             model=User, bind_link=True, register_permission=True
         ).add_fields(
