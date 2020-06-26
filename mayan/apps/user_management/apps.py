@@ -110,11 +110,14 @@ class UserManagementApp(MayanAppConfig):
         User._meta.verbose_name_plural = _('Users')
         User._meta.ordering = ('last_name', 'first_name')
 
-        User._meta.get_field('username').verbose_name = _('Username')
-        User._meta.get_field('first_name').verbose_name = _('First name')
-        User._meta.get_field('last_name').verbose_name = _('Last name')
         User._meta.get_field('email').verbose_name = _('Email')
+        User._meta.get_field('first_name').verbose_name = _('First name')
+        User._meta.get_field('groups').verbose_name = _('Groups')
         User._meta.get_field('is_active').verbose_name = _('Is active?')
+        User._meta.get_field('last_name').verbose_name = _('Last name')
+        User._meta.get_field('password').verbose_name = _('Password')
+        User._meta.get_field('username').verbose_name = _('Username')
+
         User.has_usable_password.short_description = _(
             'Has usable password?'
         )
