@@ -9,7 +9,9 @@ from django.views.generic import RedirectView
 from mayan.apps.views.generics import (
     ConfirmView, SingleObjectEditView, SimpleView
 )
-from mayan.apps.views.mixins import ExternalContentTypeObjectMixin
+from mayan.apps.views.mixins import (
+    ExternalContentTypeObjectMixin, ObjectNameMixin
+)
 
 from .classes import ModelCopy
 from .forms import (
@@ -103,7 +105,7 @@ class LicenseView(SimpleView):
     }
     template_name = 'appearance/generic_form.html'
 
-from mayan.apps.views.mixins import ObjectNameMixin
+
 class ObjectCopyView(ExternalContentTypeObjectMixin, ObjectNameMixin, ConfirmView):
     external_object_permission = permission_object_copy
 
