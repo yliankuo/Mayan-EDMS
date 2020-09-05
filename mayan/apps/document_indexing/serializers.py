@@ -1,4 +1,7 @@
+from django.utils.translation import ugettext, ugettext_lazy as _
+
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.reverse import reverse
 from rest_framework_recursive.fields import RecursiveField
 
@@ -106,7 +109,7 @@ class IndexTemplateNodeSerializer(serializers.ModelSerializer):
             'level', 'link_documents', 'parent', 'parent_url', 'url'
         )
         model = IndexTemplateNode
-        read_only_fields = ('children', 'id', 'level')
+        read_only_fields = ('children', 'id', 'index', 'level')
 
     def get_index_url(self, obj):
         return reverse(
@@ -134,6 +137,70 @@ class IndexTemplateNodeSerializer(serializers.ModelSerializer):
                 'index_template_node_id': obj.pk
             }, format=self.context['format'], request=self.context['request']
         )
+
+
+class IndexTemplateNodeWriteSerializer(serializers.ModelSerializer):
+    children = RecursiveField(many=True, read_only=True)
+    index_url = serializers.SerializerMethodField(read_only=True)
+    parent_url = serializers.SerializerMethodField(read_only=True)
+    url = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        fields = (
+            'children', 'enabled', 'expression', 'id', 'index', 'index_url',
+            'level', 'link_documents', 'parent', 'parent_url', 'url'
+        )
+        model = IndexTemplateNode
+        read_only_fields = ('children', 'id', 'index', 'level')
+
+    def create(self, validated_data):
+        validated_data['index'] = self.context['index_template']
+        return super().create(validated_data=validated_data)
+
+    def get_index_url(self, obj):
+        return reverse(
+            viewname='rest_api:indextemplate-detail', kwargs={
+                'index_template_id': obj.index.pk,
+            }, format=self.context['format'], request=self.context['request']
+        )
+
+    def get_parent_url(self, obj):
+        if obj.parent:
+            return reverse(
+                viewname='rest_api:indextemplatenode-detail', kwargs={
+                    'index_template_id': obj.index.pk,
+                    'index_template_node_id': obj.parent.pk
+                }, format=self.context['format'],
+                request=self.context['request']
+            )
+        else:
+            return ''
+
+    def get_url(self, obj):
+        return reverse(
+            viewname='rest_api:indextemplatenode-detail', kwargs={
+                'index_template_id': obj.index.pk,
+                'index_template_node_id': obj.pk
+            }, format=self.context['format'], request=self.context['request']
+        )
+
+    def validate(self, attrs):
+        parent = attrs.get('parent', None)
+        if not parent:
+            raise ValidationError(
+                {'parent': [_('Parent cannot be empty.')]}
+            )
+        else:
+            if not self.context['index_template'].node_templates.filter(id=parent.pk).exists():
+                raise ValidationError(
+                    {
+                        'parent': [
+                            _('Parent must be from the same index template.')
+                        ]
+                    }
+                )
+
+        return attrs
 
 
 class IndexTemplateSerializer(serializers.HyperlinkedModelSerializer):

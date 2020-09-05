@@ -17,7 +17,7 @@ from .permissions import (
 from .serializers import (
     IndexInstanceNodeSerializer, IndexInstanceSerializer,
     IndexTemplateSerializer, IndexTemplateNodeSerializer,
-    IndexTemplateWriteSerializer
+    IndexTemplateNodeWriteSerializer, IndexTemplateWriteSerializer
 )
 
 
@@ -166,13 +166,23 @@ class APIIndexTemplateDetailView(
     queryset = Index.objects.all()
 
 
-class APIIndexTemplateNodeViewMixin:
-    serializer_class = IndexTemplateNodeSerializer
+class APIIndexTemplateNodeViewMixin(AsymmetricSerializerViewMixin):
+    object_permissions = {
+        'GET': permission_document_indexing_view,
+        'PATCH': permission_document_indexing_edit,
+        'PUT': permission_document_indexing_edit,
+        'POST': permission_document_indexing_edit,
+        'DELETE': permission_document_indexing_edit
+    }
+    read_serializer_class = IndexTemplateNodeSerializer
+    write_serializer_class = IndexTemplateNodeWriteSerializer
 
     def get_index_template(self):
+        permission = self.object_permissions[self.request.method]
+
         queryset = AccessControlList.objects.restrict_queryset(
-            permission=permission_document_indexing_view,
-            queryset=Index.objects.all(), user=self.request.user
+            permission=permission, queryset=Index.objects.all(),
+            user=self.request.user
         )
 
         return get_object_or_404(
@@ -187,10 +197,13 @@ class APIIndexTemplateNodeListView(
     get: Returns a list of all the template nodes for the selected index.
     post: Create a new index template node.
     """
-    mayan_object_permissions = {'GET': (permission_document_indexing_view,)}
-
     def get_queryset(self):
         return self.get_index_template().template_root.get_children()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['index_template'] = self.get_index_template()
+        return context
 
 
 class APIIndexTemplateNodeDetailView(
@@ -203,12 +216,6 @@ class APIIndexTemplateNodeDetailView(
     put: Edit an index template node.
     """
     lookup_url_kwarg = 'index_template_node_id'
-    mayan_object_permissions = {
-        'GET': (permission_document_indexing_view,),
-        'PUT': (permission_document_indexing_edit,),
-        'PATCH': (permission_document_indexing_edit,),
-        'DELETE': (permission_document_indexing_edit,)
-    }
 
     def get_queryset(self):
         return self.get_index_template().node_templates.all()

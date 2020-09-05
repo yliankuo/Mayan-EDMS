@@ -1,4 +1,4 @@
-from ..models import Index
+from ..models import Index, IndexInstanceNode, IndexTemplateNode
 
 from .literals import (
     TEST_INDEX_LABEL, TEST_INDEX_LABEL_EDITED, TEST_INDEX_SLUG,
@@ -64,9 +64,27 @@ class IndexTemplateNodeViewTestMixin(object):
 
 
 class IndexTestMixin(object):
-    def _create_test_index(self, rebuild=False):
+    def setUp(self):
+        super().setUp()
+        self.test_indexes = []
+        self._test_indexes_data = [
+            {'label': TEST_INDEX_LABEL, 'slug': TEST_INDEX_SLUG},
+            {
+                'label': '{}_1'.format(TEST_INDEX_LABEL),
+                'slug': '{}_1'.format(TEST_INDEX_SLUG)
+            },
+        ]
+
+    def _create_test_index(self, extra_data=None, rebuild=False):
+        data = self._test_indexes_data[len(self.test_indexes)]
+
+        if extra_data:
+            data.update(extra_data)
+
         # Create empty index
-        self.test_index = Index.objects.create(label=TEST_INDEX_LABEL)
+        self.test_index = Index.objects.create(**data)
+
+        self.test_indexes.append(self.test_index)
 
         # Add our document type to the new index
         if hasattr(self, 'test_document_type'):
@@ -81,6 +99,68 @@ class IndexTestMixin(object):
             parent=self.test_index.template_root,
             expression=TEST_INDEX_TEMPLATE_DOCUMENT_LABEL_EXPRESSION,
             link_documents=True
+        )
+
+
+class IndexTemplateAPIViewTestMixin(object):
+    def _request_test_index_template_create_api_view(self):
+        return self.post(
+            viewname='rest_api:indextemplate-list', data={
+                'label': TEST_INDEX_LABEL, 'slug': TEST_INDEX_SLUG,
+                'document_types': self.test_document_type.pk
+            }
+        )
+
+    def _request_test_index_template_delete_api_view(self):
+        return self.delete(
+            viewname='rest_api:indextemplate-detail', kwargs={
+                'index_template_id': self.test_index.pk
+            }
+        )
+
+    def _request_test_index_template_detail_api_view(self):
+        return self.get(
+            viewname='rest_api:indextemplate-detail', kwargs={
+                'index_template_id': self.test_index.pk
+            }
+        )
+
+    def _request_test_index_template_edit_via_patch_api_view(self):
+        return self.patch(
+            viewname='rest_api:indextemplate-detail', kwargs={
+                'index_template_id': self.test_index.pk
+            }, data={'label': TEST_INDEX_LABEL_EDITED}
+        )
+
+
+class IndexTemplateNodeAPITestMixin:
+    def _request_test_index_template_node_create_api_view(self, extra_data=None):
+        data = {
+            'expression': TEST_INDEX_TEMPLATE_DOCUMENT_LABEL_EXPRESSION
+        }
+
+        if extra_data:
+            data.update(extra_data)
+
+        values = list(IndexTemplateNode.objects.values_list('pk', flat=True))
+
+        response = self.post(
+            viewname='rest_api:indextemplatenode-list', kwargs={
+                'index_template_id': self.test_index.pk
+            }, data=data
+        )
+        self.test_index_template_node = IndexTemplateNode.objects.exclude(
+            pk__in=values
+        ).first()
+
+        return response
+
+    def _request_test_index_template_node_delete_api_view(self):
+        return self.delete(
+            viewname='rest_api:indextemplatenode-detail', kwargs={
+                'index_template_id': self.test_index.pk,
+                'index_template_node_id': self.test_index_template_node.pk,
+            }
         )
 
 

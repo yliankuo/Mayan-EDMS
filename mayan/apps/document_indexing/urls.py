@@ -125,7 +125,6 @@ api_urls = [
         name='indexinstancenode-document-list',
         view=APIIndexInstanceNodeDocumentListView.as_view()
     ),
-
     url(
         regex=r'^index_templates/$', name='indextemplate-list',
         view=APIIndexTemplateListView.as_view()
