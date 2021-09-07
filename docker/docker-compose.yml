@@ -15,7 +15,7 @@ x-mayan-container:
     PYTHONDONTWRITEBYTECODE: 1
     MAYAN_CELERY_BROKER_URL: redis://:${MAYAN_REDIS_PASSWORD:-mayanredispassword}@redis:6379/0
     MAYAN_CELERY_RESULT_BACKEND: redis://:${MAYAN_REDIS_PASSWORD:-mayanredispassword}@redis:6379/1
-    MAYAN_DATABASES: "{'default':{'ENGINE':'django.db.backends.postgresql','NAME':'${MAYAN_DATABASE_NAME:-mayan}','PASSWORD':'${MAYAN_DATABASE_PASSWORD:-mayandbpass}','USER':'${MAYAN_DATABASE_USER:-mayan}','HOST':'${MAYAN_DATABASE_HOST:-postgresql}'}}"
+    MAYAN_DATABASES: "{'default':{'ENGINE':'django.db.backends.postgresql','NAME':'${MAYAN_DATABASE_NAME:-mayan}','PASSWORD':'${MAYAN_DATABASE_PASSWORD:-mayanuserpass}','USER':'${MAYAN_DATABASE_USER:-mayan}','HOST':'${MAYAN_DATABASE_HOST:-postgresql}'}}"
     MAYAN_DOCKER_WAIT: "${MAYAN_DATABASE_HOST:-postgresql}:5432 redis:6379"
     MAYAN_LOCK_MANAGER_BACKEND: mayan.apps.lock_manager.backends.redis_lock.RedisLock
     MAYAN_LOCK_MANAGER_BACKEND_ARGUMENTS: "{'redis_url':'redis://:${MAYAN_REDIS_PASSWORD:-mayanredispassword}@redis:6379/2'}"
@@ -60,7 +60,7 @@ services:
       - "work_mem=8MB"
     environment:
       POSTGRES_DB: ${MAYAN_DATABASE_NAME:-mayan}
-      POSTGRES_PASSWORD: ${MAYAN_DATABASE_PASSWORD:-mayandbpass}
+      POSTGRES_PASSWORD: ${MAYAN_DATABASE_PASSWORD:-mayanuserpass}
       POSTGRES_USER: ${MAYAN_DATABASE_USER:-mayan}
     image: postgres:${MAYAN_DOCKER_POSTGRES_TAG:-10.15-alpine}
     networks:
@@ -70,7 +70,7 @@ services:
     #  - "5432:5432"
     restart: unless-stopped
     volumes:
-      - ${PWD}/data/postgres:/var/lib/postgresql/data
+      - /docker-volumes/mayan-edms/postgres:/var/lib/postgresql/data
 
   redis:
     command:
